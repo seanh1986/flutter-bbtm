@@ -51,7 +51,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
       DataColumn(
         label: Text('Squad'),
         onSort: (columnIndex, ascending) =>
-            _sort<String>((Squad s) => s.name, columnIndex, ascending),
+            _sort<String>((Squad s) => s.name(), columnIndex, ascending),
       ),
       DataColumn(
         label: Text('Coaches'),
@@ -60,25 +60,25 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         label: Text('Points'),
         numeric: true,
         onSort: (columnIndex, ascending) =>
-            _sort<num>((Squad s) => s.points, columnIndex, ascending),
+            _sort<num>((Squad s) => s.points(), columnIndex, ascending),
       ),
       DataColumn(
         label: Text('Wins'),
         numeric: true,
         onSort: (columnIndex, ascending) =>
-            _sort<num>((Squad s) => s.wins, columnIndex, ascending),
+            _sort<num>((Squad s) => s.wins(), columnIndex, ascending),
       ),
       DataColumn(
         label: Text('Ties'),
         numeric: true,
         onSort: (columnIndex, ascending) =>
-            _sort<num>((Squad s) => s.ties, columnIndex, ascending),
+            _sort<num>((Squad s) => s.ties(), columnIndex, ascending),
       ),
       DataColumn(
         label: Text('Losses'),
         numeric: true,
         onSort: (columnIndex, ascending) =>
-            _sort<num>((Squad s) => s.losses, columnIndex, ascending),
+            _sort<num>((Squad s) => s.losses(), columnIndex, ascending),
       ),
     ];
   }
@@ -87,16 +87,16 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     List<DataRow> rows = List();
 
     // sort by points ascending
-    _sort<num>((Squad c) => c.points, _sortColumnIndex, _sortAscending);
+    _sort<num>((Squad c) => c.points(), _sortColumnIndex, _sortAscending);
 
     _items.forEach((s) {
       rows.add(DataRow(cells: <DataCell>[
-        DataCell(Text('${s.name}')),
+        DataCell(Text('${s.name()}')),
         DataCell(Text('${s.coaches.toString()}')),
-        DataCell(Text('${s.points.toString()}')),
-        DataCell(Text('${s.wins.toString()}')),
-        DataCell(Text('${s.ties.toString()}')),
-        DataCell(Text('${s.losses.toString()}')),
+        DataCell(Text('${s.points().toString()}')),
+        DataCell(Text('${s.wins().toString()}')),
+        DataCell(Text('${s.ties().toString()}')),
+        DataCell(Text('${s.losses().toString()}')),
       ]));
     });
 

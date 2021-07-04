@@ -26,7 +26,7 @@ class _MatchupsPage extends State<MatchupsPage> {
   @override
   Widget build(BuildContext context) {
     return GroupedListView(
-      elements: _squadMatchups,
+      elements: _squadMatchups[0].coachMatchups,
       groupBy: (matchup) => matchup.tableNum().toString(),
       groupSeparatorBuilder: _buildGroupSeparator,
       itemBuilder: (context, matchup) => MatchupHeadlineWidget(
@@ -46,21 +46,4 @@ class _MatchupsPage extends State<MatchupsPage> {
       ),
     );
   }
-
-  // Widget _buildItem(BuildContext context, SquadMatchup squadMatchup) {
-  //   return Card(
-  //       elevation: 8.0,
-  //       margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-  //       child: Container(
-  //         child: ListTile(
-  //           contentPadding:
-  //               EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-  //           leading: Icon(Icons.account_circle),
-  //           title: Text(squadMatchup.homeSquad.name +
-  //               ' vs. ' +
-  //               squadMatchup.awaySquad.name),
-  //           trailing: Icon(Icons.arrow_forward),
-  //         ),
-  //       ));
-  // }
 }

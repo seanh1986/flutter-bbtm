@@ -1,18 +1,20 @@
-class IMatchup {
-  int tableNum() {}
+import 'package:amorical_cup/data/races.dart';
 
-  String homeName() {}
-  String awayName() {}
+abstract class IMatchup {
+  int tableNum();
+  IMatchupParticipant home();
+  IMatchupParticipant away();
+}
 
-  String homeLogo() {}
-  String awayLogo() {}
+abstract class IMatchupParticipant {
+  String name();
+  Race race();
+  int points();
+  int wins();
+  int ties();
+  int losses();
 
-  int homeWins() {}
-  int awayWin() {}
-
-  int homeTies() {}
-  int awayTies() {}
-
-  int homeLosses() {}
-  int awayLosses() {}
+  String raceName() {
+    return RaceUtils.getName(race());
+  }
 }

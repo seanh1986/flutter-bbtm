@@ -59,31 +59,31 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       DataColumn(
         label: Text('Race'),
         onSort: (columnIndex, ascending) =>
-            _sort<String>((Coach c) => c.race, columnIndex, ascending),
+            _sort<String>((Coach c) => c.raceName(), columnIndex, ascending),
       ),
       DataColumn(
         label: Text('Points'),
         numeric: true,
         onSort: (columnIndex, ascending) =>
-            _sort<num>((Coach c) => c.points, columnIndex, ascending),
+            _sort<num>((Coach c) => c.points(), columnIndex, ascending),
       ),
       DataColumn(
         label: Text('Wins'),
         numeric: true,
         onSort: (columnIndex, ascending) =>
-            _sort<num>((Coach c) => c.wins, columnIndex, ascending),
+            _sort<num>((Coach c) => c.wins(), columnIndex, ascending),
       ),
       DataColumn(
         label: Text('Ties'),
         numeric: true,
         onSort: (columnIndex, ascending) =>
-            _sort<num>((Coach c) => c.ties, columnIndex, ascending),
+            _sort<num>((Coach c) => c.ties(), columnIndex, ascending),
       ),
       DataColumn(
         label: Text('Losses'),
         numeric: true,
         onSort: (columnIndex, ascending) =>
-            _sort<num>((Coach c) => c.losses, columnIndex, ascending),
+            _sort<num>((Coach c) => c.losses(), columnIndex, ascending),
       ),
       DataColumn(
         label: Text('TDs'),
@@ -104,17 +104,17 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     List<DataRow> rows = List();
 
     // sort by points ascending
-    _sort<num>((Coach c) => c.points, _sortColumnIndex, _sortAscending);
+    _sort<num>((Coach c) => c.points(), _sortColumnIndex, _sortAscending);
 
     _items.forEach((coach) {
       rows.add(DataRow(cells: <DataCell>[
         DataCell(Text('${coach.nafName}')),
         DataCell(Text('${coach.squadName}')),
-        DataCell(Text('${coach.race}')),
-        DataCell(Text('${coach.points.toString()}')),
-        DataCell(Text('${coach.wins.toString()}')),
-        DataCell(Text('${coach.ties.toString()}')),
-        DataCell(Text('${coach.losses.toString()}')),
+        DataCell(Text('${coach.raceName()}')),
+        DataCell(Text('${coach.points().toString()}')),
+        DataCell(Text('${coach.wins().toString()}')),
+        DataCell(Text('${coach.ties().toString()}')),
+        DataCell(Text('${coach.losses().toString()}')),
         DataCell(Text('${coach.tds.toString()}')),
         DataCell(Text('${coach.cas.toString()}')),
       ]));

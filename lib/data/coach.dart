@@ -1,31 +1,63 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:amorical_cup/data/i_matchup.dart';
+import 'package:amorical_cup/data/races.dart';
+// import 'package:json_annotation/json_annotation.dart';
 
-part 'coach.g.dart';
+// part 'coach.g.dart';
 
-@JsonSerializable(nullable: false)
-class Coach {
+// @JsonSerializable(nullable: false)
+class Coach extends IMatchupParticipant {
   final String nafName; // Key
 
   final String squadName;
 
-  final String name;
+  final String coachName;
 
-  final String race;
+  final Race _race;
 
-  final int wins;
-  final int ties;
-  final int losses;
+  final int _wins;
+  final int _ties;
+  final int _losses;
 
-  final int points;
+  final int _points;
 
   final int tds;
   final int cas;
 
   final bool stunty;
 
-  Coach(this.nafName, this.squadName, this.name, this.race, this.wins,
-      this.ties, this.losses, this.points, this.tds, this.cas, this.stunty);
+  Coach(this.nafName, this.squadName, this.coachName, this._race, this._wins,
+      this._ties, this._losses, this._points, this.tds, this.cas, this.stunty);
 
-  factory Coach.fromJson(Map<String, dynamic> json) => _$CoachFromJson(json);
-  Map<String, dynamic> toJson() => _$CoachToJson(this);
+  @override
+  String name() {
+    return nafName;
+  }
+
+  @override
+  Race race() {
+    return _race;
+  }
+
+  @override
+  int points() {
+    return _points;
+  }
+
+  @override
+  int wins() {
+    return _wins;
+  }
+
+  @override
+  int ties() {
+    return _ties;
+  }
+
+  @override
+  int losses() {
+    return _losses;
+  }
+
+  // factory Coach.fromJson(Map<String, dynamic> json) => _$CoachFromJson(json);
+  // Map<String, dynamic> toJson() => _$CoachToJson(this);
 }

@@ -16,48 +16,19 @@ class SquadMatchup implements IMatchup {
   SquadMatchup(
       this._tableNum, this.homeSquad, this.awaySquad, this.coachMatchups);
 
+  @override
   int tableNum() {
     return _tableNum;
   }
 
-  String homeName() {
-    return homeSquad.name;
+  @override
+  IMatchupParticipant home() {
+    return homeSquad;
   }
 
-  String awayName() {
-    return awaySquad.name;
-  }
-
-  String homeLogo() {
-    return "";
-  }
-
-  String awayLogo() {
-    return "";
-  }
-
-  int homeWins() {
-    return homeSquad.wins;
-  }
-
-  int awayWin() {
-    return awaySquad.wins;
-  }
-
-  int homeTies() {
-    return homeSquad.ties;
-  }
-
-  int awayTies() {
-    return awaySquad.ties;
-  }
-
-  int homeLosses() {
-    return homeSquad.losses;
-  }
-
-  int awayLosses() {
-    return awaySquad.losses;
+  @override
+  IMatchupParticipant away() {
+    return awaySquad;
   }
 
   static List<SquadMatchup> getExampleSquadMatchups(Tournament t) {

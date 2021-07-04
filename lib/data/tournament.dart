@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:amorical_cup/data/coach.dart';
+import 'package:amorical_cup/data/races.dart';
 import 'package:amorical_cup/data/squad.dart';
 
 class Tournament {
@@ -67,7 +68,9 @@ class Tournament {
 
         bool stunty = rng.nextBool();
 
-        coaches.add(Coach(nafName, squad.name, "", "Human", wins, ties, losses,
+        Race race = RaceUtils.randomRace(rng);
+
+        coaches.add(Coach(nafName, squad.name(), "", race, wins, ties, losses,
             points, tds, cas, stunty));
       });
     });
