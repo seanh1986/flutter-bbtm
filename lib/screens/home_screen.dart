@@ -61,24 +61,43 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Amorical Cup'),
-      ),
-      body: _children[_parentIndex].widgets[_childIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.poll), label: 'Rankings'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: 'Settings'),
-        ],
-        currentIndex: _parentIndex,
-        selectedItemColor: Theme.of(context).accentColor,
-        onTap: _onItemTapped,
-      ),
-    );
+    return WillPopScope(
+        onWillPop: () async {
+          if (_childIndex == 0) {
+            if (_parentIndex == 0) {
+              return true;
+            }
+            setState(() {
+              _parentIndex = 0;
+            });
+            return false;
+          } else {
+            setState(() {
+              _childIndex = 0;
+            });
+            return false;
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Amorical Cup'),
+          ),
+          body: _children[_parentIndex].widgets[_childIndex],
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.poll), label: 'Rankings'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.person), label: 'Profile'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.settings), label: 'Settings'),
+            ],
+            currentIndex: _parentIndex,
+            selectedItemColor: Theme.of(context).accentColor,
+            onTap: _onItemTapped,
+          ),
+        ));
   }
 
   void _onItemTapped(int index) {
