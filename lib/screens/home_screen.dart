@@ -95,12 +95,9 @@ class _HomePageState extends State<HomePage> {
 
       _WidgetFamily wFamily = _children[_parentIndex];
 
-      Widget w = wFamily != null && wFamily.widgets.length > _childIndex
-          ? wFamily.widgets[_childIndex]
-          : null;
-
-      if (w is CoachMatchupsPage) {
-        w.setCoachMatchups(coachMatchups);
+      if (wFamily != null && wFamily.widgets.length > _childIndex) {
+        Widget w = new CoachMatchupsPage(matchups: coachMatchups);
+        wFamily.widgets[_childIndex] = w;
       }
     });
   }

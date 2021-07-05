@@ -66,7 +66,14 @@ class _MatchupHeadlineWidget extends State<MatchupHeadlineWidget> {
               ),
               child: logo,
             ),
-            title: Text(participant.name()),
+            title: Container(
+              child: Column(
+                children: [
+                  Text(participant.name(), style: TextStyle(fontSize: 18)),
+                  Text(participant.showRecord()),
+                ],
+              ),
+            ),
             trailing: Icon(Icons.arrow_forward),
             onTap: () => {
               if (_listener != null) {_listener.onItemClicked(_matchup)}

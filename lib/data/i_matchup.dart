@@ -35,4 +35,26 @@ abstract class IMatchupParticipant {
   String raceName() {
     return RaceUtils.getName(race());
   }
+
+  String showRecord() {
+    return wins().toString() +
+        "-" +
+        ties().toString() +
+        "-" +
+        losses().toString() +
+        " (" +
+        winPercent().toStringAsFixed(1) +
+        "%)";
+  }
+
+  int gamesPlayed() {
+    return wins() + ties() + losses();
+  }
+
+  double winPercent() {
+    int games = gamesPlayed();
+    return games > 0
+        ? 100.0 * (1.0 * wins() + 0.5 * ties()) / gamesPlayed()
+        : 0.0;
+  }
 }

@@ -20,25 +20,6 @@ class SquadMatchupsPage extends StatefulWidget {
   }
 }
 
-class _MatchupClickListener implements MatchupClickListener {
-  final CoachMatchupListClickListener coachMatchupListeners;
-
-  _MatchupClickListener(this.coachMatchupListeners);
-
-  @override
-  void onItemClicked(IMatchup matchup) {
-    List<IMatchup> matchups = [];
-
-    if (coachMatchupListeners != null && matchup is SquadMatchup) {
-      for (CoachMatchup cm in matchup.coachMatchups) {
-        matchups.add(cm);
-      }
-
-      coachMatchupListeners.onItemClicked(matchup.coachMatchups);
-    }
-  }
-}
-
 class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   List<SquadMatchup> _matchups = [];
   MatchupClickListener _listener;
@@ -77,5 +58,24 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
+  }
+}
+
+class _MatchupClickListener implements MatchupClickListener {
+  final CoachMatchupListClickListener coachMatchupListeners;
+
+  _MatchupClickListener(this.coachMatchupListeners);
+
+  @override
+  void onItemClicked(IMatchup matchup) {
+    List<IMatchup> matchups = [];
+
+    if (coachMatchupListeners != null && matchup is SquadMatchup) {
+      for (CoachMatchup cm in matchup.coachMatchups) {
+        matchups.add(cm);
+      }
+
+      coachMatchupListeners.onItemClicked(matchup.coachMatchups);
+    }
   }
 }
