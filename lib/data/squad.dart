@@ -22,6 +22,11 @@ class Squad extends IMatchupParticipant {
       this._points, this.stunty);
 
   @override
+  OrgType type() {
+    return OrgType.Squad;
+  }
+
+  @override
   String name() {
     return _name;
   }
@@ -29,6 +34,11 @@ class Squad extends IMatchupParticipant {
   @override
   Race race() {
     return Race.Unknown;
+  }
+
+  @override
+  String parentName() {
+    return "";
   }
 
   @override

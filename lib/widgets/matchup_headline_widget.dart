@@ -1,11 +1,14 @@
 import 'package:amorical_cup/data/i_matchup.dart';
 import 'package:amorical_cup/data/races.dart';
+import 'package:amorical_cup/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
 
 class MatchupHeadlineWidget extends StatefulWidget {
   final IMatchup matchup;
+  final MatchupClickListener listener;
 
-  MatchupHeadlineWidget({Key key, @required this.matchup}) : super(key: key);
+  MatchupHeadlineWidget({Key key, @required this.matchup, this.listener})
+      : super(key: key);
 
   @override
   State<MatchupHeadlineWidget> createState() {
@@ -15,10 +18,12 @@ class MatchupHeadlineWidget extends StatefulWidget {
 
 class _MatchupHeadlineWidget extends State<MatchupHeadlineWidget> {
   IMatchup _matchup;
+  MatchupClickListener _listener;
 
   @override
   void initState() {
     _matchup = widget.matchup;
+    _listener = widget.listener;
     super.initState();
   }
 
@@ -63,6 +68,9 @@ class _MatchupHeadlineWidget extends State<MatchupHeadlineWidget> {
             ),
             title: Text(participant.name()),
             trailing: Icon(Icons.arrow_forward),
+            onTap: () => {
+              if (_listener != null) {_listener.onItemClicked(_matchup)}
+            },
           ),
         ));
   }

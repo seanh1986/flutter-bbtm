@@ -1,13 +1,31 @@
 import 'package:amorical_cup/data/races.dart';
 
+enum OrgType {
+  Squad,
+  Coach,
+}
+
 abstract class IMatchup {
+  OrgType type();
   int tableNum();
   IMatchupParticipant home();
   IMatchupParticipant away();
+
+  String matchupName() {
+    switch (type()) {
+      case OrgType.Coach:
+        return home().parentName() + " vs. " + away().parentName();
+      case OrgType.Squad:
+      default:
+        return "Squad Table #" + tableNum().toString();
+    }
+  }
 }
 
 abstract class IMatchupParticipant {
+  OrgType type();
   String name();
+  String parentName();
   Race race();
   int points();
   int wins();

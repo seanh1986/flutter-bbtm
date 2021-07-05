@@ -5,7 +5,7 @@ import 'package:amorical_cup/data/coach_matchup.dart';
 import 'dart:math';
 import 'package:amorical_cup/data/i_matchup.dart';
 
-class SquadMatchup implements IMatchup {
+class SquadMatchup extends IMatchup {
   final int _tableNum;
 
   final Squad homeSquad;
@@ -15,6 +15,11 @@ class SquadMatchup implements IMatchup {
 
   SquadMatchup(
       this._tableNum, this.homeSquad, this.awaySquad, this.coachMatchups);
+
+  @override
+  OrgType type() {
+    return OrgType.Squad;
+  }
 
   @override
   int tableNum() {

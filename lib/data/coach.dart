@@ -29,8 +29,18 @@ class Coach extends IMatchupParticipant {
       this._ties, this._losses, this._points, this.tds, this.cas, this.stunty);
 
   @override
+  OrgType type() {
+    return OrgType.Coach;
+  }
+
+  @override
   String name() {
     return nafName;
+  }
+
+  @override
+  String parentName() {
+    return squadName;
   }
 
   @override

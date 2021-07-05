@@ -1,6 +1,10 @@
+import 'package:amorical_cup/data/coach_matchup.dart';
+import 'package:amorical_cup/data/i_matchup.dart';
 import 'package:amorical_cup/data/squad_matchup.dart';
 import 'package:amorical_cup/data/tournament.dart';
-import 'package:amorical_cup/screens/matchups_screen.dart';
+import 'package:amorical_cup/screens/matchups_coaches_screen.dart';
+import 'package:amorical_cup/screens/matchups_squad_screen.dart';
+import 'package:amorical_cup/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:amorical_cup/widgets/placeholder_widget.dart';
 import 'package:amorical_cup/screens/rankings_coach.dart';
@@ -13,23 +17,45 @@ class HomePage extends StatefulWidget {
   }
 }
 
+class _WidgetFamily {
+  List<Widget> widgets;
+  _WidgetFamily(this.widgets);
+}
+
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  int _parentIndex = 0;
+  int _childIndex = 0;
+
+  _CoachMatchupListClickListener _coachMatchupListener;
 
   Tournament _tournament;
 
-  List<Widget> _children;
+  List<IMatchup> _matchups;
+
+  List<_WidgetFamily> _children;
 
   @override
   void initState() {
-    _tournament = Tournament.getExampleTournament();
+    if (_tournament == null) {
+      _tournament = Tournament.getExampleTournament();
+      _matchups = SquadMatchup.getExampleSquadMatchups(_tournament);
+    }
+
+    _coachMatchupListener = new _CoachMatchupListClickListener(this);
+
     _children = [
-      PlaceholderWidget(Colors.white),
-      RankingCoachPage(tournament: _tournament),
-      RankingSquadsPage(tournament: _tournament),
-      MatchupsPage(
-          squadMatchups: SquadMatchup.getExampleSquadMatchups(_tournament))
+      new _WidgetFamily([PlaceholderWidget(Colors.white)]),
+      new _WidgetFamily([RankingCoachPage(tournament: _tournament)]),
+      new _WidgetFamily([RankingSquadsPage(tournament: _tournament)]),
+      new _WidgetFamily([
+        SquadMatchupsPage(
+          matchups: _matchups,
+          coachMatchupListeners: _coachMatchupListener,
+        ),
+        CoachMatchupsPage(matchups: null)
+      ])
     ];
+
     super.initState();
   }
 
@@ -39,7 +65,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text('Amorical Cup'),
       ),
-      body: _children[_selectedIndex],
+      body: _children[_parentIndex].widgets[_childIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -48,7 +74,7 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
               icon: Icon(Icons.settings), label: 'Settings'),
         ],
-        currentIndex: _selectedIndex,
+        currentIndex: _parentIndex,
         selectedItemColor: Theme.of(context).accentColor,
         onTap: _onItemTapped,
       ),
@@ -57,7 +83,38 @@ class _HomePageState extends State<HomePage> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _parentIndex = index;
+      _childIndex = 0;
     });
+  }
+
+  void updateMatchupList(List<CoachMatchup> coachMatchups) {
+    setState(() {
+      _parentIndex = 3;
+      _childIndex = 1;
+
+      _WidgetFamily wFamily = _children[_parentIndex];
+
+      Widget w = wFamily != null && wFamily.widgets.length > _childIndex
+          ? wFamily.widgets[_childIndex]
+          : null;
+
+      if (w is CoachMatchupsPage) {
+        w.setCoachMatchups(coachMatchups);
+      }
+    });
+  }
+}
+
+class _CoachMatchupListClickListener implements CoachMatchupListClickListener {
+  final _HomePageState _state;
+
+  _CoachMatchupListClickListener(this._state);
+
+  @override
+  void onItemClicked(List<CoachMatchup> matchups) {
+    if (_state != null) {
+      _state.updateMatchupList(matchups);
+    }
   }
 }
