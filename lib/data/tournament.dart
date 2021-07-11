@@ -7,6 +7,8 @@ import 'package:amorical_cup/data/squad.dart';
 
 class Tournament {
   final String name;
+  final String location;
+  final String dateTime;
 
   // Key: squad name
   List<Squad> squads;
@@ -16,7 +18,8 @@ class Tournament {
   List<Coach> coaches;
   HashMap _coachMap = new HashMap<String, Coach>();
 
-  Tournament(this.name, this.squads, this.coaches) {
+  Tournament(
+      this.name, this.squads, this.coaches, this.location, this.dateTime) {
     _squadMap =
         HashMap.fromIterable(squads, key: (s) => s.name, value: (s) => s);
     _coachMap =
@@ -31,9 +34,8 @@ class Tournament {
     return _coachMap[nafName];
   }
 
-  static Tournament getExampleTournament() {
-    String name = "Amorical Cup";
-
+  static Tournament getExampleTournament(
+      String name, String location, String dateTime) {
     List<Squad> squads = [
       Squad("The Tragically Hit",
           ["natsirtdm", "stimme", "genghis", "doomington"], 3, 1, 0, 7, true),
@@ -76,7 +78,7 @@ class Tournament {
       });
     });
 
-    Tournament t = Tournament(name, squads, coaches);
+    Tournament t = Tournament(name, squads, coaches, location, dateTime);
     return t;
   }
 }

@@ -1,5 +1,6 @@
+import 'package:amorical_cup/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
+// import 'screens/home_screen.dart';
 
 void main() => runApp(App());
 
@@ -7,7 +8,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Amorical Cup',
+      title: 'NAF Tournament App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch(
           primarySwatch: Colors.blue,
@@ -16,7 +17,7 @@ class App extends StatelessWidget {
         ),
         textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
       ),
-      home: HomePage(),
+      home: SplashScreen(), // HomePage(),
     );
   }
 }

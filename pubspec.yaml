@@ -40,6 +40,7 @@ dev_dependencies:
   pluto_grid: ^2.3.0
   data_tables: ^1.0.3
   grouped_list: ^4.0.0
+  flutter_native_splash: ^1.2.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

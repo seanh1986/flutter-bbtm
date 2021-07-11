@@ -10,9 +10,9 @@ import 'package:amorical_cup/screens/rankings_coach.dart';
 import 'package:amorical_cup/screens/rankings_squads.dart';
 
 class HomePage extends StatefulWidget {
-  // Tournament tournament;
+  final Tournament tournament;
 
-  // HomePage({Key? key, required this.tournament}) : super(key: key);
+  HomePage({Key? key, required this.tournament}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    _tournament = Tournament.getExampleTournament();
+    _tournament = widget.tournament;
     _squadMatchups = SquadMatchup.getExampleSquadMatchups(_tournament);
 
     _coachMatchupListener = new _CoachMatchupListClickListener(this);
@@ -83,7 +83,11 @@ class _HomePageState extends State<HomePage> {
         },
         child: Scaffold(
           appBar: AppBar(
-            title: Text('Amorical Cup'),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: Text(_tournament.name),
           ),
           body: _children[_parentIndex].widgets[_childIndex],
           bottomNavigationBar: BottomNavigationBar(
