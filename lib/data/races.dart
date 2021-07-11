@@ -106,15 +106,18 @@ class RaceUtils {
       _raceToName.map((key, value) => MapEntry(value, key));
 
   static String getLogo(Race race) {
-    return _raceToLogo[race];
+    String? logo = _raceToLogo[race];
+    return logo != null ? logo : "";
   }
 
   static String getName(Race race) {
-    return _raceToName[race];
+    String? name = _raceToName[race];
+    return name != null ? name : "";
   }
 
   static Race getRace(String name) {
-    return _nameToRace[name];
+    Race? race = _nameToRace[name];
+    return race != null ? race : Race.Unknown;
   }
 
   static Race randomRace(Random rnd) {

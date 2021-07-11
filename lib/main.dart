@@ -9,15 +9,12 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'Amorical Cup',
       theme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: Colors.black,
-        accentColor: Colors.yellow,
-        //fontFamily: 'Georgia',
-        // textTheme: TextTheme(
-        //   headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-        //   headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
-        //   bodyText2: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
-        // ),
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.blue,
+          accentColor: Colors.redAccent,
+          cardColor: Colors.lightBlueAccent,
+        ),
+        textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
       ),
       home: HomePage(),
     );

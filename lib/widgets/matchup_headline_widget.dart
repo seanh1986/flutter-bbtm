@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 
 class MatchupHeadlineWidget extends StatefulWidget {
   final IMatchup matchup;
-  final MatchupClickListener listener;
+  final MatchupClickListener? listener;
 
-  MatchupHeadlineWidget({Key key, @required this.matchup, this.listener})
+  MatchupHeadlineWidget({Key? key, required this.matchup, this.listener})
       : super(key: key);
 
   @override
@@ -17,8 +17,8 @@ class MatchupHeadlineWidget extends StatefulWidget {
 }
 
 class _MatchupHeadlineWidget extends State<MatchupHeadlineWidget> {
-  IMatchup _matchup;
-  MatchupClickListener _listener;
+  late IMatchup _matchup;
+  MatchupClickListener? _listener;
   final double titleFontSize = 20.0;
   final double subTitleFontSize = 14.0;
 
@@ -50,9 +50,7 @@ class _MatchupHeadlineWidget extends State<MatchupHeadlineWidget> {
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
         child: ListTile(
-            onTap: () => {
-                  if (_listener != null) {_listener.onItemClicked(_matchup)}
-                },
+            onTap: () => {_listener!.onItemClicked(_matchup)},
             title: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Row(

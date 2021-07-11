@@ -10,16 +10,17 @@ class Tournament {
 
   // Key: squad name
   List<Squad> squads;
-  HashMap _squadMap;
+  HashMap _squadMap = HashMap<String, Squad>();
 
   // Key: nafName
   List<Coach> coaches;
   HashMap _coachMap = new HashMap<String, Coach>();
 
   Tournament(this.name, this.squads, this.coaches) {
-    _squadMap = Map.fromIterable(squads, key: (s) => s.name, value: (s) => s);
+    _squadMap =
+        HashMap.fromIterable(squads, key: (s) => s.name, value: (s) => s);
     _coachMap =
-        Map.fromIterable(coaches, key: (c) => c.nafName, value: (c) => c);
+        HashMap.fromIterable(coaches, key: (c) => c.nafName, value: (c) => c);
   }
 
   Squad getSquad(String squadName) {
@@ -53,7 +54,7 @@ class Tournament {
     // Create coaches
     var rng = new Random();
 
-    List<Coach> coaches = List();
+    List<Coach> coaches = [];
 
     squads.forEach((squad) {
       squad.coaches.forEach((nafName) {

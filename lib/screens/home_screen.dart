@@ -1,5 +1,4 @@
 import 'package:amorical_cup/data/coach_matchup.dart';
-import 'package:amorical_cup/data/i_matchup.dart';
 import 'package:amorical_cup/data/squad_matchup.dart';
 import 'package:amorical_cup/data/tournament.dart';
 import 'package:amorical_cup/screens/matchups_coaches_screen.dart';
@@ -11,6 +10,10 @@ import 'package:amorical_cup/screens/rankings_coach.dart';
 import 'package:amorical_cup/screens/rankings_squads.dart';
 
 class HomePage extends StatefulWidget {
+  // Tournament tournament;
+
+  // HomePage({Key? key, required this.tournament}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return _HomePageState();
@@ -26,20 +29,20 @@ class _HomePageState extends State<HomePage> {
   int _parentIndex = 0;
   int _childIndex = 0;
 
-  _CoachMatchupListClickListener _coachMatchupListener;
+  _CoachMatchupListClickListener? _coachMatchupListener;
 
-  Tournament _tournament;
+  late Tournament _tournament;
 
-  List<IMatchup> _matchups;
+  List<SquadMatchup> _squadMatchups = [];
 
-  List<_WidgetFamily> _children;
+  List<CoachMatchup> _selectedCoachMatchups = [];
+
+  List<_WidgetFamily> _children = [];
 
   @override
   void initState() {
-    if (_tournament == null) {
-      _tournament = Tournament.getExampleTournament();
-      _matchups = SquadMatchup.getExampleSquadMatchups(_tournament);
-    }
+    _tournament = Tournament.getExampleTournament();
+    _squadMatchups = SquadMatchup.getExampleSquadMatchups(_tournament);
 
     _coachMatchupListener = new _CoachMatchupListClickListener(this);
 
@@ -49,10 +52,10 @@ class _HomePageState extends State<HomePage> {
       new _WidgetFamily([RankingSquadsPage(tournament: _tournament)]),
       new _WidgetFamily([
         SquadMatchupsPage(
-          matchups: _matchups,
+          matchups: _squadMatchups,
           coachMatchupListeners: _coachMatchupListener,
         ),
-        CoachMatchupsPage(matchups: null)
+        CoachMatchupsPage(matchups: _selectedCoachMatchups)
       ])
     ];
 
@@ -94,7 +97,7 @@ class _HomePageState extends State<HomePage> {
                   icon: Icon(Icons.settings), label: 'Settings'),
             ],
             currentIndex: _parentIndex,
-            selectedItemColor: Theme.of(context).accentColor,
+            selectedItemColor: Theme.of(context).colorScheme.secondary,
             onTap: _onItemTapped,
           ),
         ));
@@ -114,7 +117,7 @@ class _HomePageState extends State<HomePage> {
 
       _WidgetFamily wFamily = _children[_parentIndex];
 
-      if (wFamily != null && wFamily.widgets.length > _childIndex) {
+      if (wFamily.widgets.length > _childIndex) {
         Widget w = new CoachMatchupsPage(matchups: coachMatchups);
         wFamily.widgets[_childIndex] = w;
       }
@@ -129,8 +132,6 @@ class _CoachMatchupListClickListener implements CoachMatchupListClickListener {
 
   @override
   void onItemClicked(List<CoachMatchup> matchups) {
-    if (_state != null) {
-      _state.updateMatchupList(matchups);
-    }
+    _state.updateMatchupList(matchups);
   }
 }

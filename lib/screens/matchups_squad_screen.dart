@@ -8,10 +8,10 @@ import 'package:amorical_cup/utils/item_click_listener.dart';
 
 class SquadMatchupsPage extends StatefulWidget {
   final List<SquadMatchup> matchups;
-  final CoachMatchupListClickListener coachMatchupListeners;
+  final CoachMatchupListClickListener? coachMatchupListeners;
 
   SquadMatchupsPage(
-      {Key key, @required this.matchups, this.coachMatchupListeners})
+      {Key? key, required this.matchups, this.coachMatchupListeners})
       : super(key: key);
 
   @override
@@ -22,7 +22,7 @@ class SquadMatchupsPage extends StatefulWidget {
 
 class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   List<SquadMatchup> _matchups = [];
-  MatchupClickListener _listener;
+  MatchupClickListener? _listener;
 
   @override
   void initState() {
@@ -35,9 +35,10 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   Widget build(BuildContext context) {
     return GroupedListView(
       elements: _matchups,
-      groupBy: (matchup) => _groupBy(matchup),
+      groupBy: (IMatchup matchup) => _groupBy(matchup),
       groupSeparatorBuilder: _buildGroupSeparator,
-      itemBuilder: (context, matchup) => MatchupHeadlineWidget(
+      itemBuilder: (BuildContext context, IMatchup matchup) =>
+          MatchupHeadlineWidget(
         matchup: matchup,
         listener: _listener,
       ),
@@ -62,7 +63,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 }
 
 class _MatchupClickListener implements MatchupClickListener {
-  final CoachMatchupListClickListener coachMatchupListeners;
+  final CoachMatchupListClickListener? coachMatchupListeners;
 
   _MatchupClickListener(this.coachMatchupListeners);
 
@@ -75,7 +76,7 @@ class _MatchupClickListener implements MatchupClickListener {
         matchups.add(cm);
       }
 
-      coachMatchupListeners.onItemClicked(matchup.coachMatchups);
+      coachMatchupListeners!.onItemClicked(matchup.coachMatchups);
     }
   }
 }

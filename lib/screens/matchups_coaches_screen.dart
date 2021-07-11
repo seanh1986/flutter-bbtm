@@ -3,13 +3,12 @@ import 'package:amorical_cup/data/i_matchup.dart';
 import 'package:amorical_cup/widgets/matchup_headline_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
-import 'package:amorical_cup/utils/item_click_listener.dart';
 
 class CoachMatchupsPage extends StatefulWidget {
   final List<CoachMatchup> matchups;
   // final MatchupListClickListener matchupListClickListener;
 
-  CoachMatchupsPage({Key key, @required this.matchups}) : super(key: key);
+  CoachMatchupsPage({Key? key, required this.matchups}) : super(key: key);
 
   // void setCoachMatchups(List<CoachMatchup> matchups) {
   //   this.matchups = matchups;
@@ -36,9 +35,10 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   Widget build(BuildContext context) {
     return GroupedListView(
       elements: _matchups,
-      groupBy: (matchup) => _groupBy(matchup),
+      groupBy: (IMatchup matchup) => _groupBy(matchup),
       groupSeparatorBuilder: _buildGroupSeparator,
-      itemBuilder: (context, matchup) => MatchupHeadlineWidget(
+      itemBuilder: (BuildContext context, IMatchup matchup) =>
+          MatchupHeadlineWidget(
         matchup: matchup,
         // listener: _listener,
       ),

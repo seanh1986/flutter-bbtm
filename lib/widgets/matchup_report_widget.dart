@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class MatchupReportWidget extends StatefulWidget {
   final IMatchupParticipant participant;
 
-  MatchupReportWidget({Key key, @required this.participant}) : super(key: key);
+  MatchupReportWidget({Key? key, required this.participant}) : super(key: key);
 
   @override
   State<MatchupReportWidget> createState() {
@@ -24,7 +24,7 @@ enum UploadState {
 }
 
 class _MatchupReportWidget extends State<MatchupReportWidget> {
-  IMatchupParticipant _participant;
+  late IMatchupParticipant _participant;
 
   final String _tdName = "Tds";
   final String _casName = "Cas";
@@ -39,7 +39,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   final double uploadIconSize = 24.0;
   final double errUploadIconSize = 20.0;
 
-  UploadState _state;
+  late UploadState _state;
 
   @override
   void initState() {
@@ -67,6 +67,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     return Card(
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+        color: Theme.of(context).primaryColorLight,
         child: Container(
           child: ListTile(
             contentPadding:
@@ -132,7 +133,9 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
                 : RawMaterialButton(
                     shape: CircleBorder(),
                     fillColor: // set color to identify editable or not
-                        _editableState() ? Colors.white : Colors.grey,
+                        _editableState()
+                            ? Theme.of(context).primaryColorLight
+                            : Colors.grey,
                     elevation: 0.0,
                     child: Icon(
                       Icons.add,
@@ -141,9 +144,11 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
                     onPressed:
                         _editableState() // only click-able in editing mode
                             ? () {
-                                setState(() {
-                                  counts[name]++;
-                                });
+                                if (counts.containsKey(name)) {
+                                  setState(() {
+                                    counts.update(name, (value) => value + 1);
+                                  });
+                                }
                               }
                             : null,
                   )),
@@ -158,7 +163,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
                     shape: CircleBorder(),
                     fillColor:
                         _editableState() // set color to identify editable or not
-                            ? Colors.white
+                            ? Theme.of(context).primaryColorLight
                             : Colors.grey,
                     elevation: 0.0,
                     child: Icon(
@@ -168,9 +173,10 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
                     onPressed:
                         _editableState() // only click-able in editing mode
                             ? () {
-                                if (counts[name] > 0) {
+                                if (counts.containsKey(name) &&
+                                    counts[name]! > 0) {
                                   setState(() {
-                                    counts[name]--;
+                                    counts.update(name, (value) => value - 1);
                                   });
                                 }
                               }
@@ -180,7 +186,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     );
   }
 
-  Widget _itemUploadStatus() {
+  Widget? _itemUploadStatus() {
     switch (_state) {
       case UploadState.NotAuthorized:
         return null;

@@ -6,7 +6,7 @@ import 'package:amorical_cup/data/squad.dart';
 class RankingSquadsPage extends StatefulWidget {
   final Tournament tournament;
 
-  RankingSquadsPage({Key key, @required this.tournament}) : super(key: key);
+  RankingSquadsPage({Key? key, required this.tournament}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -84,7 +84,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   }
 
   List<DataRow> _getRows() {
-    List<DataRow> rows = List();
+    List<DataRow> rows = [];
 
     // sort by points ascending
     _sort<num>((Squad c) => c.points(), _sortColumnIndex, _sortAscending);

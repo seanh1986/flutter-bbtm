@@ -6,7 +6,7 @@ import 'package:amorical_cup/data/coach.dart';
 class RankingCoachPage extends StatefulWidget {
   final Tournament tournament;
 
-  RankingCoachPage({Key key, @required this.tournament}) : super(key: key);
+  RankingCoachPage({Key? key, required this.tournament}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -101,7 +101,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   }
 
   List<DataRow> _getRows() {
-    List<DataRow> rows = List();
+    List<DataRow> rows = [];
 
     // sort by points ascending
     _sort<num>((Coach c) => c.points(), _sortColumnIndex, _sortAscending);
