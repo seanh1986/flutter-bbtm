@@ -1,6 +1,6 @@
 import 'package:amorical_cup/data/i_matchup.dart';
-import 'package:amorical_cup/data/races.dart';
 import 'package:amorical_cup/utils/item_click_listener.dart';
+import 'package:amorical_cup/widgets/matchup_report_widget.dart';
 import 'package:flutter/material.dart';
 
 class MatchupHeadlineWidget extends StatefulWidget {
@@ -69,7 +69,10 @@ class _MatchupHeadlineWidget extends State<MatchupHeadlineWidget> {
                           ],
                         ),
                       )),
-                      Text(' vs. '),
+                      Text(
+                        ' vs. ',
+                        style: TextStyle(fontSize: titleFontSize),
+                      ),
                       Expanded(
                           child: Container(
                         child: Column(
@@ -91,50 +94,14 @@ class _MatchupHeadlineWidget extends State<MatchupHeadlineWidget> {
           Expanded(
               child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: _itemMatchupParticipant(_matchup.home()))),
-          Text(' vs. '),
+                  child: MatchupReportWidget(participant: _matchup.home()))),
+          // child: _itemMatchupParticipant(_matchup.home()))),
+          Text(' vs. ', style: TextStyle(fontSize: titleFontSize)),
           Expanded(
               child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: _itemMatchupParticipant(_matchup.away()))),
+                  child: MatchupReportWidget(participant: _matchup.away()))),
+          // child: _itemMatchupParticipant(_matchup.away()))),
         ]);
-  }
-
-  Widget _itemMatchupParticipant(IMatchupParticipant participant) {
-    Image logo = Image.asset('../../' + RaceUtils.getLogo(participant.race()),
-        fit: BoxFit.cover);
-
-    return Card(
-        elevation: 8.0,
-        margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-        child: Container(
-          child: ListTile(
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-            leading: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: 44,
-                minHeight: 44,
-                maxWidth: 64,
-                maxHeight: 64,
-              ),
-              child: logo,
-            ),
-            title: Container(
-              child: Column(
-                children: [
-                  Text(participant.name(),
-                      style: TextStyle(fontSize: titleFontSize)),
-                  Text(participant.showRecord(),
-                      style: TextStyle(fontSize: subTitleFontSize)),
-                ],
-              ),
-            ),
-            trailing: Icon(Icons.cloud_upload_rounded),
-            onTap: () => {
-              if (_listener != null) {_listener.onItemClicked(_matchup)}
-            },
-          ),
-        ));
   }
 }
