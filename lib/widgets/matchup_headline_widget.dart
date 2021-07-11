@@ -95,13 +95,11 @@ class _MatchupHeadlineWidget extends State<MatchupHeadlineWidget> {
               child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: MatchupReportWidget(participant: _matchup.home()))),
-          // child: _itemMatchupParticipant(_matchup.home()))),
           Text(' vs. ', style: TextStyle(fontSize: titleFontSize)),
           Expanded(
               child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: MatchupReportWidget(participant: _matchup.away()))),
-          // child: _itemMatchupParticipant(_matchup.away()))),
         ]);
   }
 }
