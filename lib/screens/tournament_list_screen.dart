@@ -4,7 +4,7 @@ import 'package:amorical_cup/data/squad_matchup.dart';
 import 'package:amorical_cup/data/tournament.dart';
 import 'package:amorical_cup/screens/home_screen.dart';
 import 'package:amorical_cup/services/TournamentRepository.dart';
-import 'package:amorical_cup/widgets/matchup_headline_widget.dart';
+import 'package:amorical_cup/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:amorical_cup/utils/item_click_listener.dart';

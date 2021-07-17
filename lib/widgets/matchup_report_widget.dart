@@ -1,13 +1,16 @@
 import 'dart:collection';
-
 import 'package:amorical_cup/data/i_matchup.dart';
 import 'package:amorical_cup/data/races.dart';
+import 'package:amorical_cup/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 
 class MatchupReportWidget extends StatefulWidget {
   final IMatchupParticipant participant;
+  final UploadState state;
 
-  MatchupReportWidget({Key? key, required this.participant}) : super(key: key);
+  MatchupReportWidget(
+      {Key? key, required this.participant, required this.state})
+      : super(key: key);
 
   @override
   State<MatchupReportWidget> createState() {
@@ -15,16 +18,9 @@ class MatchupReportWidget extends StatefulWidget {
   }
 }
 
-enum UploadState {
-  NotAuthorized,
-  Editing,
-  UploadedAwaiting,
-  UploadedConfirmed,
-  Error,
-}
-
 class _MatchupReportWidget extends State<MatchupReportWidget> {
   late IMatchupParticipant _participant;
+  late UploadState _state;
 
   final String _tdName = "Tds";
   final String _casName = "Cas";
@@ -36,22 +32,17 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   final double fabSize = 40.0;
 
-  final double uploadIconSize = 24.0;
-  final double errUploadIconSize = 20.0;
-
-  late UploadState _state;
-
   @override
   void initState() {
+    refreshState();
     super.initState();
-    _state = UploadState.Editing;
-    _participant = widget.participant;
-    counts.putIfAbsent(_tdName, () => 0);
-    counts.putIfAbsent(_casName, () => 0);
   }
 
   @override
   Widget build(BuildContext context) {
+    // Refresh state
+    refreshState();
+
     return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
@@ -91,16 +82,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
                 ],
               ),
             ),
-            trailing: _itemUploadStatus(),
-            onTap: () => {
-              // TODO: send to server?
-              setState(() {
-                // Temporarily wrap around
-                int curIdx = _state.index;
-                int newIdx = (curIdx + 1) % UploadState.values.length;
-                _state = UploadState.values[newIdx];
-              })
-            },
+            trailing: null,
           ),
         ));
   }
@@ -186,49 +168,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     );
   }
 
-  Widget? _itemUploadStatus() {
-    switch (_state) {
-      case UploadState.NotAuthorized:
-        return null;
-      case UploadState.Editing:
-        return Icon(
-          Icons.cloud_upload_rounded,
-          color: Colors.white,
-          size: uploadIconSize,
-        );
-      case UploadState.UploadedAwaiting:
-        return Icon(
-          Icons.pending_actions,
-          color: Colors.orange,
-          size: uploadIconSize,
-        );
-      case UploadState.UploadedConfirmed:
-        return Icon(
-          Icons.done,
-          color: Colors.green,
-          size: uploadIconSize,
-        );
-      case UploadState.Error:
-        double shift = 0.5 * uploadIconSize;
-
-        return Container(
-            width: uploadIconSize + shift,
-            height: uploadIconSize + shift,
-            child: Stack(children: [
-              Icon(
-                Icons.cloud_upload_rounded,
-                color: Colors.white,
-                size: uploadIconSize,
-              ),
-              Positioned(
-                  left: shift,
-                  top: shift,
-                  child: Icon(Icons.report,
-                      color: Colors.red, size: errUploadIconSize))
-            ]));
-    }
-  }
-
   bool _editableState() {
     return _state == UploadState.Editing || _state == UploadState.Error;
   }
@@ -236,5 +175,12 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   bool _hideFabs() {
     return _state == UploadState.NotAuthorized ||
         _state == UploadState.UploadedConfirmed;
+  }
+
+  void refreshState() {
+    _participant = widget.participant;
+    _state = widget.state;
+    counts.putIfAbsent(_tdName, () => 0);
+    counts.putIfAbsent(_casName, () => 0);
   }
 }

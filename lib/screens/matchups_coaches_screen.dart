@@ -1,6 +1,6 @@
 import 'package:amorical_cup/data/coach_matchup.dart';
 import 'package:amorical_cup/data/i_matchup.dart';
-import 'package:amorical_cup/widgets/matchup_headline_widget.dart';
+import 'package:amorical_cup/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 
@@ -37,8 +37,8 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
       elements: _matchups,
       groupBy: (IMatchup matchup) => _groupBy(matchup),
       groupSeparatorBuilder: _buildGroupSeparator,
-      itemBuilder: (BuildContext context, IMatchup matchup) =>
-          MatchupHeadlineWidget(
+      itemBuilder: (BuildContext context, CoachMatchup matchup) =>
+          MatchupCoachWidget(
         matchup: matchup,
         // listener: _listener,
       ),

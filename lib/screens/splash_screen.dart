@@ -2,6 +2,7 @@ import 'package:amorical_cup/data/tournament.dart';
 import 'package:amorical_cup/screens/tournament_list_screen.dart';
 import 'package:amorical_cup/services/TournamentRepository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -22,8 +23,8 @@ class SplashScreenState extends State<SplashScreen> {
     // Wait for async to complete
     TournamentRepository.instance.refreshTournamentList(false);
 
-    // Open Main page (avoid lock)
-    Future.delayed(Duration.zero, () {
+    // Open Main page (wait for current build/render cycle to complete to avoid lock)
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => TournamentListPage()));
     });

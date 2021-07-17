@@ -1,23 +1,22 @@
-import 'package:amorical_cup/data/i_matchup.dart';
+import 'package:amorical_cup/data/squad_matchup.dart';
 import 'package:amorical_cup/utils/item_click_listener.dart';
-import 'package:amorical_cup/widgets/matchup_report_widget.dart';
 import 'package:flutter/material.dart';
 
-class MatchupHeadlineWidget extends StatefulWidget {
-  final IMatchup matchup;
+class MatchupSquadWidget extends StatefulWidget {
+  final SquadMatchup matchup;
   final MatchupClickListener? listener;
 
-  MatchupHeadlineWidget({Key? key, required this.matchup, this.listener})
+  MatchupSquadWidget({Key? key, required this.matchup, this.listener})
       : super(key: key);
 
   @override
-  State<MatchupHeadlineWidget> createState() {
-    return _MatchupHeadlineWidget();
+  State<MatchupSquadWidget> createState() {
+    return _MatchupSquadWidget();
   }
 }
 
-class _MatchupHeadlineWidget extends State<MatchupHeadlineWidget> {
-  late IMatchup _matchup;
+class _MatchupSquadWidget extends State<MatchupSquadWidget> {
+  late SquadMatchup _matchup;
   MatchupClickListener? _listener;
   final double titleFontSize = 20.0;
   final double subTitleFontSize = 14.0;
@@ -32,17 +31,7 @@ class _MatchupHeadlineWidget extends State<MatchupHeadlineWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        alignment: FractionalOffset.center, child: _getWidgetByOrgType());
-  }
-
-  Widget _getWidgetByOrgType() {
-    switch (_matchup.type()) {
-      case OrgType.Coach:
-        return _coachMatchupWidget();
-      case OrgType.Squad:
-      default:
-        return _squadMatchupWidget();
-    }
+        alignment: FractionalOffset.center, child: _squadMatchupWidget());
   }
 
   Widget _squadMatchupWidget() {
@@ -83,21 +72,5 @@ class _MatchupHeadlineWidget extends State<MatchupHeadlineWidget> {
                         ),
                       )),
                     ]))));
-  }
-
-  Widget _coachMatchupWidget() {
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          Expanded(
-              child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: MatchupReportWidget(participant: _matchup.home()))),
-          Text(' vs. ', style: TextStyle(fontSize: titleFontSize)),
-          Expanded(
-              child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: MatchupReportWidget(participant: _matchup.away()))),
-        ]);
   }
 }

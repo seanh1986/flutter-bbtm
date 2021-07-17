@@ -3,11 +3,12 @@ import 'package:amorical_cup/data/squad_matchup.dart';
 import 'package:amorical_cup/data/tournament.dart';
 import 'package:amorical_cup/screens/matchups_coaches_screen.dart';
 import 'package:amorical_cup/screens/matchups_squad_screen.dart';
+import 'package:amorical_cup/screens/rankings_screen.dart';
+import 'package:amorical_cup/screens/tournament_list_screen.dart';
 import 'package:amorical_cup/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:amorical_cup/widgets/placeholder_widget.dart';
-import 'package:amorical_cup/screens/rankings_coach.dart';
-import 'package:amorical_cup/screens/rankings_squads.dart';
+import 'package:flutter/scheduler.dart';
 
 class HomePage extends StatefulWidget {
   final Tournament tournament;
@@ -48,15 +49,15 @@ class _HomePageState extends State<HomePage> {
 
     _children = [
       new _WidgetFamily([PlaceholderWidget(Colors.white)]),
-      new _WidgetFamily([RankingCoachPage(tournament: _tournament)]),
-      new _WidgetFamily([RankingSquadsPage(tournament: _tournament)]),
       new _WidgetFamily([
         SquadMatchupsPage(
           matchups: _squadMatchups,
           coachMatchupListeners: _coachMatchupListener,
         ),
         CoachMatchupsPage(matchups: _selectedCoachMatchups)
-      ])
+      ]),
+      new _WidgetFamily([RankingsPage(tournament: _tournament)]),
+      new _WidgetFamily([PlaceholderWidget(Colors.black)]),
     ];
 
     super.initState();
@@ -66,27 +67,15 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () async {
-          if (_childIndex == 0) {
-            if (_parentIndex == 0) {
-              return true;
-            }
-            setState(() {
-              _parentIndex = 0;
-            });
-            return false;
-          } else {
-            setState(() {
-              _childIndex = 0;
-            });
-            return false;
-          }
+          _handleBackButton();
+          return false;
         },
         child: Scaffold(
           appBar: AppBar(
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
+            // leading: IconButton(
+            //   icon: Icon(Icons.arrow_back, color: Colors.white),
+            //   onPressed: () => Navigator.of(context).pop(),
+            // ),
             title: Text(_tournament.name),
           ),
           body: _children[_parentIndex].widgets[_childIndex],
@@ -94,9 +83,9 @@ class _HomePageState extends State<HomePage> {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.poll), label: 'Rankings'),
+                  icon: Icon(Icons.sports_football), label: 'Matches'),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.person), label: 'Profile'),
+                  icon: Icon(Icons.poll), label: 'Rankings'),
               BottomNavigationBarItem(
                   icon: Icon(Icons.settings), label: 'Settings'),
             ],
@@ -105,6 +94,25 @@ class _HomePageState extends State<HomePage> {
             onTap: _onItemTapped,
           ),
         ));
+  }
+
+  void _handleBackButton() {
+    if (_childIndex == 0) {
+      if (_parentIndex == 0) {
+        SchedulerBinding.instance!.addPostFrameCallback((_) {
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => TournamentListPage()));
+        });
+      } else {
+        setState(() {
+          _parentIndex = 0;
+        });
+      }
+    } else {
+      setState(() {
+        _childIndex = 0;
+      });
+    }
   }
 
   void _onItemTapped(int index) {
@@ -116,7 +124,7 @@ class _HomePageState extends State<HomePage> {
 
   void updateMatchupList(List<CoachMatchup> coachMatchups) {
     setState(() {
-      _parentIndex = 3;
+      _parentIndex = 1;
       _childIndex = 1;
 
       _WidgetFamily wFamily = _children[_parentIndex];
