@@ -1,5 +1,5 @@
-import 'package:amorical_cup/data/coach_matchup.dart';
-import 'package:amorical_cup/data/i_matchup.dart';
+import 'package:amorical_cup/models/coach_matchup.dart';
+import 'package:amorical_cup/models/i_matchup.dart';
 
 abstract class ItemClickListener {
   void onItemClicked(int idx);

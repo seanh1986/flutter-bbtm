@@ -1,13 +1,14 @@
-import 'package:amorical_cup/data/coach_matchup.dart';
-import 'package:amorical_cup/data/i_matchup.dart';
-import 'package:amorical_cup/data/squad_matchup.dart';
-import 'package:amorical_cup/data/tournament.dart';
+import 'package:amorical_cup/models/coach_matchup.dart';
+import 'package:amorical_cup/models/i_matchup.dart';
+import 'package:amorical_cup/models/squad_matchup.dart';
+import 'package:amorical_cup/models/tournament.dart';
 import 'package:amorical_cup/screens/home_screen.dart';
-import 'package:amorical_cup/services/TournamentRepository.dart';
+import 'package:amorical_cup/repos/TournamentRepository.dart';
 import 'package:amorical_cup/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:amorical_cup/utils/item_click_listener.dart';
+import 'package:intl/intl.dart';
 
 class TournamentListPage extends StatefulWidget {
   TournamentListPage({Key? key}) : super(key: key);
@@ -27,6 +28,11 @@ class _TournamentListPage extends State<TournamentListPage> {
   @override
   void initState() {
     TournamentRepository.instance.getTournamentList().then((tournaments) {
+      // Sort by date
+      tournaments.sort((a, b) {
+        return a.dateTime.compareTo(b.dateTime);
+      });
+
       setState(() {
         _tournaments = tournaments;
       });
@@ -48,7 +54,7 @@ class _TournamentListPage extends State<TournamentListPage> {
   }
 
   String _groupBy(Tournament t) {
-    return t.dateTime;
+    return DateFormat.yMMMEd().format(t.dateTime);
   }
 
   Widget _buildGroupSeparator(String dateTime) {

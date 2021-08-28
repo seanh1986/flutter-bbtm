@@ -1,4 +1,4 @@
-import 'package:amorical_cup/data/tournament.dart';
+import 'package:amorical_cup/models/tournament.dart';
 
 // TODO: Add ScopedModel
 
@@ -49,16 +49,16 @@ class TournamentRepository /* extends Model */ {
         List<Tournament> tournamentList = [];
 
         tournamentList.add(Tournament.getExampleTournament(
-            "Amorical Cup", "Ottawa, Ontario, Canada", "June 22, 2022"));
+            "Amorical Cup", "Ottawa, Ontario, Canada", "2022-06-22"));
 
         tournamentList.add(Tournament.getExampleTournament(
-            "Underworld Cup", "Franklin, Michigan, USA", "November 9, 2022"));
+            "Underworld Cup", "Franklin, Michigan, USA", "2022-11-09"));
 
         tournamentList.add(Tournament.getExampleTournament(
-            "Canadian Open", "Toronto, Ontario, Canada", "February 4, 2023"));
+            "Canadian Open", "Toronto, Ontario, Canada", "2023-02-04"));
 
         tournamentList.add(Tournament.getExampleTournament(
-            "Brewhouse Bowl", "Waterloo, Ontario, Canada", "May 25, 2023"));
+            "Brewhouse Bowl", "Waterloo, Ontario, Canada", "2023-05-25"));
 
         return tournamentList;
       },

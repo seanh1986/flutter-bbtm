@@ -1,6 +1,6 @@
-import 'package:amorical_cup/data/tournament.dart';
+import 'package:amorical_cup/models/tournament.dart';
 import 'package:amorical_cup/screens/tournament_list_screen.dart';
-import 'package:amorical_cup/services/TournamentRepository.dart';
+import 'package:amorical_cup/repos/TournamentRepository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';

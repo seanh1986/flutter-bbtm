@@ -1,14 +1,14 @@
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:amorical_cup/data/coach.dart';
-import 'package:amorical_cup/data/races.dart';
-import 'package:amorical_cup/data/squad.dart';
+import 'package:amorical_cup/models/coach.dart';
+import 'package:amorical_cup/models/races.dart';
+import 'package:amorical_cup/models/squad.dart';
 
 class Tournament {
   final String name;
   final String location;
-  final String dateTime;
+  final DateTime dateTime;
 
   // Key: squad name
   List<Squad> squads;
@@ -35,7 +35,9 @@ class Tournament {
   }
 
   static Tournament getExampleTournament(
-      String name, String location, String dateTime) {
+      String name, String location, String dateTimeStr) {
+    DateTime dateTime = DateTime.parse(dateTimeStr);
+
     List<Squad> squads = [
       Squad("The Tragically Hit",
           ["natsirtdm", "stimme", "genghis", "doomington"], 3, 1, 0, 7, true),

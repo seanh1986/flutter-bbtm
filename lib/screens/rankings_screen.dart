@@ -1,8 +1,8 @@
-import 'package:amorical_cup/data/tournament.dart';
+import 'package:amorical_cup/models/tournament.dart';
 import 'package:amorical_cup/widgets/rankings_coach_widget.dart';
 import 'package:amorical_cup/widgets/rankings_squads_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:amorical_cup/data/coach.dart';
+import 'package:amorical_cup/models/coach.dart';
 
 class RankingsPage extends StatefulWidget {
   final Tournament tournament;

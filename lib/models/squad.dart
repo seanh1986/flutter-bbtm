@@ -1,5 +1,5 @@
-import 'package:amorical_cup/data/i_matchup.dart';
-import 'package:amorical_cup/data/races.dart';
+import 'package:amorical_cup/models/i_matchup.dart';
+import 'package:amorical_cup/models/races.dart';
 // import 'package:json_annotation/json_annotation.dart';
 
 // part 'squad.g.dart';

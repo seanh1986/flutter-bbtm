@@ -1,4 +1,4 @@
-import 'package:amorical_cup/data/races.dart';
+import 'package:amorical_cup/models/races.dart';
 
 enum OrgType {
   Squad,

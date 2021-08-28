@@ -1,6 +1,6 @@
-import 'package:amorical_cup/data/coach_matchup.dart';
-import 'package:amorical_cup/data/squad_matchup.dart';
-import 'package:amorical_cup/data/tournament.dart';
+import 'package:amorical_cup/models/coach_matchup.dart';
+import 'package:amorical_cup/models/squad_matchup.dart';
+import 'package:amorical_cup/models/tournament.dart';
 import 'package:amorical_cup/screens/matchups_coaches_screen.dart';
 import 'package:amorical_cup/screens/matchups_squad_screen.dart';
 import 'package:amorical_cup/screens/rankings_screen.dart';

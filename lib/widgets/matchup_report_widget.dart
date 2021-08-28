@@ -1,15 +1,19 @@
 import 'dart:collection';
-import 'package:amorical_cup/data/i_matchup.dart';
-import 'package:amorical_cup/data/races.dart';
+import 'package:amorical_cup/models/i_matchup.dart';
+import 'package:amorical_cup/models/races.dart';
 import 'package:amorical_cup/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 
 class MatchupReportWidget extends StatefulWidget {
   final IMatchupParticipant participant;
+  final bool isHome;
   final UploadState state;
 
   MatchupReportWidget(
-      {Key? key, required this.participant, required this.state})
+      {Key? key,
+      required this.participant,
+      required this.isHome,
+      required this.state})
       : super(key: key);
 
   @override
@@ -34,7 +38,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   @override
   void initState() {
-    refreshState();
+    //refreshState();
     super.initState();
   }
 
@@ -46,19 +50,21 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          _itemHeadline(_participant),
+          _itemHeadline(_participant, widget.isHome),
           _itemEditMatchDetails(_participant),
         ]);
   }
 
-  Widget _itemHeadline(IMatchupParticipant participant) {
+  Widget _itemHeadline(IMatchupParticipant participant, bool isHome) {
     Image logo = Image.asset('../../' + RaceUtils.getLogo(_participant.race()),
         fit: BoxFit.cover);
 
     return Card(
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-        color: Theme.of(context).primaryColorLight,
+        color: isHome
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.secondary,
         child: Container(
           child: ListTile(
             contentPadding:

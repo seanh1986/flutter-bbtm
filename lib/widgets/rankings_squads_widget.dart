@@ -1,6 +1,6 @@
-import 'package:amorical_cup/data/tournament.dart';
+import 'package:amorical_cup/models/tournament.dart';
 import 'package:flutter/material.dart';
-import 'package:amorical_cup/data/squad.dart';
+import 'package:amorical_cup/models/squad.dart';
 // import 'package:flutter/paginated_data_table.dart';
 
 class RankingSquadsPage extends StatefulWidget {
