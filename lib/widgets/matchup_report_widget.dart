@@ -1,7 +1,7 @@
 import 'dart:collection';
-import 'package:amorical_cup/models/i_matchup.dart';
-import 'package:amorical_cup/models/races.dart';
-import 'package:amorical_cup/widgets/matchup_coach_widget.dart';
+import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/races.dart';
+import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 
 class MatchupReportWidget extends StatefulWidget {

@@ -12,14 +12,14 @@ flutter_native_splash:
   # splash screen to a png image.  This is useful for gradients. The image will be stretch to the
   # size of the app. Only one parameter can be used, color and background_image cannot both be set.
   #color: "#42a5f5"
-  background_image: "assets/images/background_football_field.jpg"
+  background_image: "assets/images/background/background_football_field.jpg"
   
   # Optional parameters are listed below.  To enable a parameter, uncomment the line by removing 
   # the leading # character.
 
   # The image parameter allows you to specify an image used in the splash screen.  It must be a 
   # png file.  
-  #image: assets/images/amorical_logo.png
+  #image: assets/images/logos/amorical_logo.png
 
   # The color_dark, background_image_dark, and image_dark are parameters that set the background
   # and image when the device is in dark mode. If they are not specified, the app will use the

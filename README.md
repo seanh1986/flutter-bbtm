@@ -1,4 +1,4 @@
-# amorical_cup
+# bbnaf_tournaments
 
 A new Flutter project.
 

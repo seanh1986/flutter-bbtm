@@ -1,5 +1,5 @@
-import 'package:amorical_cup/models/i_matchup.dart';
-import 'package:amorical_cup/models/races.dart';
+import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/races.dart';
 // import 'package:json_annotation/json_annotation.dart';
 
 // part 'coach.g.dart';

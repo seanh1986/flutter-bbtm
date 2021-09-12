@@ -1,5 +1,5 @@
-import 'package:amorical_cup/models/squad_matchup.dart';
-import 'package:amorical_cup/utils/item_click_listener.dart';
+import 'package:bbnaf/models/squad_matchup.dart';
+import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
 
 class MatchupSquadWidget extends StatefulWidget {

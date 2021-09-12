@@ -1,6 +1,6 @@
-import 'package:amorical_cup/models/coach_matchup.dart';
-import 'package:amorical_cup/models/i_matchup.dart';
-import 'package:amorical_cup/widgets/matchup_coach_widget.dart';
+import 'package:bbnaf/models/coach_matchup.dart';
+import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 

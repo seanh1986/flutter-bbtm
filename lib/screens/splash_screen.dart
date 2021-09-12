@@ -1,6 +1,6 @@
-import 'package:amorical_cup/models/tournament.dart';
-import 'package:amorical_cup/screens/tournament_list_screen.dart';
-import 'package:amorical_cup/repos/TournamentRepository.dart';
+import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/screens/tournament_list_screen.dart';
+import 'package:bbnaf/repos/TournamentRepository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -35,14 +35,13 @@ class SplashScreenState extends State<SplashScreen> {
     return Container(
       decoration: BoxDecoration(
           image: DecorationImage(
-              image: AssetImage(
-                  "../../assets/images/background_football_field.jpg"),
+              image: AssetImage('background/background_football_field.jpg'),
               fit: BoxFit.cover)),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("../../assets/images/amorical_logo.png"),
+            Image.asset('logos/amorical_logo.png'),
             Text("Loading..."),
           ],
         ),
