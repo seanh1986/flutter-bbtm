@@ -1,4 +1,4 @@
-import 'package:amorical_cup/models/tournament.dart';
+import 'package:bbnaf/models/tournament.dart';
 
 // TODO: Add ScopedModel
 

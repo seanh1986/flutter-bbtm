@@ -1,5 +1,5 @@
-import 'package:amorical_cup/models/coach.dart';
-import 'package:amorical_cup/models/i_matchup.dart';
+import 'package:bbnaf/models/coach.dart';
+import 'package:bbnaf/models/i_matchup.dart';
 
 class CoachMatchup extends IMatchup {
   final int _tableNum;

@@ -34,7 +34,7 @@ enum Race {
 }
 
 class RaceUtils {
-  static final String _baseLogoFolder = "assets/images/logos/";
+  static final String _baseLogoFolder = "assets/images/teams/";
 
   static final Map<Race, String> _raceToLogo = {
     Race.Unknown: "",

@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:amorical_cup/models/tournament.dart';
+import 'package:bbnaf/models/tournament.dart';
 import 'package:http/http.dart' show Client;
 import 'dart:convert';
 

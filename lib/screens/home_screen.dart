@@ -1,13 +1,13 @@
-import 'package:amorical_cup/models/coach_matchup.dart';
-import 'package:amorical_cup/models/squad_matchup.dart';
-import 'package:amorical_cup/models/tournament.dart';
-import 'package:amorical_cup/screens/matchups_coaches_screen.dart';
-import 'package:amorical_cup/screens/matchups_squad_screen.dart';
-import 'package:amorical_cup/screens/rankings_screen.dart';
-import 'package:amorical_cup/screens/tournament_list_screen.dart';
-import 'package:amorical_cup/utils/item_click_listener.dart';
+import 'package:bbnaf/models/coach_matchup.dart';
+import 'package:bbnaf/models/squad_matchup.dart';
+import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/screens/matchups_coaches_screen.dart';
+import 'package:bbnaf/screens/matchups_squad_screen.dart';
+import 'package:bbnaf/screens/rankings_screen.dart';
+import 'package:bbnaf/screens/tournament_list_screen.dart';
+import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
-import 'package:amorical_cup/widgets/placeholder_widget.dart';
+import 'package:bbnaf/widgets/placeholder_widget.dart';
 import 'package:flutter/scheduler.dart';
 
 class HomePage extends StatefulWidget {

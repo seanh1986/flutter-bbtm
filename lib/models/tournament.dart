@@ -1,9 +1,9 @@
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:amorical_cup/models/coach.dart';
-import 'package:amorical_cup/models/races.dart';
-import 'package:amorical_cup/models/squad.dart';
+import 'package:bbnaf/models/coach.dart';
+import 'package:bbnaf/models/races.dart';
+import 'package:bbnaf/models/squad.dart';
 
 class Tournament {
   final String name;

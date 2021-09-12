@@ -1,4 +1,4 @@
-import 'package:amorical_cup/models/races.dart';
+import 'package:bbnaf/models/races.dart';
 
 enum OrgType {
   Squad,

@@ -1,13 +1,13 @@
-import 'package:amorical_cup/models/coach_matchup.dart';
-import 'package:amorical_cup/models/i_matchup.dart';
-import 'package:amorical_cup/models/squad_matchup.dart';
-import 'package:amorical_cup/models/tournament.dart';
-import 'package:amorical_cup/screens/home_screen.dart';
-import 'package:amorical_cup/repos/TournamentRepository.dart';
-import 'package:amorical_cup/widgets/matchup_coach_widget.dart';
+import 'package:bbnaf/models/coach_matchup.dart';
+import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/squad_matchup.dart';
+import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/screens/home_screen.dart';
+import 'package:bbnaf/repos/TournamentRepository.dart';
+import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
-import 'package:amorical_cup/utils/item_click_listener.dart';
+import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:intl/intl.dart';
 
 class TournamentListPage extends StatefulWidget {
@@ -42,14 +42,22 @@ class _TournamentListPage extends State<TournamentListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return GroupedListView(
-      elements: _tournaments,
-      groupBy: (Tournament t) => _groupBy(t),
-      groupSeparatorBuilder: _buildGroupSeparator,
-      itemBuilder: (BuildContext context, Tournament t) => _itemTournament(
-        t,
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("background_football_field.jpg"),
+          fit: BoxFit.cover,
+        ),
       ),
-      order: GroupedListOrder.ASC,
+      child: GroupedListView(
+        elements: _tournaments,
+        groupBy: (Tournament t) => _groupBy(t),
+        groupSeparatorBuilder: _buildGroupSeparator,
+        itemBuilder: (BuildContext context, Tournament t) => _itemTournament(
+          t,
+        ),
+        order: GroupedListOrder.ASC,
+      ),
     );
   }
 

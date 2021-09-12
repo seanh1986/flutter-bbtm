@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "432579212807",
+    "project_id": "bbtournaments-eaa1e",
+    "storage_bucket": "bbtournaments-eaa1e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:432579212807:android:cbc605459aeb19acdddca2",
+        "android_client_info": {
+          "package_name": "com.bbnaf.tournaments"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "432579212807-li3elkg9j4kosnh0u8duk48euts0g74l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIl5uTqk8nkztN-2MLezhA9Mg6F9JvsyI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "432579212807-li3elkg9j4kosnh0u8duk48euts0g74l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

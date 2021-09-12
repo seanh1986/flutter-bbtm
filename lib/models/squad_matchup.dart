@@ -1,9 +1,9 @@
-import 'package:amorical_cup/models/squad.dart';
-import 'package:amorical_cup/models/coach.dart';
-import 'package:amorical_cup/models/tournament.dart';
-import 'package:amorical_cup/models/coach_matchup.dart';
+import 'package:bbnaf/models/squad.dart';
+import 'package:bbnaf/models/coach.dart';
+import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/models/coach_matchup.dart';
 import 'dart:math';
-import 'package:amorical_cup/models/i_matchup.dart';
+import 'package:bbnaf/models/i_matchup.dart';
 
 class SquadMatchup extends IMatchup {
   final int _tableNum;

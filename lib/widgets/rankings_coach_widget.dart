@@ -1,6 +1,6 @@
-import 'package:amorical_cup/models/tournament.dart';
+import 'package:bbnaf/models/tournament.dart';
 import 'package:flutter/material.dart';
-import 'package:amorical_cup/models/coach.dart';
+import 'package:bbnaf/models/coach.dart';
 // import 'package:flutter/paginated_data_table.dart';
 
 class RankingCoachPage extends StatefulWidget {

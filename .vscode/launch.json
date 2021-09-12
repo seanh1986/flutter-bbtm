@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "amorical_cup",
+            "name": "bbnaf_tournaments",
             "request": "launch",
             "type": "dart"
         }

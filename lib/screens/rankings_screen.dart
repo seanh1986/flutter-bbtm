@@ -1,8 +1,8 @@
-import 'package:amorical_cup/models/tournament.dart';
-import 'package:amorical_cup/widgets/rankings_coach_widget.dart';
-import 'package:amorical_cup/widgets/rankings_squads_widget.dart';
+import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/widgets/rankings_coach_widget.dart';
+import 'package:bbnaf/widgets/rankings_squads_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:amorical_cup/models/coach.dart';
+import 'package:bbnaf/models/coach.dart';
 
 class RankingsPage extends StatefulWidget {
   final Tournament tournament;
