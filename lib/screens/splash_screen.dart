@@ -1,4 +1,3 @@
-import 'package:bbnaf/models/tournament.dart';
 import 'package:bbnaf/screens/tournament_list_screen.dart';
 import 'package:bbnaf/repos/TournamentRepository.dart';
 import 'package:flutter/material.dart';
@@ -16,19 +15,19 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    handleSplashscreen();
+    // handleSplashscreen();
   }
 
-  void handleSplashscreen() async {
-    // Wait for async to complete
-    TournamentRepository.instance.refreshTournamentList(false);
+  // void handleSplashscreen() async {
+  //   // Wait for async to complete
+  //   TournamentRepository.instance.refreshTournamentList(false);
 
-    // Open Main page (wait for current build/render cycle to complete to avoid lock)
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => TournamentListPage()));
-    });
-  }
+  //   // Open Main page (wait for current build/render cycle to complete to avoid lock)
+  //   SchedulerBinding.instance!.addPostFrameCallback((_) {
+  //     Navigator.pushReplacement(context,
+  //         MaterialPageRoute(builder: (context) => TournamentListPage()));
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +40,13 @@ class SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('logos/amorical_logo.png'),
-            Text("Loading..."),
+            SizedBox(
+              width: 40.0,
+              height: 40.0,
+              child: CircularProgressIndicator(),
+            ),
+            //Image.asset('logos/amorical_logo.png'),
+            // Text("Loading..."),
           ],
         ),
       ),
