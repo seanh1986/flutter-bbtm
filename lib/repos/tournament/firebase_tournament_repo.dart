@@ -20,7 +20,7 @@ class FirebaseTournamentRepository extends TournamentRepository {
     print("FirebaseTournamentRepository: getTournamentInfos");
     return _tournamentInfoRef.snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => TournamentInfo.fromJson(doc.data()))
+          .map((doc) => TournamentInfo.fromJson(doc.id, doc.data()))
           .toList();
     });
   }

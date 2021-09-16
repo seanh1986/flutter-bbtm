@@ -10,7 +10,7 @@ class FirestoreProvider {
       .collection("tournaments")
       .withConverter<TournamentInfo>(
         fromFirestore: (snapshots, _) =>
-            TournamentInfo.fromJson(snapshots.data()!),
+            TournamentInfo.fromJson(snapshots.id, snapshots.data()!),
         toFirestore: (tournamentInfo, _) => tournamentInfo.toJson(),
       );
 
