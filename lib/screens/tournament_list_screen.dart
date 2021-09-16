@@ -62,12 +62,12 @@ class _TournamentListPage extends State<TournamentListPage> {
           return SplashScreen();
         } else if (state is TournamentListLoaded) {
           return Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("background/background_football_field.jpg"),
-                fit: BoxFit.cover,
-              ),
-            ),
+            // decoration: BoxDecoration(
+            //   image: DecorationImage(
+            //     image: AssetImage("background/background_football_field.jpg"),
+            //     fit: BoxFit.cover,
+            //   ),
+            // ),
             child: GroupedListView(
               elements: state.tournaments,
               groupBy: (TournamentInfo t) => _groupBy(t),

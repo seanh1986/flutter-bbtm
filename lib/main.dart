@@ -75,10 +75,10 @@ class _AppState extends State<App> {
 
   Widget LaunchFailed() {
     return Container(
-      decoration: BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage('background/background_football_field.jpg'),
-              fit: BoxFit.cover)),
+      // decoration: BoxDecoration(
+      //     image: DecorationImage(
+      //         image: AssetImage('background/background_football_field.jpg'),
+      //         fit: BoxFit.cover)),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -93,10 +93,10 @@ class _AppState extends State<App> {
 
   Widget LaunchLoading() {
     return Container(
-      decoration: BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage('background/background_football_field.jpg'),
-              fit: BoxFit.cover)),
+      // decoration: BoxDecoration(
+      //     image: DecorationImage(
+      //         image: AssetImage('background/background_football_field.jpg'),
+      //         fit: BoxFit.cover)),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
