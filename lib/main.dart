@@ -1,11 +1,23 @@
+import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
+import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:bbnaf/screens/splash_screen.dart';
+import 'package:bbnaf/screens/tournament_list_screen.dart';
 import 'package:flutter/material.dart';
 // import 'screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'blocs/tournament_list/tournament_list.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(App());
+
+  runApp(MultiBlocProvider(providers: [
+    BlocProvider<TournamentListsBloc>(
+        create: (context) =>
+            TournamentListsBloc(tRepo: FirebaseTournamentRepository())
+              ..add(LoadTournamentLists())),
+  ], child: App()));
 }
 
 /// We are using a StatefulWidget such that we only create the [Future] once,
@@ -57,16 +69,16 @@ class _AppState extends State<App> {
         ),
         textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
       ),
-      home: SplashScreen(), // HomePage(),
-    );
+      home: TournamentListPage(),
+    ); // HomePage(),
   }
 
   Widget LaunchFailed() {
     return Container(
-      decoration: BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage('background/background_football_field.jpg'),
-              fit: BoxFit.cover)),
+      // decoration: BoxDecoration(
+      //     image: DecorationImage(
+      //         image: AssetImage('background/background_football_field.jpg'),
+      //         fit: BoxFit.cover)),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -81,16 +93,19 @@ class _AppState extends State<App> {
 
   Widget LaunchLoading() {
     return Container(
-      decoration: BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage('background/background_football_field.jpg'),
-              fit: BoxFit.cover)),
+      // decoration: BoxDecoration(
+      //     image: DecorationImage(
+      //         image: AssetImage('background/background_football_field.jpg'),
+      //         fit: BoxFit.cover)),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset('logos/amorical_logo.png'),
-            Text("Loading..."),
+            Text(
+              "Loading...",
+              textDirection: TextDirection.ltr,
+            ),
           ],
         ),
       ),
