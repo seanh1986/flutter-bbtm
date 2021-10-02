@@ -1,22 +1,34 @@
+import 'package:bbnaf/blocs/auth/auth.dart';
+import 'package:bbnaf/blocs/login/login.dart';
+// import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
+import 'package:bbnaf/repos/auth/simple_auth_repo.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
-import 'package:bbnaf/repos/tournament/tournament_repo.dart';
-import 'package:bbnaf/screens/splash_screen.dart';
-import 'package:bbnaf/screens/tournament_list_screen.dart';
+import 'package:bbnaf/screens/login/login_screen.dart';
 import 'package:flutter/material.dart';
 // import 'screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'blocs/tournament_list/tournament_list.dart';
+import 'repos/auth/auth_repo.dart';
+import 'repos/tournament/tournament_repo.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
+  AuthRepository _authRepo = SimpleAuthRepository();
+  TournamentRepository _tournamentRepo = FirebaseTournamentRepository();
+
   runApp(MultiBlocProvider(providers: [
-    BlocProvider<TournamentListsBloc>(
+    BlocProvider<AuthBloc>(
         create: (context) =>
-            TournamentListsBloc(tRepo: FirebaseTournamentRepository())
-              ..add(LoadTournamentLists())),
+            AuthBloc(aRepo: _authRepo)..add(AppStartedAuthEvent())),
+    BlocProvider<LoginBloc>(
+        create: (context) =>
+            LoginBloc(aRepo: _authRepo)..add(AppStartedLoginEvent())),
+    BlocProvider<TournamentListsBloc>(
+        create: (context) => TournamentListsBloc(tRepo: _tournamentRepo)
+          ..add(LoadTournamentLists())),
   ], child: App()));
 }
 
@@ -69,7 +81,7 @@ class _AppState extends State<App> {
         ),
         textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
       ),
-      home: TournamentListPage(),
+      home: LoginPage(), // TournamentListPage(),
     ); // HomePage(),
   }
 
@@ -83,7 +95,7 @@ class _AppState extends State<App> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('logos/amorical_logo.png'),
+            // Image.asset('logos/amorical_logo.png'),
             Text("Failed to load..."),
           ],
         ),
@@ -101,7 +113,7 @@ class _AppState extends State<App> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('logos/amorical_logo.png'),
+            // Image.asset('logos/amorical_logo.png'),
             Text(
               "Loading...",
               textDirection: TextDirection.ltr,
