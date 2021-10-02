@@ -1,14 +1,11 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/login/login.dart';
-// import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
 import 'package:bbnaf/repos/auth/simple_auth_repo.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
 import 'package:bbnaf/screens/login/login_screen.dart';
 import 'package:flutter/material.dart';
-// import 'screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'blocs/tournament_list/tournament_list.dart';
 import 'blocs/tournament_selection/tournament_selection.dart';
 import 'repos/auth/auth_repo.dart';

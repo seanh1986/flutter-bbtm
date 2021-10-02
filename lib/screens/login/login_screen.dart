@@ -13,7 +13,7 @@ class _LoginPage extends State<LoginPage> {
   late LoginBloc _loginBloc;
   late AuthBloc _authBloc;
 
-  bool _enableEditing = true;
+  // bool _enableEditing = true;
 
   TextEditingController nameController = TextEditingController();
   // TextEditingController passwordController = TextEditingController();
@@ -51,14 +51,13 @@ class _LoginPage extends State<LoginPage> {
     return BlocBuilder<LoginBloc, LoginState>(
         bloc: _loginBloc,
         builder: (context, state) {
-          if (state.isSuccess) {
+          if (state is SuccessLoginState) {
             _authBloc.add(LoggedInAuthEvent());
-          } else if (state.isFailure) {
+          } else if (state is FailedLoginState) {
             _authBloc.add(LoggedInAuthEvent());
           }
 
-          bool processingLogin =
-              state.isSubmitting && !state.isSuccess && !state.isFailure;
+          bool processingLogin = state is LoadingLoginState;
           return Stack(
             children: <Widget>[
               Image.asset(
@@ -93,7 +92,8 @@ class _LoginPage extends State<LoginPage> {
                           Container(
                             padding: EdgeInsets.all(10),
                             child: TextField(
-                              enableInteractiveSelection: _enableEditing,
+                              enableInteractiveSelection:
+                                  processingLogin, // _enableEditing,
                               controller: nameController,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
@@ -130,9 +130,9 @@ class _LoginPage extends State<LoginPage> {
                                 child: Text('Sign in'),
                                 onPressed: () {
                                   processSignIn(nameController.text);
-                                  setState(() {
-                                    _enableEditing = false;
-                                  });
+                                  // setState(() {
+                                  //   _enableEditing = false;
+                                  // });
                                 },
                               )),
                           // Container(
@@ -163,6 +163,6 @@ class _LoginPage extends State<LoginPage> {
   }
 
   void processSignIn(String nafName) {
-    _loginBloc.add(new LoginWithNafName(nafName: nafName));
+    _loginBloc.add(new LoginWithNafNameEvent(nafName: nafName));
   }
 }

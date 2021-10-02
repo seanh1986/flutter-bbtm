@@ -11,69 +11,10 @@ abstract class LoginEvent extends Equatable {
 
 class AppStartedLoginEvent extends LoginEvent {}
 
-// class EmailChanged extends LoginEvent {
-//   final String email;
-
-//   EmailChanged({required this.email});
-
-//   @override
-//   List<Object> get props => [email];
-
-//   @override
-//   String toString() => 'EmailChanged { email :$email }';
-// }
-
-// class PasswordChanged extends LoginEvent {
-//   final String password;
-
-//   PasswordChanged({required this.password});
-
-//   @override
-//   List<Object> get props => [password];
-
-//   @override
-//   String toString() => 'PasswordChanged { password: $password }';
-// }
-
-// class Submitted extends LoginEvent {
-//   final String email;
-//   final String password;
-
-//   Submitted({required this.email, required this.password});
-
-//   @override
-//   List<Object> get props => [email, password];
-
-//   @override
-//   String toString() {
-//     return 'Submitted { email: $email, password: $password }';
-//   }
-// }
-
-// class LoginWithGooglePressed extends LoginEvent {
-//   @override
-//   String toString() => 'LoginWithGooglePressed';
-// }
-
-// class LoginWithCredentialsPressed extends LoginEvent {
-//   final String email;
-//   final String password;
-
-//   LoginWithCredentialsPressed({required this.email, required this.password});
-
-//   @override
-//   List<Object> get props => [email, password];
-
-//   @override
-//   String toString() {
-//     return 'LoginWithCredentialsPressed { email: $email, password: $password }';
-//   }
-// }
-
-class LoginWithNafName extends LoginEvent {
+class LoginWithNafNameEvent extends LoginEvent {
   final String nafName;
 
-  LoginWithNafName({required this.nafName});
+  LoginWithNafNameEvent({required this.nafName});
 
   @override
   List<Object> get props => [nafName];
