@@ -1,17 +1,9 @@
 import 'package:bbnaf/blocs/tournament_list/tournament_list.dart';
-import 'package:bbnaf/models/coach_matchup.dart';
-import 'package:bbnaf/models/i_matchup.dart';
-import 'package:bbnaf/models/squad_matchup.dart';
-import 'package:bbnaf/models/tournament.dart';
 import 'package:bbnaf/models/tournament_info.dart';
-import 'package:bbnaf/screens/home_screen.dart';
-import 'package:bbnaf/repos/TournamentRepository.dart';
 import 'package:bbnaf/screens/splash_screen.dart';
-import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grouped_list/grouped_list.dart';
-import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:intl/intl.dart';
 
 class TournamentListPage extends StatefulWidget {
