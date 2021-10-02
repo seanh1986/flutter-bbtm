@@ -8,12 +8,12 @@ abstract class TournamentListEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadTournamentLists extends TournamentListEvent {}
+class RequestLoadTournamentListEvent extends TournamentListEvent {}
 
-class TournamentListUpdated extends TournamentListEvent {
+class UpdatedTournamentListEvent extends TournamentListEvent {
   final List<TournamentInfo> tournaments;
 
-  const TournamentListUpdated(this.tournaments);
+  const UpdatedTournamentListEvent(this.tournaments);
 
   @override
   List<Object> get props => [tournaments];

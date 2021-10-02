@@ -25,16 +25,6 @@ class _TournamentListPage extends State<TournamentListPage> {
 
   @override
   void initState() {
-    // TournamentRepository.instance.getTournamentList().then((tournaments) {
-    //   // Sort by date
-    //   tournaments.sort((a, b) {
-    //     return a.dateTime.compareTo(b.dateTime);
-    //   });
-
-    //   setState(() {
-    //     _tournaments = tournaments;
-    //   });
-    // });
     super.initState();
     _bloc = BlocProvider.of<TournamentListsBloc>(context);
   }

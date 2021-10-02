@@ -15,25 +15,25 @@ class TournamentListsBloc
   @override
   Stream<TournamentListState> mapEventToState(
       TournamentListEvent event) async* {
-    if (event is LoadTournamentLists) {
-      yield* _mapLoadTournamentListsToState();
-    } else if (event is TournamentListUpdated) {
-      yield* _mapTournamentListUpdateToState(event);
+    if (event is RequestLoadTournamentListEvent) {
+      yield* _mapRequestLoadTournamentListToState();
+    } else if (event is UpdatedTournamentListEvent) {
+      yield* _mapUpdatedTournamentListToState(event);
     }
   }
 
   // Trigger load
-  Stream<TournamentListState> _mapLoadTournamentListsToState() async* {
-    print("TournamentListsBloc: _mapLoadTournamentListsToState");
+  Stream<TournamentListState> _mapRequestLoadTournamentListToState() async* {
+    print("TournamentListsBloc: _mapRequestLoadTournamentListToState");
     _tournamentSubscription?.cancel();
     _tournamentSubscription = _tournamentRepository.getTournamentInfos().listen(
-          (t) => add(TournamentListUpdated(t)),
+          (t) => add(UpdatedTournamentListEvent(t)),
         );
   }
 
   // State is updated
-  Stream<TournamentListState> _mapTournamentListUpdateToState(
-      TournamentListUpdated event) async* {
+  Stream<TournamentListState> _mapUpdatedTournamentListToState(
+      UpdatedTournamentListEvent event) async* {
     print("TournamentListsBloc: _mapTournamentListUpdateToState");
     yield TournamentListLoaded(event.tournaments);
   }

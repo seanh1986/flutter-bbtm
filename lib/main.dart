@@ -10,6 +10,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'blocs/tournament_list/tournament_list.dart';
+import 'blocs/tournament_selection/tournament_selection.dart';
 import 'repos/auth/auth_repo.dart';
 import 'repos/tournament/tournament_repo.dart';
 
@@ -28,7 +29,10 @@ void main() {
             LoginBloc(aRepo: _authRepo)..add(AppStartedLoginEvent())),
     BlocProvider<TournamentListsBloc>(
         create: (context) => TournamentListsBloc(tRepo: _tournamentRepo)
-          ..add(LoadTournamentLists())),
+          ..add(RequestLoadTournamentListEvent())),
+    BlocProvider<TournamentSelectionBloc>(
+        create: (context) => TournamentSelectionBloc(tRepo: _tournamentRepo)
+          ..add(DeselectedTournamentEvent())),
   ], child: App()));
 }
 
