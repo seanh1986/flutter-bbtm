@@ -6,27 +6,38 @@ import 'package:bbnaf/models/races.dart';
 
 // @JsonSerializable(nullable: false)
 class Coach extends IMatchupParticipant {
+  final int teamId;
+
   final String nafName; // Key
 
   final String squadName;
 
   final String coachName;
 
+  final String teamName;
+
+  final int nafNumber;
+
   final Race _race;
 
-  final int _wins;
-  final int _ties;
-  final int _losses;
+  int _wins = 0;
+  int _ties = 0;
+  int _losses = 0;
 
-  final int _points;
+  int _points = 0;
 
-  final int tds;
-  final int cas;
+  int tds = 0;
+  int cas = 0;
 
-  final bool stunty;
-
-  Coach(this.nafName, this.squadName, this.coachName, this._race, this._wins,
-      this._ties, this._losses, this._points, this.tds, this.cas, this.stunty);
+  Coach(
+    this.teamId,
+    this.nafName,
+    this.squadName,
+    this.coachName,
+    this._race,
+    this.teamName,
+    this.nafNumber,
+  );
 
   @override
   OrgType type() {
@@ -68,6 +79,27 @@ class Coach extends IMatchupParticipant {
     return _losses;
   }
 
-  // factory Coach.fromJson(Map<String, dynamic> json) => _$CoachFromJson(json);
-  // Map<String, dynamic> toJson() => _$CoachToJson(this);
+  void addWin() {
+    _wins++;
+  }
+
+  void addTie() {
+    _ties++;
+  }
+
+  void addLoss() {
+    _losses++;
+  }
+
+  void calculatePoints(int winPts, int tiePts, int lossPts) {
+    _points = _wins * winPts + _ties * tiePts + _losses * lossPts;
+  }
+
+  void addTds(int t) {
+    tds += t;
+  }
+
+  void addCas(int c) {
+    cas += c;
+  }
 }

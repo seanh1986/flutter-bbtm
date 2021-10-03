@@ -24,7 +24,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
   @override
   void initState() {
-    _items = widget.tournament.coaches;
+    _items = widget.tournament.coachMap.values.toList();
     super.initState();
   }
 

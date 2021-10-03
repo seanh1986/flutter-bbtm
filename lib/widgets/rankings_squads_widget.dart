@@ -24,7 +24,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
   @override
   void initState() {
-    _items = widget.tournament.squads;
+    _items = widget.tournament.squadMap.values.toList();
     super.initState();
   }
 
@@ -92,7 +92,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     _items.forEach((s) {
       rows.add(DataRow(cells: <DataCell>[
         DataCell(Text('${s.name()}')),
-        DataCell(Text('${s.coaches.toString()}')),
+        DataCell(Text('${s.getCoaches().toString()}')), // TODO...
         DataCell(Text('${s.points().toString()}')),
         DataCell(Text('${s.wins().toString()}')),
         DataCell(Text('${s.ties().toString()}')),

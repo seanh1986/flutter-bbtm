@@ -1,86 +1,145 @@
 import 'dart:collection';
-import 'dart:math';
-
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/squad.dart';
+import 'package:bbnaf/models/tournament_info.dart';
+import 'package:xml/xml.dart';
 
 class Tournament {
-  final String name;
-  final String location;
-  final DateTime dateTime;
+  final TournamentInfo info;
+  final XmlDocument xml;
+
+  final bool useSquads;
 
   // Key: squad name
-  List<Squad> squads;
-  HashMap _squadMap = HashMap<String, Squad>();
+  final HashMap<String, Squad> squadMap;
 
   // Key: nafName
-  List<Coach> coaches;
-  HashMap _coachMap = new HashMap<String, Coach>();
+  final HashMap<String, Coach> coachMap;
 
   Tournament(
-      this.name, this.squads, this.coaches, this.location, this.dateTime) {
-    _squadMap =
-        HashMap.fromIterable(squads, key: (s) => s.name, value: (s) => s);
-    _coachMap =
-        HashMap.fromIterable(coaches, key: (c) => c.nafName, value: (c) => c);
+      this.info, this.xml, this.squadMap, this.coachMap, this.useSquads) {}
+
+  Squad? getSquad(String squadName) {
+    return squadMap[squadName];
   }
 
-  Squad getSquad(String squadName) {
-    return _squadMap[squadName];
+  Coach? getCoach(String nafName) {
+    return coachMap[nafName];
   }
 
-  Coach getCoach(String nafName) {
-    return _coachMap[nafName];
-  }
+  factory Tournament.fromXml(XmlDocument xml, TournamentInfo info) {
+    HashMap<String, Squad> squadMap = HashMap<String, Squad>();
+    HashMap<String, Coach> coachMap = new HashMap<String, Coach>();
 
-  static Tournament getExampleTournament(
-      String name, String location, String dateTimeStr) {
-    DateTime dateTime = DateTime.parse(dateTimeStr);
+    HashMap<int, String> teamIdToNafName = new HashMap<int, String>();
 
-    List<Squad> squads = [
-      Squad("The Tragically Hit",
-          ["natsirtdm", "stimme", "genghis", "doomington"], 3, 1, 0, 7, true),
-      Squad("Strange Brew", ["hammer16", "grant85", "tlawson", "kikurasis"], 2,
-          2, 0, 6, false),
-      Squad("Waterlosers", ["iniq", "SheepNine", "catleesi", "Bloodbombers"], 1,
-          3, 0, 2, false),
-      Squad(
-          "Grand River 'Eh' Team",
-          ["KidRichard", "seanh1986", "L3athalK", "Duke_of_Edmund"],
-          4,
-          0,
-          0,
-          8,
-          false)
-    ];
+    final tournamentTag = xml.findAllElements('tournament').first;
 
-    // Create coaches
-    var rng = new Random();
+    // Find out about different group modes and their scoring!
+    int groupMode =
+        int.parse(tournamentTag.getElement("groupmode")?.text ?? "0");
+    bool useSquads = groupMode == 1;
 
-    List<Coach> coaches = [];
+    int roundNumber =
+        int.parse(tournamentTag.getElement("currentround")?.text ?? "0");
 
-    squads.forEach((squad) {
-      squad.coaches.forEach((nafName) {
-        int wins = rng.nextInt(4);
-        int ties = rng.nextInt(4 - wins);
-        int losses = 4 - wins - ties;
+    int winValue = int.parse(tournamentTag.getElement("win")?.text ?? "0");
 
-        int points = wins * 5 + ties * 2;
+    int tieValue = int.parse(tournamentTag.getElement("draw")?.text ?? "0");
 
-        int tds = rng.nextInt(4 * 2);
-        int cas = rng.nextInt(4 * 2);
+    int lossValue = int.parse(tournamentTag.getElement("loss")?.text ?? "0");
 
-        bool stunty = rng.nextBool();
+    if (useSquads) {
+      // List of squads
+      final groupTags = tournamentTag.findAllElements('group');
+      for (var g in groupTags) {
+        String squadName = g.text;
+        squadMap.putIfAbsent(squadName, () => Squad(squadName));
+      }
+    }
 
-        Race race = RaceUtils.randomRace(rng);
+    // List of teams
+    final teamsTags = xml.findAllElements('team');
 
-        coaches.add(Coach(nafName, squad.name(), "", race, wins, ties, losses,
-            points, tds, cas, stunty));
-      });
-    });
+    for (var t in teamsTags) {
+      int id = int.parse(t.getAttribute('id') ?? "0");
 
-    Tournament t = Tournament(name, squads, coaches, location, dateTime);
-    return t;
+      String teamName = t.getElement('teamname')!.text;
+      String coachName = t.getElement('coach')!.text;
+      String nafName = t.getElement('nafname')!.text;
+      int nafNumber = int.parse(t.getElement('nafnumber')!.text);
+      String race = t.getElement('nafrace')!.text;
+      String squadName = t.getElement('group')!.text;
+
+      teamIdToNafName.putIfAbsent(id, () => nafName);
+
+      Coach c = new Coach(id, nafName, squadName, coachName,
+          RaceUtils.getRace(race), teamName, nafNumber);
+      coachMap.putIfAbsent(c.nafName, () => c);
+
+      if (useSquads) {
+        Squad? squad = squadMap[squadName];
+        squad!.addCoach(c);
+      }
+    }
+
+    int curRound = 0;
+
+    final roundsTags = xml.findAllElements('round');
+    for (var r in roundsTags) {
+      int roundNumber = int.parse(r.getAttribute('number') ?? "0");
+
+      curRound = roundNumber;
+
+      final gamesTags = r.findAllElements('game');
+      for (var g in gamesTags) {
+        int tableNumber = int.parse(r.getAttribute('table') ?? "0");
+        int team1 = int.parse(g.getElement('team1')!.text); // team id
+        int team2 = int.parse(g.getElement('team2')!.text); // team id
+        int td1 = int.parse(g.getElement('td1')!.text);
+        int td2 = int.parse(g.getElement('td2')!.text);
+        int cas1 = int.parse(g.getElement('cas1')!.text);
+        int cas2 = int.parse(g.getElement('cas2')!.text);
+
+        // This means it's just the next matchups
+        // TODO move somewhere else
+        if (td1 < 0 || td2 < 0) {
+          continue;
+        }
+
+        String? nafName1 = teamIdToNafName[team1];
+        Coach? coach1 = coachMap[nafName1];
+
+        String? nafName2 = teamIdToNafName[team2];
+        Coach? coach2 = coachMap[nafName2];
+
+        if (coach1 == null || coach2 == null) {
+          continue;
+        }
+
+        if (td1 > td2) {
+          coach1.addWin();
+          coach2.addLoss();
+        } else if (td2 > td1) {
+          coach1.addLoss();
+          coach2.addWin();
+        } else {
+          coach1.addTie();
+          coach2.addTie();
+        }
+
+        coach1.addTds(td1);
+        coach1.addCas(cas1);
+
+        coach2.addTds(td2);
+        coach2.addCas(cas2);
+
+        coach1.calculatePoints(winValue, tieValue, lossValue);
+        coach2.calculatePoints(winValue, tieValue, lossValue);
+      }
+    }
+
+    return new Tournament(info, xml, squadMap, coachMap, useSquads);
   }
 }

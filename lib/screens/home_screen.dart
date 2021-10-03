@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     _tournament = widget.tournament;
-    _squadMatchups = SquadMatchup.getExampleSquadMatchups(_tournament);
+    // _squadMatchups = SquadMatchup.getExampleSquadMatchups(_tournament);
 
     _coachMatchupListener = new _CoachMatchupListClickListener(this);
 
@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> {
             //   icon: Icon(Icons.arrow_back, color: Colors.white),
             //   onPressed: () => Navigator.of(context).pop(),
             // ),
-            title: Text(_tournament.name),
+            title: Text(_tournament.info.name),
           ),
           body: _children[_parentIndex].widgets[_childIndex],
           bottomNavigationBar: BottomNavigationBar(

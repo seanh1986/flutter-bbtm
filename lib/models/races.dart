@@ -125,4 +125,11 @@ class RaceUtils {
     int idx = rnd.nextInt(Race.values.length - 2) + 1;
     return Race.values[idx];
   }
+
+  static bool isStunty(Race race) {
+    return race == Race.Ogre ||
+        race == Race.Halfling ||
+        race == Race.Goblin ||
+        race == Race.Snotling;
+  }
 }

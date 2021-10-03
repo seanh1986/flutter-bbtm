@@ -1,3 +1,4 @@
+import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
 // import 'package:json_annotation/json_annotation.dart';
@@ -8,18 +9,17 @@ import 'package:bbnaf/models/races.dart';
 class Squad extends IMatchupParticipant {
   final String _name; // Key
 
-  final List<String> coaches; // nafNames
+  List<String> _coaches = []; // nafNames
 
-  final int _wins;
-  final int _ties;
-  final int _losses;
+  int _wins = 0;
+  int _ties = 0;
+  int _losses = 0;
 
-  final int _points;
+  int _points = 0;
 
-  final bool stunty;
+  bool stunty = false;
 
-  Squad(this._name, this.coaches, this._wins, this._ties, this._losses,
-      this._points, this.stunty);
+  Squad(this._name);
 
   @override
   OrgType type() {
@@ -61,6 +61,27 @@ class Squad extends IMatchupParticipant {
     return _losses;
   }
 
-  // factory Squad.fromJson(Map<String, dynamic> json) => _$SquadFromJson(json);
-  // Map<String, dynamic> toJson() => _$SquadToJson(this);
+  List<String> getCoaches() {
+    return _coaches;
+  }
+
+  void addCoach(Coach c) {
+    _coaches.add(c.nafName);
+  }
+
+  void setWins(int w) {
+    _wins = w;
+  }
+
+  void setTies(int t) {
+    _ties = t;
+  }
+
+  void setLosses(int l) {
+    _losses = l;
+  }
+
+  void setPoints(int p) {
+    _points = p;
+  }
 }

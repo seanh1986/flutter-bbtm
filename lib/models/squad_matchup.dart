@@ -36,36 +36,36 @@ class SquadMatchup extends IMatchup {
     return awaySquad;
   }
 
-  static List<SquadMatchup> getExampleSquadMatchups(Tournament t) {
-    List<SquadMatchup> squadMatchups = [];
+  // static List<SquadMatchup> getExampleSquadMatchups(Tournament t) {
+  //   List<SquadMatchup> squadMatchups = [];
 
-    int squadTableNum = 0;
-    int coachTableNum = 0;
-    for (int i = 1; i < t.squads.length; i += 2) {
-      squadTableNum++;
+  //   int squadTableNum = 0;
+  //   int coachTableNum = 0;
+  //   for (int i = 1; i < t.squads.length; i += 2) {
+  //     squadTableNum++;
 
-      Squad homeSquad = t.squads[i - 1];
-      Squad awaySquad = t.squads[i];
+  //     Squad homeSquad = t.squads[i - 1];
+  //     Squad awaySquad = t.squads[i];
 
-      List<CoachMatchup> coachMatchups = [];
+  //     List<CoachMatchup> coachMatchups = [];
 
-      int numCoachesPerSquad =
-          min(homeSquad.coaches.length, awaySquad.coaches.length);
+  //     int numCoachesPerSquad =
+  //         min(homeSquad.coaches.length, awaySquad.coaches.length);
 
-      for (int j = 0; j < numCoachesPerSquad; j++) {
-        coachTableNum++;
+  //     for (int j = 0; j < numCoachesPerSquad; j++) {
+  //       coachTableNum++;
 
-        Coach homeCoach = t.getCoach(homeSquad.coaches[j]);
-        Coach awayCoach = t.getCoach(awaySquad.coaches[j]);
+  //       Coach homeCoach = t.getCoach(homeSquad.coaches[j]);
+  //       Coach awayCoach = t.getCoach(awaySquad.coaches[j]);
 
-        coachMatchups
-            .add(new CoachMatchup(coachTableNum, homeCoach, awayCoach));
-      }
+  //       coachMatchups
+  //           .add(new CoachMatchup(coachTableNum, homeCoach, awayCoach));
+  //     }
 
-      squadMatchups.add(
-          new SquadMatchup(squadTableNum, homeSquad, awaySquad, coachMatchups));
-    }
+  //     squadMatchups.add(
+  //         new SquadMatchup(squadTableNum, homeSquad, awaySquad, coachMatchups));
+  //   }
 
-    return squadMatchups;
-  }
+  //   return squadMatchups;
+  // }
 }

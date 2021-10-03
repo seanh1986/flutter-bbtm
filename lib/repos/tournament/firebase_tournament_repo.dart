@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:bbnaf/models/tournament.dart';
 import 'package:bbnaf/models/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
@@ -8,6 +10,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_storage_web/firebase_storage_web.dart'
     as firebase_storage_web;
 import 'package:flutter/foundation.dart';
+import 'package:xml/xml.dart';
 
 class FirebaseTournamentRepository extends TournamentRepository {
   firebase_storage.FirebaseStorage _storage =
@@ -40,42 +43,42 @@ class FirebaseTournamentRepository extends TournamentRepository {
     firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
         .ref(tournamentInfo.id + '.bbd');
 
-    await _download(ref);
+    XmlDocument xml = await _downloadTournamentFile(ref);
 
-    Tournament t = Tournament.getExampleTournament(tournamentInfo.name,
-        tournamentInfo.location, tournamentInfo.dateTimeStart.toString());
+    Tournament t = Tournament.fromXml(xml, tournamentInfo);
 
     yield t;
   }
 
-  Future<void> _download(firebase_storage.Reference ref) async {
+  Future<XmlDocument> _downloadTournamentFile(
+      firebase_storage.Reference ref) async {
     if (kIsWeb) {
-      return _downloadBytes(ref);
+      return _downloadTournamentFileWeb(ref);
     } else {
-      return _downloadFile(ref);
+      return _downloadTournamentFileMobile(ref);
     }
   }
 
-  Future<void> _downloadBytes(firebase_storage.Reference ref) async {
+  Future<XmlDocument> _downloadTournamentFileWeb(
+      firebase_storage.Reference ref) async {
     final bytes = await ref.getData();
-    // Download...
 
     print(
         'Success!\n Downloaded BYTES: ${ref.name} \n from bucket: ${ref.bucket}\n '
         'at path: ${ref.fullPath}');
 
-    await saveAsBytes(bytes!, ref.name);
+    String s = new String.fromCharCodes(bytes!);
 
-    print('Success!\n Wrote "${ref.fullPath}" to ${ref.name}');
+    final document = XmlDocument.parse(s);
+
+    print(document.toXmlString(pretty: true, indent: '\t'));
+
+    return document;
   }
 
-  Future<void> _downloadLink(firebase_storage.Reference ref) async {
-    final link = await ref.getDownloadURL();
-
-    print('Success!\n download URL: $link');
-  }
-
-  Future<void> _downloadFile(firebase_storage.Reference ref) async {
+  // TO BE TESTED
+  Future<XmlDocument> _downloadTournamentFileMobile(
+      firebase_storage.Reference ref) async {
     final io.Directory systemTempDir = io.Directory.systemTemp;
     final io.File tempFile = io.File('${systemTempDir.path}/${ref.name}');
     if (tempFile.existsSync()) await tempFile.delete();
@@ -86,5 +89,55 @@ class FirebaseTournamentRepository extends TournamentRepository {
         'Success!\n Downloaded FILE: ${ref.name} \n from bucket: ${ref.bucket}\n '
         'at path: ${ref.fullPath} \n'
         'Wrote "${ref.fullPath}" to ref.name');
+
+    final file = new File(ref.name);
+    final document = XmlDocument.parse(file.readAsStringSync());
+
+    print(document.toXmlString(pretty: true, indent: '\t'));
+
+    return document;
   }
+
+  // Future<void> _download(firebase_storage.Reference ref) async {
+  //   if (kIsWeb) {
+  //     return _downloadBytes(ref);
+  //   } else {
+  //     return _downloadFile(ref);
+  //   }
+  // }
+
+  // Future<void> _downloadBytes(firebase_storage.Reference ref) async {
+  //   final bytes = await ref.getData();
+  //   // Download...
+
+  //   print(
+  //       'Success!\n Downloaded BYTES: ${ref.name} \n from bucket: ${ref.bucket}\n '
+  //       'at path: ${ref.fullPath}');
+
+  //   String s = new String.fromCharCodes(bytes!);
+  //   // var outputAsUint8List = new Uint8List.fromList(s.codeUnits);
+
+  //   await saveAsBytes(bytes, ref.name);
+
+  //   print('Success!\n Wrote "${ref.fullPath}" to ${ref.name}');
+  // }
+
+  // Future<void> _downloadLink(firebase_storage.Reference ref) async {
+  //   final link = await ref.getDownloadURL();
+
+  //   print('Success!\n download URL: $link');
+  // }
+
+  // Future<void> _downloadFile(firebase_storage.Reference ref) async {
+  //   final io.Directory systemTempDir = io.Directory.systemTemp;
+  //   final io.File tempFile = io.File('${systemTempDir.path}/${ref.name}');
+  //   if (tempFile.existsSync()) await tempFile.delete();
+
+  //   await ref.writeToFile(tempFile);
+
+  //   print(
+  //       'Success!\n Downloaded FILE: ${ref.name} \n from bucket: ${ref.bucket}\n '
+  //       'at path: ${ref.fullPath} \n'
+  //       'Wrote "${ref.fullPath}" to ref.name');
+  // }
 }
