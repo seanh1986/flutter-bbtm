@@ -5,6 +5,8 @@ import 'package:bbnaf/utils/save_as/save_as.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io' as io;
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:firebase_storage_web/firebase_storage_web.dart'
+    as firebase_storage_web;
 import 'package:flutter/foundation.dart';
 
 class FirebaseTournamentRepository extends TournamentRepository {
