@@ -1,3 +1,4 @@
+import 'package:bbnaf/models/tournament.dart';
 import 'package:bbnaf/models/tournament_info.dart';
 import 'package:equatable/equatable.dart';
 
@@ -12,14 +13,15 @@ class NoSelectedTournamentState extends TournamentSelectionState {}
 
 class SelectedTournamentState extends TournamentSelectionState {
   final TournamentInfo tournamentInfo;
+  final Tournament tournament;
 
-  const SelectedTournamentState(this.tournamentInfo);
+  const SelectedTournamentState(this.tournamentInfo, this.tournament);
 
   @override
-  List<Object> get props => [tournamentInfo];
+  List<Object> get props => [tournamentInfo, tournament];
 
   @override
   String toString() {
-    return 'SelectedTournamentState { tournamentInfo: $tournamentInfo }';
+    return 'SelectedTournamentState { tournamentInfo: $tournamentInfo, tournament: $tournament }';
   }
 }

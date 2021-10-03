@@ -1,5 +1,7 @@
 import 'package:bbnaf/blocs/tournament_list/tournament_list.dart';
+import 'package:bbnaf/blocs/tournament_selection/tournament_selection.dart';
 import 'package:bbnaf/models/tournament_info.dart';
+import 'package:bbnaf/screens/home_screen.dart';
 import 'package:bbnaf/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,7 +18,8 @@ class TournamentListPage extends StatefulWidget {
 }
 
 class _TournamentListPage extends State<TournamentListPage> {
-  late TournamentListsBloc _bloc;
+  late TournamentListsBloc _tournyListBloc;
+  late TournamentSelectionBloc _tournySelectBloc;
 
   // List<Tournament> _tournaments = [];
 
@@ -26,19 +29,32 @@ class _TournamentListPage extends State<TournamentListPage> {
   @override
   void initState() {
     super.initState();
-    _bloc = BlocProvider.of<TournamentListsBloc>(context);
+    _tournyListBloc = BlocProvider.of<TournamentListsBloc>(context);
+    _tournySelectBloc = BlocProvider.of<TournamentSelectionBloc>(context);
   }
 
   @override
   void dispose() {
-    _bloc.close();
+    _tournyListBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<TournamentSelectionBloc, TournamentSelectionState>(
+        bloc: _tournySelectBloc,
+        builder: (content, state) {
+          if (state is SelectedTournamentState) {
+            return HomePage(tournament: state.tournament);
+          } else {
+            return _showTournamentList(context);
+          }
+        });
+  }
+
+  Widget _showTournamentList(BuildContext context) {
     return BlocBuilder<TournamentListsBloc, TournamentListState>(
-      bloc: _bloc,
+      bloc: _tournyListBloc,
       builder: (context, state) {
         if (state is TournamentListLoading) {
           return SplashScreen();
@@ -112,6 +128,8 @@ class _TournamentListPage extends State<TournamentListPage> {
         margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
         child: ListTile(
             onTap: () => {
+                  _tournySelectBloc.add(LoadingTournamentEvent(t))
+
                   // // Open Main page
                   // Navigator.pushReplacement(
                   //     context,
