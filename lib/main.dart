@@ -11,8 +11,9 @@ import 'blocs/tournament_selection/tournament_selection.dart';
 import 'repos/auth/auth_repo.dart';
 import 'repos/tournament/tournament_repo.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 
   AuthRepository _authRepo = SimpleAuthRepository();
   TournamentRepository _tournamentRepo = FirebaseTournamentRepository();
@@ -45,12 +46,12 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  /// The future is part of the state of our widget. We should not call `initializeApp`
-  /// directly inside [build].
-  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
-
   @override
   Widget build(BuildContext context) {
+    /// The future is part of the state of our widget. We should not call `initializeApp`
+    /// directly inside [build].
+    final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+
     return FutureBuilder(
       // Initialize FlutterFire:
       future: _initialization,

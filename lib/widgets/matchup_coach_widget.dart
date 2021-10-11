@@ -1,6 +1,7 @@
 import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:bbnaf/widgets/matchup_report_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class MatchupCoachWidget extends StatefulWidget {
@@ -30,13 +31,13 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
   late UploadState _state;
 
-  final double titleFontSize = 20.0;
-  final double subTitleFontSize = 14.0;
+  final double titleFontSize = kIsWeb ? 20.0 : 14.0;
+  final double subTitleFontSize = kIsWeb ? 14.0 : 12.0;
 
-  final double uploadIconSize = 24.0;
-  final double errUploadIconSize = 20.0;
+  final double uploadIconSize = kIsWeb ? 24.0 : 15.0;
+  final double errUploadIconSize = kIsWeb ? 20.0 : 12.0;
 
-  final double itemUploadSize = 50.0;
+  final double itemUploadSize = kIsWeb ? 50.0 : 40.0;
 
   @override
   void initState() {
@@ -55,52 +56,50 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   Widget _coachMatchupWidget() {
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: <
+        Widget>[
+      Expanded(
+          child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+              child: MatchupReportWidget(
+                participant: _matchup.home(),
+                isHome: true,
+                state: _state,
+              ))),
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Expanded(
-              child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: MatchupReportWidget(
-                    participant: _matchup.home(),
-                    isHome: true,
-                    state: _state,
-                  ))),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                  width: itemUploadSize,
-                  height: itemUploadSize,
-                  child: _hideItemUploadBtn()
-                      ? null
-                      : RawMaterialButton(
-                          shape: CircleBorder(),
-                          fillColor: Theme.of(context).primaryColorLight,
-                          elevation: 0.0,
-                          child: _itemUploadStatus(),
-                          onPressed: () => {
-                            // TODO: send to server?
-                            setState(() {
-                              // Temporarily wrap around
-                              int curIdx = _state.index;
-                              int newIdx =
-                                  (curIdx + 1) % UploadState.values.length;
-                              _state = UploadState.values[newIdx];
-                            }),
-                          },
-                        )),
-              Text(' vs. ', style: TextStyle(fontSize: titleFontSize)),
-            ],
-          ),
-          Expanded(
-              child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: MatchupReportWidget(
-                      participant: _matchup.away(),
-                      isHome: false,
-                      state: _state))),
-        ]);
+          Container(
+              width: itemUploadSize,
+              height: itemUploadSize,
+              child: _hideItemUploadBtn()
+                  ? null
+                  : RawMaterialButton(
+                      shape: CircleBorder(),
+                      fillColor: Theme.of(context).primaryColorLight,
+                      elevation: 0.0,
+                      child: _itemUploadStatus(),
+                      onPressed: () => {
+                        // TODO: send to server?
+                        setState(() {
+                          // Temporarily wrap around
+                          int curIdx = _state.index;
+                          int newIdx = (curIdx + 1) % UploadState.values.length;
+                          _state = UploadState.values[newIdx];
+                        }),
+                      },
+                    )),
+          Text(' vs. ', style: TextStyle(fontSize: titleFontSize)),
+        ],
+      ),
+      Expanded(
+          child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+              child: MatchupReportWidget(
+                  participant: _matchup.away(), isHome: false, state: _state))),
+    ]);
   }
 
   Widget? _itemUploadStatus() {

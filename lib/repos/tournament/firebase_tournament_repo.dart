@@ -3,12 +3,9 @@ import 'dart:typed_data';
 import 'package:bbnaf/models/tournament.dart';
 import 'package:bbnaf/models/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
-import 'package:bbnaf/utils/save_as/save_as.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io' as io;
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:firebase_storage_web/firebase_storage_web.dart'
-    as firebase_storage_web;
 import 'package:flutter/foundation.dart';
 import 'package:xml/xml.dart';
 
@@ -90,8 +87,7 @@ class FirebaseTournamentRepository extends TournamentRepository {
         'at path: ${ref.fullPath} \n'
         'Wrote "${ref.fullPath}" to ref.name');
 
-    final file = new File(ref.name);
-    final document = XmlDocument.parse(file.readAsStringSync());
+    final document = XmlDocument.parse(tempFile.readAsStringSync());
 
     print(document.toXmlString(pretty: true, indent: '\t'));
 

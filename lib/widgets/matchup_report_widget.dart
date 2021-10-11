@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'package:bbnaf/models/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/widgets/matchup_coach_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class MatchupReportWidget extends StatefulWidget {
@@ -31,10 +32,10 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   Map<String, int> counts = LinkedHashMap();
 
-  final double titleFontSize = 20.0;
-  final double subTitleFontSize = 14.0;
+  final double titleFontSize = kIsWeb ? 20.0 : 14.0;
+  final double subTitleFontSize = kIsWeb ? 14.0 : 12.0;
 
-  final double fabSize = 40.0;
+  final double fabSize = kIsWeb ? 40.0 : 35.0;
 
   @override
   void initState() {
@@ -56,41 +57,80 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   }
 
   Widget _itemHeadline(IMatchupParticipant participant, bool isHome) {
-    Image logo = Image.asset('../../' + RaceUtils.getLogo(_participant.race()),
-        fit: BoxFit.cover);
-
     return Card(
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
         color: isHome
             ? Theme.of(context).colorScheme.primary
             : Theme.of(context).colorScheme.secondary,
-        child: Container(
-          child: ListTile(
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-            leading: ConstrainedBox(
+        child: kIsWeb
+            ? _itemHeaderWeb(participant)
+            : _itemHeaderMobile(participant));
+  }
+
+  Widget _itemHeaderWeb(IMatchupParticipant participant) {
+    // Image logo = Image.asset('../../' + RaceUtils.getLogo(_participant.race()),
+    //     fit: BoxFit.cover);
+    Image logo =
+        Image.asset(RaceUtils.getLogo(_participant.race()), fit: BoxFit.cover);
+
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+      leading: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: 44,
+          minHeight: 44,
+          maxWidth: 64,
+          maxHeight: 64,
+        ),
+        child: logo,
+      ),
+      title: Container(
+        child: Column(
+          children: [
+            Text(_participant.name(),
+                style: TextStyle(fontSize: titleFontSize)),
+            Text(_participant.showRecord(),
+                style: TextStyle(fontSize: subTitleFontSize)),
+          ],
+        ),
+      ),
+      trailing: null,
+    );
+  }
+
+  Widget _itemHeaderMobile(IMatchupParticipant participant) {
+    Image logo =
+        Image.asset(RaceUtils.getLogo(_participant.race()), fit: BoxFit.cover);
+
+    return Column(
+      children: [
+        Container(
+            margin: EdgeInsets.fromLTRB(10.0, 6.0, 10.0, 3.0),
+            child: ConstrainedBox(
               constraints: BoxConstraints(
-                minWidth: 44,
-                minHeight: 44,
-                maxWidth: 64,
-                maxHeight: 64,
+                minWidth: 30,
+                minHeight: 30,
+                maxWidth: 50,
+                maxHeight: 50,
               ),
               child: logo,
-            ),
-            title: Container(
-              child: Column(
-                children: [
-                  Text(_participant.name(),
-                      style: TextStyle(fontSize: titleFontSize)),
-                  Text(_participant.showRecord(),
-                      style: TextStyle(fontSize: subTitleFontSize)),
-                ],
-              ),
-            ),
-            trailing: null,
+            )),
+        Container(
+          width: double.infinity,
+          margin: EdgeInsets.fromLTRB(10.0, 3.0, 10.0, 6.0),
+          child: Column(
+            children: [
+              Text(_participant.name(),
+                  style: TextStyle(fontSize: titleFontSize)),
+              Text(_participant.showRecord(),
+                  style: TextStyle(fontSize: subTitleFontSize)),
+            ],
           ),
-        ));
+        ),
+      ],
+      mainAxisAlignment: MainAxisAlignment.center,
+    );
   }
 
   Widget _itemEditMatchDetails(IMatchupParticipant participant) {
