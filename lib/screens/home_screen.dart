@@ -3,6 +3,7 @@ import 'package:bbnaf/models/squad_matchup.dart';
 import 'package:bbnaf/models/tournament.dart';
 import 'package:bbnaf/screens/matchups_coaches_screen.dart';
 import 'package:bbnaf/screens/matchups_squad_screen.dart';
+import 'package:bbnaf/screens/overview_screen.dart';
 import 'package:bbnaf/screens/rankings_screen.dart';
 import 'package:bbnaf/screens/tournament_list_screen.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
@@ -12,8 +13,10 @@ import 'package:flutter/scheduler.dart';
 
 class HomePage extends StatefulWidget {
   final Tournament tournament;
+  final String? nafName;
 
-  HomePage({Key? key, required this.tournament}) : super(key: key);
+  HomePage({Key? key, required this.tournament, this.nafName})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -33,6 +36,7 @@ class _HomePageState extends State<HomePage> {
   _CoachMatchupListClickListener? _coachMatchupListener;
 
   late Tournament _tournament;
+  late String? _nafName;
 
   List<SquadMatchup> _squadMatchups = [];
 
@@ -43,12 +47,18 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     _tournament = widget.tournament;
+    _nafName = widget.nafName;
     _squadMatchups = _tournament.curSquadRound!.squadMatchups;
 
     _coachMatchupListener = new _CoachMatchupListClickListener(this);
 
     _children = [
-      new _WidgetFamily([PlaceholderWidget(Colors.white)]),
+      new _WidgetFamily([
+        OverviewScreen(
+          tournament: _tournament,
+          nafName: _nafName,
+        )
+      ]),
       new _WidgetFamily([
         SquadMatchupsPage(
           matchups: _squadMatchups,

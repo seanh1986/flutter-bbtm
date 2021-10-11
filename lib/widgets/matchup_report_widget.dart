@@ -69,8 +69,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   }
 
   Widget _itemHeaderWeb(IMatchupParticipant participant) {
-    // Image logo = Image.asset('../../' + RaceUtils.getLogo(_participant.race()),
-    //     fit: BoxFit.cover);
     Image logo =
         Image.asset(RaceUtils.getLogo(_participant.race()), fit: BoxFit.cover);
 

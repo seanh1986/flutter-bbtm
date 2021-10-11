@@ -1,3 +1,4 @@
+import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/tournament_list/tournament_list.dart';
 import 'package:bbnaf/blocs/tournament_selection/tournament_selection.dart';
 import 'package:bbnaf/models/tournament_info.dart';
@@ -18,6 +19,7 @@ class TournamentListPage extends StatefulWidget {
 }
 
 class _TournamentListPage extends State<TournamentListPage> {
+  late AuthBloc _authBloc;
   late TournamentListsBloc _tournyListBloc;
   late TournamentSelectionBloc _tournySelectBloc;
 
@@ -29,6 +31,7 @@ class _TournamentListPage extends State<TournamentListPage> {
   @override
   void initState() {
     super.initState();
+    _authBloc = BlocProvider.of<AuthBloc>(context);
     _tournyListBloc = BlocProvider.of<TournamentListsBloc>(context);
     _tournySelectBloc = BlocProvider.of<TournamentSelectionBloc>(context);
   }
@@ -41,14 +44,27 @@ class _TournamentListPage extends State<TournamentListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TournamentSelectionBloc, TournamentSelectionState>(
-        bloc: _tournySelectBloc,
-        builder: (content, state) {
-          if (state is SelectedTournamentState) {
-            return HomePage(tournament: state.tournament);
-          } else {
-            return _showTournamentList(context);
+    return BlocBuilder<AuthBloc, AuthState>(
+        bloc: _authBloc,
+        builder: (content, authState) {
+          String? nafName;
+
+          if (authState is AuthUserState) {
+            nafName = authState.nafName;
           }
+
+          return BlocBuilder<TournamentSelectionBloc, TournamentSelectionState>(
+              bloc: _tournySelectBloc,
+              builder: (content, state) {
+                if (state is SelectedTournamentState) {
+                  return HomePage(
+                    tournament: state.tournament,
+                    nafName: nafName,
+                  );
+                } else {
+                  return _showTournamentList(context);
+                }
+              });
         });
   }
 
@@ -127,15 +143,7 @@ class _TournamentListPage extends State<TournamentListPage> {
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
         child: ListTile(
-            onTap: () => {
-                  _tournySelectBloc.add(LoadingTournamentEvent(t))
-
-                  // // Open Main page
-                  // Navigator.pushReplacement(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //         builder: (context) => HomePage(tournament: t)))
-                },
+            onTap: () => {_tournySelectBloc.add(LoadingTournamentEvent(t))},
             title: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Container(
