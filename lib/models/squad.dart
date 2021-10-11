@@ -1,11 +1,19 @@
+import 'dart:collection';
+
 import 'package:bbnaf/models/coach.dart';
+import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/models/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
-// import 'package:json_annotation/json_annotation.dart';
+import 'package:bbnaf/models/rounds.dart';
+import 'package:bbnaf/models/squad_matchup.dart';
 
-// part 'squad.g.dart';
+enum SquadScoreMode {
+  NO_SQUADS,
+  CUMULATIVE_PLAYER_SCORES,
+  W_T_L_1_HALF_0,
+  COUNT_WINS_ONLY,
+}
 
-// @JsonSerializable(nullable: false)
 class Squad extends IMatchupParticipant {
   final String _name; // Key
 
@@ -15,7 +23,7 @@ class Squad extends IMatchupParticipant {
   int _ties = 0;
   int _losses = 0;
 
-  int _points = 0;
+  double _points = 0.0;
 
   bool stunty = false;
 
@@ -42,7 +50,7 @@ class Squad extends IMatchupParticipant {
   }
 
   @override
-  int points() {
+  double points() {
     return _points;
   }
 
@@ -69,19 +77,102 @@ class Squad extends IMatchupParticipant {
     _coaches.add(c.nafName);
   }
 
-  void setWins(int w) {
-    _wins = w;
+  void calculateWinsTiesLosses(List<SquadRound> prevSquadRounds) {
+    for (SquadRound sr in prevSquadRounds) {
+      for (SquadMatchup sm in sr.squadMatchups) {
+        bool isHome;
+        if (sm.homeSquad.name() == _name) {
+          isHome = true;
+        } else if (sm.awaySquad.name() == _name) {
+          isHome = false;
+        } else {
+          continue;
+        }
+
+        int numWins = 0;
+        int numTies = 0;
+        int numLosses = 0;
+        for (CoachMatchup cm in sm.coachMatchups) {
+          if (cm.homeTds > cm.awayTds) {
+            // home wins
+            if (isHome) {
+              numWins++;
+            } else {
+              numLosses++;
+            }
+          } else if (cm.homeTds < cm.awayTds) {
+            // away wins
+            if (isHome) {
+              numLosses++;
+            } else {
+              numWins++;
+            }
+          } else {
+            numTies++;
+          }
+        }
+
+        double winPts = numWins + numTies * 0.5;
+        double lossPts = numLosses + numTies * 0.5;
+
+        if (winPts > lossPts) {
+          _wins++;
+        } else if (winPts < lossPts) {
+          _losses++;
+        } else {
+          _ties++;
+        }
+      }
+    }
   }
 
-  void setTies(int t) {
-    _ties = t;
+  void calculatePoints(
+      SquadScoreMode scoreMode, HashMap<String, Coach> coachMap) {
+    switch (scoreMode) {
+      case SquadScoreMode.CUMULATIVE_PLAYER_SCORES:
+        _calculatePointsCumulativePlayerScores(coachMap);
+        break;
+      case SquadScoreMode.W_T_L_1_HALF_0:
+        _calculatePointsWinTieLossOneHalfZero();
+        break;
+      case SquadScoreMode.COUNT_WINS_ONLY:
+        _calculatePointsWinsOnly();
+        break;
+      default:
+        break;
+    }
   }
 
-  void setLosses(int l) {
-    _losses = l;
+  void _calculatePointsCumulativePlayerScores(HashMap<String, Coach> coachMap) {
+    _points = 0;
+    for (String nafName in _coaches) {
+      Coach? c = coachMap[nafName];
+      if (c == null) {
+        continue;
+      }
+
+      _points += c.points();
+    }
   }
 
-  void setPoints(int p) {
-    _points = p;
+  void _calculatePointsWinTieLossOneHalfZero() {
+    _points = _wins * 1 + _ties * 0.5 + _losses * 0;
+  }
+
+  void _calculatePointsWinsOnly() {
+    _points = _wins as double;
+  }
+
+  static SquadScoreMode getSquadScoreMode(int groupScoreMode) {
+    switch (groupScoreMode) {
+      case 0:
+        return SquadScoreMode.CUMULATIVE_PLAYER_SCORES;
+      case 1:
+        return SquadScoreMode.W_T_L_1_HALF_0;
+      case 2:
+        return SquadScoreMode.COUNT_WINS_ONLY;
+      default:
+        return SquadScoreMode.NO_SQUADS;
+    }
   }
 }

@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     _tournament = widget.tournament;
-    // _squadMatchups = SquadMatchup.getExampleSquadMatchups(_tournament);
+    _squadMatchups = _tournament.curSquadRound!.squadMatchups;
 
     _coachMatchupListener = new _CoachMatchupListClickListener(this);
 

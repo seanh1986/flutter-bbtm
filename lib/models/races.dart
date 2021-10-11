@@ -4,6 +4,7 @@ enum Race {
   Unknown, // Used when race is not relevant
   Amazon,
   BlackOrc,
+  Bretonnian,
   ChaosChosen,
   ChaosDwarf,
   ChaosRenegade,
@@ -40,6 +41,7 @@ class RaceUtils {
     Race.Unknown: "",
     Race.Amazon: _baseLogoFolder + "logo_amazon.png",
     Race.BlackOrc: _baseLogoFolder + "logo_blackorcs.png",
+    Race.Bretonnian: _baseLogoFolder + "logo_bretonnians.png",
     Race.ChaosChosen: _baseLogoFolder + "logo_chaos.png",
     Race.ChaosDwarf: _baseLogoFolder + "logo_chaosdwarf.png",
     Race.ChaosRenegade: _baseLogoFolder + "logo_chaosrenegades.png",
@@ -73,6 +75,7 @@ class RaceUtils {
     Race.Unknown: "", // empty string for unknown
     Race.Amazon: "Amazon",
     Race.BlackOrc: "Black Orc",
+    Race.Bretonnian: "Bretonnian",
     Race.ChaosChosen: "Chaos Chosen",
     Race.ChaosDwarf: "Chaos Dwarf",
     Race.ChaosRenegade: "Chaos Renegade",
@@ -86,7 +89,7 @@ class RaceUtils {
     Race.Human: "Human",
     Race.ImperialNobility: "Imperial Nobility",
     Race.Lizardmen: "Lizardmen",
-    Race.NecromanticHorror: "NecromanticHorror",
+    Race.NecromanticHorror: "Necromantic Horror",
     Race.Norse: "Norse",
     Race.Nurgle: "Nurgle",
     Race.Ogre: "Ogre",

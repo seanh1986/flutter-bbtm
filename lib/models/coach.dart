@@ -24,7 +24,7 @@ class Coach extends IMatchupParticipant {
   int _ties = 0;
   int _losses = 0;
 
-  int _points = 0;
+  double _points = 0;
 
   int tds = 0;
   int cas = 0;
@@ -60,7 +60,7 @@ class Coach extends IMatchupParticipant {
   }
 
   @override
-  int points() {
+  double points() {
     return _points;
   }
 
@@ -91,7 +91,7 @@ class Coach extends IMatchupParticipant {
     _losses++;
   }
 
-  void calculatePoints(int winPts, int tiePts, int lossPts) {
+  void calculatePoints(double winPts, double tiePts, double lossPts) {
     _points = _wins * winPts + _ties * tiePts + _losses * lossPts;
   }
 

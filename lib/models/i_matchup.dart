@@ -7,6 +7,7 @@ enum OrgType {
 
 abstract class IMatchup {
   OrgType type();
+  int roundNum();
   int tableNum();
   IMatchupParticipant home();
   IMatchupParticipant away();
@@ -27,7 +28,7 @@ abstract class IMatchupParticipant {
   String name();
   String parentName();
   Race race();
-  int points();
+  double points();
   int wins();
   int ties();
   int losses();

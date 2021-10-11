@@ -1,24 +1,33 @@
 import 'dart:collection';
+import "package:collection/collection.dart";
 import 'package:bbnaf/models/coach.dart';
+import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/models/races.dart';
+import 'package:bbnaf/models/rounds.dart';
 import 'package:bbnaf/models/squad.dart';
+import 'package:bbnaf/models/squad_matchup.dart';
 import 'package:bbnaf/models/tournament_info.dart';
 import 'package:xml/xml.dart';
 
 class Tournament {
-  final TournamentInfo info;
-  final XmlDocument xml;
+  late final TournamentInfo info;
+  late final XmlDocument xml;
 
-  final bool useSquads;
+  late final bool useSquads;
+
+  late final int curRoundNumber;
 
   // Key: squad name
-  final HashMap<String, Squad> squadMap;
+  late final HashMap<String, Squad> squadMap;
 
   // Key: nafName
-  final HashMap<String, Coach> coachMap;
+  late final HashMap<String, Coach> coachMap;
 
-  Tournament(
-      this.info, this.xml, this.squadMap, this.coachMap, this.useSquads) {}
+  late final List<SquadRound> prevSquadRounds;
+  late final List<CoachRound> prevCoachRounds;
+
+  SquadRound? curSquadRound;
+  CoachRound? curCoachRound;
 
   Squad? getSquad(String squadName) {
     return squadMap[squadName];
@@ -28,8 +37,30 @@ class Tournament {
     return coachMap[nafName];
   }
 
+  // Squad constructor
+  Tournament.squads(
+      this.info,
+      this.xml,
+      this.curRoundNumber,
+      this.squadMap,
+      this.coachMap,
+      this.prevSquadRounds,
+      this.prevCoachRounds,
+      this.curSquadRound,
+      this.curCoachRound) {
+    useSquads = true;
+  }
+
+  // Non-squad constructor
+  Tournament.noSquads(this.info, this.xml, this.curRoundNumber, this.coachMap,
+      this.prevCoachRounds, this.curCoachRound) {
+    useSquads = false;
+    squadMap = new HashMap<String, Squad>();
+    curSquadRound = null;
+  }
+
   factory Tournament.fromXml(XmlDocument xml, TournamentInfo info) {
-    HashMap<String, Squad> squadMap = HashMap<String, Squad>();
+    HashMap<String, Squad> squadMap = new HashMap<String, Squad>();
     HashMap<String, Coach> coachMap = new HashMap<String, Coach>();
 
     HashMap<int, String> teamIdToNafName = new HashMap<int, String>();
@@ -41,14 +72,22 @@ class Tournament {
         int.parse(tournamentTag.getElement("groupmode")?.text ?? "0");
     bool useSquads = groupMode == 1;
 
-    int roundNumber =
+    int groupScoreMode =
+        int.parse(tournamentTag.getElement("groupscore")?.text ?? "0");
+
+    SquadScoreMode squadScoreMode = Squad.getSquadScoreMode(groupScoreMode);
+
+    int curRoundNumber =
         int.parse(tournamentTag.getElement("currentround")?.text ?? "0");
 
-    int winValue = int.parse(tournamentTag.getElement("win")?.text ?? "0");
+    double winValue =
+        double.parse(tournamentTag.getElement("win")?.text ?? "0.0");
 
-    int tieValue = int.parse(tournamentTag.getElement("draw")?.text ?? "0");
+    double tieValue =
+        double.parse(tournamentTag.getElement("draw")?.text ?? "0.0");
 
-    int lossValue = int.parse(tournamentTag.getElement("loss")?.text ?? "0");
+    double lossValue =
+        double.parse(tournamentTag.getElement("loss")?.text ?? "0.0");
 
     if (useSquads) {
       // List of squads
@@ -84,29 +123,26 @@ class Tournament {
       }
     }
 
-    int curRound = 0;
+    List<CoachRound> prevCoachRounds = [];
+    CoachRound? curCoachRound;
 
     final roundsTags = xml.findAllElements('round');
     for (var r in roundsTags) {
       int roundNumber = int.parse(r.getAttribute('number') ?? "0");
 
-      curRound = roundNumber;
+      bool isCurrentRound = roundNumber == curRoundNumber;
+
+      List<CoachMatchup> coachMatchups = [];
 
       final gamesTags = r.findAllElements('game');
       for (var g in gamesTags) {
-        int tableNumber = int.parse(r.getAttribute('table') ?? "0");
+        int tableNumber = int.parse(g.getAttribute('table') ?? "0");
         int team1 = int.parse(g.getElement('team1')!.text); // team id
         int team2 = int.parse(g.getElement('team2')!.text); // team id
         int td1 = int.parse(g.getElement('td1')!.text);
         int td2 = int.parse(g.getElement('td2')!.text);
         int cas1 = int.parse(g.getElement('cas1')!.text);
         int cas2 = int.parse(g.getElement('cas2')!.text);
-
-        // This means it's just the next matchups
-        // TODO move somewhere else
-        if (td1 < 0 || td2 < 0) {
-          continue;
-        }
 
         String? nafName1 = teamIdToNafName[team1];
         Coach? coach1 = coachMap[nafName1];
@@ -118,6 +154,24 @@ class Tournament {
           continue;
         }
 
+        CoachMatchup matchup =
+            new CoachMatchup(roundNumber, tableNumber, coach1, coach2);
+        coachMatchups.add(matchup);
+
+        if (isCurrentRound) {
+          continue;
+        }
+
+        matchup.homeTds = td1;
+        matchup.homeCas = cas1;
+        coach1.addTds(td1);
+        coach1.addCas(cas1);
+
+        matchup.awayTds = td2;
+        matchup.awayCas = cas2;
+        coach2.addTds(td2);
+        coach2.addCas(cas2);
+
         if (td1 > td2) {
           coach1.addWin();
           coach2.addLoss();
@@ -128,18 +182,94 @@ class Tournament {
           coach1.addTie();
           coach2.addTie();
         }
+      }
 
-        coach1.addTds(td1);
-        coach1.addCas(cas1);
+      // Update Coach Rounds
+      CoachRound coachRound = new CoachRound(roundNumber, coachMatchups);
 
-        coach2.addTds(td2);
-        coach2.addCas(cas2);
-
-        coach1.calculatePoints(winValue, tieValue, lossValue);
-        coach2.calculatePoints(winValue, tieValue, lossValue);
+      if (isCurrentRound) {
+        curCoachRound = coachRound;
+      } else {
+        prevCoachRounds.add(coachRound);
       }
     }
 
-    return new Tournament(info, xml, squadMap, coachMap, useSquads);
+    // Update coach points
+    for (Coach c in coachMap.values) {
+      c.calculatePoints(winValue, tieValue, lossValue);
+    }
+
+    if (useSquads) {
+      List<SquadRound> prevSquadRounds =
+          _getSquadRounds(prevCoachRounds, squadMap, coachMap);
+      SquadRound curSquadRound =
+          _getSquadRound(curCoachRound!, squadMap, coachMap);
+
+      // Update squad points
+      for (Squad s in squadMap.values) {
+        s.calculatePoints(squadScoreMode, coachMap);
+        s.calculateWinsTiesLosses(prevSquadRounds);
+      }
+
+      return new Tournament.squads(
+          info,
+          xml,
+          curRoundNumber,
+          squadMap,
+          coachMap,
+          prevSquadRounds,
+          prevCoachRounds,
+          curSquadRound,
+          curCoachRound);
+    } else {
+      return new Tournament.noSquads(
+          info, xml, curRoundNumber, coachMap, prevCoachRounds, curCoachRound);
+    }
+  }
+
+  static List<SquadRound> _getSquadRounds(List<CoachRound> coachRounds,
+      HashMap<String, Squad> squadMap, HashMap<String, Coach> coachMap) {
+    List<SquadRound> squadRounds = [];
+
+    for (CoachRound cr in coachRounds) {
+      SquadRound squadRound = _getSquadRound(cr, squadMap, coachMap);
+      squadRounds.add(squadRound);
+    }
+
+    return squadRounds;
+  }
+
+  static SquadRound _getSquadRound(CoachRound cr,
+      HashMap<String, Squad> squadMap, HashMap<String, Coach> coachMap) {
+    int roundNumber = cr.roundNumber;
+
+    List<SquadMatchup> squadMatchupList = [];
+
+    // HomeSquad to list of coach matchups
+    Map<String, List<CoachMatchup>> groups =
+        groupBy(cr.coachMatchups, (CoachMatchup cm) => cm.homeCoach.squadName);
+
+    int tableNum = 1;
+    for (String homeSquadName in groups.keys) {
+      List<CoachMatchup>? coachMatchups = groups[homeSquadName];
+      if (coachMatchups == null || coachMatchups.isEmpty) {
+        continue;
+      }
+
+      Squad? homeSquad = squadMap[homeSquadName];
+      Squad? awaySquad = squadMap[coachMatchups.first.awayCoach.squadName];
+      if (homeSquad == null || awaySquad == null) {
+        continue;
+      }
+
+      SquadMatchup squadMatchup = new SquadMatchup(
+          roundNumber, tableNum, homeSquad, awaySquad, coachMatchups);
+
+      squadMatchupList.add(squadMatchup);
+
+      tableNum++;
+    }
+
+    return new SquadRound(roundNumber, squadMatchupList);
   }
 }
