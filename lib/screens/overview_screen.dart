@@ -36,24 +36,44 @@ class _OverviewScreenState extends State<OverviewScreen> {
   Widget build(BuildContext context) {
     return Container(
       child: Padding(
-        padding: EdgeInsets.all(7),
-        child: Stack(children: <Widget>[
-          Align(
-            alignment: Alignment.centerRight,
-            child: Stack(
-              children: <Widget>[_welcomeUser()],
-            ),
-          )
-        ]),
-      ),
+          padding: EdgeInsets.all(7),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[_welcomeUser(), _curRoundInfo()],
+          )),
     );
   }
 
   Widget _welcomeUser() {
     return Container(
-      child: Text(
-        "Welcome " + (_nafName != null ? _nafName.toString() : "Guest") + "!",
-      ),
-    );
+        padding: EdgeInsets.all(7),
+        margin: EdgeInsets.all(7),
+        child: Card(
+            child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Welcome " +
+                  (_nafName != null ? _nafName.toString() : "Guest") +
+                  "!",
+              style: TextStyle(fontSize: 20),
+            ),
+          ],
+        )));
+  }
+
+  Widget _curRoundInfo() {
+    return Container(
+        child: Card(
+            child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Round #" + _tournament.curRoundNumber.toString(),
+          style: TextStyle(fontSize: 16),
+        ),
+      ],
+    )));
   }
 }

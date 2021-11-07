@@ -1,8 +1,6 @@
 import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/models/squad_matchup.dart';
 import 'package:bbnaf/models/tournament.dart';
-import 'package:bbnaf/screens/matchups_coaches_screen.dart';
-import 'package:bbnaf/screens/matchups_squad_screen.dart';
 import 'package:bbnaf/screens/overview_screen.dart';
 import 'package:bbnaf/screens/rankings_screen.dart';
 import 'package:bbnaf/screens/tournament_list_screen.dart';
@@ -10,6 +8,9 @@ import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/widgets/placeholder_widget.dart';
 import 'package:flutter/scheduler.dart';
+
+import 'matchups/matchups_coaches_screen.dart';
+import 'matchups/matchups_squad_screen.dart';
 
 class HomePage extends StatefulWidget {
   final Tournament tournament;
@@ -52,6 +53,15 @@ class _HomePageState extends State<HomePage> {
 
     _coachMatchupListener = new _CoachMatchupListClickListener(this);
 
+    List<Widget> matchupWidgets = [];
+    if (_tournament.useSquads) {
+      matchupWidgets.add(SquadMatchupsPage(
+        matchups: _squadMatchups,
+        coachMatchupListeners: _coachMatchupListener,
+      ));
+    }
+    matchupWidgets.add(CoachMatchupsPage(matchups: _selectedCoachMatchups));
+
     _children = [
       new _WidgetFamily([
         OverviewScreen(
@@ -59,13 +69,7 @@ class _HomePageState extends State<HomePage> {
           nafName: _nafName,
         )
       ]),
-      new _WidgetFamily([
-        SquadMatchupsPage(
-          matchups: _squadMatchups,
-          coachMatchupListeners: _coachMatchupListener,
-        ),
-        CoachMatchupsPage(matchups: _selectedCoachMatchups)
-      ]),
+      new _WidgetFamily(matchupWidgets),
       new _WidgetFamily([RankingsPage(tournament: _tournament)]),
       new _WidgetFamily([PlaceholderWidget(Colors.black)]),
     ];
