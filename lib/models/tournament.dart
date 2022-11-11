@@ -37,6 +37,15 @@ class Tournament {
     return coachMap[nafName];
   }
 
+  Squad? getCoachSquad(String nafName) {
+    if (!useSquads) {
+      return null;
+    }
+
+    Coach? coach = getCoach(nafName);
+    return coach != null ? getSquad(coach.squadName) : null;
+  }
+
   // Squad constructor
   Tournament.squads(
       this.info,

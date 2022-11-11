@@ -31,6 +31,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     // _listener = new _MatchupClickListener(widget.matchupListClickListener);
   }
 
+  // TODO: Add CurCoach widget at top if non-null
   @override
   Widget build(BuildContext context) {
     return GroupedListView(

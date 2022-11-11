@@ -1,4 +1,6 @@
+import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/coach_matchup.dart';
+import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/squad_matchup.dart';
 import 'package:bbnaf/models/tournament.dart';
 import 'package:bbnaf/screens/overview_screen.dart';
@@ -39,6 +41,9 @@ class _HomePageState extends State<HomePage> {
   late Tournament _tournament;
   late String? _nafName;
 
+  late Coach? _curCoach;
+  late Squad? _curSquad;
+
   List<SquadMatchup> _squadMatchups = [];
 
   List<CoachMatchup> _selectedCoachMatchups = [];
@@ -49,6 +54,11 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     _tournament = widget.tournament;
     _nafName = widget.nafName;
+    _curCoach =
+        _nafName != null ? _tournament.getCoach(_nafName as String) : null;
+    _curSquad =
+        _nafName != null ? _tournament.getCoachSquad(_nafName as String) : null;
+
     _squadMatchups = _tournament.curSquadRound!.squadMatchups;
 
     _coachMatchupListener = new _CoachMatchupListClickListener(this);

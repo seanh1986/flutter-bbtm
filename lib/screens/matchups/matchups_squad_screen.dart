@@ -1,5 +1,6 @@
 import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/squad_matchup.dart';
 import 'package:bbnaf/widgets/matchup_squad_widget.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +10,13 @@ import 'package:bbnaf/utils/item_click_listener.dart';
 class SquadMatchupsPage extends StatefulWidget {
   final List<SquadMatchup> matchups;
   final CoachMatchupListClickListener? coachMatchupListeners;
+  final Squad? curSquad;
 
   SquadMatchupsPage(
-      {Key? key, required this.matchups, this.coachMatchupListeners})
+      {Key? key,
+      required this.matchups,
+      this.coachMatchupListeners,
+      this.curSquad})
       : super(key: key);
 
   @override
@@ -23,14 +28,17 @@ class SquadMatchupsPage extends StatefulWidget {
 class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   List<SquadMatchup> _matchups = [];
   MatchupClickListener? _listener;
+  Squad? _curSquad;
 
   @override
   void initState() {
     _matchups = widget.matchups;
     _listener = new _MatchupClickListener(widget.coachMatchupListeners);
+    _curSquad = widget.curSquad;
     super.initState();
   }
 
+  // TODO: Add CurSquad widget at top if non-null
   @override
   Widget build(BuildContext context) {
     return GroupedListView(
