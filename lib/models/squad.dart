@@ -7,11 +7,12 @@ import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/rounds.dart';
 import 'package:bbnaf/models/squad_matchup.dart';
 
+// Different options for how squads are used
 enum SquadScoreMode {
-  NO_SQUADS,
-  CUMULATIVE_PLAYER_SCORES,
-  W_T_L_1_HALF_0,
-  COUNT_WINS_ONLY,
+  NO_SQUADS, // No squads at all
+  CUMULATIVE_PLAYER_SCORES, // Squad pts are sum of player pts
+  W_T_L_1_HALF_0, // 1 pt for W, 0.5 for tie, 0 for loss
+  COUNT_WINS_ONLY, // pts = num wins
 }
 
 class Squad extends IMatchupParticipant {

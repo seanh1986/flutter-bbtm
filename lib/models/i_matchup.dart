@@ -1,5 +1,6 @@
 import 'package:bbnaf/models/races.dart';
 
+// Identifies if the object is of type squad or coach
 enum OrgType {
   Squad,
   Coach,
@@ -23,6 +24,8 @@ abstract class IMatchup {
   }
 }
 
+// Abstract class which represents a matchup
+// This can be squad vs squad or coach vs coach
 abstract class IMatchupParticipant {
   OrgType type();
   String name();
@@ -33,6 +36,7 @@ abstract class IMatchupParticipant {
   int ties();
   int losses();
 
+  // Returns "" if not valid
   String raceName() {
     return RaceUtils.getName(race());
   }
@@ -54,8 +58,6 @@ abstract class IMatchupParticipant {
 
   double winPercent() {
     int games = gamesPlayed();
-    return games > 0
-        ? 100.0 * (1.0 * wins() + 0.5 * ties()) / gamesPlayed()
-        : 0.0;
+    return games > 0 ? 100.0 * (1.0 * wins() + 0.5 * ties()) / games : 0.0;
   }
 }

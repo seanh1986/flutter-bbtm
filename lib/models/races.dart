@@ -1,7 +1,7 @@
 import 'dart:math';
 
 enum Race {
-  Unknown, // Used when race is not relevant
+  Unknown, // Used when race is not relevant (i.e., Squad)
   Amazon,
   BlackOrc,
   Bretonnian,
