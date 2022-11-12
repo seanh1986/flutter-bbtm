@@ -1,6 +1,8 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/login/login.dart';
+import 'package:bbnaf/screens/login/widget_login_header.dart';
 import 'package:bbnaf/screens/tournament_list_screen.dart';
+import 'package:bbnaf/utils/bordered_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -62,107 +64,90 @@ class _LoginParticipantPage extends State<LoginParticipantPage> {
           }
 
           bool processingLogin = state is LoadingLoginState;
-          return Stack(
-            children: <Widget>[
-              Image.asset(
-                './assets/images/background/background_football_field.png',
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
+          return Scaffold(
+              body: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(
+                    './assets/images/background/background_football_field.png'),
                 fit: BoxFit.cover,
               ),
-              Scaffold(
-                body: Center(
-                  child: Padding(
-                      padding: EdgeInsets.all(10),
-                      child: ListView(
-                        children: <Widget>[
-                          Container(
-                              alignment: Alignment.center,
-                              padding: EdgeInsets.all(10),
-                              child: Text(
-                                'Bloodbowl Tournament Manager',
-                                style: TextStyle(
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 30),
-                              )),
-                          // Container(
-                          //     alignment: Alignment.center,
-                          //     padding: EdgeInsets.all(10),
-                          //     child: Text(
-                          //       'Sign in',
-                          //       style: TextStyle(fontSize: 20),
-                          //     )),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            child: TextField(
-                              enableInteractiveSelection:
-                                  processingLogin, // _enableEditing,
-                              controller: nafNameController,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: 'Naf Name',
-                              ),
-                            ),
+            ),
+            child: Center(
+              child: Padding(
+                  padding: EdgeInsets.all(10),
+                  child: ListView(
+                    children: <Widget>[
+                      LoginScreenHeader(
+                          showBackButton: true, subTitle: "Participant Login"),
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        child: TextField(
+                          enableInteractiveSelection:
+                              processingLogin, // _enableEditing,
+                          controller: nafNameController,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Naf Name',
                           ),
-                          // Container(
-                          //   padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                          //   child: TextField(
-                          //     obscureText: true,
-                          //     controller: passwordController,
-                          //     decoration: InputDecoration(
-                          //       border: OutlineInputBorder(),
-                          //       labelText: 'Password',
-                          //     ),
-                          //   ),
-                          // ),
-                          // TextButton(
-                          //   style: TextButton.styleFrom(primary: Colors.blue),
-                          //   onPressed: () {
-                          //     //forgot password screen
-                          //   },
-                          //   child: Text('Forgot Password'),
-                          // ),
-                          Container(
-                              height: 50,
-                              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.blue,
-                                  textStyle: TextStyle(color: Colors.white),
-                                ),
-                                child: Text('Sign in'),
-                                onPressed: () {
-                                  processSignIn(nafNameController.text);
-                                  // setState(() {
-                                  //   _enableEditing = false;
-                                  // });
-                                },
-                              )),
-                          //   Container(
-                          //       child: Row(
-                          //     children: <Widget>[
-                          //       Text('Does not have account?'),
-                          //       TextButton(
-                          //         style: TextButton.styleFrom(
-                          //             textStyle: TextStyle(color: Colors.blue)),
-                          //         child: Text(
-                          //           'Sign in',
-                          //           style: TextStyle(fontSize: 20),
-                          //         ),
-                          //         onPressed: () {
-                          //           //signup screen
-                          //         },
-                          //       )
-                          //     ],
-                          //     mainAxisAlignment: MainAxisAlignment.center,
-                          //   ))
-                        ],
-                      )),
-                ),
-              )
-            ],
-          );
+                        ),
+                      ),
+                      // Container(
+                      //   padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                      //   child: TextField(
+                      //     obscureText: true,
+                      //     controller: passwordController,
+                      //     decoration: InputDecoration(
+                      //       border: OutlineInputBorder(),
+                      //       labelText: 'Password',
+                      //     ),
+                      //   ),
+                      // ),
+                      // TextButton(
+                      //   style: TextButton.styleFrom(primary: Colors.blue),
+                      //   onPressed: () {
+                      //     //forgot password screen
+                      //   },
+                      //   child: Text('Forgot Password'),
+                      // ),
+                      Container(
+                          height: 50,
+                          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.blue,
+                              textStyle: TextStyle(color: Colors.white),
+                            ),
+                            child: Text('Sign in'),
+                            onPressed: () {
+                              processSignIn(nafNameController.text);
+                              // setState(() {
+                              //   _enableEditing = false;
+                              // });
+                            },
+                          )),
+                      //   Container(
+                      //       child: Row(
+                      //     children: <Widget>[
+                      //       Text('Does not have account?'),
+                      //       TextButton(
+                      //         style: TextButton.styleFrom(
+                      //             textStyle: TextStyle(color: Colors.blue)),
+                      //         child: Text(
+                      //           'Sign in',
+                      //           style: TextStyle(fontSize: 20),
+                      //         ),
+                      //         onPressed: () {
+                      //           //signup screen
+                      //         },
+                      //       )
+                      //     ],
+                      //     mainAxisAlignment: MainAxisAlignment.center,
+                      //   ))
+                    ],
+                  )),
+            ),
+          ));
         });
   }
 

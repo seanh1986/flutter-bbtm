@@ -1,13 +1,9 @@
-import 'package:bbnaf/blocs/auth/auth.dart';
-import 'package:bbnaf/blocs/login/login.dart';
 import 'package:bbnaf/screens/login/login_screen_participant.dart';
-import 'package:bbnaf/screens/tournament_list_screen.dart';
+import 'package:bbnaf/screens/login/widget_login_header.dart';
+import 'package:bbnaf/utils/bordered_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'login_screen_organizer.dart';
-
-enum LoginPageState { LandingPage, OrganizerLogin, ParticipantLogin }
 
 class LoginPage extends StatefulWidget {
   @override
@@ -17,22 +13,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPage extends State<LoginPage> {
-  LoginPageState _state = LoginPageState.LandingPage;
-
   @override
   Widget build(BuildContext context) {
-    switch (_state) {
-      case LoginPageState.OrganizerLogin:
-        return LoginOrganizerPage();
-      case LoginPageState.ParticipantLogin:
-        return LoginParticipantPage();
-      case LoginPageState.LandingPage:
-      default:
-        return _landingPage();
-    }
-  }
-
-  Widget _landingPage() {
     return Stack(
       children: <Widget>[
         Image.asset(
@@ -42,11 +24,22 @@ class _LoginPage extends State<LoginPage> {
           fit: BoxFit.cover,
         ),
         Scaffold(
-          body: Center(
+            body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                  './assets/images/background/background_football_field.png'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Center(
             child: Padding(
                 padding: EdgeInsets.all(10),
                 child: ListView(
                   children: <Widget>[
+                    SizedBox(height: 20),
+                    LoginScreenHeader(showBackButton: false),
+                    SizedBox(height: 20),
                     Container(
                         height: 50,
                         padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -57,11 +50,14 @@ class _LoginPage extends State<LoginPage> {
                           ),
                           child: Text('Organizer'),
                           onPressed: () {
-                            setState(() {
-                              _state = LoginPageState.OrganizerLogin;
-                            });
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        LoginOrganizerPage()));
                           },
                         )),
+                    SizedBox(height: 20),
                     Container(
                         height: 50,
                         padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -72,15 +68,18 @@ class _LoginPage extends State<LoginPage> {
                           ),
                           child: Text('Participant'),
                           onPressed: () {
-                            setState(() {
-                              _state = LoginPageState.ParticipantLogin;
-                            });
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        LoginParticipantPage()));
                           },
                         )),
+                    SizedBox(height: 20),
                   ],
                 )),
           ),
-        )
+        ))
       ],
     );
   }
