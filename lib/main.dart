@@ -3,6 +3,7 @@ import 'package:bbnaf/blocs/login/login.dart';
 import 'package:bbnaf/repos/auth/simple_auth_repo.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
 import 'package:bbnaf/screens/login/login_screen.dart';
+import 'package:bbnaf/screens/login/login_screen_organizer.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

@@ -11,6 +11,21 @@ abstract class LoginEvent extends Equatable {
 
 class AppStartedLoginEvent extends LoginEvent {}
 
+class AttemptLoginWithFirebaseEvent extends LoginEvent {
+  final String email;
+  final String password;
+
+  AttemptLoginWithFirebaseEvent({required this.email, required this.password});
+
+  @override
+  List<Object> get props => [email, password];
+
+  @override
+  String toString() {
+    return 'AttemptLoginWithFirebaseEvent { email: $email }';
+  }
+}
+
 class LoginWithNafNameEvent extends LoginEvent {
   final String nafName;
 

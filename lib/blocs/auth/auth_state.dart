@@ -7,34 +7,51 @@ abstract class AuthState extends Equatable {
   List<Object> get props => [];
 }
 
+// Initial state (non-authorized)
 class AppStartAuthState extends AuthState {}
 
 // Guest that can only view
 class GuestAuthState extends AuthState {}
 
-class AuthUserState extends AuthState {
+// Participant that can edit their own scores
+class ParticipantAuthState extends AuthState {
   final String nafName;
 
-  AuthUserState(this.nafName);
+  ParticipantAuthState(this.nafName);
 
   @override
   List<Object> get props => [nafName];
 
   @override
-  String toString() => 'Authenticated { nafName: $nafName }';
+  String toString() => 'Participant Authenticated { nafName: $nafName }';
 }
 
-// // User that can edit their own match reports
-// class UserAuthState extends AuthenticatedUser {
-//   UserAuthState(String nafName) : super(nafName);
-// }
+// Participant that can edit their own scores
+class CaptainAuthState extends AuthState {
+  final String squadName;
+  final String nafName;
 
-// // User that can edit their squad's match reports
-// class UserCaptainAuthState extends AuthenticatedUser {
-//   UserCaptainAuthState(String nafName) : super(nafName);
-// }
+  CaptainAuthState(this.squadName, this.nafName);
 
-// // Tournament admin
-// class AdminAuthState extends AuthenticatedUser {
-//   AdminAuthState(String nafName) : super(nafName);
-// }
+  @override
+  List<Object> get props => [nafName, squadName];
+
+  @override
+  String toString() =>
+      'Captain Authenticated { nafName: $nafName, squadName: $squadName }';
+}
+
+// Tournament admin
+class OrganizerAuthState extends AuthState {
+  final String nafName;
+  final String email;
+
+  OrganizerAuthState(this.nafName, this.email);
+
+  @override
+  List<Object> get props => [nafName, email];
+
+  @override
+  String toString() =>
+      'Organizer Authenticated { nafName: $nafName, email: $email }';
+}

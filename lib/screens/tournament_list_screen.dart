@@ -49,7 +49,12 @@ class _TournamentListPage extends State<TournamentListPage> {
         builder: (content, authState) {
           String? nafName;
 
-          if (authState is AuthUserState) {
+          // TODO: Handle this better
+          if (authState is ParticipantAuthState) {
+            nafName = authState.nafName;
+          } else if (authState is CaptainAuthState) {
+            nafName = authState.nafName;
+          } else if (authState is OrganizerAuthState) {
             nafName = authState.nafName;
           }
 

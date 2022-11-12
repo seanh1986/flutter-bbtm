@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bbnaf/blocs/login/login.dart';
 import 'package:bbnaf/repos/auth/auth_repo.dart';
 import 'package:bloc/bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   AuthRepository _authRepository;
@@ -14,10 +15,29 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   Stream<LoginState> mapEventToState(LoginEvent event) async* {
     if (event is AppStartedLoginEvent) {
       //TODO: can check cache to pre-populate login
+    } else if (event is AttemptLoginWithFirebaseEvent) {
+      yield* _mapAttemptLoginWithFirebaseToState(event);
     } else if (event is LoginWithNafNameEvent) {
       yield* _mapLoginWithNafNameToState(
         nafName: event.nafName,
       );
+    }
+  }
+
+  Stream<LoginState> _mapAttemptLoginWithFirebaseToState(
+      AttemptLoginWithFirebaseEvent event) async* {
+    yield LoadingLoginState();
+    try {
+      User? user = await _authRepository.signInWithCredentials(
+          event.email, event.password);
+
+      if (user != null) {
+        yield SuccessLoginState();
+      } else {
+        yield FailedLoginState();
+      }
+    } catch (_) {
+      yield FailedLoginState();
     }
   }
 
