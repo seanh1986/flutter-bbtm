@@ -128,9 +128,6 @@ class _LoginOrganizerPage extends State<LoginOrganizerPage> {
                                 onPressed: () {
                                   processSignIn(emailController.text,
                                       passwordController.text);
-                                  // setState(() {
-                                  //   _enableEditing = false;
-                                  // });
                                 },
                               )),
                           Container(
@@ -156,119 +153,6 @@ class _LoginOrganizerPage extends State<LoginOrganizerPage> {
                       ))),
             ),
           ));
-
-          // return Stack(
-          //   children: <Widget>[
-          //     Image.asset(
-          //       './assets/images/background/background_football_field.png',
-          //       height: MediaQuery.of(context).size.height,
-          //       width: MediaQuery.of(context).size.width,
-          //       fit: BoxFit.cover,
-          //     ),
-          //     Scaffold(
-          //       body: Center(
-          //         child: Padding(
-          //             padding: EdgeInsets.all(10),
-          //             child: ListView(
-          //               children: <Widget>[
-          //                 Container(
-          //                   alignment: Alignment.topLeft,
-          //                   padding: EdgeInsets.all(10),
-          //                   child: IconButton(
-          //                     icon: Icon(Icons.arrow_back),
-          //                     onPressed: () {
-          //                       Navigator.pop(context);
-          //                     },
-          //                   ),
-          //                 ),
-          //                 Container(
-          //                     alignment: Alignment.center,
-          //                     padding: EdgeInsets.all(10),
-          //                     child: Text(
-          //                       'Bloodbowl Tournament Manager',
-          //                       style: TextStyle(
-          //                           color: Colors.blue,
-          //                           fontWeight: FontWeight.w500,
-          //                           fontSize: 30),
-          //                     )),
-          //                 Container(
-          //                     alignment: Alignment.center,
-          //                     padding: EdgeInsets.all(10),
-          //                     child: Text(
-          //                       'Organizer Login',
-          //                       style: TextStyle(fontSize: 20),
-          //                     )),
-          //                 Container(
-          //                   padding: EdgeInsets.all(10),
-          //                   child: TextField(
-          //                     enableInteractiveSelection:
-          //                         processingLogin, // _enableEditing,
-          //                     controller: emailController,
-          //                     decoration: InputDecoration(
-          //                       border: OutlineInputBorder(),
-          //                       labelText: 'Email',
-          //                     ),
-          //                   ),
-          //                 ),
-          //                 Container(
-          //                   padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-          //                   child: TextField(
-          //                     obscureText: true,
-          //                     controller: passwordController,
-          //                     decoration: InputDecoration(
-          //                       border: OutlineInputBorder(),
-          //                       labelText: 'Password',
-          //                     ),
-          //                   ),
-          //                 ),
-          //                 TextButton(
-          //                   style: TextButton.styleFrom(primary: Colors.blue),
-          //                   onPressed: () {
-          //                     //forgot password screen
-          //                   },
-          //                   child: Text('Forgot Password'),
-          //                 ),
-          //                 Container(
-          //                     height: 50,
-          //                     padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-          //                     child: ElevatedButton(
-          //                       style: ElevatedButton.styleFrom(
-          //                         primary: Colors.blue,
-          //                         textStyle: TextStyle(color: Colors.white),
-          //                       ),
-          //                       child: Text('Sign in'),
-          //                       onPressed: () {
-          //                         processSignIn(emailController.text,
-          //                             passwordController.text);
-          //                         // setState(() {
-          //                         //   _enableEditing = false;
-          //                         // });
-          //                       },
-          //                     )),
-          //                 Container(
-          //                     child: Row(
-          //                   children: <Widget>[
-          //                     Text('Don\'t have account?'),
-          //                     TextButton(
-          //                       style: TextButton.styleFrom(
-          //                           textStyle: TextStyle(color: Colors.blue)),
-          //                       child: Text(
-          //                         'Sign Up',
-          //                         style: TextStyle(fontSize: 20),
-          //                       ),
-          //                       onPressed: () {
-          //                         //signup screen
-          //                       },
-          //                     )
-          //                   ],
-          //                   mainAxisAlignment: MainAxisAlignment.center,
-          //                 ))
-          //               ],
-          //             )),
-          //       ),
-          //     )
-          //   ],
-          // );
         });
   }
 
