@@ -1,8 +1,6 @@
 import 'package:bbnaf/screens/login/login_screen_participant.dart';
 import 'package:bbnaf/screens/login/widget_login_header.dart';
-import 'package:bbnaf/utils/bordered_text.dart';
 import 'package:flutter/material.dart';
-
 import 'login_screen_organizer.dart';
 
 class LoginPage extends StatefulWidget {

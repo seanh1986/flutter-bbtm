@@ -1,10 +1,10 @@
-import 'package:bbnaf/blocs/auth/auth.dart';
-import 'package:bbnaf/blocs/login/login.dart';
-import 'package:bbnaf/screens/login/widget_login_header.dart';
-import 'package:bbnaf/screens/tournament_list_screen.dart';
-import 'package:bbnaf/utils/bordered_text.dart';
+import 'package:bbnaf/repos/auth/auth_repo.dart';
+import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
+import 'package:bbnaf/screens/tournament_list/tournament_list_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_login/flutter_login.dart';
 
 class LoginOrganizerPage extends StatefulWidget {
   @override
@@ -12,152 +12,107 @@ class LoginOrganizerPage extends StatefulWidget {
 }
 
 class _LoginOrganizerPage extends State<LoginOrganizerPage> {
-  late LoginBloc _loginBloc;
-  late AuthBloc _authBloc;
+  AuthRepository _authRepo = FirebaseAuthRepository();
 
-  // bool _enableEditing = true;
+  final String keyNafName = "nafName";
+
+  AuthUser _authUser = AuthUser();
+
+  List<UserFormField> _additionalFields = [];
 
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  Duration get loginTime => Duration(milliseconds: timeDilation.ceil() * 2250);
+
   @override
   void initState() {
-    _authBloc = BlocProvider.of<AuthBloc>(context);
-    _loginBloc = BlocProvider.of<LoginBloc>(context);
+    _additionalFields
+        .add(new UserFormField(keyName: keyNafName, displayName: "NAF Name"));
+
     super.initState();
   }
 
   @override
   void dispose() {
-    _loginBloc.close();
-    _authBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-        bloc: _authBloc,
-        builder: (context, state) {
-          if (state is OrganizerAuthState) {
-            return TournamentListPage();
-          } else if (state is CaptainAuthState) {
-            return TournamentListPage();
-          } else if (state is ParticipantAuthState) {
-            return TournamentListPage();
-          } else if (state is GuestAuthState) {
-            return TournamentListPage();
-          } else {
-            return _screenUI(context);
-          }
-        });
+    return FlutterLogin(
+      title: 'Bloodbowl Tournament Manager',
+      logo: AssetImage('assets/images/logos/amorical_logo.png'),
+      additionalSignupFields: _additionalFields,
+      userValidator: (value) {
+        if (!value!.contains('@') || !value.endsWith('.com')) {
+          return "Email must contain '@' and end with '.com'";
+        }
+        return null;
+      },
+      passwordValidator: (value) {
+        if (value!.isEmpty) {
+          return 'Password is empty';
+        }
+        return null;
+      },
+      loginAfterSignUp: true,
+      navigateBackAfterRecovery: true,
+      onSignup: _signupUser,
+      onLogin: _tryLoginUser,
+      hideForgotPasswordButton: true,
+      onRecoverPassword: _recoverPassword,
+      onSubmitAnimationCompleted: () {
+        debugPrint('onSubmitAnimationCompleted');
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => TournamentListPage(
+            authUser: _authUser,
+          ),
+        ));
+      },
+    );
   }
 
-  Widget _screenUI(BuildContext context) {
-    return BlocBuilder<LoginBloc, LoginState>(
-        bloc: _loginBloc,
-        builder: (context, state) {
-          if (state is SuccessLoginState) {
-            _authBloc.add(ParticipantLoggedInAuthEvent());
-          } else if (state is FailedLoginState) {
-            _authBloc.add(ParticipantLoggedInAuthEvent());
-          }
+  Future<String?> _tryLoginUser(LoginData data) async {
+    debugPrint('Email: ${data.name}, Password: ${data.password}');
 
-          bool processingLogin = state is LoadingLoginState;
+    String email = data.name;
+    String password = data.password;
 
-          return Scaffold(
-              body: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(
-                    './assets/images/background/background_football_field.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Center(
-              child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Container(
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: Colors.white),
-                      child: ListView(
-                        children: <Widget>[
-                          LoginScreenHeader(
-                              showBackButton: true,
-                              subTitle: "Organizer Login"),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            child: TextField(
-                              enableInteractiveSelection:
-                                  processingLogin, // _enableEditing,
-                              controller: emailController,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: 'Email',
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                            child: TextField(
-                              obscureText: true,
-                              controller: passwordController,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: 'Password',
-                              ),
-                            ),
-                          ),
-                          TextButton(
-                            style: TextButton.styleFrom(primary: Colors.blue),
-                            onPressed: () {
-                              //forgot password screen
-                            },
-                            child: Text('Forgot Password'),
-                          ),
-                          Container(
-                              height: 50,
-                              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.blue,
-                                  textStyle: TextStyle(color: Colors.white),
-                                ),
-                                child: Text('Sign in'),
-                                onPressed: () {
-                                  processSignIn(emailController.text,
-                                      passwordController.text);
-                                },
-                              )),
-                          Container(
-                              child: Row(
-                            children: <Widget>[
-                              Text('Don\'t have account?',
-                                  style: TextStyle(fontSize: 20)),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                    textStyle: TextStyle(color: Colors.blue)),
-                                child: Text(
-                                  'Sign Up',
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                                onPressed: () {
-                                  //signup screen
-                                },
-                              )
-                            ],
-                            mainAxisAlignment: MainAxisAlignment.center,
-                          ))
-                        ],
-                      ))),
-            ),
-          ));
-        });
+    _authUser = await _authRepo.signInWithCredentials(email, password);
+
+    return _authUser.error;
   }
 
-  void processSignIn(String email, String password) {
-    _loginBloc.add(
-        new AttemptLoginWithFirebaseEvent(email: email, password: password));
+  Future<String?> _signupUser(SignupData data) async {
+    debugPrint('Signup info');
+    debugPrint('Name: ${data.name}');
+    debugPrint('Password: ${data.password}');
+
+    data.additionalSignupData?.forEach((key, value) {
+      debugPrint('$key: $value');
+    });
+
+    String? optionalNafName = data.additionalSignupData?[keyNafName];
+
+    if (data.name == null || data.password == null || optionalNafName == null) {
+      return null;
+    }
+
+    String email = data.name.toString();
+    String password = data.password.toString();
+    String nafName = optionalNafName.toString();
+
+    _authUser = await _authRepo.signUp(
+        nafName: nafName, email: email, password: password);
+
+    return _authUser.error;
+  }
+
+  Future<String?> _recoverPassword(String name) async {
+    debugPrint('Email: $name');
+    return Future.delayed(loginTime).then((_) {
+      return null;
+    });
   }
 }

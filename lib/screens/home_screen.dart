@@ -3,9 +3,10 @@ import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/squad_matchup.dart';
 import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/overview_screen.dart';
 import 'package:bbnaf/screens/rankings_screen.dart';
-import 'package:bbnaf/screens/tournament_list_screen.dart';
+import 'package:bbnaf/screens/tournament_list/tournament_list_screen.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/widgets/placeholder_widget.dart';
@@ -16,9 +17,9 @@ import 'matchups/matchups_squad_screen.dart';
 
 class HomePage extends StatefulWidget {
   final Tournament tournament;
-  final String? nafName;
+  final AuthUser authUser;
 
-  HomePage({Key? key, required this.tournament, this.nafName})
+  HomePage({Key? key, required this.tournament, required this.authUser})
       : super(key: key);
 
   @override
@@ -39,7 +40,7 @@ class _HomePageState extends State<HomePage> {
   _CoachMatchupListClickListener? _coachMatchupListener;
 
   late Tournament _tournament;
-  late String? _nafName;
+  late AuthUser _authUser;
 
   late Coach? _curCoach;
   late Squad? _curSquad;
@@ -53,11 +54,13 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     _tournament = widget.tournament;
-    _nafName = widget.nafName;
-    _curCoach =
-        _nafName != null ? _tournament.getCoach(_nafName as String) : null;
-    _curSquad =
-        _nafName != null ? _tournament.getCoachSquad(_nafName as String) : null;
+    _authUser = widget.authUser;
+    _curCoach = widget.authUser.nafName != null
+        ? _tournament.getCoach(widget.authUser.nafName as String)
+        : null;
+    _curSquad = widget.authUser.nafName != null
+        ? _tournament.getCoachSquad(widget.authUser.nafName as String)
+        : null;
 
     _squadMatchups = _tournament.curSquadRound!.squadMatchups;
 
@@ -76,7 +79,7 @@ class _HomePageState extends State<HomePage> {
       new _WidgetFamily([
         OverviewScreen(
           tournament: _tournament,
-          nafName: _nafName,
+          authUser: _authUser,
         )
       ]),
       new _WidgetFamily(matchupWidgets),
@@ -124,8 +127,12 @@ class _HomePageState extends State<HomePage> {
     if (_childIndex == 0) {
       if (_parentIndex == 0) {
         SchedulerBinding.instance!.addPostFrameCallback((_) {
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => TournamentListPage()));
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => TournamentListPage(
+                        authUser: _authUser,
+                      )));
         });
       } else {
         setState(() {

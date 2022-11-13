@@ -2,6 +2,7 @@ import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/tournament_list/tournament_list.dart';
 import 'package:bbnaf/blocs/tournament_selection/tournament_selection.dart';
 import 'package:bbnaf/models/tournament_info.dart';
+import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/home_screen.dart';
 import 'package:bbnaf/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,9 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 
 class TournamentListPage extends StatefulWidget {
-  TournamentListPage({Key? key}) : super(key: key);
+  final AuthUser authUser;
+
+  TournamentListPage({Key? key, required this.authUser}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -19,7 +22,8 @@ class TournamentListPage extends StatefulWidget {
 }
 
 class _TournamentListPage extends State<TournamentListPage> {
-  late AuthBloc _authBloc;
+  late AuthUser _authUser;
+
   late TournamentListsBloc _tournyListBloc;
   late TournamentSelectionBloc _tournySelectBloc;
 
@@ -31,9 +35,9 @@ class _TournamentListPage extends State<TournamentListPage> {
   @override
   void initState() {
     super.initState();
-    _authBloc = BlocProvider.of<AuthBloc>(context);
     _tournyListBloc = BlocProvider.of<TournamentListsBloc>(context);
     _tournySelectBloc = BlocProvider.of<TournamentSelectionBloc>(context);
+    _authUser = widget.authUser;
   }
 
   @override
@@ -44,32 +48,17 @@ class _TournamentListPage extends State<TournamentListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-        bloc: _authBloc,
-        builder: (content, authState) {
-          String? nafName;
-
-          // TODO: Handle this better
-          if (authState is ParticipantAuthState) {
-            nafName = authState.nafName;
-          } else if (authState is CaptainAuthState) {
-            nafName = authState.nafName;
-          } else if (authState is OrganizerAuthState) {
-            nafName = authState.nafName;
+    return BlocBuilder<TournamentSelectionBloc, TournamentSelectionState>(
+        bloc: _tournySelectBloc,
+        builder: (content, state) {
+          if (state is SelectedTournamentState) {
+            return HomePage(
+              tournament: state.tournament,
+              authUser: _authUser,
+            );
+          } else {
+            return _showTournamentList(context);
           }
-
-          return BlocBuilder<TournamentSelectionBloc, TournamentSelectionState>(
-              bloc: _tournySelectBloc,
-              builder: (content, state) {
-                if (state is SelectedTournamentState) {
-                  return HomePage(
-                    tournament: state.tournament,
-                    nafName: nafName,
-                  );
-                } else {
-                  return _showTournamentList(context);
-                }
-              });
         });
   }
 

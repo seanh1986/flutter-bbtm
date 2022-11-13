@@ -1,9 +1,10 @@
+import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class AuthRepository {
-  Future<User?> signInWithCredentials(String email, String password);
+  Future<AuthUser> signInWithCredentials(String email, String password);
 
-  Future<User?> signUp(
+  Future<AuthUser> signUp(
       {required String nafName,
       required String email,
       required String password});

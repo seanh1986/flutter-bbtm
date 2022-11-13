@@ -1,14 +1,15 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class OverviewScreen extends StatefulWidget {
   final Tournament tournament;
-  final String? nafName;
+  final AuthUser authUser;
 
-  OverviewScreen({Key? key, required this.tournament, required this.nafName})
+  OverviewScreen({Key? key, required this.tournament, required this.authUser})
       : super(key: key);
 
   @override
@@ -19,17 +20,14 @@ class OverviewScreen extends StatefulWidget {
 
 class _OverviewScreenState extends State<OverviewScreen> {
   late Tournament _tournament;
-  late String? _nafName;
-  late AuthBloc _authBloc;
+  late AuthUser _authUser;
 
   @override
   void initState() {
     _tournament = widget.tournament;
-    _nafName = widget.nafName;
+    _authUser = widget.authUser;
 
     super.initState();
-
-    _authBloc = BlocProvider.of<AuthBloc>(context);
   }
 
   @override
@@ -55,7 +53,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
           children: [
             Text(
               "Welcome " +
-                  (_nafName != null ? _nafName.toString() : "Guest") +
+                  (_authUser.nafName != null
+                      ? _authUser.nafName.toString()
+                      : "Guest") +
                   "!",
               style: TextStyle(fontSize: 20),
             ),

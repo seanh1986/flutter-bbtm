@@ -1,7 +1,7 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/login/login.dart';
 import 'package:bbnaf/screens/login/widget_login_header.dart';
-import 'package:bbnaf/screens/tournament_list_screen.dart';
+import 'package:bbnaf/screens/tournament_list/tournament_list_screen.dart';
 import 'package:bbnaf/utils/bordered_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,17 +39,17 @@ class _LoginParticipantPage extends State<LoginParticipantPage> {
     return BlocBuilder<AuthBloc, AuthState>(
         bloc: _authBloc,
         builder: (context, state) {
-          if (state is OrganizerAuthState) {
-            return TournamentListPage();
-          } else if (state is CaptainAuthState) {
-            return TournamentListPage();
-          } else if (state is ParticipantAuthState) {
-            return TournamentListPage();
-          } else if (state is GuestAuthState) {
-            return TournamentListPage();
-          } else {
-            return _screenUI(context);
-          }
+          // if (state is OrganizerAuthState) {
+          //   return TournamentListPage();
+          // } else if (state is CaptainAuthState) {
+          //   return TournamentListPage();
+          // } else if (state is ParticipantAuthState) {
+          //   return TournamentListPage();
+          // } else if (state is GuestAuthState) {
+          //   return TournamentListPage();
+          // } else {
+          return _screenUI(context);
+          // }
         });
   }
 
