@@ -15,8 +15,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Stream<AuthState> mapEventToState(AuthEvent event) async* {
     if (event is AppStartedAuthEvent) {
       yield* _mapAppStartedToState();
-    } else if (event is LoggedInAuthEvent) {
-      yield* _mapLoggedInToState(event);
+    } else if (event is OrganizerLoggedInAuthEvent) {
+      yield* _mapOrganizerLoggedInToState(event);
+    } else if (event is ParticipantLoggedInAuthEvent) {
+      yield* _mapParticipantLoggedInToState(event);
+    } else if (event is CaptainLoggedInAuthEvent) {
+      yield* _mapCaptainLoggedInToState(event);
     } else if (event is LoggedOutAuthEvent) {
       yield* _mapLoggedOutToState();
     }
@@ -26,9 +30,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final isSignedIn = await _authRepository.isSignedIn();
       if (isSignedIn) {
-        final String? displayName = _authRepository.getUserDisplayName();
-        if (displayName != null) {
-          yield AuthUserState(displayName);
+        final String? nafName = _authRepository.getUserDisplayName();
+        if (nafName != null) {
+          yield ParticipantAuthState(nafName);
         } else {
           yield GuestAuthState();
         }
@@ -40,11 +44,37 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Stream<AuthState> _mapLoggedInToState(LoggedInAuthEvent event) async* {
-    print("AuthBloc: _mapLoggedInToState");
+  Stream<AuthState> _mapOrganizerLoggedInToState(
+      OrganizerLoggedInAuthEvent event) async* {
+    print("AuthBloc: _mapLoggedInToState: Organizer");
+    String? nafName = _authRepository.getUserDisplayName();
+    String? email = _authRepository.getUserEmail();
+    if (nafName != null && email != null) {
+      yield OrganizerAuthState(nafName, email);
+    } else {
+      yield GuestAuthState();
+    }
+  }
+
+  Stream<AuthState> _mapParticipantLoggedInToState(
+      ParticipantLoggedInAuthEvent event) async* {
+    print("AuthBloc: _mapLoggedInToState: Participant");
     String? nafName = _authRepository.getUserDisplayName();
     if (nafName != null) {
-      yield AuthUserState(nafName);
+      yield ParticipantAuthState(nafName);
+    } else {
+      yield GuestAuthState();
+    }
+  }
+
+  Stream<AuthState> _mapCaptainLoggedInToState(
+      CaptainLoggedInAuthEvent event) async* {
+    print("AuthBloc: _mapLoggedInToState: Captain");
+    String? nafName = _authRepository.getUserDisplayName();
+    String? squadName = "";
+    //_authRepository.getUserDisplayName(); // TODO: Get Squad Name??
+    if (nafName != null) {
+      yield CaptainAuthState(nafName, squadName);
     } else {
       yield GuestAuthState();
     }

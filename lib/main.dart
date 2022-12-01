@@ -1,5 +1,6 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/login/login.dart';
+import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
 import 'package:bbnaf/repos/auth/simple_auth_repo.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
 import 'package:bbnaf/screens/login/login_screen.dart';
@@ -15,7 +16,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  AuthRepository _authRepo = SimpleAuthRepository();
+  // AuthRepository _authRepo = SimpleAuthRepository();
+  AuthRepository _authRepo = FirebaseAuthRepository();
   TournamentRepository _tournamentRepo = FirebaseTournamentRepository();
 
   runApp(MultiBlocProvider(providers: [
@@ -58,21 +60,21 @@ class _AppState extends State<App> {
       builder: (context, snapshot) {
         // Check for errors
         if (snapshot.hasError) {
-          return LaunchFailed();
+          return _launchFailed();
         }
 
         // Once complete, show your application
         if (snapshot.connectionState == ConnectionState.done) {
-          return LaunchSuccess();
+          return _launchSuccess();
         }
 
         // Otherwise, show something whilst waiting for initialization to complete
-        return LaunchLoading();
+        return _launchLoading();
       },
     );
   }
 
-  Widget LaunchSuccess() {
+  Widget _launchSuccess() {
     return MaterialApp(
       title: 'BloodBowl Tournament Management',
       theme: ThemeData(
@@ -87,7 +89,7 @@ class _AppState extends State<App> {
     ); // HomePage(),
   }
 
-  Widget LaunchFailed() {
+  Widget _launchFailed() {
     return Container(
       // decoration: BoxDecoration(
       //     image: DecorationImage(
@@ -105,7 +107,7 @@ class _AppState extends State<App> {
     );
   }
 
-  Widget LaunchLoading() {
+  Widget _launchLoading() {
     return Container(
       // decoration: BoxDecoration(
       //     image: DecorationImage(

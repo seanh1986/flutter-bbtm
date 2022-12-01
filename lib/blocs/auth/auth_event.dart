@@ -12,9 +12,19 @@ class AppStartedAuthEvent extends AuthEvent {
   String toString() => 'AppStarted';
 }
 
-class LoggedInAuthEvent extends AuthEvent {
+class OrganizerLoggedInAuthEvent extends AuthEvent {
   @override
-  String toString() => 'LoggedIn';
+  String toString() => 'LoggedIn_Organizer';
+}
+
+class ParticipantLoggedInAuthEvent extends AuthEvent {
+  @override
+  String toString() => 'LoggedIn_Participant';
+}
+
+class CaptainLoggedInAuthEvent extends AuthEvent {
+  @override
+  String toString() => 'LoggedIn_Captain';
 }
 
 class LoggedOutAuthEvent extends AuthEvent {

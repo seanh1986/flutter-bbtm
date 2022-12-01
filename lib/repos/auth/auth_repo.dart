@@ -1,10 +1,13 @@
-abstract class AuthRepository {
-  // Future<void> signInWithCredentials(String email, String password);
+import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-  // Future<void> signUp(
-  //     {required String nafName,
-  //     required String email,
-  //     required String password});
+abstract class AuthRepository {
+  Future<AuthUser> signInWithCredentials(String email, String password);
+
+  Future<AuthUser> signUp(
+      {required String nafName,
+      required String email,
+      required String password});
 
   void signIn(String nafName);
 
@@ -14,4 +17,7 @@ abstract class AuthRepository {
 
   // Returns null if user not signed in
   String? getUserDisplayName();
+
+  // Returns null if user not signed in
+  String? getUserEmail();
 }
