@@ -1,9 +1,7 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
-import 'package:bbnaf/blocs/auth/auth_bloc.dart';
 import 'package:bbnaf/repos/auth/auth_repo.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
-import 'package:bbnaf/screens/tournament_list/tournament_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -70,14 +68,7 @@ class _LoginOrganizerPage extends State<LoginOrganizerPage> {
       onRecoverPassword: _recoverPassword,
       onSubmitAnimationCompleted: () {
         debugPrint('onSubmitAnimationCompleted');
-
         _authBloc.add(new LoggedInAuthEvent(authUser: _authUser));
-
-        // Navigator.of(context).pushReplacement(MaterialPageRoute(
-        //   builder: (context) => TournamentListPage(
-        //     authUser: _authUser,
-        //   ),
-        // ));
       },
     );
   }

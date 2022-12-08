@@ -1,9 +1,6 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
-import 'package:bbnaf/blocs/login/login.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
-import 'package:bbnaf/repos/auth/simple_auth_repo.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
-import 'package:bbnaf/screens/login/login_screen.dart';
 import 'package:bbnaf/screens/tournament_list/tournament_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -17,7 +14,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // AuthRepository _authRepo = SimpleAuthRepository();
   AuthRepository _authRepo = FirebaseAuthRepository();
   TournamentRepository _tournamentRepo = FirebaseTournamentRepository();
 
@@ -25,9 +21,6 @@ void main() async {
     BlocProvider<AuthBloc>(
         create: (context) =>
             AuthBloc(aRepo: _authRepo)..add(AppStartedAuthEvent())),
-    BlocProvider<LoginBloc>(
-        create: (context) =>
-            LoginBloc(aRepo: _authRepo)..add(AppStartedLoginEvent())),
     BlocProvider<TournamentListsBloc>(
         create: (context) => TournamentListsBloc(tRepo: _tournamentRepo)
           ..add(RequestLoadTournamentListEvent())),
