@@ -4,6 +4,7 @@ import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
 import 'package:bbnaf/repos/auth/simple_auth_repo.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
 import 'package:bbnaf/screens/login/login_screen.dart';
+import 'package:bbnaf/screens/tournament_list/tournament_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -85,7 +86,7 @@ class _AppState extends State<App> {
         ),
         textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
       ),
-      home: LoginPage(), // TournamentListPage(),
+      home: TournamentSelectionPage(), // LoginPage(), // TournamentListPage(),
     ); // HomePage(),
   }
 

@@ -1,3 +1,5 @@
+import 'package:bbnaf/blocs/auth/auth.dart';
+import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class AuthEvent extends Equatable {
@@ -12,19 +14,32 @@ class AppStartedAuthEvent extends AuthEvent {
   String toString() => 'AppStarted';
 }
 
-class OrganizerLoggedInAuthEvent extends AuthEvent {
-  @override
-  String toString() => 'LoggedIn_Organizer';
-}
+// class OrganizerLoggedInAuthEvent extends AuthEvent {
+//   @override
+//   String toString() => 'LoggedIn_Organizer';
+// }
 
-class ParticipantLoggedInAuthEvent extends AuthEvent {
-  @override
-  String toString() => 'LoggedIn_Participant';
-}
+// class ParticipantLoggedInAuthEvent extends AuthEvent {
+//   @override
+//   String toString() => 'LoggedIn_Participant';
+// }
 
-class CaptainLoggedInAuthEvent extends AuthEvent {
+// class CaptainLoggedInAuthEvent extends AuthEvent {
+//   @override
+//   String toString() => 'LoggedIn_Captain';
+// }
+
+class LoggedInAuthEvent extends AuthEvent {
+  final AuthUser authUser;
+
+  LoggedInAuthEvent({required this.authUser});
+
   @override
-  String toString() => 'LoggedIn_Captain';
+  String toString() =>
+      'LoggedIn: ' +
+      authUser.user!.email.toString() +
+      " - " +
+      authUser.nafName!.toString();
 }
 
 class LoggedOutAuthEvent extends AuthEvent {
