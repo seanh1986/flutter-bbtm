@@ -20,4 +20,7 @@ abstract class AuthRepository {
 
   // Returns null if user not signed in
   String? getUserEmail();
+
+  // Returns current user (internals are null if not signed in)
+  AuthUser getAuthUser();
 }

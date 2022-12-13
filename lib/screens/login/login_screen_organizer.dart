@@ -1,9 +1,10 @@
+import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/repos/auth/auth_repo.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
-import 'package:bbnaf/screens/tournament_list/tournament_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_login/flutter_login.dart';
 
 class LoginOrganizerPage extends StatefulWidget {
@@ -13,6 +14,8 @@ class LoginOrganizerPage extends StatefulWidget {
 
 class _LoginOrganizerPage extends State<LoginOrganizerPage> {
   AuthRepository _authRepo = FirebaseAuthRepository();
+
+  late AuthBloc _authBloc;
 
   final String keyNafName = "nafName";
 
@@ -27,6 +30,7 @@ class _LoginOrganizerPage extends State<LoginOrganizerPage> {
 
   @override
   void initState() {
+    _authBloc = BlocProvider.of<AuthBloc>(context);
     _additionalFields
         .add(new UserFormField(keyName: keyNafName, displayName: "NAF Name"));
 
@@ -64,11 +68,7 @@ class _LoginOrganizerPage extends State<LoginOrganizerPage> {
       onRecoverPassword: _recoverPassword,
       onSubmitAnimationCompleted: () {
         debugPrint('onSubmitAnimationCompleted');
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => TournamentListPage(
-            authUser: _authUser,
-          ),
-        ));
+        _authBloc.add(new LoggedInAuthEvent(authUser: _authUser));
       },
     );
   }

@@ -34,4 +34,8 @@ class SimpleAuthRepository extends AuthRepository {
   String? getUserEmail() {
     return null;
   }
+
+  AuthUser getAuthUser() {
+    return new AuthUser();
+  }
 }

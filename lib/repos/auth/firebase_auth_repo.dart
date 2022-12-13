@@ -87,4 +87,8 @@ class FirebaseAuthRepository extends AuthRepository {
   String? getUserEmail() {
     return _firebaseAuth.currentUser!.email;
   }
+
+  AuthUser getAuthUser() {
+    return AuthUser(user: _firebaseAuth.currentUser, error: "");
+  }
 }
