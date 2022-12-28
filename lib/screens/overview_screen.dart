@@ -1,5 +1,5 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
-import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';

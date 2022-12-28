@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:bbnaf/blocs/Bloc.dart';
-import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 
 class TournamentBloc implements Bloc {
   Tournament? _tournament;

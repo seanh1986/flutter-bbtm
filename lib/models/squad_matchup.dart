@@ -1,6 +1,4 @@
 import 'dart:collection';
-
-import 'package:bbnaf/models/rounds.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/models/i_matchup.dart';
@@ -14,8 +12,7 @@ class SquadMatchup extends IMatchup {
 
   List<CoachMatchup> coachMatchups = [];
 
-  SquadMatchup(this._roundNum, this._tableNum, this.homeSquad, this.awaySquad,
-      this.coachMatchups);
+  SquadMatchup(this._roundNum, this._tableNum, this.homeSquad, this.awaySquad);
 
   @override
   OrgType type() {
@@ -40,5 +37,9 @@ class SquadMatchup extends IMatchup {
   @override
   IMatchupParticipant away() {
     return awaySquad;
+  }
+
+  bool hasSquad(String squadName) {
+    return homeSquad.name() == squadName || awaySquad.name() == squadName;
   }
 }

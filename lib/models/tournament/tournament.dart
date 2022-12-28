@@ -1,12 +1,13 @@
 import 'dart:collection';
+import 'package:bbnaf/utils/swiss/round_matching.dart';
 import "package:collection/collection.dart";
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/models/races.dart';
-import 'package:bbnaf/models/rounds.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/squad_matchup.dart';
-import 'package:bbnaf/models/tournament_info.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:flutter/widgets.dart';
 import 'package:xml/xml.dart';
 
 class Tournament {
@@ -17,24 +18,44 @@ class Tournament {
 
   late final int curRoundNumber;
 
-  // Key: squad name
-  late final HashMap<String, Squad> squadMap;
+  // Key: squad name, Value: Idx in squad list
+  HashMap<String, int> _squadMap = new HashMap<String, int>();
+  List<Squad> _squads = [];
 
-  // Key: nafName
-  late final HashMap<String, Coach> coachMap;
+  // Key: nafName, Value: Idx in coach list
+  HashMap<String, int> _coachMap = new HashMap<String, int>();
+  List<Coach> _coaches = [];
 
-  late final List<SquadRound> prevSquadRounds;
-  late final List<CoachRound> prevCoachRounds;
+  List<SquadRound> prevSquadRounds = [];
+  List<CoachRound> prevCoachRounds = [];
 
   SquadRound? curSquadRound;
   CoachRound? curCoachRound;
 
+  void addSquad(Squad s) {
+    int idx = _squads.length;
+    _squads.add(s);
+    _squadMap.putIfAbsent(s.name(), () => idx);
+  }
+
   Squad? getSquad(String squadName) {
-    return squadMap[squadName];
+    int? idx = _squadMap[squadName];
+    return idx != null ? _squads[idx] : null;
+  }
+
+  List<Squad> getSquads() {
+    return _squads;
+  }
+
+  void addCoach(Coach c) {
+    int idx = _coaches.length;
+    _coaches.add(c);
+    _coachMap.putIfAbsent(c.name(), () => idx);
   }
 
   Coach? getCoach(String nafName) {
-    return coachMap[nafName];
+    int? idx = _coachMap[nafName];
+    return idx != null ? _coaches[idx] : null;
   }
 
   Squad? getCoachSquad(String nafName) {
@@ -46,31 +67,84 @@ class Tournament {
     return coach != null ? getSquad(coach.squadName) : null;
   }
 
+  List<Coach> getCoaches() {
+    return _coaches;
+  }
+
   // Squad constructor
   Tournament.squads(
       this.info,
       this.xml,
       this.curRoundNumber,
-      this.squadMap,
-      this.coachMap,
+      this._squads,
+      this._coaches,
       this.prevSquadRounds,
       this.prevCoachRounds,
       this.curSquadRound,
       this.curCoachRound) {
     useSquads = true;
+
+    for (int i = 0; i < _squads.length; i++) {
+      Squad s = _squads[i];
+      _squadMap.putIfAbsent(s.name(), () => i);
+    }
+
+    for (int i = 0; i < _coaches.length; i++) {
+      Coach c = _coaches[i];
+      _coachMap.putIfAbsent(c.name(), () => i);
+    }
   }
 
   // Non-squad constructor
-  Tournament.noSquads(this.info, this.xml, this.curRoundNumber, this.coachMap,
+  Tournament.noSquads(this.info, this.xml, this.curRoundNumber, this._coaches,
       this.prevCoachRounds, this.curCoachRound) {
     useSquads = false;
-    squadMap = new HashMap<String, Squad>();
     curSquadRound = null;
+
+    for (int i = 0; i < _coaches.length; i++) {
+      Coach c = _coaches[i];
+      _coachMap.putIfAbsent(c.name(), () => i);
+    }
+  }
+
+  bool updateRound(RoundMatching matchups) {
+    if (matchups.round() != curRoundNumber + 1) {
+      debugPrint('Failed to update round: Round numbers do not coincide');
+      return false;
+    }
+
+    curRoundNumber = matchups.round();
+    if (useSquads) {
+      SquadRound squadRound = SquadRound.fromRoundMatching(matchups);
+      if (squadRound.getMatches().isEmpty) {
+        debugPrint('Failed to update round: Matches list is empty');
+        return false;
+      }
+
+      prevSquadRounds.add(squadRound);
+      curSquadRound = squadRound;
+
+      // TODO: Update coaches too
+    } else {
+      CoachRound round = CoachRound.fromRoundMatching(matchups);
+      if (round.getMatches().isEmpty) {
+        debugPrint('Failed to update round: Matches list is empty');
+        return false;
+      }
+
+      prevCoachRounds.add(round);
+      curCoachRound = round;
+    }
+
+    return true;
   }
 
   factory Tournament.fromXml(XmlDocument xml, TournamentInfo info) {
-    HashMap<String, Squad> squadMap = new HashMap<String, Squad>();
-    HashMap<String, Coach> coachMap = new HashMap<String, Coach>();
+    List<Squad> squads = [];
+    HashMap<String, int> squadMap = new HashMap<String, int>();
+
+    List<Coach> coaches = [];
+    HashMap<String, int> coachMap = new HashMap<String, int>();
 
     HashMap<int, String> teamIdToNafName = new HashMap<int, String>();
 
@@ -101,9 +175,14 @@ class Tournament {
     if (useSquads) {
       // List of squads
       final groupTags = tournamentTag.findAllElements('group');
+
       for (var g in groupTags) {
         String squadName = g.text;
-        squadMap.putIfAbsent(squadName, () => Squad(squadName));
+
+        int idx = squads.length;
+
+        squads.add(Squad(squadName));
+        squadMap.putIfAbsent(squadName, () => idx);
       }
     }
 
@@ -124,10 +203,16 @@ class Tournament {
 
       Coach c = new Coach(id, nafName, squadName, coachName,
           RaceUtils.getRace(race), teamName, nafNumber);
-      coachMap.putIfAbsent(c.nafName, () => c);
+
+      int idx = coaches.length;
+
+      coaches.add(c);
+
+      coachMap.putIfAbsent(c.nafName, () => idx);
 
       if (useSquads) {
-        Squad? squad = squadMap[squadName];
+        int? idx = squadMap[squadName];
+        Squad? squad = idx != null ? squads[idx] : null;
         squad!.addCoach(c);
       }
     }
@@ -154,10 +239,12 @@ class Tournament {
         int cas2 = int.parse(g.getElement('cas2')!.text);
 
         String? nafName1 = teamIdToNafName[team1];
-        Coach? coach1 = coachMap[nafName1];
+        int? idx1 = coachMap[nafName1];
+        Coach? coach1 = idx1 != null ? coaches[idx1] : null;
 
         String? nafName2 = teamIdToNafName[team2];
-        Coach? coach2 = coachMap[nafName2];
+        int? idx2 = coachMap[nafName2];
+        Coach? coach2 = idx2 != null ? coaches[idx2] : null;
 
         if (coach1 == null || coach2 == null) {
           continue;
@@ -204,59 +291,56 @@ class Tournament {
     }
 
     // Update coach points
-    for (Coach c in coachMap.values) {
-      c.calculatePoints(winValue, tieValue, lossValue);
-    }
+    coaches.forEach((Coach coach) {
+      coach.calculatePoints(winValue, tieValue, lossValue);
+    });
 
     if (useSquads) {
       List<SquadRound> prevSquadRounds =
-          _getSquadRounds(prevCoachRounds, squadMap, coachMap);
+          _getSquadRounds(prevCoachRounds, squadMap, squads, coachMap, coaches);
       SquadRound curSquadRound =
-          _getSquadRound(curCoachRound!, squadMap, coachMap);
+          _getSquadRound(curCoachRound!, squadMap, squads, coachMap, coaches);
 
       // Update squad points
-      for (Squad s in squadMap.values) {
-        s.calculatePoints(squadScoreMode, coachMap);
-        s.calculateWinsTiesLosses(prevSquadRounds);
-      }
+      squads.forEach((Squad squad) {
+        squad.calculatePoints(squadScoreMode, coachMap, coaches);
+        squad.calculateWinsTiesLosses(prevSquadRounds);
+      });
 
-      return new Tournament.squads(
-          info,
-          xml,
-          curRoundNumber,
-          squadMap,
-          coachMap,
-          prevSquadRounds,
-          prevCoachRounds,
-          curSquadRound,
-          curCoachRound);
+      return new Tournament.squads(info, xml, curRoundNumber, squads, coaches,
+          prevSquadRounds, prevCoachRounds, curSquadRound, curCoachRound);
     } else {
       return new Tournament.noSquads(
-          info, xml, curRoundNumber, coachMap, prevCoachRounds, curCoachRound);
+          info, xml, curRoundNumber, coaches, prevCoachRounds, curCoachRound);
     }
   }
 
-  static List<SquadRound> _getSquadRounds(List<CoachRound> coachRounds,
-      HashMap<String, Squad> squadMap, HashMap<String, Coach> coachMap) {
+  static List<SquadRound> _getSquadRounds(
+      List<CoachRound> coachRounds,
+      HashMap<String, int> squadMap,
+      List<Squad> squads,
+      HashMap<String, int> coachMap,
+      List<Coach> coaches) {
     List<SquadRound> squadRounds = [];
 
     for (CoachRound cr in coachRounds) {
-      SquadRound squadRound = _getSquadRound(cr, squadMap, coachMap);
+      SquadRound squadRound =
+          _getSquadRound(cr, squadMap, squads, coachMap, coaches);
       squadRounds.add(squadRound);
     }
 
     return squadRounds;
   }
 
-  static SquadRound _getSquadRound(CoachRound cr,
-      HashMap<String, Squad> squadMap, HashMap<String, Coach> coachMap) {
-    int roundNumber = cr.roundNumber;
+  static SquadRound _getSquadRound(CoachRound cr, HashMap<String, int> squadMap,
+      List<Squad> squads, HashMap<String, int> coachMap, List<Coach> coaches) {
+    int roundNumber = cr.round();
 
     List<SquadMatchup> squadMatchupList = [];
 
     // HomeSquad to list of coach matchups
     Map<String, List<CoachMatchup>> groups =
-        groupBy(cr.coachMatchups, (CoachMatchup cm) => cm.homeCoach.squadName);
+        groupBy(cr.matches, (CoachMatchup cm) => cm.homeCoach.squadName);
 
     int tableNum = 1;
     for (String homeSquadName in groups.keys) {
@@ -265,14 +349,19 @@ class Tournament {
         continue;
       }
 
-      Squad? homeSquad = squadMap[homeSquadName];
-      Squad? awaySquad = squadMap[coachMatchups.first.awayCoach.squadName];
+      int? homeSquadIdx = squadMap[homeSquadName];
+      Squad? homeSquad = homeSquadIdx != null ? squads[homeSquadIdx] : null;
+
+      int? awaySquadIdx = squadMap[coachMatchups.first.awayCoach.squadName];
+      Squad? awaySquad = awaySquadIdx != null ? squads[awaySquadIdx] : null;
       if (homeSquad == null || awaySquad == null) {
         continue;
       }
 
-      SquadMatchup squadMatchup = new SquadMatchup(
-          roundNumber, tableNum, homeSquad, awaySquad, coachMatchups);
+      SquadMatchup squadMatchup =
+          new SquadMatchup(roundNumber, tableNum, homeSquad, awaySquad);
+
+      squadMatchup.coachMatchups = coachMatchups;
 
       squadMatchupList.add(squadMatchup);
 

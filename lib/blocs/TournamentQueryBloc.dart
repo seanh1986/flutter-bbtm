@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bbnaf/blocs/Bloc.dart';
-import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 
 class TournamentQueryBloc implements Bloc {
   final _controller = StreamController<List<Tournament>>();

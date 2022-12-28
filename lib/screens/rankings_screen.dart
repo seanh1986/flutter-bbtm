@@ -1,4 +1,4 @@
-import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/widgets/rankings_coach_widget.dart';
 import 'package:bbnaf/widgets/rankings_squads_widget.dart';
 import 'package:flutter/material.dart';

@@ -1,7 +1,5 @@
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:bbnaf/models/tournament.dart';
-import 'package:bbnaf/models/tournament_info.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io' as io;

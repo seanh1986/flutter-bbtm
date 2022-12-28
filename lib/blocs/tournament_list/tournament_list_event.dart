@@ -1,4 +1,4 @@
-import 'package:bbnaf/models/tournament_info.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class TournamentListEvent extends Equatable {
