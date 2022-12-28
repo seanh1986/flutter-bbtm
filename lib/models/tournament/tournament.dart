@@ -71,42 +71,6 @@ class Tournament {
     return _coaches;
   }
 
-  // Squad constructor
-  Tournament.squads(
-      this.info,
-      this.xml,
-      this.curRoundNumber,
-      this._squads,
-      this._coaches,
-      this.prevSquadRounds,
-      this.prevCoachRounds,
-      this.curSquadRound,
-      this.curCoachRound) {
-    useSquads = true;
-
-    for (int i = 0; i < _squads.length; i++) {
-      Squad s = _squads[i];
-      _squadMap.putIfAbsent(s.name(), () => i);
-    }
-
-    for (int i = 0; i < _coaches.length; i++) {
-      Coach c = _coaches[i];
-      _coachMap.putIfAbsent(c.name(), () => i);
-    }
-  }
-
-  // Non-squad constructor
-  Tournament.noSquads(this.info, this.xml, this.curRoundNumber, this._coaches,
-      this.prevCoachRounds, this.curCoachRound) {
-    useSquads = false;
-    curSquadRound = null;
-
-    for (int i = 0; i < _coaches.length; i++) {
-      Coach c = _coaches[i];
-      _coachMap.putIfAbsent(c.name(), () => i);
-    }
-  }
-
   bool updateRound(RoundMatching matchups) {
     if (matchups.round() != curRoundNumber + 1) {
       debugPrint('Failed to update round: Round numbers do not coincide');
@@ -312,6 +276,42 @@ class Tournament {
     } else {
       return new Tournament.noSquads(
           info, xml, curRoundNumber, coaches, prevCoachRounds, curCoachRound);
+    }
+  }
+
+// Squad constructor
+  Tournament.squads(
+      this.info,
+      this.xml,
+      this.curRoundNumber,
+      this._squads,
+      this._coaches,
+      this.prevSquadRounds,
+      this.prevCoachRounds,
+      this.curSquadRound,
+      this.curCoachRound) {
+    useSquads = true;
+
+    for (int i = 0; i < _squads.length; i++) {
+      Squad s = _squads[i];
+      _squadMap.putIfAbsent(s.name(), () => i);
+    }
+
+    for (int i = 0; i < _coaches.length; i++) {
+      Coach c = _coaches[i];
+      _coachMap.putIfAbsent(c.name(), () => i);
+    }
+  }
+
+  // Non-squad constructor
+  Tournament.noSquads(this.info, this.xml, this.curRoundNumber, this._coaches,
+      this.prevCoachRounds, this.curCoachRound) {
+    useSquads = false;
+    curSquadRound = null;
+
+    for (int i = 0; i < _coaches.length; i++) {
+      Coach c = _coaches[i];
+      _coachMap.putIfAbsent(c.name(), () => i);
     }
   }
 
