@@ -2,7 +2,7 @@ import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/squad_matchup.dart';
-import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/overview_screen.dart';
 import 'package:bbnaf/screens/rankings_screen.dart';
@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage> {
         ? _tournament.getCoachSquad(widget.authUser.nafName as String)
         : null;
 
-    _squadMatchups = _tournament.curSquadRound!.squadMatchups;
+    _squadMatchups = _tournament.curSquadRound!.matches;
 
     _coachMatchupListener = new _CoachMatchupListClickListener(this);
 

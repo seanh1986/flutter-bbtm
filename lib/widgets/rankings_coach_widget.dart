@@ -1,4 +1,4 @@
-import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/coach.dart';
 // import 'package:flutter/paginated_data_table.dart';
@@ -24,7 +24,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
   @override
   void initState() {
-    _items = widget.tournament.coachMap.values.toList();
+    _items = widget.tournament.getCoaches();
     super.initState();
   }
 

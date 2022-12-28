@@ -1,7 +1,7 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/tournament_list/tournament_list.dart';
 import 'package:bbnaf/blocs/tournament_selection/tournament_selection.dart';
-import 'package:bbnaf/models/tournament_info.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/home_screen.dart';
 import 'package:bbnaf/screens/login/login_screen.dart';

@@ -29,6 +29,10 @@ class Coach extends IMatchupParticipant {
   int tds = 0;
   int cas = 0;
 
+  List<double> _tieBreakers = <double>[];
+
+  List<String> _opponents = <String>[];
+
   Coach(
     this.teamId,
     this.nafName,
@@ -79,6 +83,16 @@ class Coach extends IMatchupParticipant {
     return _losses;
   }
 
+  @override
+  List<double> tiebreakers() {
+    return _tieBreakers;
+  }
+
+  @override
+  List<String> opponents() {
+    return _opponents;
+  }
+
   void addWin() {
     _wins++;
   }
@@ -93,6 +107,14 @@ class Coach extends IMatchupParticipant {
 
   void calculatePoints(double winPts, double tiePts, double lossPts) {
     _points = _wins * winPts + _ties * tiePts + _losses * lossPts;
+  }
+
+  void updateTiebreakers(List<double> tieBreakers) {
+    _tieBreakers = tieBreakers;
+  }
+
+  void addNewOpponent(String opponentName) {
+    _opponents.add(opponentName);
   }
 
   void addTds(int t) {

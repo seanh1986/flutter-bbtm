@@ -1,4 +1,4 @@
-import 'package:bbnaf/models/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/squad.dart';
 // import 'package:flutter/paginated_data_table.dart';
@@ -24,7 +24,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
   @override
   void initState() {
-    _items = widget.tournament.squadMap.values.toList();
+    _items = widget.tournament.getSquads();
     super.initState();
   }
 

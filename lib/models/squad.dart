@@ -4,8 +4,8 @@ import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/models/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
-import 'package:bbnaf/models/rounds.dart';
 import 'package:bbnaf/models/squad_matchup.dart';
+import 'package:bbnaf/utils/swiss/round_matching.dart';
 
 // Different options for how squads are used
 enum SquadScoreMode {
@@ -27,6 +27,10 @@ class Squad extends IMatchupParticipant {
   double _points = 0.0;
 
   bool stunty = false;
+
+  List<double> _tieBreakers = <double>[];
+
+  List<String> _opponents = <String>[];
 
   Squad(this._name);
 
@@ -70,6 +74,16 @@ class Squad extends IMatchupParticipant {
     return _losses;
   }
 
+  @override
+  List<double> tiebreakers() {
+    return _tieBreakers;
+  }
+
+  @override
+  List<String> opponents() {
+    return _opponents;
+  }
+
   List<String> getCoaches() {
     return _coaches;
   }
@@ -80,7 +94,7 @@ class Squad extends IMatchupParticipant {
 
   void calculateWinsTiesLosses(List<SquadRound> prevSquadRounds) {
     for (SquadRound sr in prevSquadRounds) {
-      for (SquadMatchup sm in sr.squadMatchups) {
+      for (SquadMatchup sm in sr.matches) {
         bool isHome;
         if (sm.homeSquad.name() == _name) {
           isHome = true;
@@ -127,11 +141,11 @@ class Squad extends IMatchupParticipant {
     }
   }
 
-  void calculatePoints(
-      SquadScoreMode scoreMode, HashMap<String, Coach> coachMap) {
+  void calculatePoints(SquadScoreMode scoreMode, HashMap<String, int> coachMap,
+      List<Coach> coachList) {
     switch (scoreMode) {
       case SquadScoreMode.CUMULATIVE_PLAYER_SCORES:
-        _calculatePointsCumulativePlayerScores(coachMap);
+        _calculatePointsCumulativePlayerScores(coachMap, coachList);
         break;
       case SquadScoreMode.W_T_L_1_HALF_0:
         _calculatePointsWinTieLossOneHalfZero();
@@ -144,10 +158,12 @@ class Squad extends IMatchupParticipant {
     }
   }
 
-  void _calculatePointsCumulativePlayerScores(HashMap<String, Coach> coachMap) {
+  void _calculatePointsCumulativePlayerScores(
+      HashMap<String, int> coachMap, List<Coach> coachList) {
     _points = 0;
     for (String nafName in _coaches) {
-      Coach? c = coachMap[nafName];
+      int? cIdx = coachMap[nafName];
+      Coach? c = cIdx != null ? coachList[cIdx] : null;
       if (c == null) {
         continue;
       }
@@ -162,6 +178,14 @@ class Squad extends IMatchupParticipant {
 
   void _calculatePointsWinsOnly() {
     _points = _wins as double;
+  }
+
+  void updateTiebreakers(List<double> tieBreakers) {
+    _tieBreakers = tieBreakers;
+  }
+
+  void addNewOpponent(String opponentName) {
+    _opponents.add(opponentName);
   }
 
   static SquadScoreMode getSquadScoreMode(int groupScoreMode) {

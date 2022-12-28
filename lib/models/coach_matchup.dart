@@ -39,4 +39,8 @@ class CoachMatchup extends IMatchup {
   IMatchupParticipant away() {
     return awayCoach;
   }
+
+  bool hasPlayer(String nafName) {
+    return homeCoach.nafName == nafName || awayCoach.nafName == nafName;
+  }
 }

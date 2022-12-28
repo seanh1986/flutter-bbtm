@@ -1,5 +1,5 @@
-import 'package:bbnaf/models/tournament.dart';
-import 'package:bbnaf/models/tournament_info.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class TournamentSelectionState extends Equatable {
