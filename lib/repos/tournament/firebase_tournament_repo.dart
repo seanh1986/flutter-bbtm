@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
@@ -45,6 +47,20 @@ class FirebaseTournamentRepository extends TournamentRepository {
                 : Map<String, dynamic>()));
 
     yield t;
+  }
+
+  @override
+  Future<void> updateTournamentInfo(TournamentInfo tournamentInfo) async {
+    Map<String, Object?> json =
+        tournamentInfo.toJson().map((key, value) => value);
+    return _tournamentInfoRef.doc(tournamentInfo.id).set(json);
+  }
+
+  @override
+  Future<void> updateTournamentData(Tournament tournament) async {
+    Map<String, Object?> json = {"data": jsonEncode(tournament)};
+
+    return _tournamentInfoRef.doc(tournament.info.id).set(json);
   }
 
   @override

@@ -2,18 +2,21 @@ import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/models/i_matchup.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/squad_matchup.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/widgets/matchup_squad_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
 
 class SquadMatchupsPage extends StatefulWidget {
+  final Tournament tournament;
   final List<SquadMatchup> matchups;
   final CoachMatchupListClickListener? coachMatchupListeners;
   final Squad? curSquad;
 
   SquadMatchupsPage(
       {Key? key,
+      required this.tournament,
       required this.matchups,
       this.coachMatchupListeners,
       this.curSquad})
@@ -26,12 +29,14 @@ class SquadMatchupsPage extends StatefulWidget {
 }
 
 class _SquadMatchupsPage extends State<SquadMatchupsPage> {
+  late Tournament _tournament;
   List<SquadMatchup> _matchups = [];
   MatchupClickListener? _listener;
   Squad? _curSquad;
 
   @override
   void initState() {
+    _tournament = widget.tournament;
     _matchups = widget.matchups;
     _listener = new _MatchupClickListener(widget.coachMatchupListeners);
     _curSquad = widget.curSquad;
@@ -47,6 +52,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
       groupSeparatorBuilder: _buildGroupSeparator,
       itemBuilder: (BuildContext context, SquadMatchup matchup) =>
           MatchupSquadWidget(
+        tournament: _tournament,
         matchup: matchup,
         listener: _listener,
       ),
@@ -55,7 +61,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   }
 
   String _groupBy(IMatchup matchup) {
-    return matchup.matchupName();
+    return matchup.groupByName(_tournament);
   }
 
   Widget _buildGroupSeparator(String matchupName) {

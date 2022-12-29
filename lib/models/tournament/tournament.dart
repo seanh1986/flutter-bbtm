@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:convert';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import "package:collection/collection.dart";
@@ -126,7 +127,23 @@ class Tournament {
         addCoach(Coach.fromJson(i, tCoaches[i] as Map<String, dynamic>));
       }
     }
+
+    final tSquads = json['squads'] as List<dynamic>?;
+    if (tSquads != null) {
+      for (int i = 0; i < tSquads.length; i++) {
+        addSquad(Squad.fromJson(tSquads[i] as Map<String, dynamic>));
+      }
+    }
   }
+
+  Map toJson() => {
+        'round': curRoundNumber,
+        'usesquads': useSquads,
+        'firstroundmatching':
+            SwissPairings.getFirstRoundMatchingName(firstRoundMatchingRule),
+        'coaches': jsonEncode(_coaches),
+        'squads': jsonEncode(_squads)
+      };
 
   void _syncSquadsAndCoaches() {
     _squadIdxMap.clear();
@@ -253,8 +270,8 @@ class Tournament {
           continue;
         }
 
-        CoachMatchup matchup =
-            new CoachMatchup(roundNumber, tableNumber, coach1, coach2);
+        CoachMatchup matchup = new CoachMatchup(
+            roundNumber, tableNumber, coach1.nafName, coach2.nafName);
         coachMatchups.add(matchup);
 
         if (isCurrentRound) {
@@ -398,8 +415,10 @@ class Tournament {
     List<SquadMatchup> squadMatchupList = [];
 
     // HomeSquad to list of coach matchups
-    Map<String, List<CoachMatchup>> groups =
-        groupBy(cr.matches, (CoachMatchup cm) => cm.homeCoach.squadName);
+    Map<String, List<CoachMatchup>> groups = groupBy(
+        cr.matches,
+        (CoachMatchup cm) =>
+            getHomeSquadNameFromCoachMatchup(cm, coachMap, coaches));
 
     int tableNum = 1;
     for (String homeSquadName in groups.keys) {
@@ -411,14 +430,18 @@ class Tournament {
       int? homeSquadIdx = squadMap[homeSquadName];
       Squad? homeSquad = homeSquadIdx != null ? squads[homeSquadIdx] : null;
 
-      int? awaySquadIdx = squadMap[coachMatchups.first.awayCoach.squadName];
+      int? awayCoachIdx = coachMap[coachMatchups.first.homeNafName];
+      String awaySquadName =
+          awayCoachIdx != null ? coaches[awayCoachIdx].squadName : "";
+
+      int? awaySquadIdx = squadMap[awaySquadName];
       Squad? awaySquad = awaySquadIdx != null ? squads[awaySquadIdx] : null;
       if (homeSquad == null || awaySquad == null) {
         continue;
       }
 
-      SquadMatchup squadMatchup =
-          new SquadMatchup(roundNumber, tableNum, homeSquad, awaySquad);
+      SquadMatchup squadMatchup = new SquadMatchup(
+          roundNumber, tableNum, homeSquad.name(), awaySquad.name());
 
       squadMatchup.coachMatchups = coachMatchups;
 
@@ -428,5 +451,11 @@ class Tournament {
     }
 
     return new SquadRound(roundNumber, squadMatchupList);
+  }
+
+  static String getHomeSquadNameFromCoachMatchup(
+      CoachMatchup cm, HashMap<String, int> coachMap, List<Coach> coaches) {
+    int? coachIdx = coachMap[cm.homeNafName];
+    return coachIdx != null ? coaches[coachIdx].squadName : "";
   }
 }

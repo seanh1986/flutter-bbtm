@@ -3,8 +3,6 @@ import 'dart:math';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/models/i_matchup.dart';
-import 'package:bbnaf/models/races.dart';
-import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
@@ -111,11 +109,11 @@ class SwissPairings {
       notYetPaired.removeAt(idx_2);
 
       if (tournament.useSquads) {
-        matchings.matches.add(
-            SquadMatchup(1, tableNum, player_1 as Squad, player_2 as Squad));
+        matchings.matches
+            .add(SquadMatchup(1, tableNum, player_1.name(), player_2.name()));
       } else {
-        matchings.matches.add(
-            CoachMatchup(1, tableNum, player_1 as Coach, player_2 as Coach));
+        matchings.matches
+            .add(CoachMatchup(1, tableNum, player_1.name(), player_2.name()));
       }
 
       tableNum++;
@@ -282,11 +280,9 @@ class SwissPairings {
       }
 
       if (bestPlayer.type() == OrgType.Coach) {
-        return CoachMatchup(
-            roundNum, -1, bestPlayer as Coach, nextPlayer as Coach);
+        return CoachMatchup(roundNum, -1, bestPlayer.name(), nextPlayer.name());
       } else {
-        return SquadMatchup(
-            roundNum, -1, bestPlayer as Squad, nextPlayer as Squad);
+        return SquadMatchup(roundNum, -1, bestPlayer.name(), nextPlayer.name());
       }
     }
 
@@ -316,8 +312,8 @@ class SwissPairings {
     for (int g = newMatchups.matches.length - 1; g >= 0; g--) {
       IMatchup pairedGame = newMatchups.matches[g];
 
-      IMatchupParticipant player_1 = pairedGame.home();
-      IMatchupParticipant player_2 = pairedGame.away();
+      IMatchupParticipant player_1 = pairedGame.home(tournament);
+      IMatchupParticipant player_2 = pairedGame.away(tournament);
 
       bool hasBestPlayerPlayedVsPlayer_1 =
           bestPlayer.opponents().any((name) => player_1.name() == name);
@@ -341,7 +337,7 @@ class SwissPairings {
         // check that the switch player is not scheduled, and that it is not the bye user, or the best
         // score user, or the chosen pairs p1, p2
         // check if this player is already scheduled this round
-        if (newMatchups.hasMatchForPlayer(switchPlayer)) {
+        if (newMatchups.hasMatchForPlayerName(switchPlayer.name())) {
           debugPrint("round " +
               roundNum.toString() +
               " Match already exists for switchlayer: " +
@@ -375,9 +371,9 @@ class SwissPairings {
           debugPrint("round " +
               roundNum.toString() +
               "pairing remove game " +
-              pairedGame.home().name() +
+              pairedGame.homeName() +
               " vs. " +
-              pairedGame.away().name());
+              pairedGame.awayName());
 
           bool success = newMatchups.matches.remove(pairedGame);
           if (!success) {
@@ -385,15 +381,15 @@ class SwissPairings {
           }
 
           if (bestPlayer.type() == OrgType.Coach) {
+            newMatchups.matches.add(
+                CoachMatchup(roundNum, -1, bestPlayer.name(), player_2.name()));
             newMatchups.matches.add(CoachMatchup(
-                roundNum, -1, bestPlayer as Coach, player_2 as Coach));
-            newMatchups.matches.add(CoachMatchup(
-                roundNum, -1, player_1 as Coach, switchPlayer as Coach));
+                roundNum, -1, player_1.name(), switchPlayer.name()));
           } else {
+            newMatchups.matches.add(
+                SquadMatchup(roundNum, -1, bestPlayer.name(), player_2.name()));
             newMatchups.matches.add(SquadMatchup(
-                roundNum, -1, bestPlayer as Squad, player_2 as Squad));
-            newMatchups.matches.add(SquadMatchup(
-                roundNum, -1, player_1 as Squad, switchPlayer as Squad));
+                roundNum, -1, player_1.name(), switchPlayer.name()));
           }
 
           return true;
@@ -406,9 +402,9 @@ class SwissPairings {
           debugPrint("round " +
               roundNum.toString() +
               "pairing remove game " +
-              pairedGame.home().name() +
+              pairedGame.homeName() +
               " vs. " +
-              pairedGame.away().name());
+              pairedGame.awayName());
 
           bool success = newMatchups.matches.remove(pairedGame);
           if (!success) {
@@ -416,15 +412,15 @@ class SwissPairings {
           }
 
           if (bestPlayer.type() == OrgType.Coach) {
+            newMatchups.matches.add(
+                CoachMatchup(roundNum, -1, bestPlayer.name(), player_1.name()));
             newMatchups.matches.add(CoachMatchup(
-                roundNum, -1, bestPlayer as Coach, player_1 as Coach));
-            newMatchups.matches.add(CoachMatchup(
-                roundNum, -1, player_2 as Coach, switchPlayer as Coach));
+                roundNum, -1, player_2.name(), switchPlayer.name()));
           } else {
+            newMatchups.matches.add(
+                SquadMatchup(roundNum, -1, bestPlayer.name(), player_1.name()));
             newMatchups.matches.add(SquadMatchup(
-                roundNum, -1, bestPlayer as Squad, player_1 as Squad));
-            newMatchups.matches.add(SquadMatchup(
-                roundNum, -1, player_2 as Squad, switchPlayer as Squad));
+                roundNum, -1, player_2.name(), switchPlayer.name()));
           }
 
           return true;
@@ -455,128 +451,128 @@ class SwissPairings {
     }
   }
 
-  List<IMatchup>? _applySwissOld(
-      List<IMatchupParticipant> teams, bool allowRematches) {
-    // 1. Sort using tie breakers
-    teams.sort((a, b) => sortDescendingOperator(a, b));
+  // List<IMatchup>? _applySwissOld(
+  //     List<IMatchupParticipant> teams, bool allowRematches) {
+  //   // 1. Sort using tie breakers
+  //   teams.sort((a, b) => sortDescendingOperator(a, b));
 
-    // 2. Ensure even number of teams (or add bye)
-    _ensureEvenNumTeamsOld(teams);
+  //   // 2. Ensure even number of teams (or add bye)
+  //   _ensureEvenNumTeamsOld(teams);
 
-    // 3. Group Teams
-    List<List<IMatchupParticipant>> groupedTeams = _groupTeamsOld(teams);
+  //   // 3. Group Teams
+  //   List<List<IMatchupParticipant>> groupedTeams = _groupTeamsOld(teams);
 
-    // 4. Assign Pairings
-    List<IMatchup>? matchups = _assignPairingsOld(groupedTeams);
-    return matchups;
-  }
+  //   // 4. Assign Pairings
+  //   List<IMatchup>? matchups = _assignPairingsOld(groupedTeams);
+  //   return matchups;
+  // }
 
-  /// If we have an odd number of teams, assign a bye team
-  void _ensureEvenNumTeamsOld(List<IMatchupParticipant> teams) {
-    if (teams.isEmpty) {
-      return;
-    }
+  // /// If we have an odd number of teams, assign a bye team
+  // void _ensureEvenNumTeamsOld(List<IMatchupParticipant> teams) {
+  //   if (teams.isEmpty) {
+  //     return;
+  //   }
 
-    OrgType orgType = teams.first.type();
+  //   OrgType orgType = teams.first.type();
 
-    if (teams.length % 2 != 0) {
-      switch (orgType) {
-        case OrgType.Squad:
-          teams.add(new Squad("Bye"));
-          break;
-        case OrgType.Coach:
-          teams.add(new Coach(-1, "Bye", "Bye", "Bye", Race.Unknown, "", -1));
-          break;
-      }
-    }
-  }
+  //   if (teams.length % 2 != 0) {
+  //     switch (orgType) {
+  //       case OrgType.Squad:
+  //         teams.add(new Squad("Bye"));
+  //         break;
+  //       case OrgType.Coach:
+  //         teams.add(new Coach(-1, "Bye", "Bye", "Bye", Race.Unknown, "", -1));
+  //         break;
+  //     }
+  //   }
+  // }
 
-  /// Teams are assumed to already be sorted in descending order and even
-  /// 1. We group players by points
-  /// 2. If any groups have odd numbers, move last player to the next group
-  List<List<IMatchupParticipant>> _groupTeamsOld(
-      List<IMatchupParticipant> teams) {
-    List<List<IMatchupParticipant>> groups = <List<IMatchupParticipant>>[];
-    groups.add(<IMatchupParticipant>[]);
+  // /// Teams are assumed to already be sorted in descending order and even
+  // /// 1. We group players by points
+  // /// 2. If any groups have odd numbers, move last player to the next group
+  // List<List<IMatchupParticipant>> _groupTeamsOld(
+  //     List<IMatchupParticipant> teams) {
+  //   List<List<IMatchupParticipant>> groups = <List<IMatchupParticipant>>[];
+  //   groups.add(<IMatchupParticipant>[]);
 
-    double prevPts = teams.first.points();
-    for (int i = 0; i < teams.length; i++) {
-      double pts = teams[i].points();
-      if (pts != prevPts) {
-        // Done with previous group, check if even
-        // If odd, relegate last team into this new group
-        IMatchupParticipant? relegatedTeam = null;
-        if (groups.last.length % 2 != 0) {
-          relegatedTeam = groups.last.last;
-        }
-        groups.add(<IMatchupParticipant>[]);
-        if (relegatedTeam != null) {
-          groups.last.add(relegatedTeam);
-        }
-      }
+  //   double prevPts = teams.first.points();
+  //   for (int i = 0; i < teams.length; i++) {
+  //     double pts = teams[i].points();
+  //     if (pts != prevPts) {
+  //       // Done with previous group, check if even
+  //       // If odd, relegate last team into this new group
+  //       IMatchupParticipant? relegatedTeam = null;
+  //       if (groups.last.length % 2 != 0) {
+  //         relegatedTeam = groups.last.last;
+  //       }
+  //       groups.add(<IMatchupParticipant>[]);
+  //       if (relegatedTeam != null) {
+  //         groups.last.add(relegatedTeam);
+  //       }
+  //     }
 
-      groups.last.add(teams[i]);
-    }
+  //     groups.last.add(teams[i]);
+  //   }
 
-    return groups;
-  }
+  //   return groups;
+  // }
 
-  /// 1. For each Group, find pairings that will pair each player with someone not already played
-  /// 2. If no valid set of pairings in a group, merge group with next group
-  /// 3. If can't match last group, then unmatch previous groups & merge those with current one
-  /// 4. If can't generate pairings after entire list is considered then allow rematches (Rare)
-  List<IMatchup>? _assignPairingsOld(
-      List<List<IMatchupParticipant>> groupedTeams) {}
+  // /// 1. For each Group, find pairings that will pair each player with someone not already played
+  // /// 2. If no valid set of pairings in a group, merge group with next group
+  // /// 3. If can't match last group, then unmatch previous groups & merge those with current one
+  // /// 4. If can't generate pairings after entire list is considered then allow rematches (Rare)
+  // List<IMatchup>? _assignPairingsOld(
+  //     List<List<IMatchupParticipant>> groupedTeams) {}
 
-  double _weightOld(
-      double maxPts, IMatchupParticipant p1, IMatchupParticipant p2) {
-    double w = 0.0;
+  // double _weightOld(
+  //     double maxPts, IMatchupParticipant p1, IMatchupParticipant p2) {
+  //   double w = 0.0;
 
-    // A pairing where the participants have not played each other as many times
-    // as they have played at least one other participant outscore all pairings
-    // where the participants have played the most times.
-    // This will stave off re-pairs and second byes for as long as possible, and
-    // then re-re-pairs and third byes, and so on …
+  //   // A pairing where the participants have not played each other as many times
+  //   // as they have played at least one other participant outscore all pairings
+  //   // where the participants have played the most times.
+  //   // This will stave off re-pairs and second byes for as long as possible, and
+  //   // then re-re-pairs and third byes, and so on …
 
-    int numOpponents = p1.opponents().length;
-    int numTimesPlayedP2 = p1.opponents().where((a) => p2.name() == a).length;
-    int maxDuplicates = findMaxNumDuplicatedElementInListOld(p1.opponents());
+  //   int numOpponents = p1.opponents().length;
+  //   int numTimesPlayedP2 = p1.opponents().where((a) => p2.name() == a).length;
+  //   int maxDuplicates = findMaxNumDuplicatedElementInListOld(p1.opponents());
 
-    if (numOpponents > 0 && numTimesPlayedP2 < maxDuplicates) {
-      w += _qualityOld(maxPts, maxPts) + 1;
-    }
+  //   if (numOpponents > 0 && numTimesPlayedP2 < maxDuplicates) {
+  //     w += _qualityOld(maxPts, maxPts) + 1;
+  //   }
 
-    // Determine a score for the quality of this pairing based on the points of
-    // the higher scoring participant of the two (importance) and
-    // how close the two participant's records are.
+  //   // Determine a score for the quality of this pairing based on the points of
+  //   // the higher scoring participant of the two (importance) and
+  //   // how close the two participant's records are.
 
-    double p1Pts = p1.points();
-    double p2Pts = p2.points();
+  //   double p1Pts = p1.points();
+  //   double p2Pts = p2.points();
 
-    double best = max(p1Pts, p2Pts);
-    double worst = min(p1Pts, p2Pts);
-    double spread = best - worst;
-    double closeness = maxPts - spread;
-    double importance = best;
+  //   double best = max(p1Pts, p2Pts);
+  //   double worst = min(p1Pts, p2Pts);
+  //   double spread = best - worst;
+  //   double closeness = maxPts - spread;
+  //   double importance = best;
 
-    w += _qualityOld(importance, closeness);
+  //   w += _qualityOld(importance, closeness);
 
-    return w;
-  }
+  //   return w;
+  // }
 
-  /// importance and closeness are values in the range 0..highest_points
-  double _qualityOld(double importance, double closeness) {
-    // Add one to these values to avoid sometimes multiplying by zero and losing information.
-    return (importance + 1) * (closeness + 1);
-  }
+  // /// importance and closeness are values in the range 0..highest_points
+  // double _qualityOld(double importance, double closeness) {
+  //   // Add one to these values to avoid sometimes multiplying by zero and losing information.
+  //   return (importance + 1) * (closeness + 1);
+  // }
 
-  /// Find the max count of any duplicated items in a list
-  int findMaxNumDuplicatedElementInListOld<T>(Iterable<T> list) => list
-      .fold<Map<T, int>>(
-          {},
-          (map, element) =>
-              map..update(element, (value) => value + 1, ifAbsent: () => 1))
-      .entries
-      .reduce((e1, e2) => e1.value > e2.value ? e1 : e2)
-      .value;
+  // /// Find the max count of any duplicated items in a list
+  // int findMaxNumDuplicatedElementInListOld<T>(Iterable<T> list) => list
+  //     .fold<Map<T, int>>(
+  //         {},
+  //         (map, element) =>
+  //             map..update(element, (value) => value + 1, ifAbsent: () => 1))
+  //     .entries
+  //     .reduce((e1, e2) => e1.value > e2.value ? e1 : e2)
+  //     .value;
 }

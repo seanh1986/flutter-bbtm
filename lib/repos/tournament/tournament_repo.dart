@@ -6,5 +6,9 @@ abstract class TournamentRepository {
 
   Stream<Tournament> getTournamentData(TournamentInfo tournamentInfo);
 
+  Future<void> updateTournamentInfo(TournamentInfo tournamentInfo);
+
+  Future<void> updateTournamentData(Tournament tournament);
+
   Stream<Tournament> downloadTournament(TournamentInfo tournamentInfo);
 }

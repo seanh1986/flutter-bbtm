@@ -1,14 +1,20 @@
 import 'package:bbnaf/models/coach_matchup.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:bbnaf/widgets/matchup_report_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class MatchupCoachWidget extends StatefulWidget {
+  Tournament tournament;
   final CoachMatchup matchup;
   final MatchupClickListener? listener;
 
-  MatchupCoachWidget({Key? key, required this.matchup, this.listener})
+  MatchupCoachWidget(
+      {Key? key,
+      required this.tournament,
+      required this.matchup,
+      this.listener})
       : super(key: key);
 
   @override
@@ -26,6 +32,7 @@ enum UploadState {
 }
 
 class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
+  late Tournament _tournament;
   late CoachMatchup _matchup;
   MatchupClickListener? _listener;
 
@@ -42,6 +49,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   @override
   void initState() {
     super.initState();
+    _tournament = widget.tournament;
     _matchup = widget.matchup;
     _listener = widget.listener;
 
@@ -63,7 +71,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
               child: MatchupReportWidget(
-                participant: _matchup.home(),
+                participant: _matchup.home(_tournament),
                 isHome: true,
                 state: _state,
               ))),
@@ -98,7 +106,9 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
               child: MatchupReportWidget(
-                  participant: _matchup.away(), isHome: false, state: _state))),
+                  participant: _matchup.away(_tournament),
+                  isHome: false,
+                  state: _state))),
     ]);
   }
 

@@ -10,9 +10,7 @@ import 'package:bbnaf/screens/rankings_screen.dart';
 import 'package:bbnaf/screens/tournament_list/tournament_list_screen.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
-import 'package:bbnaf/widgets/placeholder_widget.dart';
 import 'package:flutter/scheduler.dart';
-
 import 'matchups/matchups_coaches_screen.dart';
 import 'matchups/matchups_squad_screen.dart';
 
@@ -72,11 +70,13 @@ class _HomePageState extends State<HomePage> {
     List<Widget> matchupWidgets = [];
     if (_tournament.useSquads) {
       matchupWidgets.add(SquadMatchupsPage(
+        tournament: _tournament,
         matchups: _squadMatchups,
         coachMatchupListeners: _coachMatchupListener,
       ));
     }
-    matchupWidgets.add(CoachMatchupsPage(matchups: _selectedCoachMatchups));
+    matchupWidgets.add(CoachMatchupsPage(
+        tournament: _tournament, matchups: _selectedCoachMatchups));
 
     _children = [
       new _WidgetFamily([
@@ -145,7 +145,7 @@ class _HomePageState extends State<HomePage> {
   void _handleBackButton() {
     if (_childIndex == 0) {
       if (_parentIndex == 0) {
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
           Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -180,7 +180,8 @@ class _HomePageState extends State<HomePage> {
       _WidgetFamily wFamily = _children[_parentIndex];
 
       if (wFamily.widgets.length > _childIndex) {
-        Widget w = new CoachMatchupsPage(matchups: coachMatchups);
+        Widget w = new CoachMatchupsPage(
+            tournament: _tournament, matchups: coachMatchups);
         wFamily.widgets[_childIndex] = w;
       }
     });

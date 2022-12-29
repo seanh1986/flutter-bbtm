@@ -75,6 +75,10 @@ class SwissRound extends RoundMatching {
     return matches;
   }
 
+  bool hasMatchForPlayerName(String name) {
+    return matches.any((IMatchup match) => match.hasParticipantName(name));
+  }
+
   bool hasMatchForPlayer(IMatchupParticipant p) {
     return matches.any((IMatchup match) => match.hasParticipant(p));
   }

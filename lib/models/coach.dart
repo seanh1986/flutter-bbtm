@@ -1,12 +1,7 @@
-import 'dart:collection';
 import 'dart:convert';
 import 'package:bbnaf/models/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
-// import 'package:json_annotation/json_annotation.dart';
 
-// part 'coach.g.dart';
-
-// @JsonSerializable(nullable: false)
 class Coach extends IMatchupParticipant {
   late final int teamId;
 
@@ -162,6 +157,9 @@ class Coach extends IMatchupParticipant {
 
     final tCas = json['cas'] as int?;
     this.cas = tCas != null ? tCas : 0;
+
+    final tOpponents = json['opponents'] as List<String>?;
+    this._opponents = tOpponents != null ? tOpponents : [];
   }
 
   Map toJson() => {

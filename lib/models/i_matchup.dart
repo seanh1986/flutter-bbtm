@@ -1,4 +1,5 @@
 import 'package:bbnaf/models/races.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 
 // Identifies if the object is of type squad or coach
 enum OrgType {
@@ -17,18 +18,22 @@ abstract class IMatchup {
   OrgType type();
   int roundNum();
   int tableNum();
-  IMatchupParticipant home();
-  IMatchupParticipant away();
+
+  String homeName();
+  String awayName();
+
+  IMatchupParticipant home(Tournament t);
+  IMatchupParticipant away(Tournament t);
 
   MatchResult result = MatchResult.NoResult;
 
-  String matchupName() {
+  String groupByName(Tournament t) {
     switch (type()) {
       case OrgType.Coach:
-        return home().parentName() + " vs. " + away().parentName();
+        return home(t).parentName() + " vs. " + away(t).parentName();
       case OrgType.Squad:
       default:
-        return "Squad Table #" + tableNum().toString();
+        return homeName() + " vs. " + awayName();
     }
   }
 
@@ -40,12 +45,17 @@ abstract class IMatchup {
     this.result = result;
   }
 
-  bool hasParticipant(IMatchupParticipant p) {
-    return home().name() == p.name() || away().name() == p.name();
+  bool hasParticipantName(String name) {
+    return homeName() == name || awayName == name;
   }
 
-  bool hasParticipants(IMatchupParticipant p1, IMatchupParticipant p2) {
-    return (home() == p1 && away() == p2) || (home() == p2 && away() == p1);
+  bool hasParticipant(IMatchupParticipant p) {
+    return homeName() == p.name() || awayName == p.name();
+  }
+
+  bool hasParticipants(
+      Tournament t, IMatchupParticipant p1, IMatchupParticipant p2) {
+    return (home(t) == p1 && away(t) == p2) || (home(t) == p2 && away(t) == p1);
   }
 
   @override
@@ -59,12 +69,40 @@ abstract class IMatchup {
     return other is IMatchup &&
         other.type() == type() &&
         other.roundNum() == roundNum() &&
-        other.home() == home() &&
-        other.away() == away();
+        other.homeName() == homeName() &&
+        other.awayName() == awayName();
   }
 
   @override
-  int get hashCode => Object.hash(type(), roundNum(), home(), away());
+  int get hashCode => Object.hash(type(), roundNum(), homeName(), awayName());
+
+  static String getResultName(MatchResult result) {
+    switch (result) {
+      case MatchResult.HomeWon:
+        return "HomeWon";
+      case MatchResult.AwayWon:
+        return "AwayWon";
+      case MatchResult.Draw:
+        return "Draw";
+      case MatchResult.NoResult:
+      default:
+        return "NoResult";
+    }
+  }
+
+  static MatchResult parseResult(String result) {
+    switch (result) {
+      case "HomeWon":
+        return MatchResult.HomeWon;
+      case "AwayWon":
+        return MatchResult.AwayWon;
+      case "Draw":
+        return MatchResult.Draw;
+      case "NoResult":
+      default:
+        return MatchResult.NoResult;
+    }
+  }
 }
 
 // Abstract class which represents a matchup

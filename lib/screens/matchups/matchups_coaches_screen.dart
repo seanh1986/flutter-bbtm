@@ -1,14 +1,18 @@
 import 'package:bbnaf/models/coach_matchup.dart';
 import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 
 class CoachMatchupsPage extends StatefulWidget {
+  final Tournament tournament;
   final List<CoachMatchup> matchups;
   // final MatchupListClickListener matchupListClickListener;
 
-  CoachMatchupsPage({Key? key, required this.matchups}) : super(key: key);
+  CoachMatchupsPage(
+      {Key? key, required this.matchups, required this.tournament})
+      : super(key: key);
 
   // void setCoachMatchups(List<CoachMatchup> matchups) {
   //   this.matchups = matchups;
@@ -21,6 +25,7 @@ class CoachMatchupsPage extends StatefulWidget {
 }
 
 class _CoachMatchupsPage extends State<CoachMatchupsPage> {
+  late Tournament _tournament;
   List<CoachMatchup> _matchups = [];
   // MatchupClickListener _listener;
 
@@ -28,6 +33,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   void initState() {
     super.initState();
     _matchups = widget.matchups;
+    _tournament = widget.tournament;
     // _listener = new _MatchupClickListener(widget.matchupListClickListener);
   }
 
@@ -41,6 +47,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
             groupSeparatorBuilder: _buildGroupSeparator,
             itemBuilder: (BuildContext context, CoachMatchup matchup) =>
                 MatchupCoachWidget(
+              tournament: _tournament,
               matchup: matchup,
               // listener: _listener,
             ),
@@ -50,7 +57,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   }
 
   String _groupBy(IMatchup matchup) {
-    return matchup.matchupName();
+    return matchup.groupByName(_tournament);
   }
 
   Widget _buildGroupSeparator(String matchupName) {
