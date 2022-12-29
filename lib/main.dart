@@ -69,6 +69,9 @@ class _AppState extends State<App> {
   }
 
   Widget _launchSuccess() {
+    // Canadian Open: X0qh35qbzPhBQKBb6y6c
+    String? hardcodedTournamentId = null;
+
     return MaterialApp(
       title: 'BloodBowl Tournament Management',
       theme: ThemeData(
@@ -79,8 +82,10 @@ class _AppState extends State<App> {
         ),
         textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
       ),
-      home: TournamentSelectionPage(), // LoginPage(), // TournamentListPage(),
-    ); // HomePage(),
+      home: TournamentSelectionPage(
+        tournamentId: hardcodedTournamentId,
+      ),
+    );
   }
 
   Widget _launchFailed() {
