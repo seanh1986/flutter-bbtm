@@ -4,6 +4,7 @@ import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:bbnaf/screens/admin/admin_screen.dart';
 import 'package:bbnaf/screens/overview_screen.dart';
 import 'package:bbnaf/screens/rankings_screen.dart';
 import 'package:bbnaf/screens/tournament_list/tournament_list_screen.dart';
@@ -86,7 +87,12 @@ class _HomePageState extends State<HomePage> {
       ]),
       new _WidgetFamily(matchupWidgets),
       new _WidgetFamily([RankingsPage(tournament: _tournament)]),
-      new _WidgetFamily([PlaceholderWidget(Colors.black)]),
+      new _WidgetFamily([
+        AdminScreen(
+          tournament: _tournament,
+          authUser: _authUser,
+        )
+      ]),
     ];
 
     super.initState();
@@ -109,20 +115,31 @@ class _HomePageState extends State<HomePage> {
           ),
           body: _children[_parentIndex].widgets[_childIndex],
           bottomNavigationBar: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.sports_football), label: 'Matches'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.poll), label: 'Rankings'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.settings), label: 'Settings'),
-            ],
+            items: _getBottomNavigationBarItems(),
             currentIndex: _parentIndex,
             selectedItemColor: Theme.of(context).colorScheme.secondary,
             onTap: _onItemTapped,
           ),
         ));
+  }
+
+  List<BottomNavigationBarItem> _getBottomNavigationBarItems() {
+    List<BottomNavigationBarItem> items = [
+      BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+      BottomNavigationBarItem(
+          icon: Icon(Icons.sports_football), label: 'Matches'),
+      BottomNavigationBarItem(icon: Icon(Icons.poll), label: 'Rankings'),
+    ];
+
+    if (_authUser.user != null &&
+        _authUser.user!.email != null &&
+        _tournament.info.organizers
+            .any((element) => element.email == _authUser.user!.email)) {
+      items.add(
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Admin'));
+    }
+
+    return items;
   }
 
   void _handleBackButton() {

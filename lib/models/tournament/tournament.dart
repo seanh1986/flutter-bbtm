@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
+import 'package:bbnaf/utils/swiss/swiss.dart';
 import "package:collection/collection.dart";
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/coach_matchup.dart';
@@ -14,9 +15,10 @@ class Tournament {
   late final TournamentInfo info;
   //late final XmlDocument xml;
 
+  late final FirstRoundMatchingRule firstRoundMatchingRule;
   late final bool useSquads;
 
-  late final int curRoundNumber;
+  int curRoundNumber = 0;
 
   // Key: squad name, Value: Idx in squad list
   HashMap<String, int> _squadIdxMap = new HashMap<String, int>();
@@ -72,12 +74,14 @@ class Tournament {
   }
 
   bool updateRound(RoundMatching matchups) {
-    if (matchups.round() != curRoundNumber + 1) {
+    int newRound = matchups.round();
+
+    if (newRound != curRoundNumber + 1) {
       debugPrint('Failed to update round: Round numbers do not coincide');
       return false;
     }
 
-    curRoundNumber = matchups.round();
+    curRoundNumber = newRound;
     if (useSquads) {
       SquadRound squadRound = SquadRound.fromRoundMatching(matchups);
       if (squadRound.getMatches().isEmpty) {
@@ -111,6 +115,10 @@ class Tournament {
 
     final tUseSquads = json['usesquads'] as bool?;
     this.useSquads = tUseSquads != null ? tUseSquads : false;
+
+    final tFirstRoundMatching = json['firstroundmatching'] as String?;
+    this.firstRoundMatchingRule = SwissPairings.parseFirstRoundMatchingName(
+        tFirstRoundMatching != null ? tFirstRoundMatching : "");
 
     final tCoaches = json['coaches'] as List<dynamic>?;
     if (tCoaches != null) {

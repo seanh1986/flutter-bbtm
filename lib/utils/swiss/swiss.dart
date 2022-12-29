@@ -24,10 +24,9 @@ enum RoundPairingError {
 // https://github.com/i-chess/fast-swiss-pairing/tree/master/src/main/java/com/ichess/fastswisspairing
 class SwissPairings {
   Tournament tournament;
-  FirstRoundMatchingRule firstRoundMatchingRule;
   final _random = new Random();
 
-  SwissPairings(this.tournament, this.firstRoundMatchingRule);
+  SwissPairings(this.tournament);
 
   /// Return true if pairing successful, false if
   RoundPairingError pairNextRound() {
@@ -38,7 +37,7 @@ class SwissPairings {
     RoundMatching? matching;
 
     if (round == 1) {
-      matching = _getFirstRoundMatching(firstRoundMatchingRule);
+      matching = _getFirstRoundMatching(tournament.firstRoundMatchingRule);
     } else if (verifyAllResultsEntered()) {
       if (tournament.useSquads) {
         matching = _applySwiss(round, tournament.getSquads());
@@ -63,7 +62,7 @@ class SwissPairings {
     return errorType;
   }
 
-  RoundMatching _getFirstRoundMatching(FirstRoundMatchingRule rule) {
+  RoundMatching? _getFirstRoundMatching(FirstRoundMatchingRule rule) {
     switch (rule) {
       case FirstRoundMatchingRule.MatchRandom:
       case FirstRoundMatchingRule.MatchRandomAvoidGroup:
@@ -72,39 +71,44 @@ class SwissPairings {
     }
   }
 
-  SwissRound _firstRoundRandom() {
-    SwissRound matchings = SwissRound(1);
-
-    List<int> notYetPairedIndices = [];
+  SwissRound? _firstRoundRandom() {
+    List<IMatchupParticipant> notYetPaired = [];
 
     if (tournament.useSquads) {
-      for (int i = 0; i < tournament.getSquads().length; i++) {
-        notYetPairedIndices.add(i);
-      }
+      notYetPaired = new List.from(tournament.getSquads());
     } else {
-      for (int i = 0; i < tournament.getCoaches().length; i++) {
-        notYetPairedIndices.add(i);
-      }
+      notYetPaired = new List.from(tournament.getCoaches());
     }
+
+    // Handle case with odd number of coaches
+    if (notYetPaired.length % 2 == 1) {
+      int byeIdx = _random.nextInt(notYetPaired.length - 1);
+      notYetPaired.removeAt(byeIdx);
+    }
+
+    if (notYetPaired.length <= 1) {
+      return null;
+    }
+
+    SwissRound matchings = SwissRound(1);
 
     int tableNum = 1;
 
-    while (notYetPairedIndices.length > 1) {
-      int idx_1 = _random.nextInt(notYetPairedIndices.length - 1);
+    while (notYetPaired.length > 1) {
+      int idx_1 = _random.nextInt(notYetPaired.length - 1);
 
-      IMatchupParticipant player_1 = tournament.useSquads
-          ? tournament.getSquads()[idx_1]
-          : tournament.getCoaches()[idx_1];
+      IMatchupParticipant player_1 = notYetPaired[idx_1];
 
-      notYetPairedIndices.remove(idx_1);
+      notYetPaired.removeAt(idx_1);
 
-      int idx_2 = _random.nextInt(notYetPairedIndices.length - 1);
+      // Last player will be when lenght is = 1
+      int idx_2 = notYetPaired.length > 1
+          ? _random.nextInt(notYetPaired.length - 1)
+          : 0;
 
-      IMatchupParticipant player_2 = tournament.useSquads
-          ? tournament.getSquads()[idx_2]
-          : tournament.getCoaches()[idx_2];
+      IMatchupParticipant player_2 = notYetPaired[idx_2];
 
-      notYetPairedIndices.remove(idx_2);
+      notYetPaired.removeAt(idx_2);
 
       if (tournament.useSquads) {
         matchings.matches.add(
@@ -429,6 +433,26 @@ class SwissPairings {
     }
     // nothing to do... probably not enough players or some crazy pairing
     return false;
+  }
+
+  static String getFirstRoundMatchingName(FirstRoundMatchingRule rule) {
+    switch (rule) {
+      case FirstRoundMatchingRule.MatchRandomAvoidGroup:
+        return "MatchRandomAvoidGroup";
+      case FirstRoundMatchingRule.MatchRandom:
+      default:
+        return "MatchRandom";
+    }
+  }
+
+  static FirstRoundMatchingRule parseFirstRoundMatchingName(String rule) {
+    switch (rule) {
+      case "MatchRandomAvoidGroup":
+        return FirstRoundMatchingRule.MatchRandomAvoidGroup;
+      case "MatchRandom":
+      default:
+        return FirstRoundMatchingRule.MatchRandom;
+    }
   }
 
   List<IMatchup>? _applySwissOld(
