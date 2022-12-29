@@ -34,17 +34,19 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   // TODO: Add CurCoach widget at top if non-null
   @override
   Widget build(BuildContext context) {
-    return GroupedListView(
-      elements: _matchups,
-      groupBy: (IMatchup matchup) => _groupBy(matchup),
-      groupSeparatorBuilder: _buildGroupSeparator,
-      itemBuilder: (BuildContext context, CoachMatchup matchup) =>
-          MatchupCoachWidget(
-        matchup: matchup,
-        // listener: _listener,
-      ),
-      order: GroupedListOrder.ASC,
-    );
+    return _matchups.isNotEmpty
+        ? GroupedListView(
+            elements: _matchups,
+            groupBy: (IMatchup matchup) => _groupBy(matchup),
+            groupSeparatorBuilder: _buildGroupSeparator,
+            itemBuilder: (BuildContext context, CoachMatchup matchup) =>
+                MatchupCoachWidget(
+              matchup: matchup,
+              // listener: _listener,
+            ),
+            order: GroupedListOrder.ASC,
+          )
+        : _noMatchUpsYet();
   }
 
   String _groupBy(IMatchup matchup) {
@@ -63,25 +65,8 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   }
 }
 
-// class _MatchupClickListener implements MatchupClickListener {
-//   final MatchupListClickListener matchupListClickListener;
-
-//   _MatchupClickListener(this.matchupListClickListener);
-
-//   @override
-//   void onItemClicked(IMatchup matchup) {
-//     List<IMatchup> matchups = [];
-
-//     if (matchup is SquadMatchup) {
-//       for (CoachMatchup cm in matchup.coachMatchups) {
-//         matchups.add(cm);
-//       }
-//     } else {
-//       matchups.add(matchup);
-//     }
-
-//     if (matchupListClickListener != null) {
-//       matchupListClickListener.onItemClicked(matchups);
-//     }
-//   }
-// }
+Widget _noMatchUpsYet() {
+  return Container(
+    child: Text('Matchups not available yet'),
+  );
+}
