@@ -21,6 +21,7 @@ enum RoundPairingError {
   UnableToFindValidMatches,
 }
 
+// https://github.com/i-chess/fast-swiss-pairing/tree/master/src/main/java/com/ichess/fastswisspairing
 class SwissPairings {
   Tournament tournament;
   FirstRoundMatchingRule firstRoundMatchingRule;
