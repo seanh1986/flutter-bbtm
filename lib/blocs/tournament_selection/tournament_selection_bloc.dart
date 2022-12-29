@@ -29,8 +29,12 @@ class TournamentSelectionBloc
       LoadingTournamentEvent event) async* {
     print("TournamentSelectionBloc: _mapLoadingTournamentState");
     _tournamentSelectionSubscription?.cancel();
+    // _tournamentSelectionSubscription =
+    //     _tournamentRepository.downloadTournament(event.tournamentInfo).listen(
+    //           (t) => add(SelectedTournamentEvent(event.tournamentInfo, t)),
+    //         );
     _tournamentSelectionSubscription =
-        _tournamentRepository.downloadTournament(event.tournamentInfo).listen(
+        _tournamentRepository.getTournamentData(event.tournamentInfo).listen(
               (t) => add(SelectedTournamentEvent(event.tournamentInfo, t)),
             );
   }

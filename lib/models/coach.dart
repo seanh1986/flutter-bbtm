@@ -1,3 +1,5 @@
+import 'dart:collection';
+import 'dart:convert';
 import 'package:bbnaf/models/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
 // import 'package:json_annotation/json_annotation.dart';
@@ -6,19 +8,19 @@ import 'package:bbnaf/models/races.dart';
 
 // @JsonSerializable(nullable: false)
 class Coach extends IMatchupParticipant {
-  final int teamId;
+  late final int teamId;
 
-  final String nafName; // Key
+  late final String nafName; // Key
 
-  final String squadName;
+  late final String squadName;
 
-  final String coachName;
+  late final String coachName;
 
-  final String teamName;
+  late final String teamName;
 
-  final int nafNumber;
+  late final int nafNumber;
 
-  final Race _race;
+  late final Race _race;
 
   int _wins = 0;
   int _ties = 0;
@@ -124,4 +126,56 @@ class Coach extends IMatchupParticipant {
   void addCas(int c) {
     cas += c;
   }
+
+  Coach.fromJson(int id, Map<String, Object?> json) {
+    this.teamId = id;
+
+    final tNafName = json['nafname'] as String?;
+    this.nafName = tNafName != null ? tNafName : "";
+
+    final tCoachName = json['coachname'] as String?;
+    this.coachName = tCoachName != null ? tCoachName : "";
+
+    final tTeamName = json['teamname'] as String?;
+    this.teamName = tTeamName != null ? tTeamName : "";
+
+    final tSquadName = json['squadname'] as String?;
+    this.squadName = tSquadName != null ? tSquadName : "";
+
+    final tRace = json['race'] as String?;
+    this._race = tRace != null ? RaceUtils.getRace(tRace) : Race.Unknown;
+
+    final tNafNumber = json['nafnumber'] as int?;
+    this.nafNumber = tNafNumber != null ? tNafNumber : -1;
+
+    final tWins = json['wins'] as int?;
+    this._wins = tWins != null ? tWins : 0;
+
+    final tTies = json['ties'] as int?;
+    this._ties = tTies != null ? tTies : 0;
+
+    final tLosses = json['losses'] as int?;
+    this._losses = tLosses != null ? tLosses : 0;
+
+    final tTd = json['td'] as int?;
+    this.tds = tTd != null ? tTd : 0;
+
+    final tCas = json['cas'] as int?;
+    this.cas = tCas != null ? tCas : 0;
+  }
+
+  Map toJson() => {
+        'nafname': nafName,
+        'coachname': coachName,
+        'teamname': teamName,
+        'squadname': squadName,
+        'race': RaceUtils.getName(_race),
+        'nafnumber': nafNumber,
+        'wins': _wins,
+        'ties': _ties,
+        'losses': _losses,
+        'td': tds,
+        'cas': cas,
+        'opponents': jsonEncode(_opponents)
+      };
 }

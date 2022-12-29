@@ -1,13 +1,14 @@
+import 'dart:core';
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 
-@immutable
 class TournamentInfo {
-  final String id;
-  final String name;
-  final String location;
-  final DateTime dateTimeStart;
-  final DateTime dateTimeEnd;
+  late final String id;
+  late final String name;
+  late final String location;
+  late final DateTime dateTimeStart;
+  late final DateTime dateTimeEnd;
+  List<OrganizerInfo> organizers = [];
 
   TournamentInfo({
     required this.id,
@@ -17,45 +18,79 @@ class TournamentInfo {
     required this.dateTimeEnd,
   });
 
-  factory TournamentInfo.fromJson(
-      String documentId, Map<String, Object?> json) {
-    final name = json['Name'] as String?;
-    if (name == null) {
+  TournamentInfo.fromJson(String documentId, Map<String, dynamic> json) {
+    this.id = documentId;
+
+    final tName = json['Name'] as String?;
+    if (tName != null) {
+      this.name = tName;
+    } else {
       throw UnsupportedError('Invalid data: $json -> "Name" is missing');
     }
 
-    final location = json['Location'] as String?;
-    if (location == null) {
+    final tLocation = json['Location'] as String?;
+    if (tLocation != null) {
+      this.location = tLocation;
+    } else {
       throw UnsupportedError('Invalid data: $json -> "Location" is missing');
     }
 
     final Timestamp? tStart = json['DateTimeStart'] as Timestamp?;
-    if (tStart == null) {
+    if (tStart != null) {
+      this.dateTimeStart = tStart.toDate();
+    } else {
       throw UnsupportedError(
           'Invalid data: $json -> "DateTimeStart" is missing');
     }
-    final dateTimeStart = tStart.toDate();
 
     final Timestamp? tEnd = json['DateTimeEnd'] as Timestamp?;
-    if (tEnd == null) {
+    if (tEnd != null) {
+      this.dateTimeEnd = tStart.toDate();
+    } else {
       throw UnsupportedError('Invalid data: $json -> "DateTimeEnd" is missing');
     }
-    final dateTimeEnd = tStart.toDate();
 
-    return TournamentInfo(
-        id: documentId,
-        name: name,
-        location: location,
-        dateTimeStart: dateTimeStart,
-        dateTimeEnd: dateTimeEnd);
+    final tOrganizers = json['organizers'] as List<dynamic>?;
+    if (tOrganizers != null) {
+      tOrganizers.forEach((tOrga) {
+        organizers.add(OrganizerInfo.fromJson(tOrga as Map<String, dynamic>));
+      });
+    }
   }
 
-  Map<String, Object?> toJson() {
-    return {
-      'Name': name,
-      'Location': location,
-      'DateTimeStart': dateTimeStart,
-      'DateTimeEnd': dateTimeEnd,
-    };
+  Map toJson() => {
+        'Name': name,
+        'Location': location,
+        'DateTimeStart': dateTimeStart,
+        'DateTimeEnd': dateTimeEnd,
+        'organizers': jsonEncode(organizers),
+      };
+}
+
+class OrganizerInfo {
+  late String email;
+  late String nafName;
+
+  OrganizerInfo(this.email, this.nafName);
+
+  OrganizerInfo.fromJson(Map<String, dynamic> json) {
+    final tEmail = json['email'] as String?;
+    if (tEmail != null) {
+      this.email = tEmail;
+    } else {
+      throw UnsupportedError('Invalid data: $json -> "email" is missing');
+    }
+
+    final tNafName = json['nafname'] as String?;
+    if (tNafName != null) {
+      this.nafName = tNafName;
+    } else {
+      throw UnsupportedError('Invalid data: $json -> "nafname" is missing');
+    }
   }
+
+  Map toJson() => {
+        'email': email,
+        'nafName': nafName,
+      };
 }

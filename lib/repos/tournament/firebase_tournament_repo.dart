@@ -34,6 +34,20 @@ class FirebaseTournamentRepository extends TournamentRepository {
   }
 
   @override
+  Stream<Tournament> getTournamentData(TournamentInfo tournamentInfo) async* {
+    print("FirebaseTournamentRepository: getTournamentData");
+
+    Tournament t = await _tournamentInfoRef.doc(tournamentInfo.id).get().then(
+        (value) => Tournament.fromJson(
+            tournamentInfo,
+            value.exists && value.data()!.containsKey("data")
+                ? value.data()!['data'] as Map<String, dynamic>
+                : Map<String, dynamic>()));
+
+    yield t;
+  }
+
+  @override
   Stream<Tournament> downloadTournament(TournamentInfo tournamentInfo) async* {
     firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
         .ref(tournamentInfo.id + '.bbd');

@@ -12,18 +12,18 @@ import 'package:xml/xml.dart';
 
 class Tournament {
   late final TournamentInfo info;
-  late final XmlDocument xml;
+  //late final XmlDocument xml;
 
   late final bool useSquads;
 
   late final int curRoundNumber;
 
   // Key: squad name, Value: Idx in squad list
-  HashMap<String, int> _squadMap = new HashMap<String, int>();
+  HashMap<String, int> _squadIdxMap = new HashMap<String, int>();
   List<Squad> _squads = [];
 
   // Key: nafName, Value: Idx in coach list
-  HashMap<String, int> _coachMap = new HashMap<String, int>();
+  HashMap<String, int> _coachIdxMap = new HashMap<String, int>();
   List<Coach> _coaches = [];
 
   List<SquadRound> prevSquadRounds = [];
@@ -35,11 +35,11 @@ class Tournament {
   void addSquad(Squad s) {
     int idx = _squads.length;
     _squads.add(s);
-    _squadMap.putIfAbsent(s.name(), () => idx);
+    _squadIdxMap.putIfAbsent(s.name(), () => idx);
   }
 
   Squad? getSquad(String squadName) {
-    int? idx = _squadMap[squadName];
+    int? idx = _squadIdxMap[squadName];
     return idx != null ? _squads[idx] : null;
   }
 
@@ -50,11 +50,11 @@ class Tournament {
   void addCoach(Coach c) {
     int idx = _coaches.length;
     _coaches.add(c);
-    _coachMap.putIfAbsent(c.name(), () => idx);
+    _coachIdxMap.putIfAbsent(c.name(), () => idx);
   }
 
   Coach? getCoach(String nafName) {
-    int? idx = _coachMap[nafName];
+    int? idx = _coachIdxMap[nafName];
     return idx != null ? _coaches[idx] : null;
   }
 
@@ -101,6 +101,37 @@ class Tournament {
     }
 
     return true;
+  }
+
+  Tournament.fromJson(TournamentInfo info, Map<String, dynamic> json) {
+    this.info = info;
+
+    final tRound = json['round'] as int?;
+    this.curRoundNumber = tRound != null ? tRound : 0;
+
+    final tUseSquads = json['usesquads'] as bool?;
+    this.useSquads = tUseSquads != null ? tUseSquads : false;
+
+    final tCoaches = json['coaches'] as List<dynamic>?;
+    if (tCoaches != null) {
+      for (int i = 0; i < tCoaches.length; i++) {
+        addCoach(Coach.fromJson(i, tCoaches[i] as Map<String, dynamic>));
+      }
+    }
+  }
+
+  void _syncSquadsAndCoaches() {
+    _squadIdxMap.clear();
+    for (int i = 0; i < _squads.length; i++) {
+      Squad s = _squads[i];
+      _squadIdxMap.putIfAbsent(s.name(), () => i);
+    }
+
+    _coachIdxMap.clear();
+    for (int i = 0; i < _coaches.length; i++) {
+      Coach c = _coaches[i];
+      _coachIdxMap.putIfAbsent(c.name(), () => i);
+    }
   }
 
   factory Tournament.fromXml(XmlDocument xml, TournamentInfo info) {
@@ -271,18 +302,31 @@ class Tournament {
         squad.calculateWinsTiesLosses(prevSquadRounds);
       });
 
-      return new Tournament.squads(info, xml, curRoundNumber, squads, coaches,
-          prevSquadRounds, prevCoachRounds, curSquadRound, curCoachRound);
+      return new Tournament.squads(
+          info,
+          // xml,
+          curRoundNumber,
+          squads,
+          coaches,
+          prevSquadRounds,
+          prevCoachRounds,
+          curSquadRound,
+          curCoachRound);
     } else {
       return new Tournament.noSquads(
-          info, xml, curRoundNumber, coaches, prevCoachRounds, curCoachRound);
+          info,
+          // xml,
+          curRoundNumber,
+          coaches,
+          prevCoachRounds,
+          curCoachRound);
     }
   }
 
 // Squad constructor
   Tournament.squads(
       this.info,
-      this.xml,
+      // this.xml,
       this.curRoundNumber,
       this._squads,
       this._coaches,
@@ -292,27 +336,34 @@ class Tournament {
       this.curCoachRound) {
     useSquads = true;
 
-    for (int i = 0; i < _squads.length; i++) {
-      Squad s = _squads[i];
-      _squadMap.putIfAbsent(s.name(), () => i);
-    }
+    // for (int i = 0; i < _squads.length; i++) {
+    //   Squad s = _squads[i];
+    //   _squadMap.putIfAbsent(s.name(), () => i);
+    // }
 
-    for (int i = 0; i < _coaches.length; i++) {
-      Coach c = _coaches[i];
-      _coachMap.putIfAbsent(c.name(), () => i);
-    }
+    // for (int i = 0; i < _coaches.length; i++) {
+    //   Coach c = _coaches[i];
+    //   _coachMap.putIfAbsent(c.name(), () => i);
+    // }
+    _syncSquadsAndCoaches();
   }
 
   // Non-squad constructor
-  Tournament.noSquads(this.info, this.xml, this.curRoundNumber, this._coaches,
-      this.prevCoachRounds, this.curCoachRound) {
+  Tournament.noSquads(
+      this.info,
+      // this.xml,
+      this.curRoundNumber,
+      this._coaches,
+      this.prevCoachRounds,
+      this.curCoachRound) {
     useSquads = false;
     curSquadRound = null;
 
-    for (int i = 0; i < _coaches.length; i++) {
-      Coach c = _coaches[i];
-      _coachMap.putIfAbsent(c.name(), () => i);
-    }
+    // for (int i = 0; i < _coaches.length; i++) {
+    //   Coach c = _coaches[i];
+    //   _coachMap.putIfAbsent(c.name(), () => i);
+    // }
+    _syncSquadsAndCoaches();
   }
 
   static List<SquadRound> _getSquadRounds(
