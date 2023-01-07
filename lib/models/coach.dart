@@ -158,11 +158,14 @@ class Coach extends IMatchupParticipant {
     final tCas = json['cas'] as int?;
     this.cas = tCas != null ? tCas : 0;
 
-    final tOpponents = json['opponents'] as List<String>?;
+    final tOpponentsA = json['opponents'] as List<dynamic>?;
+    final tOpponents = tOpponentsA != null && tOpponentsA.isNotEmpty
+        ? tOpponentsA as List<String>?
+        : null;
     this._opponents = tOpponents != null ? tOpponents : [];
   }
 
-  Map toJson() => {
+  Map<String, dynamic> toJson() => {
         'nafname': nafName,
         'coachname': coachName,
         'teamname': teamName,
@@ -174,6 +177,6 @@ class Coach extends IMatchupParticipant {
         'losses': _losses,
         'td': tds,
         'cas': cas,
-        'opponents': jsonEncode(_opponents)
+        'opponents': _opponents,
       };
 }

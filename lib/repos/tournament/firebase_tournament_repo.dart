@@ -36,17 +36,35 @@ class FirebaseTournamentRepository extends TournamentRepository {
   }
 
   @override
-  Stream<Tournament> getTournamentData(TournamentInfo tournamentInfo) async* {
+  Stream<Tournament> getTournamentData(String tournamentId) async* {
     print("FirebaseTournamentRepository: getTournamentData");
 
-    Tournament t = await _tournamentInfoRef.doc(tournamentInfo.id).get().then(
-        (value) => Tournament.fromJson(
-            tournamentInfo,
-            value.exists && value.data()!.containsKey("data")
-                ? value.data()!['data'] as Map<String, dynamic>
-                : Map<String, dynamic>()));
+    Tournament t = await _tournamentInfoRef
+        .doc(tournamentId)
+        .get()
+        .then((value) => _parseTournamentResponse(value));
 
     yield t;
+  }
+
+  Tournament _parseTournamentResponse(
+      DocumentSnapshot<Map<String, dynamic>> value) {
+    String tournamentId = value.id;
+
+    if (!value.exists || value.data() == null) {
+      TournamentInfo tournamentInfo =
+          TournamentInfo.fromJson(tournamentId, Map<String, dynamic>());
+      return Tournament.fromJson(tournamentInfo, Map<String, dynamic>());
+    }
+
+    TournamentInfo tournamentInfo =
+        TournamentInfo.fromJson(tournamentId, value.data()!);
+
+    if (!value.data()!.containsKey("data")) {
+      return Tournament.fromJson(tournamentInfo, Map<String, dynamic>());
+    }
+
+    return Tournament.fromJson(tournamentInfo, value.data()!['data']);
   }
 
   @override
@@ -58,8 +76,14 @@ class FirebaseTournamentRepository extends TournamentRepository {
 
   @override
   Future<void> updateTournamentData(Tournament tournament) async {
-    Map<String, Object?> json = {"data": jsonEncode(tournament)};
+    Map<String, dynamic> jsonA = tournament.info.toJson();
 
+    jsonA.putIfAbsent("data", () => tournament.toJson());
+
+    Map<String, Object?> json =
+        jsonA.map((key, value) => MapEntry<String, Object?>(key, value));
+
+    // TODO: This broke stuff!! ^ refactored above...
     return _tournamentInfoRef.doc(tournament.info.id).set(json);
   }
 

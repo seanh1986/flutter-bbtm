@@ -1,4 +1,6 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
+import 'package:bbnaf/blocs/tournament_update/tournament_update.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
 import 'package:bbnaf/screens/tournament_list/tournament_selection.dart';
@@ -27,7 +29,12 @@ void main() async {
     BlocProvider<TournamentSelectionBloc>(
         create: (context) => TournamentSelectionBloc(tRepo: _tournamentRepo)
           ..add(DeselectedTournamentEvent())),
+    BlocProvider<TournamentUpdateBloc>(
+        create: (context) => TournamentUpdateBloc(tRepo: _tournamentRepo)
+          ..add(AppStartedTournamentUpdateEvent())),
   ], child: App()));
+
+  _tournamentRepo.updateTournamentData(Tournament.fromExample());
 }
 
 /// We are using a StatefulWidget such that we only create the [Future] once,

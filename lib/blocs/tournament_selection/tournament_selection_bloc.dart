@@ -34,7 +34,7 @@ class TournamentSelectionBloc
     //           (t) => add(SelectedTournamentEvent(event.tournamentInfo, t)),
     //         );
     _tournamentSelectionSubscription =
-        _tournamentRepository.getTournamentData(event.tournamentInfo).listen(
+        _tournamentRepository.getTournamentData(event.tournamentInfo.id).listen(
               (t) => add(SelectedTournamentEvent(event.tournamentInfo, t)),
             );
   }

@@ -33,3 +33,17 @@ class NewRoundState extends TournamentUpdateState {
     return 'NewRoundState { tournament: $tournament }';
   }
 }
+
+class TournamentDataUpdatedState extends TournamentUpdateState {
+  final Tournament tournament;
+
+  const TournamentDataUpdatedState(this.tournament);
+
+  @override
+  List<Object> get props => [tournament];
+
+  @override
+  String toString() {
+    return 'NewRoundState { tournament: $tournament }';
+  }
+}

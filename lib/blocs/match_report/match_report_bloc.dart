@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:bbnaf/blocs/tournament_selection/tournament_selection_bloc.dart';
 import 'package:bbnaf/repos/auth/auth_repo.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:bloc/bloc.dart';

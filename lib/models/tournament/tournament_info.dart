@@ -45,7 +45,7 @@ class TournamentInfo {
 
     final Timestamp? tEnd = json['DateTimeEnd'] as Timestamp?;
     if (tEnd != null) {
-      this.dateTimeEnd = tStart.toDate();
+      this.dateTimeEnd = tEnd.toDate();
     } else {
       throw UnsupportedError('Invalid data: $json -> "DateTimeEnd" is missing');
     }
@@ -58,20 +58,21 @@ class TournamentInfo {
     }
   }
 
-  Map toJson() => {
+  Map<String, dynamic> toJson() => {
         'Name': name,
         'Location': location,
-        'DateTimeStart': dateTimeStart,
-        'DateTimeEnd': dateTimeEnd,
-        'organizers': jsonEncode(organizers),
+        'DateTimeStart': Timestamp.fromDate(dateTimeStart),
+        'DateTimeEnd': Timestamp.fromDate(dateTimeEnd),
+        'organizers': organizers.map((e) => e.toJson()).toList(),
       };
 }
 
 class OrganizerInfo {
   late String email;
   late String nafName;
+  late bool primary;
 
-  OrganizerInfo(this.email, this.nafName);
+  OrganizerInfo(this.email, this.nafName, this.primary);
 
   OrganizerInfo.fromJson(Map<String, dynamic> json) {
     final tEmail = json['email'] as String?;
@@ -87,10 +88,14 @@ class OrganizerInfo {
     } else {
       throw UnsupportedError('Invalid data: $json -> "nafname" is missing');
     }
+
+    final tPrimary = json['primary'] as bool?;
+    primary = tPrimary != null ? tPrimary : false;
   }
 
-  Map toJson() => {
+  Map<String, dynamic> toJson() => {
         'email': email,
-        'nafName': nafName,
+        'nafname': nafName,
+        'primary': primary,
       };
 }

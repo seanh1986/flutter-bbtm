@@ -224,10 +224,10 @@ class Squad extends IMatchupParticipant {
 
   Map toJson() => {
         'name': _name,
-        'coaches': jsonEncode(_coaches),
+        'coaches': _coaches,
         'wins': _wins,
         'ties': _ties,
         'losses': _losses,
-        'opponents': jsonEncode(_opponents),
+        'opponents': _opponents,
       };
 }

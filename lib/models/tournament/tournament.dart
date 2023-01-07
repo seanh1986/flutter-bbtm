@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:convert';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import "package:collection/collection.dart";
@@ -136,13 +135,13 @@ class Tournament {
     }
   }
 
-  Map toJson() => {
+  Map<String, dynamic> toJson() => {
         'round': curRoundNumber,
         'usesquads': useSquads,
         'firstroundmatching':
             SwissPairings.getFirstRoundMatchingName(firstRoundMatchingRule),
-        'coaches': jsonEncode(_coaches),
-        'squads': jsonEncode(_squads)
+        'coaches': _coaches.map((e) => e.toJson()).toList(),
+        'squads': _squads.map((e) => e.toJson()).toList(),
       };
 
   void _syncSquadsAndCoaches() {
@@ -457,5 +456,35 @@ class Tournament {
       CoachMatchup cm, HashMap<String, int> coachMap, List<Coach> coaches) {
     int? coachIdx = coachMap[cm.homeNafName];
     return coachIdx != null ? coaches[coachIdx].squadName : "";
+  }
+
+  Tournament.fromExample() {
+    info = TournamentInfo(
+        id: "X0qh35qbzPhBQKBb6y6c",
+        name: "Canadian Open",
+        location: "Waterloo, Ontario",
+        dateTimeStart: DateTime.utc(2023, 2, 10),
+        dateTimeEnd: DateTime.utc(2023, 2, 11));
+
+    info.organizers
+        .add(OrganizerInfo("thecanadianopen@gmail.com", "grant85", true));
+
+    info.organizers
+        .add(OrganizerInfo("huberman.sean@gmail.com", "seanh1986", false));
+
+    firstRoundMatchingRule = FirstRoundMatchingRule.MatchRandom;
+    useSquads = false;
+
+    curRoundNumber = 0;
+
+    int id = -1;
+    addCoach(Coach(id++, "seanh1986", "", "Sean", Race.NecromanticHorror,
+        "Sean Team", 23461));
+    addCoach(Coach(
+        id++, "grant85", "", "Grant", Race.DaemonOfKhorne, "Grant Team", 6482));
+    addCoach(Coach(
+        id++, "hammer16", "", "Chris H", Race.Ogre, "Chris H Team", 20377));
+    addCoach(Coach(id++, "Duke_of_Edmund", "", "Andew W", Race.ShamblingUndead,
+        "Andrew Team", 27220));
   }
 }

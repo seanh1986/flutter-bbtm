@@ -1,8 +1,10 @@
+import 'package:bbnaf/blocs/tournament_update/tournament_update.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AdminScreen extends StatefulWidget {
   final Tournament tournament;
@@ -20,17 +22,38 @@ class AdminScreen extends StatefulWidget {
 class _AdminScreenState extends State<AdminScreen> {
   late Tournament _tournament;
   late AuthUser _authUser;
+  late TournamentUpdateBloc _tournyUpdateBloc;
 
   @override
   void initState() {
     _tournament = widget.tournament;
     _authUser = widget.authUser;
+    _tournyUpdateBloc = BlocProvider.of<TournamentUpdateBloc>(context);
 
     super.initState();
   }
 
   @override
+  void dispose() {
+    _tournyUpdateBloc.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return BlocBuilder<TournamentUpdateBloc, TournamentUpdateState>(
+        bloc: _tournyUpdateBloc,
+        builder: (selectContext, selectState) {
+          if (selectState is NewRoundState) {
+            _tournament = selectState.tournament;
+          } else if (selectState is TournamentDataUpdatedState) {
+            _tournament = selectState.tournament;
+          }
+          return _generateView();
+        });
+  }
+
+  Widget _generateView() {
     return Container(
       child: Padding(
           padding: EdgeInsets.all(7),
@@ -93,9 +116,7 @@ class _AdminScreenState extends State<AdminScreen> {
                 context: context, title: "Advance Round", message: msg);
 
             if (pairingError == RoundPairingError.NoError) {
-              setState(() {
-                _tournament = _tournament;
-              });
+              _tournyUpdateBloc.add(NewRoundEvent(_tournament));
             }
           },
         ));
