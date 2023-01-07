@@ -13,7 +13,6 @@ import 'package:xml/xml.dart';
 
 class Tournament {
   late final TournamentInfo info;
-  //late final XmlDocument xml;
 
   late final FirstRoundMatchingRule firstRoundMatchingRule;
   late final bool useSquads;
@@ -28,11 +27,8 @@ class Tournament {
   HashMap<String, int> _coachIdxMap = new HashMap<String, int>();
   List<Coach> _coaches = [];
 
-  List<SquadRound> prevSquadRounds = [];
-  List<CoachRound> prevCoachRounds = [];
-
-  SquadRound? curSquadRound;
-  CoachRound? curCoachRound;
+  List<SquadRound> SquadRounds = [];
+  List<CoachRound> CoachRounds = [];
 
   void addSquad(Squad s) {
     int idx = _squads.length;
@@ -89,8 +85,7 @@ class Tournament {
         return false;
       }
 
-      prevSquadRounds.add(squadRound);
-      curSquadRound = squadRound;
+      SquadRounds.add(squadRound);
 
       // TODO: Update coaches too
     } else {
@@ -100,8 +95,7 @@ class Tournament {
         return false;
       }
 
-      prevCoachRounds.add(round);
-      curCoachRound = round;
+      CoachRounds.add(round);
     }
 
     return true;
@@ -236,8 +230,7 @@ class Tournament {
       }
     }
 
-    List<CoachRound> prevCoachRounds = [];
-    CoachRound? curCoachRound;
+    List<CoachRound> coachRounds = [];
 
     final roundsTags = xml.findAllElements('round');
     for (var r in roundsTags) {
@@ -302,11 +295,7 @@ class Tournament {
       // Update Coach Rounds
       CoachRound coachRound = new CoachRound(roundNumber, coachMatchups);
 
-      if (isCurrentRound) {
-        curCoachRound = coachRound;
-      } else {
-        prevCoachRounds.add(coachRound);
-      }
+      coachRounds.add(coachRound);
     }
 
     // Update coach points
@@ -315,78 +304,48 @@ class Tournament {
     });
 
     if (useSquads) {
-      List<SquadRound> prevSquadRounds =
-          _getSquadRounds(prevCoachRounds, squadMap, squads, coachMap, coaches);
-      SquadRound curSquadRound =
-          _getSquadRound(curCoachRound!, squadMap, squads, coachMap, coaches);
+      List<SquadRound> squadRounds =
+          _getSquadRounds(coachRounds, squadMap, squads, coachMap, coaches);
 
       // Update squad points
       squads.forEach((Squad squad) {
         squad.calculatePoints(squadScoreMode, coachMap, coaches);
-        squad.calculateWinsTiesLosses(prevSquadRounds);
+        squad.calculateWinsTiesLosses(squadRounds);
       });
 
       return new Tournament.squads(
-          info,
-          // xml,
-          curRoundNumber,
-          squads,
-          coaches,
-          prevSquadRounds,
-          prevCoachRounds,
-          curSquadRound,
-          curCoachRound);
+        info,
+        // xml,
+        curRoundNumber,
+        squads,
+        coaches,
+        squadRounds,
+        coachRounds,
+      );
     } else {
       return new Tournament.noSquads(
-          info,
-          // xml,
-          curRoundNumber,
-          coaches,
-          prevCoachRounds,
-          curCoachRound);
+        info,
+        // xml,
+        curRoundNumber,
+        coaches,
+        coachRounds,
+      );
     }
   }
 
 // Squad constructor
-  Tournament.squads(
-      this.info,
-      // this.xml,
-      this.curRoundNumber,
-      this._squads,
-      this._coaches,
-      this.prevSquadRounds,
-      this.prevCoachRounds,
-      this.curSquadRound,
-      this.curCoachRound) {
+  Tournament.squads(this.info, this.curRoundNumber, this._squads, this._coaches,
+      this.SquadRounds, this.CoachRounds) {
     useSquads = true;
 
-    // for (int i = 0; i < _squads.length; i++) {
-    //   Squad s = _squads[i];
-    //   _squadMap.putIfAbsent(s.name(), () => i);
-    // }
-
-    // for (int i = 0; i < _coaches.length; i++) {
-    //   Coach c = _coaches[i];
-    //   _coachMap.putIfAbsent(c.name(), () => i);
-    // }
     _syncSquadsAndCoaches();
   }
 
   // Non-squad constructor
   Tournament.noSquads(
-      this.info,
-      // this.xml,
-      this.curRoundNumber,
-      this._coaches,
-      this.prevCoachRounds,
-      this.curCoachRound) {
+      this.info, this.curRoundNumber, this._coaches, this.CoachRounds) {
     useSquads = false;
-    curSquadRound = null;
 
-    // for (int i = 0; i < _coaches.length; i++) {
-    //   Coach c = _coaches[i];
-    //   _coachMap.putIfAbsent(c.name(), () => i);
-    // }
     _syncSquadsAndCoaches();
   }
 

@@ -61,8 +61,8 @@ class _HomePageState extends State<HomePage> {
         ? _tournament.getCoachSquad(widget.authUser.nafName as String)
         : null;
 
-    if (_tournament.curSquadRound != null) {
-      _squadMatchups = _tournament.curSquadRound!.matches;
+    if (_tournament.SquadRounds.isNotEmpty) {
+      _squadMatchups = _tournament.SquadRounds.last.matches;
     }
 
     _coachMatchupListener = new _CoachMatchupListClickListener(this);

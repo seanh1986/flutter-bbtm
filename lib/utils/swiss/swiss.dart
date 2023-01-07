@@ -125,19 +125,19 @@ class SwissPairings {
   bool verifyAllResultsEntered() {
     bool allCoachesEntered;
 
-    if (tournament.prevCoachRounds.isEmpty) {
+    if (tournament.CoachRounds.isEmpty) {
       allCoachesEntered = true;
     } else {
-      CoachRound round = tournament.prevCoachRounds.last;
+      CoachRound round = tournament.CoachRounds.last;
       allCoachesEntered =
           !round.matches.any((match) => match.result == MatchResult.NoResult);
     }
 
     bool allSquadsEntered;
-    if (tournament.prevSquadRounds.isEmpty) {
+    if (tournament.SquadRounds.isEmpty) {
       allSquadsEntered = true;
     } else {
-      SquadRound round = tournament.prevSquadRounds.last;
+      SquadRound round = tournament.SquadRounds.last;
       allSquadsEntered =
           !round.matches.any((match) => match.result == MatchResult.NoResult);
     }
