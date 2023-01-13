@@ -1,9 +1,9 @@
 import 'dart:core';
 import 'dart:math';
 import 'package:bbnaf/models/coach.dart';
-import 'package:bbnaf/models/coach_matchup.dart';
-import 'package:bbnaf/models/i_matchup.dart';
-import 'package:bbnaf/models/squad_matchup.dart';
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/i_matchup.dart';
+import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:flutter/material.dart';
@@ -125,19 +125,19 @@ class SwissPairings {
   bool verifyAllResultsEntered() {
     bool allCoachesEntered;
 
-    if (tournament.CoachRounds.isEmpty) {
+    if (tournament.coachRounds.isEmpty) {
       allCoachesEntered = true;
     } else {
-      CoachRound round = tournament.CoachRounds.last;
+      CoachRound round = tournament.coachRounds.last;
       allCoachesEntered =
           !round.matches.any((match) => match.result == MatchResult.NoResult);
     }
 
     bool allSquadsEntered;
-    if (tournament.SquadRounds.isEmpty) {
+    if (tournament.squadRounds.isEmpty) {
       allSquadsEntered = true;
     } else {
-      SquadRound round = tournament.SquadRounds.last;
+      SquadRound round = tournament.squadRounds.last;
       allSquadsEntered =
           !round.matches.any((match) => match.result == MatchResult.NoResult);
     }

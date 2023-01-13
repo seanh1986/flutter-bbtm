@@ -1,4 +1,4 @@
-import 'package:bbnaf/models/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:bbnaf/widgets/matchup_report_widget.dart';

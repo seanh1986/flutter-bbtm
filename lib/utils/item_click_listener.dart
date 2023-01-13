@@ -1,5 +1,5 @@
-import 'package:bbnaf/models/coach_matchup.dart';
-import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/i_matchup.dart';
 
 abstract class ItemClickListener {
   void onItemClicked(int idx);

@@ -3,10 +3,10 @@ import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import "package:collection/collection.dart";
 import 'package:bbnaf/models/coach.dart';
-import 'package:bbnaf/models/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/squad.dart';
-import 'package:bbnaf/models/squad_matchup.dart';
+import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:flutter/widgets.dart';
 import 'package:xml/xml.dart';
@@ -27,8 +27,8 @@ class Tournament {
   HashMap<String, int> _coachIdxMap = new HashMap<String, int>();
   List<Coach> _coaches = [];
 
-  List<SquadRound> SquadRounds = [];
-  List<CoachRound> CoachRounds = [];
+  List<SquadRound> squadRounds = [];
+  List<CoachRound> coachRounds = [];
 
   void addSquad(Squad s) {
     int idx = _squads.length;
@@ -85,7 +85,7 @@ class Tournament {
         return false;
       }
 
-      SquadRounds.add(squadRound);
+      squadRounds.add(squadRound);
 
       // TODO: Update coaches too
     } else {
@@ -95,7 +95,7 @@ class Tournament {
         return false;
       }
 
-      CoachRounds.add(round);
+      coachRounds.add(round);
     }
 
     return true;
@@ -136,6 +136,8 @@ class Tournament {
             SwissPairings.getFirstRoundMatchingName(firstRoundMatchingRule),
         'coaches': _coaches.map((e) => e.toJson()).toList(),
         'squads': _squads.map((e) => e.toJson()).toList(),
+        'squadrounds': squadRounds.map((e) => e.toJson()).toList(),
+        'coachrounds': coachRounds.map((e) => e.toJson()).toList(),
       };
 
   void _syncSquadsAndCoaches() {
@@ -335,7 +337,7 @@ class Tournament {
 
 // Squad constructor
   Tournament.squads(this.info, this.curRoundNumber, this._squads, this._coaches,
-      this.SquadRounds, this.CoachRounds) {
+      this.squadRounds, this.coachRounds) {
     useSquads = true;
 
     _syncSquadsAndCoaches();
@@ -343,7 +345,7 @@ class Tournament {
 
   // Non-squad constructor
   Tournament.noSquads(
-      this.info, this.curRoundNumber, this._coaches, this.CoachRounds) {
+      this.info, this.curRoundNumber, this._coaches, this.coachRounds) {
     useSquads = false;
 
     _syncSquadsAndCoaches();

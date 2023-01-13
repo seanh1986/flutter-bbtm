@@ -1,4 +1,4 @@
-import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 
 class CoachMatchup extends IMatchup {
@@ -55,7 +55,7 @@ class CoachMatchup extends IMatchup {
     return homeNafName == nafName || awayNafName == nafName;
   }
 
-  CoachMatchup.fromJson(Map<String, Object?> json) {
+  CoachMatchup.fromJson(Map<String, dynamic> json) {
     final tRound = json['round'] as int?;
     this._roundNum = tRound != null ? tRound : 0;
 
@@ -84,7 +84,7 @@ class CoachMatchup extends IMatchup {
     this.awayCas = tAwayCas != null ? tAwayCas : 0;
   }
 
-  Map toJson() => {
+  Map<String, dynamic> toJson() => {
         'round': _roundNum,
         'table': _tableNum,
         'result': IMatchup.getResultName(result),

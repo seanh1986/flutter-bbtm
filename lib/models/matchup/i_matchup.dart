@@ -27,6 +27,8 @@ abstract class IMatchup {
 
   MatchResult result = MatchResult.NoResult;
 
+  Map<String, dynamic> toJson();
+
   String groupByName(Tournament t) {
     switch (type()) {
       case OrgType.Coach:

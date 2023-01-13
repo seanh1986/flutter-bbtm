@@ -2,10 +2,10 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:bbnaf/models/coach.dart';
-import 'package:bbnaf/models/coach_matchup.dart';
-import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
-import 'package:bbnaf/models/squad_matchup.dart';
+import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 
 // Different options for how squads are used

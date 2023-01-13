@@ -1,5 +1,5 @@
-import 'package:bbnaf/models/coach_matchup.dart';
-import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 
 class SquadMatchup extends IMatchup {
@@ -57,7 +57,7 @@ class SquadMatchup extends IMatchup {
     return homeSquadName == squadName || awaySquadName == squadName;
   }
 
-  SquadMatchup.fromJson(Map<String, Object?> json) {
+  SquadMatchup.fromJson(Map<String, dynamic> json) {
     final tRound = json['round'] as int?;
     this._roundNum = tRound != null ? tRound : 0;
 
@@ -76,7 +76,7 @@ class SquadMatchup extends IMatchup {
     // TODO: Coach Matchups! (maybe use index only?)
   }
 
-  Map toJson() => {
+  Map<String, dynamic> toJson() => {
         'round': _roundNum,
         'table': _tableNum,
         'result': IMatchup.getResultName(result),

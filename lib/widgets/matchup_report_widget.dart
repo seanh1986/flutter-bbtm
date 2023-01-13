@@ -1,5 +1,5 @@
 import 'dart:collection';
-import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/foundation.dart';
