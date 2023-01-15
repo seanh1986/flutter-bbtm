@@ -1,6 +1,4 @@
 import 'dart:collection';
-import 'dart:convert';
-
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
@@ -109,14 +107,16 @@ class Squad extends IMatchupParticipant {
         int numTies = 0;
         int numLosses = 0;
         for (CoachMatchup cm in sm.coachMatchups) {
-          if (cm.homeTds > cm.awayTds) {
+          ReportedMatchResultWithStatus r = cm.getReportedMatchStatus();
+
+          if (r.homeTds > r.awayTds) {
             // home wins
             if (isHome) {
               numWins++;
             } else {
               numLosses++;
             }
-          } else if (cm.homeTds < cm.awayTds) {
+          } else if (r.homeTds < r.awayTds) {
             // away wins
             if (isHome) {
               numLosses++;

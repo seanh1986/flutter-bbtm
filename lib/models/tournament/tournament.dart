@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import "package:collection/collection.dart";
@@ -272,13 +273,18 @@ class Tournament {
           continue;
         }
 
-        matchup.homeTds = td1;
-        matchup.homeCas = cas1;
+        ReportedMatchResult result = ReportedMatchResult();
+        result.homeTds = td1;
+        result.homeCas = cas1;
+        result.awayTds = td2;
+        result.awayCas = cas2;
+
+        matchup.homeReportedResults = result;
+        matchup.awayReportedResults = result;
+
         coach1.addTds(td1);
         coach1.addCas(cas1);
 
-        matchup.awayTds = td2;
-        matchup.awayCas = cas2;
         coach2.addTds(td2);
         coach2.addCas(cas2);
 

@@ -1,17 +1,34 @@
 import 'package:bbnaf/models/matchup/i_matchup.dart';
+import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
+
+enum ReportedMatchStatus {
+  NoReportsYet,
+  HomeReported,
+  AwayReported,
+  BothReportedConflict,
+  BothReportedAgree,
+}
+
+class ReportedMatchResultWithStatus extends ReportedMatchResult {
+  ReportedMatchStatus status = ReportedMatchStatus.NoReportsYet;
+  ReportedMatchResultWithStatus();
+  ReportedMatchResultWithStatus.from(
+      ReportedMatchStatus s, ReportedMatchResult r)
+      : super.from(r) {
+    this.status = s;
+  }
+}
 
 class CoachMatchup extends IMatchup {
   late final int _roundNum;
   late int _tableNum;
 
   late final String homeNafName;
-  int homeTds = 0;
-  int homeCas = 0;
+  ReportedMatchResult homeReportedResults = ReportedMatchResult();
 
   late final String awayNafName;
-  int awayTds = 0;
-  int awayCas = 0;
+  ReportedMatchResult awayReportedResults = ReportedMatchResult();
 
   CoachMatchup(
       this._roundNum, this._tableNum, this.homeNafName, this.awayNafName);
@@ -51,6 +68,40 @@ class CoachMatchup extends IMatchup {
     return t.getCoach(awayNafName)!;
   }
 
+  ReportedMatchResultWithStatus getReportedMatchStatus() {
+    bool homeReported = homeReportedResults.reported;
+    bool awayReported = awayReportedResults.reported;
+
+    if (!homeReported && !awayReported) {
+      return ReportedMatchResultWithStatus();
+    } else if (homeReported && awayReported) {
+      bool sameHomeTds =
+          homeReportedResults.homeTds == awayReportedResults.homeTds;
+      bool sameAwayTds =
+          homeReportedResults.awayTds == awayReportedResults.awayTds;
+      bool sameHomeCas =
+          homeReportedResults.homeCas == awayReportedResults.homeCas;
+      bool sameAwayCas =
+          homeReportedResults.awayCas == awayReportedResults.awayCas;
+
+      if (sameHomeTds && sameAwayTds && sameHomeCas && sameAwayCas) {
+        return ReportedMatchResultWithStatus.from(
+            ReportedMatchStatus.BothReportedAgree, homeReportedResults);
+      } else {
+        return ReportedMatchResultWithStatus.from(
+            ReportedMatchStatus.BothReportedConflict, homeReportedResults);
+      }
+    } else if (homeReported) {
+      return ReportedMatchResultWithStatus.from(
+          ReportedMatchStatus.HomeReported, homeReportedResults);
+    } else if (awayReported) {
+      return ReportedMatchResultWithStatus.from(
+          ReportedMatchStatus.AwayReported, awayReportedResults);
+    } else {
+      return ReportedMatchResultWithStatus();
+    }
+  }
+
   bool hasPlayer(String nafName) {
     return homeNafName == nafName || awayNafName == nafName;
   }
@@ -68,20 +119,20 @@ class CoachMatchup extends IMatchup {
     final tHomeNafName = json['home_nafname'] as String?;
     this.homeNafName = tHomeNafName != null ? tHomeNafName : "";
 
-    final tHomeTd = json['home_td'] as int?;
-    this.homeTds = tHomeTd != null ? tHomeTd : 0;
-
-    final tHomeCas = json['home_cas'] as int?;
-    this.homeCas = tHomeCas != null ? tHomeCas : 0;
-
     final tAwayNafName = json['away_nafname'] as String?;
     this.awayNafName = tAwayNafName != null ? tAwayNafName : "";
 
-    final tAwayTd = json['away_td'] as int?;
-    this.awayTds = tAwayTd != null ? tAwayTd : 0;
+    final tHomeReportedResults =
+        json['home_reported_results'] as Map<String, dynamic>?;
+    if (tHomeReportedResults != null) {
+      homeReportedResults = ReportedMatchResult.fromJson(tHomeReportedResults);
+    }
 
-    final tAwayCas = json['away_cas'] as int?;
-    this.awayCas = tAwayCas != null ? tAwayCas : 0;
+    final tAwayReportedResults =
+        json['away_reported_results'] as Map<String, dynamic>?;
+    if (tAwayReportedResults != null) {
+      awayReportedResults = ReportedMatchResult.fromJson(tAwayReportedResults);
+    }
   }
 
   Map<String, dynamic> toJson() => {
@@ -89,10 +140,8 @@ class CoachMatchup extends IMatchup {
         'table': _tableNum,
         'result': IMatchup.getResultName(result),
         'home_nafname': homeNafName,
-        'home_td': homeTds,
-        'home_cas': homeCas,
         'away_nafname': awayNafName,
-        'away_td': awayTds,
-        'away_cas': awayCas,
+        'home_reported_results': homeReportedResults.toJson(),
+        'away_reported_results': awayReportedResults.toJson(),
       };
 }
