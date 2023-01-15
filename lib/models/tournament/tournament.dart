@@ -108,10 +108,10 @@ class Tournament {
     final tRound = json['round'] as int?;
     this.curRoundNumber = tRound != null ? tRound : 0;
 
-    final tUseSquads = json['usesquads'] as bool?;
+    final tUseSquads = json['use_squads'] as bool?;
     this.useSquads = tUseSquads != null ? tUseSquads : false;
 
-    final tFirstRoundMatching = json['firstroundmatching'] as String?;
+    final tFirstRoundMatching = json['first_round_matching'] as String?;
     this.firstRoundMatchingRule = SwissPairings.parseFirstRoundMatchingName(
         tFirstRoundMatching != null ? tFirstRoundMatching : "");
 
@@ -128,17 +128,27 @@ class Tournament {
         addSquad(Squad.fromJson(tSquads[i] as Map<String, dynamic>));
       }
     }
+
+    final tCoachRounds = json['coach_rounds'] as List<dynamic>?;
+    if (tCoachRounds != null) {
+      for (int i = 0; i < tCoachRounds.length; i++) {
+        coachRounds
+            .add(CoachRound.fromJson(tCoachRounds[i] as Map<String, dynamic>));
+      }
+    }
+
+    _syncSquadsAndCoaches();
   }
 
   Map<String, dynamic> toJson() => {
         'round': curRoundNumber,
-        'usesquads': useSquads,
-        'firstroundmatching':
+        'use_squads': useSquads,
+        'first_round_matching':
             SwissPairings.getFirstRoundMatchingName(firstRoundMatchingRule),
         'coaches': _coaches.map((e) => e.toJson()).toList(),
         'squads': _squads.map((e) => e.toJson()).toList(),
-        'squadrounds': squadRounds.map((e) => e.toJson()).toList(),
-        'coachrounds': coachRounds.map((e) => e.toJson()).toList(),
+        'squad_rounds': squadRounds.map((e) => e.toJson()).toList(),
+        'coach_rounds': coachRounds.map((e) => e.toJson()).toList(),
       };
 
   void _syncSquadsAndCoaches() {
@@ -153,276 +163,6 @@ class Tournament {
       Coach c = _coaches[i];
       _coachIdxMap.putIfAbsent(c.name(), () => i);
     }
-  }
-
-  factory Tournament.fromXml(XmlDocument xml, TournamentInfo info) {
-    List<Squad> squads = [];
-    HashMap<String, int> squadMap = new HashMap<String, int>();
-
-    List<Coach> coaches = [];
-    HashMap<String, int> coachMap = new HashMap<String, int>();
-
-    HashMap<int, String> teamIdToNafName = new HashMap<int, String>();
-
-    final tournamentTag = xml.findAllElements('tournament').first;
-
-    // Find out about different group modes and their scoring!
-    int groupMode =
-        int.parse(tournamentTag.getElement("groupmode")?.text ?? "0");
-    bool useSquads = groupMode == 1;
-
-    int groupScoreMode =
-        int.parse(tournamentTag.getElement("groupscore")?.text ?? "0");
-
-    SquadScoreMode squadScoreMode = Squad.getSquadScoreMode(groupScoreMode);
-
-    int curRoundNumber =
-        int.parse(tournamentTag.getElement("currentround")?.text ?? "0");
-
-    double winValue =
-        double.parse(tournamentTag.getElement("win")?.text ?? "0.0");
-
-    double tieValue =
-        double.parse(tournamentTag.getElement("draw")?.text ?? "0.0");
-
-    double lossValue =
-        double.parse(tournamentTag.getElement("loss")?.text ?? "0.0");
-
-    if (useSquads) {
-      // List of squads
-      final groupTags = tournamentTag.findAllElements('group');
-
-      for (var g in groupTags) {
-        String squadName = g.text;
-
-        int idx = squads.length;
-
-        squads.add(Squad(squadName));
-        squadMap.putIfAbsent(squadName, () => idx);
-      }
-    }
-
-    // List of teams
-    final teamsTags = xml.findAllElements('team');
-
-    for (var t in teamsTags) {
-      int id = int.parse(t.getAttribute('id') ?? "0");
-
-      String teamName = t.getElement('teamname')!.text;
-      String coachName = t.getElement('coach')!.text;
-      String nafName = t.getElement('nafname')!.text;
-      int nafNumber = int.parse(t.getElement('nafnumber')!.text);
-      String race = t.getElement('nafrace')!.text;
-      String squadName = t.getElement('group')!.text;
-
-      teamIdToNafName.putIfAbsent(id, () => nafName);
-
-      Coach c = new Coach(id, nafName, squadName, coachName,
-          RaceUtils.getRace(race), teamName, nafNumber);
-
-      int idx = coaches.length;
-
-      coaches.add(c);
-
-      coachMap.putIfAbsent(c.nafName, () => idx);
-
-      if (useSquads) {
-        int? idx = squadMap[squadName];
-        Squad? squad = idx != null ? squads[idx] : null;
-        squad!.addCoach(c);
-      }
-    }
-
-    List<CoachRound> coachRounds = [];
-
-    final roundsTags = xml.findAllElements('round');
-    for (var r in roundsTags) {
-      int roundNumber = int.parse(r.getAttribute('number') ?? "0");
-
-      bool isCurrentRound = roundNumber == curRoundNumber;
-
-      List<CoachMatchup> coachMatchups = [];
-
-      final gamesTags = r.findAllElements('game');
-      for (var g in gamesTags) {
-        int tableNumber = int.parse(g.getAttribute('table') ?? "0");
-        int team1 = int.parse(g.getElement('team1')!.text); // team id
-        int team2 = int.parse(g.getElement('team2')!.text); // team id
-        int td1 = int.parse(g.getElement('td1')!.text);
-        int td2 = int.parse(g.getElement('td2')!.text);
-        int cas1 = int.parse(g.getElement('cas1')!.text);
-        int cas2 = int.parse(g.getElement('cas2')!.text);
-
-        String? nafName1 = teamIdToNafName[team1];
-        int? idx1 = coachMap[nafName1];
-        Coach? coach1 = idx1 != null ? coaches[idx1] : null;
-
-        String? nafName2 = teamIdToNafName[team2];
-        int? idx2 = coachMap[nafName2];
-        Coach? coach2 = idx2 != null ? coaches[idx2] : null;
-
-        if (coach1 == null || coach2 == null) {
-          continue;
-        }
-
-        CoachMatchup matchup = new CoachMatchup(
-            roundNumber, tableNumber, coach1.nafName, coach2.nafName);
-        coachMatchups.add(matchup);
-
-        if (isCurrentRound) {
-          continue;
-        }
-
-        ReportedMatchResult result = ReportedMatchResult();
-        result.homeTds = td1;
-        result.homeCas = cas1;
-        result.awayTds = td2;
-        result.awayCas = cas2;
-
-        matchup.homeReportedResults = result;
-        matchup.awayReportedResults = result;
-
-        coach1.addTds(td1);
-        coach1.addCas(cas1);
-
-        coach2.addTds(td2);
-        coach2.addCas(cas2);
-
-        if (td1 > td2) {
-          coach1.addWin();
-          coach2.addLoss();
-        } else if (td2 > td1) {
-          coach1.addLoss();
-          coach2.addWin();
-        } else {
-          coach1.addTie();
-          coach2.addTie();
-        }
-      }
-
-      // Update Coach Rounds
-      CoachRound coachRound = new CoachRound(roundNumber, coachMatchups);
-
-      coachRounds.add(coachRound);
-    }
-
-    // Update coach points
-    coaches.forEach((Coach coach) {
-      coach.calculatePoints(winValue, tieValue, lossValue);
-    });
-
-    if (useSquads) {
-      List<SquadRound> squadRounds =
-          _getSquadRounds(coachRounds, squadMap, squads, coachMap, coaches);
-
-      // Update squad points
-      squads.forEach((Squad squad) {
-        squad.calculatePoints(squadScoreMode, coachMap, coaches);
-        squad.calculateWinsTiesLosses(squadRounds);
-      });
-
-      return new Tournament.squads(
-        info,
-        // xml,
-        curRoundNumber,
-        squads,
-        coaches,
-        squadRounds,
-        coachRounds,
-      );
-    } else {
-      return new Tournament.noSquads(
-        info,
-        // xml,
-        curRoundNumber,
-        coaches,
-        coachRounds,
-      );
-    }
-  }
-
-// Squad constructor
-  Tournament.squads(this.info, this.curRoundNumber, this._squads, this._coaches,
-      this.squadRounds, this.coachRounds) {
-    useSquads = true;
-
-    _syncSquadsAndCoaches();
-  }
-
-  // Non-squad constructor
-  Tournament.noSquads(
-      this.info, this.curRoundNumber, this._coaches, this.coachRounds) {
-    useSquads = false;
-
-    _syncSquadsAndCoaches();
-  }
-
-  static List<SquadRound> _getSquadRounds(
-      List<CoachRound> coachRounds,
-      HashMap<String, int> squadMap,
-      List<Squad> squads,
-      HashMap<String, int> coachMap,
-      List<Coach> coaches) {
-    List<SquadRound> squadRounds = [];
-
-    for (CoachRound cr in coachRounds) {
-      SquadRound squadRound =
-          _getSquadRound(cr, squadMap, squads, coachMap, coaches);
-      squadRounds.add(squadRound);
-    }
-
-    return squadRounds;
-  }
-
-  static SquadRound _getSquadRound(CoachRound cr, HashMap<String, int> squadMap,
-      List<Squad> squads, HashMap<String, int> coachMap, List<Coach> coaches) {
-    int roundNumber = cr.round();
-
-    List<SquadMatchup> squadMatchupList = [];
-
-    // HomeSquad to list of coach matchups
-    Map<String, List<CoachMatchup>> groups = groupBy(
-        cr.matches,
-        (CoachMatchup cm) =>
-            getHomeSquadNameFromCoachMatchup(cm, coachMap, coaches));
-
-    int tableNum = 1;
-    for (String homeSquadName in groups.keys) {
-      List<CoachMatchup>? coachMatchups = groups[homeSquadName];
-      if (coachMatchups == null || coachMatchups.isEmpty) {
-        continue;
-      }
-
-      int? homeSquadIdx = squadMap[homeSquadName];
-      Squad? homeSquad = homeSquadIdx != null ? squads[homeSquadIdx] : null;
-
-      int? awayCoachIdx = coachMap[coachMatchups.first.homeNafName];
-      String awaySquadName =
-          awayCoachIdx != null ? coaches[awayCoachIdx].squadName : "";
-
-      int? awaySquadIdx = squadMap[awaySquadName];
-      Squad? awaySquad = awaySquadIdx != null ? squads[awaySquadIdx] : null;
-      if (homeSquad == null || awaySquad == null) {
-        continue;
-      }
-
-      SquadMatchup squadMatchup = new SquadMatchup(
-          roundNumber, tableNum, homeSquad.name(), awaySquad.name());
-
-      squadMatchup.coachMatchups = coachMatchups;
-
-      squadMatchupList.add(squadMatchup);
-
-      tableNum++;
-    }
-
-    return new SquadRound(roundNumber, squadMatchupList);
-  }
-
-  static String getHomeSquadNameFromCoachMatchup(
-      CoachMatchup cm, HashMap<String, int> coachMap, List<Coach> coaches) {
-    int? coachIdx = coachMap[cm.homeNafName];
-    return coachIdx != null ? coaches[coachIdx].squadName : "";
   }
 
   Tournament.fromExample() {
@@ -454,4 +194,274 @@ class Tournament {
     addCoach(Coach(id++, "Duke_of_Edmund", "", "Andew W", Race.ShamblingUndead,
         "Andrew Team", 27220));
   }
+
+  // factory Tournament.fromXml(XmlDocument xml, TournamentInfo info) {
+  //   List<Squad> squads = [];
+  //   HashMap<String, int> squadMap = new HashMap<String, int>();
+
+  //   List<Coach> coaches = [];
+  //   HashMap<String, int> coachMap = new HashMap<String, int>();
+
+  //   HashMap<int, String> teamIdToNafName = new HashMap<int, String>();
+
+  //   final tournamentTag = xml.findAllElements('tournament').first;
+
+  //   // Find out about different group modes and their scoring!
+  //   int groupMode =
+  //       int.parse(tournamentTag.getElement("groupmode")?.text ?? "0");
+  //   bool useSquads = groupMode == 1;
+
+  //   int groupScoreMode =
+  //       int.parse(tournamentTag.getElement("groupscore")?.text ?? "0");
+
+  //   SquadScoreMode squadScoreMode = Squad.getSquadScoreMode(groupScoreMode);
+
+  //   int curRoundNumber =
+  //       int.parse(tournamentTag.getElement("currentround")?.text ?? "0");
+
+  //   double winValue =
+  //       double.parse(tournamentTag.getElement("win")?.text ?? "0.0");
+
+  //   double tieValue =
+  //       double.parse(tournamentTag.getElement("draw")?.text ?? "0.0");
+
+  //   double lossValue =
+  //       double.parse(tournamentTag.getElement("loss")?.text ?? "0.0");
+
+  //   if (useSquads) {
+  //     // List of squads
+  //     final groupTags = tournamentTag.findAllElements('group');
+
+  //     for (var g in groupTags) {
+  //       String squadName = g.text;
+
+  //       int idx = squads.length;
+
+  //       squads.add(Squad(squadName));
+  //       squadMap.putIfAbsent(squadName, () => idx);
+  //     }
+  //   }
+
+  //   // List of teams
+  //   final teamsTags = xml.findAllElements('team');
+
+  //   for (var t in teamsTags) {
+  //     int id = int.parse(t.getAttribute('id') ?? "0");
+
+  //     String teamName = t.getElement('teamname')!.text;
+  //     String coachName = t.getElement('coach')!.text;
+  //     String nafName = t.getElement('nafname')!.text;
+  //     int nafNumber = int.parse(t.getElement('nafnumber')!.text);
+  //     String race = t.getElement('nafrace')!.text;
+  //     String squadName = t.getElement('group')!.text;
+
+  //     teamIdToNafName.putIfAbsent(id, () => nafName);
+
+  //     Coach c = new Coach(id, nafName, squadName, coachName,
+  //         RaceUtils.getRace(race), teamName, nafNumber);
+
+  //     int idx = coaches.length;
+
+  //     coaches.add(c);
+
+  //     coachMap.putIfAbsent(c.nafName, () => idx);
+
+  //     if (useSquads) {
+  //       int? idx = squadMap[squadName];
+  //       Squad? squad = idx != null ? squads[idx] : null;
+  //       squad!.addCoach(c);
+  //     }
+  //   }
+
+  //   List<CoachRound> coachRounds = [];
+
+  //   final roundsTags = xml.findAllElements('round');
+  //   for (var r in roundsTags) {
+  //     int roundNumber = int.parse(r.getAttribute('number') ?? "0");
+
+  //     bool isCurrentRound = roundNumber == curRoundNumber;
+
+  //     List<CoachMatchup> coachMatchups = [];
+
+  //     final gamesTags = r.findAllElements('game');
+  //     for (var g in gamesTags) {
+  //       int tableNumber = int.parse(g.getAttribute('table') ?? "0");
+  //       int team1 = int.parse(g.getElement('team1')!.text); // team id
+  //       int team2 = int.parse(g.getElement('team2')!.text); // team id
+  //       int td1 = int.parse(g.getElement('td1')!.text);
+  //       int td2 = int.parse(g.getElement('td2')!.text);
+  //       int cas1 = int.parse(g.getElement('cas1')!.text);
+  //       int cas2 = int.parse(g.getElement('cas2')!.text);
+
+  //       String? nafName1 = teamIdToNafName[team1];
+  //       int? idx1 = coachMap[nafName1];
+  //       Coach? coach1 = idx1 != null ? coaches[idx1] : null;
+
+  //       String? nafName2 = teamIdToNafName[team2];
+  //       int? idx2 = coachMap[nafName2];
+  //       Coach? coach2 = idx2 != null ? coaches[idx2] : null;
+
+  //       if (coach1 == null || coach2 == null) {
+  //         continue;
+  //       }
+
+  //       CoachMatchup matchup = new CoachMatchup(
+  //           roundNumber, tableNumber, coach1.nafName, coach2.nafName);
+  //       coachMatchups.add(matchup);
+
+  //       if (isCurrentRound) {
+  //         continue;
+  //       }
+
+  //       ReportedMatchResult result = ReportedMatchResult();
+  //       result.homeTds = td1;
+  //       result.homeCas = cas1;
+  //       result.awayTds = td2;
+  //       result.awayCas = cas2;
+
+  //       matchup.homeReportedResults = result;
+  //       matchup.awayReportedResults = result;
+
+  //       coach1.addTds(td1);
+  //       coach1.addCas(cas1);
+
+  //       coach2.addTds(td2);
+  //       coach2.addCas(cas2);
+
+  //       if (td1 > td2) {
+  //         coach1.addWin();
+  //         coach2.addLoss();
+  //       } else if (td2 > td1) {
+  //         coach1.addLoss();
+  //         coach2.addWin();
+  //       } else {
+  //         coach1.addTie();
+  //         coach2.addTie();
+  //       }
+  //     }
+
+  //     // Update Coach Rounds
+  //     CoachRound coachRound = new CoachRound(roundNumber, coachMatchups);
+
+  //     coachRounds.add(coachRound);
+  //   }
+
+  //   // Update coach points
+  //   coaches.forEach((Coach coach) {
+  //     coach.calculatePoints(winValue, tieValue, lossValue);
+  //   });
+
+  //   if (useSquads) {
+  //     List<SquadRound> squadRounds =
+  //         _getSquadRounds(coachRounds, squadMap, squads, coachMap, coaches);
+
+  //     // Update squad points
+  //     squads.forEach((Squad squad) {
+  //       squad.calculatePoints(squadScoreMode, coachMap, coaches);
+  //       squad.calculateWinsTiesLosses(squadRounds);
+  //     });
+
+  //     return new Tournament.squads(
+  //       info,
+  //       // xml,
+  //       curRoundNumber,
+  //       squads,
+  //       coaches,
+  //       squadRounds,
+  //       coachRounds,
+  //     );
+  //   } else {
+  //     return new Tournament.noSquads(
+  //       info,
+  //       // xml,
+  //       curRoundNumber,
+  //       coaches,
+  //       coachRounds,
+  //     );
+  //   }
+  // }
+
+// // Squad constructor
+//   Tournament.squads(this.info, this.curRoundNumber, this._squads, this._coaches,
+//       this.squadRounds, this.coachRounds) {
+//     useSquads = true;
+
+//     _syncSquadsAndCoaches();
+//   }
+
+//   // Non-squad constructor
+//   Tournament.noSquads(
+//       this.info, this.curRoundNumber, this._coaches, this.coachRounds) {
+//     useSquads = false;
+
+//     _syncSquadsAndCoaches();
+//   }
+
+  // static List<SquadRound> _getSquadRounds(
+  //     List<CoachRound> coachRounds,
+  //     HashMap<String, int> squadMap,
+  //     List<Squad> squads,
+  //     HashMap<String, int> coachMap,
+  //     List<Coach> coaches) {
+  //   List<SquadRound> squadRounds = [];
+
+  //   for (CoachRound cr in coachRounds) {
+  //     SquadRound squadRound =
+  //         _getSquadRound(cr, squadMap, squads, coachMap, coaches);
+  //     squadRounds.add(squadRound);
+  //   }
+
+  //   return squadRounds;
+  // }
+
+  // static SquadRound _getSquadRound(CoachRound cr, HashMap<String, int> squadMap,
+  //     List<Squad> squads, HashMap<String, int> coachMap, List<Coach> coaches) {
+  //   int roundNumber = cr.round();
+
+  //   List<SquadMatchup> squadMatchupList = [];
+
+  //   // HomeSquad to list of coach matchups
+  //   Map<String, List<CoachMatchup>> groups = groupBy(
+  //       cr.matches,
+  //       (CoachMatchup cm) =>
+  //           getHomeSquadNameFromCoachMatchup(cm, coachMap, coaches));
+
+  //   int tableNum = 1;
+  //   for (String homeSquadName in groups.keys) {
+  //     List<CoachMatchup>? coachMatchups = groups[homeSquadName];
+  //     if (coachMatchups == null || coachMatchups.isEmpty) {
+  //       continue;
+  //     }
+
+  //     int? homeSquadIdx = squadMap[homeSquadName];
+  //     Squad? homeSquad = homeSquadIdx != null ? squads[homeSquadIdx] : null;
+
+  //     int? awayCoachIdx = coachMap[coachMatchups.first.homeNafName];
+  //     String awaySquadName =
+  //         awayCoachIdx != null ? coaches[awayCoachIdx].squadName : "";
+
+  //     int? awaySquadIdx = squadMap[awaySquadName];
+  //     Squad? awaySquad = awaySquadIdx != null ? squads[awaySquadIdx] : null;
+  //     if (homeSquad == null || awaySquad == null) {
+  //       continue;
+  //     }
+
+  //     SquadMatchup squadMatchup = new SquadMatchup(
+  //         roundNumber, tableNum, homeSquad.name(), awaySquad.name());
+
+  //     squadMatchup.coachMatchups = coachMatchups;
+
+  //     squadMatchupList.add(squadMatchup);
+
+  //     tableNum++;
+  //   }
+
+  //   return new SquadRound(roundNumber, squadMatchupList);
+  // }
+//
+  // static String getHomeSquadNameFromCoachMatchup(
+  //     CoachMatchup cm, HashMap<String, int> coachMap, List<Coach> coaches) {
+  //   int? coachIdx = coachMap[cm.homeNafName];
+  //   return coachIdx != null ? coaches[coachIdx].squadName : "";
+  // }
 }

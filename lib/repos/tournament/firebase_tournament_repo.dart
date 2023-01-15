@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
@@ -87,64 +85,64 @@ class FirebaseTournamentRepository extends TournamentRepository {
     return _tournamentInfoRef.doc(tournament.info.id).set(json);
   }
 
-  @override
-  Stream<Tournament> downloadTournament(TournamentInfo tournamentInfo) async* {
-    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
-        .ref(tournamentInfo.id + '.bbd');
+  // @override
+  // Stream<Tournament> downloadTournament(TournamentInfo tournamentInfo) async* {
+  //   firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+  //       .ref(tournamentInfo.id + '.bbd');
 
-    XmlDocument xml = await _downloadTournamentFile(ref);
+  //   XmlDocument xml = await _downloadTournamentFile(ref);
 
-    Tournament t = Tournament.fromXml(xml, tournamentInfo);
+  //   Tournament t = Tournament.fromXml(xml, tournamentInfo);
 
-    yield t;
-  }
+  //   yield t;
+  // }
 
-  Future<XmlDocument> _downloadTournamentFile(
-      firebase_storage.Reference ref) async {
-    if (kIsWeb) {
-      return _downloadTournamentFileWeb(ref);
-    } else {
-      return _downloadTournamentFileMobile(ref);
-    }
-  }
+  // Future<XmlDocument> _downloadTournamentFile(
+  //     firebase_storage.Reference ref) async {
+  //   if (kIsWeb) {
+  //     return _downloadTournamentFileWeb(ref);
+  //   } else {
+  //     return _downloadTournamentFileMobile(ref);
+  //   }
+  // }
 
-  Future<XmlDocument> _downloadTournamentFileWeb(
-      firebase_storage.Reference ref) async {
-    final bytes = await ref.getData();
+  // Future<XmlDocument> _downloadTournamentFileWeb(
+  //     firebase_storage.Reference ref) async {
+  //   final bytes = await ref.getData();
 
-    print(
-        'Success!\n Downloaded BYTES: ${ref.name} \n from bucket: ${ref.bucket}\n '
-        'at path: ${ref.fullPath}');
+  //   print(
+  //       'Success!\n Downloaded BYTES: ${ref.name} \n from bucket: ${ref.bucket}\n '
+  //       'at path: ${ref.fullPath}');
 
-    String s = new String.fromCharCodes(bytes!);
+  //   String s = new String.fromCharCodes(bytes!);
 
-    final document = XmlDocument.parse(s);
+  //   final document = XmlDocument.parse(s);
 
-    print(document.toXmlString(pretty: true, indent: '\t'));
+  //   print(document.toXmlString(pretty: true, indent: '\t'));
 
-    return document;
-  }
+  //   return document;
+  // }
 
-  // TO BE TESTED
-  Future<XmlDocument> _downloadTournamentFileMobile(
-      firebase_storage.Reference ref) async {
-    final io.Directory systemTempDir = io.Directory.systemTemp;
-    final io.File tempFile = io.File('${systemTempDir.path}/${ref.name}');
-    if (tempFile.existsSync()) await tempFile.delete();
+  // // TO BE TESTED
+  // Future<XmlDocument> _downloadTournamentFileMobile(
+  //     firebase_storage.Reference ref) async {
+  //   final io.Directory systemTempDir = io.Directory.systemTemp;
+  //   final io.File tempFile = io.File('${systemTempDir.path}/${ref.name}');
+  //   if (tempFile.existsSync()) await tempFile.delete();
 
-    await ref.writeToFile(tempFile);
+  //   await ref.writeToFile(tempFile);
 
-    print(
-        'Success!\n Downloaded FILE: ${ref.name} \n from bucket: ${ref.bucket}\n '
-        'at path: ${ref.fullPath} \n'
-        'Wrote "${ref.fullPath}" to ref.name');
+  //   print(
+  //       'Success!\n Downloaded FILE: ${ref.name} \n from bucket: ${ref.bucket}\n '
+  //       'at path: ${ref.fullPath} \n'
+  //       'Wrote "${ref.fullPath}" to ref.name');
 
-    final document = XmlDocument.parse(tempFile.readAsStringSync());
+  //   final document = XmlDocument.parse(tempFile.readAsStringSync());
 
-    print(document.toXmlString(pretty: true, indent: '\t'));
+  //   print(document.toXmlString(pretty: true, indent: '\t'));
 
-    return document;
-  }
+  //   return document;
+  // }
 
   // Future<void> _download(firebase_storage.Reference ref) async {
   //   if (kIsWeb) {

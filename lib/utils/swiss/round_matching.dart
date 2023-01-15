@@ -65,6 +65,18 @@ class CoachRound extends RoundMatching {
     return matches.any((CoachMatchup match) => match.hasParticipant(c));
   }
 
+  CoachRound.fromJson(Map<String, dynamic> json) {
+    final tRound = json['round'] as int?;
+    this._round = tRound != null ? tRound : 0;
+
+    final tMatches = json['matches'] as List<dynamic>?;
+    if (tMatches != null) {
+      for (int i = 0; i < tMatches.length; i++) {
+        matches.add(CoachMatchup.fromJson(tMatches[i] as Map<String, dynamic>));
+      }
+    }
+  }
+
   Map<String, dynamic> toJson() => {
         'round': _round,
         'matches': matches.map((e) => e.toJson()).toList(),

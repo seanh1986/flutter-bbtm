@@ -10,5 +10,5 @@ abstract class TournamentRepository {
 
   Future<void> updateTournamentData(Tournament tournament);
 
-  Stream<Tournament> downloadTournament(TournamentInfo tournamentInfo);
+  // Stream<Tournament> downloadTournament(TournamentInfo tournamentInfo);
 }
