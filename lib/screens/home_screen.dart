@@ -46,8 +46,6 @@ class _HomePageState extends State<HomePage> {
 
   List<SquadMatchup> _squadMatchups = [];
 
-  List<CoachMatchup> _selectedCoachMatchups = [];
-
   List<_WidgetFamily> _children = [];
 
   @override
@@ -75,8 +73,7 @@ class _HomePageState extends State<HomePage> {
         coachMatchupListeners: _coachMatchupListener,
       ));
     }
-    matchupWidgets.add(CoachMatchupsPage(
-        tournament: _tournament, matchups: _selectedCoachMatchups));
+    matchupWidgets.add(CoachMatchupsPage(tournament: _tournament));
 
     _children = [
       new _WidgetFamily([
@@ -180,8 +177,7 @@ class _HomePageState extends State<HomePage> {
       _WidgetFamily wFamily = _children[_parentIndex];
 
       if (wFamily.widgets.length > _childIndex) {
-        Widget w = new CoachMatchupsPage(
-            tournament: _tournament, matchups: coachMatchups);
+        Widget w = new CoachMatchupsPage(tournament: _tournament);
         wFamily.widgets[_childIndex] = w;
       }
     });

@@ -62,7 +62,9 @@ class FirebaseTournamentRepository extends TournamentRepository {
       return Tournament.fromJson(tournamentInfo, Map<String, dynamic>());
     }
 
-    return Tournament.fromJson(tournamentInfo, value.data()!['data']);
+    Map<String, dynamic> json = value.data()!['data'];
+
+    return Tournament.fromJson(tournamentInfo, json);
   }
 
   @override
@@ -81,7 +83,6 @@ class FirebaseTournamentRepository extends TournamentRepository {
     Map<String, Object?> json =
         jsonA.map((key, value) => MapEntry<String, Object?>(key, value));
 
-    // TODO: This broke stuff!! ^ refactored above...
     return _tournamentInfoRef.doc(tournament.info.id).set(json);
   }
 

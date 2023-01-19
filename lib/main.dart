@@ -34,7 +34,7 @@ void main() async {
           ..add(AppStartedTournamentUpdateEvent())),
   ], child: App()));
 
-  _tournamentRepo.updateTournamentData(Tournament.fromExample());
+  // _tournamentRepo.updateTournamentData(Tournament.fromExample());
 }
 
 /// We are using a StatefulWidget such that we only create the [Future] once,

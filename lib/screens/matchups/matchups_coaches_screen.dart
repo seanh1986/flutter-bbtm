@@ -7,12 +7,9 @@ import 'package:grouped_list/grouped_list.dart';
 
 class CoachMatchupsPage extends StatefulWidget {
   final Tournament tournament;
-  final List<CoachMatchup> matchups;
   // final MatchupListClickListener matchupListClickListener;
 
-  CoachMatchupsPage(
-      {Key? key, required this.matchups, required this.tournament})
-      : super(key: key);
+  CoachMatchupsPage({Key? key, required this.tournament}) : super(key: key);
 
   // void setCoachMatchups(List<CoachMatchup> matchups) {
   //   this.matchups = matchups;
@@ -32,8 +29,11 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   @override
   void initState() {
     super.initState();
-    _matchups = widget.matchups;
     _tournament = widget.tournament;
+
+    if (_tournament.coachRounds.isNotEmpty) {
+      _matchups = _tournament.coachRounds.last.matches;
+    }
     // _listener = new _MatchupClickListener(widget.matchupListClickListener);
   }
 
