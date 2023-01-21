@@ -68,6 +68,35 @@ class CoachMatchup extends IMatchup {
     return t.getCoach(awayNafName)!;
   }
 
+  MatchResult getResult() {
+    if (homeReportedResults.reported && awayReportedResults.reported) {
+      if (homeReportedResults.homeTds == awayReportedResults.homeTds &&
+          homeReportedResults.awayTds == awayReportedResults.awayTds &&
+          homeReportedResults.homeCas == awayReportedResults.homeCas &&
+          homeReportedResults.awayCas == awayReportedResults.awayCas) {
+        return _getMatchResult(homeReportedResults);
+      } else {
+        return MatchResult.Conflict;
+      }
+    } else if (homeReportedResults.reported) {
+      return _getMatchResult(homeReportedResults);
+    } else if (awayReportedResults.reported) {
+      return _getMatchResult(awayReportedResults);
+    } else {
+      return MatchResult.NoResult;
+    }
+  }
+
+  MatchResult _getMatchResult(ReportedMatchResult r) {
+    if (r.homeTds > r.awayTds) {
+      return MatchResult.HomeWon;
+    } else if (r.homeTds < r.awayTds) {
+      return MatchResult.AwayWon;
+    } else {
+      return MatchResult.Draw;
+    }
+  }
+
   ReportedMatchResultWithStatus getReportedMatchStatus() {
     bool homeReported = homeReportedResults.reported;
     bool awayReported = awayReportedResults.reported;
@@ -113,9 +142,6 @@ class CoachMatchup extends IMatchup {
     final tTable = json['table'] as int?;
     this._tableNum = tTable != null ? tTable : -1;
 
-    final tResult = json['result'] as String?;
-    this.result = IMatchup.parseResult(tResult != null ? tResult : "");
-
     final tHomeNafName = json['home_nafname'] as String?;
     this.homeNafName = tHomeNafName != null ? tHomeNafName : "";
 
@@ -138,7 +164,6 @@ class CoachMatchup extends IMatchup {
   Map<String, dynamic> toJson() => {
         'round': _roundNum,
         'table': _tableNum,
-        'result': IMatchup.getResultName(result),
         'home_nafname': homeNafName,
         'away_nafname': awayNafName,
         'home_reported_results': homeReportedResults.toJson(),

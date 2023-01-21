@@ -1,4 +1,5 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
+import 'package:bbnaf/blocs/match_report/match_report.dart';
 import 'package:bbnaf/blocs/tournament_update/tournament_update.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
@@ -32,6 +33,9 @@ void main() async {
     BlocProvider<TournamentUpdateBloc>(
         create: (context) => TournamentUpdateBloc(tRepo: _tournamentRepo)
           ..add(AppStartedTournamentUpdateEvent())),
+    BlocProvider<MatchReportBloc>(
+        create: (context) => MatchReportBloc(tRepo: _tournamentRepo)
+          ..add(AppStartMatchReportEvent())),
   ], child: App()));
 
   // _tournamentRepo.updateTournamentData(Tournament.fromExample());
@@ -77,7 +81,7 @@ class _AppState extends State<App> {
 
   Widget _launchSuccess() {
     // Canadian Open: X0qh35qbzPhBQKBb6y6c
-    String? hardcodedTournamentId = null;
+    String? hardcodedTournamentId = "X0qh35qbzPhBQKBb6y6c";
 
     return MaterialApp(
       title: 'BloodBowl Tournament Management',

@@ -53,6 +53,11 @@ class SquadMatchup extends IMatchup {
     return t.getSquad(awaySquadName)!;
   }
 
+  @override
+  MatchResult getResult() {
+    return MatchResult.NoResult;
+  }
+
   bool hasSquad(String squadName) {
     return homeSquadName == squadName || awaySquadName == squadName;
   }
@@ -63,9 +68,6 @@ class SquadMatchup extends IMatchup {
 
     final tTable = json['table'] as int?;
     this._tableNum = tTable != null ? tTable : -1;
-
-    final tResult = json['result'] as String?;
-    this.result = IMatchup.parseResult(tResult != null ? tResult : "");
 
     final tHomeName = json['home_name'] as String?;
     this.homeSquadName = tHomeName != null ? tHomeName : "";
@@ -79,7 +81,6 @@ class SquadMatchup extends IMatchup {
   Map<String, dynamic> toJson() => {
         'round': _roundNum,
         'table': _tableNum,
-        'result': IMatchup.getResultName(result),
         'home_name': homeSquadName,
         'away_name': awaySquadName,
       };

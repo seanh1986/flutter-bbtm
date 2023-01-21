@@ -9,6 +9,7 @@ enum OrgType {
 
 enum MatchResult {
   NoResult, // no result assigned yet
+  Conflict, // Inputted results do not agree
   HomeWon,
   AwayWon,
   Draw,
@@ -25,8 +26,6 @@ abstract class IMatchup {
   IMatchupParticipant home(Tournament t);
   IMatchupParticipant away(Tournament t);
 
-  MatchResult result = MatchResult.NoResult;
-
   Map<String, dynamic> toJson();
 
   String groupByName(Tournament t) {
@@ -40,12 +39,10 @@ abstract class IMatchup {
   }
 
   bool hasResult() {
-    return result != MatchResult.NoResult;
+    return getResult() != MatchResult.NoResult;
   }
 
-  void setResult(MatchResult result) {
-    this.result = result;
-  }
+  MatchResult getResult();
 
   bool hasParticipantName(String name) {
     return homeName() == name || awayName == name;
@@ -78,33 +75,33 @@ abstract class IMatchup {
   @override
   int get hashCode => Object.hash(type(), roundNum(), homeName(), awayName());
 
-  static String getResultName(MatchResult result) {
-    switch (result) {
-      case MatchResult.HomeWon:
-        return "HomeWon";
-      case MatchResult.AwayWon:
-        return "AwayWon";
-      case MatchResult.Draw:
-        return "Draw";
-      case MatchResult.NoResult:
-      default:
-        return "NoResult";
-    }
-  }
+  // static String getResultName(MatchResult result) {
+  //   switch (result) {
+  //     case MatchResult.HomeWon:
+  //       return "HomeWon";
+  //     case MatchResult.AwayWon:
+  //       return "AwayWon";
+  //     case MatchResult.Draw:
+  //       return "Draw";
+  //     case MatchResult.NoResult:
+  //     default:
+  //       return "NoResult";
+  //   }
+  // }
 
-  static MatchResult parseResult(String result) {
-    switch (result) {
-      case "HomeWon":
-        return MatchResult.HomeWon;
-      case "AwayWon":
-        return MatchResult.AwayWon;
-      case "Draw":
-        return MatchResult.Draw;
-      case "NoResult":
-      default:
-        return MatchResult.NoResult;
-    }
-  }
+  // static MatchResult parseResult(String result) {
+  //   switch (result) {
+  //     case "HomeWon":
+  //       return MatchResult.HomeWon;
+  //     case "AwayWon":
+  //       return MatchResult.AwayWon;
+  //     case "Draw":
+  //       return MatchResult.Draw;
+  //     case "NoResult":
+  //     default:
+  //       return MatchResult.NoResult;
+  //   }
+  // }
 }
 
 // Abstract class which represents a matchup

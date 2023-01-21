@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
+import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import "package:collection/collection.dart";
@@ -11,6 +12,15 @@ import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:flutter/widgets.dart';
 import 'package:xml/xml.dart';
+
+enum Authorization {
+  Unauthorized,
+  HomeCoach,
+  AwayCoach,
+  HomeCaptain,
+  AwayCaptain,
+  Admin,
+}
 
 class Tournament {
   late final TournamentInfo info;
@@ -100,6 +110,26 @@ class Tournament {
     }
 
     return true;
+  }
+
+  Authorization getMatchAuthorization(CoachMatchup matchup, AuthUser authUser) {
+    // Check if Admin
+    if (authUser.user?.email != null) {
+      if (info.organizers.any((e) => e.email == authUser.user?.email)) {
+        return Authorization.Admin;
+      }
+    }
+
+    // TODO: Check if squad captain
+
+    // User is in matchup
+    if (matchup.awayNafName == authUser.nafName) {
+      return Authorization.AwayCoach;
+    } else if (matchup.homeNafName == authUser.nafName) {
+      return Authorization.HomeCoach;
+    }
+
+    return Authorization.Unauthorized;
   }
 
   Tournament.fromJson(TournamentInfo info, Map<String, dynamic> json) {

@@ -1,15 +1,19 @@
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 
 class CoachMatchupsPage extends StatefulWidget {
   final Tournament tournament;
+  final AuthUser authUser;
   // final MatchupListClickListener matchupListClickListener;
 
-  CoachMatchupsPage({Key? key, required this.tournament}) : super(key: key);
+  CoachMatchupsPage(
+      {Key? key, required this.tournament, required this.authUser})
+      : super(key: key);
 
   // void setCoachMatchups(List<CoachMatchup> matchups) {
   //   this.matchups = matchups;
@@ -23,6 +27,7 @@ class CoachMatchupsPage extends StatefulWidget {
 
 class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   late Tournament _tournament;
+  late AuthUser _authUser;
   List<CoachMatchup> _matchups = [];
   // MatchupClickListener _listener;
 
@@ -30,6 +35,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   void initState() {
     super.initState();
     _tournament = widget.tournament;
+    _authUser = widget.authUser;
 
     if (_tournament.coachRounds.isNotEmpty) {
       _matchups = _tournament.coachRounds.last.matches;
@@ -48,6 +54,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
             itemBuilder: (BuildContext context, CoachMatchup matchup) =>
                 MatchupCoachWidget(
               tournament: _tournament,
+              authUser: _authUser,
               matchup: matchup,
               // listener: _listener,
             ),

@@ -73,7 +73,10 @@ class _HomePageState extends State<HomePage> {
         coachMatchupListeners: _coachMatchupListener,
       ));
     }
-    matchupWidgets.add(CoachMatchupsPage(tournament: _tournament));
+    matchupWidgets.add(CoachMatchupsPage(
+      tournament: _tournament,
+      authUser: _authUser,
+    ));
 
     _children = [
       new _WidgetFamily([
@@ -177,7 +180,10 @@ class _HomePageState extends State<HomePage> {
       _WidgetFamily wFamily = _children[_parentIndex];
 
       if (wFamily.widgets.length > _childIndex) {
-        Widget w = new CoachMatchupsPage(tournament: _tournament);
+        Widget w = new CoachMatchupsPage(
+          tournament: _tournament,
+          authUser: _authUser,
+        );
         wFamily.widgets[_childIndex] = w;
       }
     });

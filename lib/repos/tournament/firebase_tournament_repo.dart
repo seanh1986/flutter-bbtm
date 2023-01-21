@@ -1,11 +1,10 @@
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:io' as io;
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:flutter/foundation.dart';
-import 'package:xml/xml.dart';
 
 class FirebaseTournamentRepository extends TournamentRepository {
   firebase_storage.FirebaseStorage _storage =
@@ -84,6 +83,39 @@ class FirebaseTournamentRepository extends TournamentRepository {
         jsonA.map((key, value) => MapEntry<String, Object?>(key, value));
 
     return _tournamentInfoRef.doc(tournament.info.id).set(json);
+  }
+
+  @override
+  Future<void> updateCoachMatchReport(
+      Tournament tournament, CoachMatchup matchup, bool isHome) async {
+    Tournament dbTournament = await _tournamentInfoRef
+        .doc(tournament.info.id)
+        .get()
+        .then((value) => _parseTournamentResponse(value));
+
+    if (dbTournament.coachRounds.length != tournament.coachRounds.length) {
+      return;
+    }
+
+    int roundIdx = dbTournament.coachRounds.length - 1;
+
+    int matchIdx = dbTournament.coachRounds.last.matches.indexWhere((e) =>
+        e.awayNafName == matchup.awayNafName &&
+        e.homeNafName == matchup.homeNafName);
+
+    if (roundIdx < 0 || matchIdx < 0) {
+      return;
+    }
+
+    if (isHome) {
+      dbTournament.coachRounds[roundIdx].matches[matchIdx].homeReportedResults =
+          matchup.homeReportedResults;
+    } else {
+      dbTournament.coachRounds[roundIdx].matches[matchIdx].homeReportedResults =
+          matchup.awayReportedResults;
+    }
+
+    updateTournamentData(dbTournament);
   }
 
   // @override

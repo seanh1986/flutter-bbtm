@@ -1,3 +1,5 @@
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
 
@@ -14,22 +16,18 @@ class AppStartMatchReportEvent extends MatchReportEvent {
   String toString() => 'AppStartMatchReportEvent';
 }
 
-class SignInMatchReportEvent extends MatchReportEvent {
-  @override
-  String toString() => 'SignInMatchReportEvent';
-}
+class UpdateMatchReportEvent extends MatchReportEvent {
+  Tournament tournament;
+  CoachMatchup matchup;
+  bool isHome = true;
+  bool isAdmin = false;
 
-class SubmitMatchReportEvent extends MatchReportEvent {
-  @override
-  String toString() => 'SubmitMatchReportEvent';
-}
+  UpdateMatchReportEvent(this.tournament, this.matchup, this.isHome);
 
-class ComfirmMatchReportEvent extends MatchReportEvent {
-  @override
-  String toString() => 'ComfirmMatchReportEvent';
-}
+  UpdateMatchReportEvent.admin(this.tournament, this.matchup) {
+    this.isAdmin = true;
+  }
 
-class ErrorMatchReportEvent extends MatchReportEvent {
   @override
-  String toString() => 'ErrorMatchReportEvent';
+  String toString() => 'UpdateMatchReportEvent';
 }

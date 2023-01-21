@@ -129,8 +129,8 @@ class SwissPairings {
       allCoachesEntered = true;
     } else {
       CoachRound round = tournament.coachRounds.last;
-      allCoachesEntered =
-          !round.matches.any((match) => match.result == MatchResult.NoResult);
+      allCoachesEntered = !round.matches
+          .any((match) => match.getResult() == MatchResult.NoResult);
     }
 
     bool allSquadsEntered;
@@ -138,8 +138,8 @@ class SwissPairings {
       allSquadsEntered = true;
     } else {
       SquadRound round = tournament.squadRounds.last;
-      allSquadsEntered =
-          !round.matches.any((match) => match.result == MatchResult.NoResult);
+      allSquadsEntered = !round.matches
+          .any((match) => match.getResult() == MatchResult.NoResult);
     }
 
     return allCoachesEntered && allSquadsEntered;
