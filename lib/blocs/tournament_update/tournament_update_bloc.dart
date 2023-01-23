@@ -40,12 +40,19 @@ class TournamentUpdateBloc
     print("TournamentUpdateBloc: _mapNewRoundEventState");
     String tournamentId = event.tournament.info.id;
     _repo.updateTournamentData(event.tournament);
-    Stream<Tournament> newTournament = _repo.getTournamentData(tournamentId);
 
-    Stream<TournamentUpdateState> newState =
-        newTournament.map((event) => NewRoundState(event));
+    _tournamentSubscription?.cancel();
+    _tournamentSubscription = _repo.getTournamentData(tournamentId).listen(
+          (t) => NewRoundState(t),
+        );
 
-    yield* newState;
+    // // Old method...
+    // Stream<Tournament> newTournament = _repo.getTournamentData(tournamentId);
+
+    // Stream<TournamentUpdateState> newState =
+    //     newTournament.map((event) => NewRoundState(event));
+
+    // yield* newState;
   }
 
   // Update tournament info

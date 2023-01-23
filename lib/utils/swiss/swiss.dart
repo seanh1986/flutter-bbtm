@@ -183,7 +183,18 @@ class SwissPairings {
     int byePlayerIdx = _findByePlayerIndex(sortedPlayers);
 
     // 3. Find Swiss pairings
-    return _findPairings(roundNum, sortedPlayers, byePlayerIdx);
+    SwissRound? pairings = _findPairings(roundNum, sortedPlayers, byePlayerIdx);
+
+    if (pairings != null) {
+      for (int i = 0; i < pairings.matches.length; i++) {
+        IMatchup matchup = pairings.matches[i];
+        if (matchup is CoachMatchup) {
+          matchup.setTableNum(i + 1);
+        }
+      }
+    }
+
+    return pairings;
   }
 
   SwissRound? _findPairings(

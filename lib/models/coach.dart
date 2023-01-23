@@ -93,19 +93,7 @@ class Coach extends IMatchupParticipant {
     return _opponents;
   }
 
-  // void addWin() {
-  //   _wins++;
-  // }
-
-  // void addTie() {
-  //   _ties++;
-  // }
-
-  // void addLoss() {
-  //   _losses++;
-  // }
-
-  void updateRecord(TournamentInfo t) {
+  void overwriteRecord(TournamentInfo t) {
     _wins = 0;
     _ties = 0;
     _losses = 0;
@@ -159,26 +147,6 @@ class Coach extends IMatchupParticipant {
 
     _points = _wins * t.winPts + _ties * t.tiePts + _losses * t.lossPts;
   }
-
-  // void calculatePoints(double winPts, double tiePts, double lossPts) {
-  //   _points = _wins * winPts + _ties * tiePts + _losses * lossPts;
-  // }
-
-  // void updateTiebreakers(List<double> tieBreakers) {
-  //   _tieBreakers = tieBreakers;
-  // }
-
-  // void addNewOpponent(String opponentName) {
-  //   _opponents.add(opponentName);
-  // }
-
-  // void addTds(int t) {
-  //   tds += t;
-  // }
-
-  // void addCas(int c) {
-  //   cas += c;
-  // }
 
   Coach.fromJson(int id, Map<String, Object?> json) {
     this.teamId = id;

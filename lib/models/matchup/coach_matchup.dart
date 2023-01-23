@@ -48,6 +48,10 @@ class CoachMatchup extends IMatchup {
     return _tableNum;
   }
 
+  void setTableNum(int t) {
+    _tableNum = t;
+  }
+
   @override
   String homeName() {
     return homeNafName;

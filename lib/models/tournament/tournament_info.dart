@@ -10,17 +10,19 @@ class TournamentInfo {
   late final DateTime dateTimeEnd;
   List<OrganizerInfo> organizers = [];
 
-  late double winPts = 5;
-  late double tiePts = 3;
-  late double lossPts = 1;
+  late double winPts;
+  late double tiePts;
+  late double lossPts;
 
-  TournamentInfo({
-    required this.id,
-    required this.name,
-    required this.location,
-    required this.dateTimeStart,
-    required this.dateTimeEnd,
-  });
+  TournamentInfo(
+      {required this.id,
+      required this.name,
+      required this.location,
+      required this.dateTimeStart,
+      required this.dateTimeEnd,
+      this.winPts = 5,
+      this.tiePts = 3,
+      this.lossPts = 1});
 
   TournamentInfo.fromJson(String documentId, Map<String, dynamic> json) {
     this.id = documentId;
