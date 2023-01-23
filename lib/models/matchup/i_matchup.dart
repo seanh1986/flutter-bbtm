@@ -45,11 +45,11 @@ abstract class IMatchup {
   MatchResult getResult();
 
   bool hasParticipantName(String name) {
-    return homeName() == name || awayName == name;
+    return homeName() == name || awayName() == name;
   }
 
   bool hasParticipant(IMatchupParticipant p) {
-    return homeName() == p.name() || awayName == p.name();
+    return homeName() == p.name() || awayName() == p.name();
   }
 
   bool hasParticipants(

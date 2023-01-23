@@ -93,23 +93,31 @@ class _AdminScreenState extends State<AdminScreen> {
           child: Text('Advance to Round: ' +
               (_tournament.curRoundNumber + 1).toString()),
           onPressed: () {
-            SwissPairings swiss = SwissPairings(_tournament);
-            RoundPairingError pairingError = swiss.pairNextRound();
+            bool success = _tournament.processRound();
 
             String msg;
-            switch (pairingError) {
-              case RoundPairingError.NoError:
-                msg = "Succesful";
-                break;
-              case RoundPairingError.MissingPreviousResults:
-                msg = "Missing Previous Results";
-                break;
-              case RoundPairingError.UnableToFindValidMatches:
-                msg = "Unable To Find Valid Matches";
-                break;
-              default:
-                msg = "Unknown Error";
-                break;
+            RoundPairingError pairingError;
+
+            if (success) {
+              SwissPairings swiss = SwissPairings(_tournament);
+              pairingError = swiss.pairNextRound();
+              switch (pairingError) {
+                case RoundPairingError.NoError:
+                  msg = "Succesful";
+                  break;
+                case RoundPairingError.MissingPreviousResults:
+                  msg = "Missing Previous Results";
+                  break;
+                case RoundPairingError.UnableToFindValidMatches:
+                  msg = "Unable To Find Valid Matches";
+                  break;
+                default:
+                  msg = "Unknown Error";
+                  break;
+              }
+            } else {
+              msg = "Failed to Process Tournament Round";
+              pairingError = RoundPairingError.MissingPreviousResults;
             }
 
             showOkAlertDialog(

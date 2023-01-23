@@ -1,5 +1,7 @@
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 
 class Coach extends IMatchupParticipant {
   late final int teamId;
@@ -28,6 +30,8 @@ class Coach extends IMatchupParticipant {
   List<double> _tieBreakers = <double>[];
 
   List<String> _opponents = <String>[];
+
+  List<CoachMatchup> matches = [];
 
   Coach(
     this.teamId,
@@ -89,37 +93,92 @@ class Coach extends IMatchupParticipant {
     return _opponents;
   }
 
-  void addWin() {
-    _wins++;
+  // void addWin() {
+  //   _wins++;
+  // }
+
+  // void addTie() {
+  //   _ties++;
+  // }
+
+  // void addLoss() {
+  //   _losses++;
+  // }
+
+  void updateRecord(TournamentInfo t) {
+    _wins = 0;
+    _ties = 0;
+    _losses = 0;
+    _points = 0;
+    tds = 0;
+    cas = 0;
+    _opponents.clear();
+
+    matches.forEach((m) {
+      ReportedMatchResultWithStatus matchStats = m.getReportedMatchStatus();
+      MatchResult matchResult = m.getResult();
+
+      if (nafName == m.homeNafName) {
+        switch (matchResult) {
+          case MatchResult.HomeWon:
+            _wins++;
+            break;
+          case MatchResult.AwayWon:
+            _losses++;
+            break;
+          case MatchResult.Draw:
+            _ties++;
+            break;
+          default:
+            break;
+        }
+
+        tds += matchStats.homeTds;
+        cas += matchStats.homeCas;
+        _opponents.add(m.awayNafName);
+      } else if (nafName == m.awayNafName) {
+        switch (matchResult) {
+          case MatchResult.HomeWon:
+            _losses++;
+            break;
+          case MatchResult.AwayWon:
+            _wins++;
+            break;
+          case MatchResult.Draw:
+            _ties++;
+            break;
+          default:
+            break;
+        }
+
+        tds += matchStats.awayTds;
+        cas += matchStats.awayCas;
+        _opponents.add(m.homeNafName);
+      }
+    });
+
+    _points = _wins * t.winPts + _ties * t.tiePts + _losses * t.lossPts;
   }
 
-  void addTie() {
-    _ties++;
-  }
+  // void calculatePoints(double winPts, double tiePts, double lossPts) {
+  //   _points = _wins * winPts + _ties * tiePts + _losses * lossPts;
+  // }
 
-  void addLoss() {
-    _losses++;
-  }
+  // void updateTiebreakers(List<double> tieBreakers) {
+  //   _tieBreakers = tieBreakers;
+  // }
 
-  void calculatePoints(double winPts, double tiePts, double lossPts) {
-    _points = _wins * winPts + _ties * tiePts + _losses * lossPts;
-  }
+  // void addNewOpponent(String opponentName) {
+  //   _opponents.add(opponentName);
+  // }
 
-  void updateTiebreakers(List<double> tieBreakers) {
-    _tieBreakers = tieBreakers;
-  }
+  // void addTds(int t) {
+  //   tds += t;
+  // }
 
-  void addNewOpponent(String opponentName) {
-    _opponents.add(opponentName);
-  }
-
-  void addTds(int t) {
-    tds += t;
-  }
-
-  void addCas(int c) {
-    cas += c;
-  }
+  // void addCas(int c) {
+  //   cas += c;
+  // }
 
   Coach.fromJson(int id, Map<String, Object?> json) {
     this.teamId = id;
@@ -141,27 +200,6 @@ class Coach extends IMatchupParticipant {
 
     final tNafNumber = json['naf_number'] as int?;
     this.nafNumber = tNafNumber != null ? tNafNumber : -1;
-
-    // final tWins = json['wins'] as int?;
-    // this._wins = tWins != null ? tWins : 0;
-
-    // final tTies = json['ties'] as int?;
-    // this._ties = tTies != null ? tTies : 0;
-
-    // final tLosses = json['losses'] as int?;
-    // this._losses = tLosses != null ? tLosses : 0;
-
-    // final tTd = json['td'] as int?;
-    // this.tds = tTd != null ? tTd : 0;
-
-    // final tCas = json['cas'] as int?;
-    // this.cas = tCas != null ? tCas : 0;
-
-    // final tOpponentsA = json['opponents'] as List<dynamic>?;
-    // final tOpponents = tOpponentsA != null && tOpponentsA.isNotEmpty
-    //     ? tOpponentsA as List<String>?
-    //     : null;
-    // this._opponents = tOpponents != null ? tOpponents : [];
   }
 
   Map<String, dynamic> toJson() => {
@@ -171,11 +209,5 @@ class Coach extends IMatchupParticipant {
         'squad_name': squadName,
         'race': RaceUtils.getName(_race),
         'naf_number': nafNumber,
-        // 'wins': _wins,
-        // 'ties': _ties,
-        // 'losses': _losses,
-        // 'td': tds,
-        // 'cas': cas,
-        // 'opponents': _opponents,
       };
 }

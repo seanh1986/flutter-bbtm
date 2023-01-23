@@ -10,6 +10,10 @@ class TournamentInfo {
   late final DateTime dateTimeEnd;
   List<OrganizerInfo> organizers = [];
 
+  late double winPts = 5;
+  late double tiePts = 3;
+  late double lossPts = 1;
+
   TournamentInfo({
     required this.id,
     required this.name,
@@ -56,6 +60,21 @@ class TournamentInfo {
         organizers.add(OrganizerInfo.fromJson(tOrga as Map<String, dynamic>));
       });
     }
+
+    final tWinPts = json['win_pts'] as double?;
+    if (tWinPts != null) {
+      this.winPts = tWinPts;
+    }
+
+    final tTiePts = json['tie_pts'] as double?;
+    if (tTiePts != null) {
+      this.tiePts = tTiePts;
+    }
+
+    final tLossPts = json['loss_pts'] as double?;
+    if (tLossPts != null) {
+      this.lossPts = tLossPts;
+    }
   }
 
   Map<String, dynamic> toJson() => {
@@ -64,6 +83,9 @@ class TournamentInfo {
         'DateTimeStart': Timestamp.fromDate(dateTimeStart),
         'DateTimeEnd': Timestamp.fromDate(dateTimeEnd),
         'organizers': organizers.map((e) => e.toJson()).toList(),
+        'win_pts': winPts,
+        'tie_pts': tiePts,
+        'loss_pts': lossPts,
       };
 }
 
