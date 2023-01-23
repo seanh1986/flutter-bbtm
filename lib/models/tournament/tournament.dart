@@ -1,14 +1,12 @@
 import 'dart:collection';
-import 'package:bbnaf/models/matchup/reported_match_result.dart';
+import 'dart:math';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
-import "package:collection/collection.dart";
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/squad.dart';
-import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:flutter/widgets.dart';
 import 'package:xml/xml.dart';
@@ -80,6 +78,67 @@ class Tournament {
     return _coaches;
   }
 
+  // Try to process round (i.e., populate coaches with results)
+  bool processRound() {
+    if (coachRounds.isEmpty) {
+      return true;
+    }
+
+    CoachRound round = coachRounds.last;
+    if (round.matches.any((m) => !m.hasResult())) {
+      return false;
+    }
+
+    // Avoid duplicates (TODO: do better)
+    if (coachRounds.length == _coaches.first.matches.length) {
+      return false;
+    }
+
+    round.matches.forEach((m) {
+      Coach? homeCoach = getCoach(m.homeNafName);
+      Coach? awayCoach = getCoach(m.awayNafName);
+
+      // Update Matches
+      homeCoach?.matches.add(m);
+      awayCoach?.matches.add(m);
+
+      // Overwrite records
+      homeCoach?.overwriteRecord(info);
+      awayCoach?.overwriteRecord(info);
+    });
+
+    return true;
+  }
+
+  void _reProcessAllRounds() {
+    // Clear all coach matchups
+    _coaches.forEach((c) {
+      c.matches.clear();
+    });
+
+    // Update matches for each coach
+    coachRounds.forEach((r) {
+      if (r.matches.any((m) => !m.hasResult())) {
+        return;
+      }
+
+      r.matches.forEach((m) {
+        Coach? homeCoach = getCoach(m.homeNafName);
+        Coach? awayCoach = getCoach(m.awayNafName);
+
+        // Update Matches
+        homeCoach?.matches.add(m);
+        awayCoach?.matches.add(m);
+      });
+    });
+
+    // Overwrite records
+    _coaches.forEach((c) {
+      c.overwriteRecord(info);
+    });
+  }
+
+  // Increment to next round by updating the coach/squad rounds
   bool updateRound(RoundMatching matchups) {
     int newRound = matchups.round();
 
@@ -167,6 +226,7 @@ class Tournament {
       }
     }
 
+    _reProcessAllRounds();
     _syncSquadsAndCoaches();
   }
 
@@ -201,7 +261,10 @@ class Tournament {
         name: "Canadian Open",
         location: "Waterloo, Ontario",
         dateTimeStart: DateTime.utc(2023, 2, 10),
-        dateTimeEnd: DateTime.utc(2023, 2, 11));
+        dateTimeEnd: DateTime.utc(2023, 2, 11),
+        winPts: 5,
+        tiePts: 3,
+        lossPts: 1);
 
     info.organizers
         .add(OrganizerInfo("thecanadianopen@gmail.com", "grant85", true));
@@ -223,6 +286,24 @@ class Tournament {
         id++, "hammer16", "", "Chris H", Race.Ogre, "Chris H Team", 20377));
     addCoach(Coach(id++, "Duke_of_Edmund", "", "Andew W", Race.ShamblingUndead,
         "Andrew Team", 27220));
+    addCoach(Coach(id++, "Grither", "", "Bryan T", Race.ChaosDwarf,
+        "Bryan T Team", 10904));
+    addCoach(Coach(
+        id++, "L3athalK", "", "Leathan", Race.Amazon, "Leathan Team", 7465));
+    addCoach(Coach(id++, "KidRichard", "", "Derek T", Race.Snotling,
+        "Derek T Team", 24415));
+    addCoach(Coach(
+        id++, "delevus", "", "Matt V", Race.Vampire, "Vanderby Team", 9884));
+    addCoach(Coach(
+        id++, "Stimme", "", "Alex W", Race.TombKings, "Alex W Team", 17245));
+    addCoach(Coach(id++, "Manz62", "", "Manu", Race.Slann, "Manu Team", 9753));
+    addCoach(Coach(id++, "Buffalo_Chris", "", "Buffalo", Race.WoodElf,
+        "Buffalo Team", 5624));
+    addCoach(Coach(id++, "AviD", "", "Avi", Race.HighElf, "Avi Team", 25207));
+    addCoach(Coach(
+        id++, "runki_khrum", "", "Colin", Race.Skaven, "Colin Team", 6780));
+    addCoach(
+        Coach(id++, "TrevCraig", "", "Trev", Race.Goblin, "Tev Team", 23648));
   }
 
   // factory Tournament.fromXml(XmlDocument xml, TournamentInfo info) {
