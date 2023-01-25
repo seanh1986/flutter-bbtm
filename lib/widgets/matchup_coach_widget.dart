@@ -29,12 +29,14 @@ class MatchupCoachWidget extends StatefulWidget {
 }
 
 enum UploadState {
-  NotAuthorized,
-  Editing,
-  UploadedAwaiting,
-  ConfirmOrEdit,
-  UploadedConfirmed,
-  Error,
+  NotYetSet, // Not a valid state (this means not yet initialized)
+  NotAuthorized, // Not authorized to edit match results
+  Editing, // Currently editing
+  // UploadedAwaiting, // Upload pending
+  CanConfirm, // Opponent submitted, please confirm
+  CanEdit, // User already submitted but can edit
+  UploadedConfirmed, // Confirmed that both sides agree
+  Error, // Disagreement in reported results
 }
 
 class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
@@ -45,7 +47,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
   late MatchReportBloc _matchReportBloc;
 
-  late UploadState _state;
+  late ReportedMatchResultWithStatus _reportWithStatus;
+  UploadState _state = UploadState.NotYetSet;
 
   final double titleFontSize = kIsWeb ? 20.0 : 14.0;
   final double subTitleFontSize = kIsWeb ? 14.0 : 12.0;
@@ -68,25 +71,21 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
     _matchReportBloc = BlocProvider.of<MatchReportBloc>(context);
 
-    ReportedMatchResultWithStatus reportWithStatus =
-        _matchup.getReportedMatchStatus();
+    _reportWithStatus = _matchup.getReportedMatchStatus();
 
     Authorization authorization =
         _tournament.getMatchAuthorization(_matchup, _authUser);
 
-    _state = _getMatchUploadState(reportWithStatus, authorization);
+    if (_state == UploadState.NotYetSet) {
+      _state = _getMatchUploadState(_reportWithStatus, authorization);
+    }
 
-    homeReportWidget = MatchupReportWidget(
-        reportedMatch: reportWithStatus,
-        participant: _matchup.home(_tournament),
-        showHome: true,
-        state: _state);
-
-    awayReportWidget = MatchupReportWidget(
-        reportedMatch: reportWithStatus,
-        participant: _matchup.away(_tournament),
-        showHome: false,
-        state: _state);
+    print("Matchup: " +
+        _matchup.homeNafName +
+        " vs. " +
+        _matchup.awayNafName +
+        " -> " +
+        _state.toString());
   }
 
   UploadState _getMatchUploadState(
@@ -105,19 +104,33 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
         return UploadState.Error;
       case ReportedMatchStatus.HomeReported:
         return authorization == Authorization.HomeCoach ||
-                authorization == Authorization.HomeCaptain
-            ? UploadState.UploadedAwaiting
-            : UploadState.ConfirmOrEdit;
+                authorization == Authorization.HomeCaptain ||
+                authorization == Authorization.Admin
+            ? UploadState.CanEdit
+            : UploadState.CanConfirm;
       case ReportedMatchStatus.AwayReported:
         return authorization == Authorization.AwayCoach ||
-                authorization == Authorization.AwayCaptain
-            ? UploadState.UploadedAwaiting
-            : UploadState.ConfirmOrEdit;
+                authorization == Authorization.AwayCaptain ||
+                authorization == Authorization.Admin
+            ? UploadState.CanEdit
+            : UploadState.CanConfirm;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    homeReportWidget = MatchupReportWidget(
+        reportedMatch: _reportWithStatus,
+        participant: _matchup.home(_tournament),
+        showHome: true,
+        state: _state);
+
+    awayReportWidget = MatchupReportWidget(
+        reportedMatch: _reportWithStatus,
+        participant: _matchup.away(_tournament),
+        showHome: false,
+        state: _state);
+
     return BlocBuilder<MatchReportBloc, MatchReportState>(
         bloc: _matchReportBloc,
         builder: (selectContext, selectState) {
@@ -148,19 +161,11 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                           fillColor: Theme.of(context).primaryColorLight,
                           elevation: 0.0,
                           child: _itemUploadStatus(),
-                          onPressed: () => {
-                            // TODO: send to server?
-                            _uploadToServer()
-
-                            // setState(() {
-                            //   // Temporarily wrap around
-                            //   int curIdx = _state.index;
-                            //   int newIdx = (curIdx + 1) % UploadState.values.length;
-                            //   _state = UploadState.values[newIdx];
-                            // }),
-                          },
+                          onPressed: () => {_handleUploadOrEditPressEvent()},
                         )),
               Text(' vs. ', style: TextStyle(fontSize: titleFontSize)),
+              Text('Table #' + _matchup.tableNum().toString(),
+                  style: TextStyle(fontSize: titleFontSize))
             ],
           ),
           Expanded(
@@ -169,6 +174,26 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                       horizontal: 5.0, vertical: 10.0),
                   child: awayReportWidget)),
         ]);
+  }
+
+  void _handleUploadOrEditPressEvent() {
+    switch (_state) {
+      case UploadState.Editing:
+      case UploadState.CanConfirm:
+        _uploadToServer();
+        break;
+      case UploadState.CanEdit:
+      case UploadState.Error:
+        setState(() {
+          _state = UploadState.Editing;
+        });
+        break;
+      case UploadState.UploadedConfirmed:
+      // case UploadState.UploadedAwaiting:
+      case UploadState.NotAuthorized:
+      default:
+        return;
+    }
   }
 
   void _uploadToServer() {
@@ -225,9 +250,21 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           color: Colors.white,
           size: uploadIconSize,
         );
-      case UploadState.UploadedAwaiting:
+      // case UploadState.UploadedAwaiting:
+      //   return Icon(
+      //     Icons.query_builder,
+      //     color: Colors.orange,
+      //     size: uploadIconSize,
+      //   );
+      case UploadState.CanEdit:
         return Icon(
-          Icons.pending_actions,
+          Icons.create_outlined,
+          color: Colors.orange,
+          size: uploadIconSize,
+        );
+      case UploadState.CanConfirm:
+        return Icon(
+          Icons.done,
           color: Colors.orange,
           size: uploadIconSize,
         );
@@ -238,6 +275,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           size: uploadIconSize,
         );
       case UploadState.Error:
+      case UploadState.NotYetSet:
         double shift = 0.5 * uploadIconSize;
 
         return Container(

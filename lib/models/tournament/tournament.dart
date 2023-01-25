@@ -182,9 +182,10 @@ class Tournament {
     // TODO: Check if squad captain
 
     // User is in matchup
-    if (matchup.awayNafName == authUser.nafName) {
+    if (matchup.awayNafName.toLowerCase() == authUser.nafName?.toLowerCase()) {
       return Authorization.AwayCoach;
-    } else if (matchup.homeNafName == authUser.nafName) {
+    } else if (matchup.homeNafName.toLowerCase() ==
+        authUser.nafName?.toLowerCase()) {
       return Authorization.HomeCoach;
     }
 

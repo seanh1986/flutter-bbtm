@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'package:bbnaf/models/matchup/reported_match_result.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:bloc/bloc.dart';
 
