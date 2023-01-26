@@ -262,10 +262,11 @@ class Tournament {
         name: "Canadian Open",
         location: "Waterloo, Ontario",
         dateTimeStart: DateTime.utc(2023, 2, 10),
-        dateTimeEnd: DateTime.utc(2023, 2, 11),
-        winPts: 5,
-        tiePts: 3,
-        lossPts: 1);
+        dateTimeEnd: DateTime.utc(2023, 2, 11));
+
+    info.scoringDetails.winPts = 5;
+    info.scoringDetails.tiePts = 3;
+    info.scoringDetails.lossPts = 1;
 
     info.organizers
         .add(OrganizerInfo("thecanadianopen@gmail.com", "grant85", true));

@@ -1,5 +1,4 @@
 import 'dart:core';
-import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TournamentInfo {
@@ -10,19 +9,18 @@ class TournamentInfo {
   late final DateTime dateTimeEnd;
   List<OrganizerInfo> organizers = [];
 
-  late double winPts;
-  late double tiePts;
-  late double lossPts;
+  ScoringDetails scoringDetails = ScoringDetails();
+
+  String detailsWeather = "";
+  String detailsKickOff = "";
+  String detailsSpecialRules = "";
 
   TournamentInfo(
       {required this.id,
       required this.name,
       required this.location,
       required this.dateTimeStart,
-      required this.dateTimeEnd,
-      this.winPts = 5,
-      this.tiePts = 3,
-      this.lossPts = 1});
+      required this.dateTimeEnd});
 
   TournamentInfo.fromJson(String documentId, Map<String, dynamic> json) {
     this.id = documentId;
@@ -63,6 +61,82 @@ class TournamentInfo {
       });
     }
 
+    final tScoringDetails = json['scoring_details'] as Map<String, dynamic>?;
+    if (tScoringDetails != null) {
+      this.scoringDetails = ScoringDetails.fromJson(tScoringDetails);
+    }
+  }
+
+  Map<String, dynamic> toJson() => {
+        'Name': name,
+        'Location': location,
+        'DateTimeStart': Timestamp.fromDate(dateTimeStart),
+        'DateTimeEnd': Timestamp.fromDate(dateTimeEnd),
+        'organizers': organizers.map((e) => e.toJson()).toList(),
+        'scoring_details': scoringDetails.toJson(),
+      };
+}
+
+// enum TieBreakers {
+//   OpponentStrength,
+//   TD,
+// }
+
+class CasualtyDetails {
+  bool spp = true;
+  bool foul = false;
+  bool surf = false;
+  bool weapon = false;
+  bool dodge = false;
+
+  CasualtyDetails();
+
+  CasualtyDetails.fromJson(Map<String, dynamic> json) {
+    final tSpp = json['spp'] as bool?;
+    if (tSpp != null) {
+      this.spp = tSpp;
+    }
+
+    final tFoul = json['foul'] as bool?;
+    if (tFoul != null) {
+      this.foul = tFoul;
+    }
+
+    final tSurf = json['surf'] as bool?;
+    if (tSurf != null) {
+      this.surf = tSurf;
+    }
+
+    final tWeapon = json['weapon'] as bool?;
+    if (tWeapon != null) {
+      this.weapon = tWeapon;
+    }
+
+    final tDodge = json['dodge'] as bool?;
+    if (tDodge != null) {
+      this.dodge = tDodge;
+    }
+  }
+
+  Map<String, dynamic> toJson() => {
+        'spp': spp,
+        'foul': foul,
+        'surf': surf,
+        'weapon': weapon,
+        'dodge': dodge,
+      };
+}
+
+class ScoringDetails {
+  double winPts = 5;
+  double tiePts = 3;
+  double lossPts = 1;
+
+  CasualtyDetails casualtyDetails = CasualtyDetails();
+
+  ScoringDetails();
+
+  ScoringDetails.fromJson(Map<String, dynamic> json) {
     final tWinPts = json['win_pts'] as double?;
     if (tWinPts != null) {
       this.winPts = tWinPts;
@@ -77,17 +151,18 @@ class TournamentInfo {
     if (tLossPts != null) {
       this.lossPts = tLossPts;
     }
+
+    final tCasDetails = json['casualty_details'] as Map<String, dynamic>?;
+    if (tCasDetails != null) {
+      this.casualtyDetails = CasualtyDetails.fromJson(tCasDetails);
+    }
   }
 
   Map<String, dynamic> toJson() => {
-        'Name': name,
-        'Location': location,
-        'DateTimeStart': Timestamp.fromDate(dateTimeStart),
-        'DateTimeEnd': Timestamp.fromDate(dateTimeEnd),
-        'organizers': organizers.map((e) => e.toJson()).toList(),
         'win_pts': winPts,
         'tie_pts': tiePts,
         'loss_pts': lossPts,
+        'casualty_details': casualtyDetails.toJson(),
       };
 }
 

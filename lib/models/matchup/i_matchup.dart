@@ -29,12 +29,16 @@ abstract class IMatchup {
   Map<String, dynamic> toJson();
 
   String groupByName(Tournament t) {
-    switch (type()) {
-      case OrgType.Coach:
-        return home(t).parentName() + " vs. " + away(t).parentName();
-      case OrgType.Squad:
-      default:
-        return homeName() + " vs. " + awayName();
+    if (t.useSquads) {
+      switch (type()) {
+        case OrgType.Coach:
+          return home(t).parentName() + " vs. " + away(t).parentName();
+        case OrgType.Squad:
+        default:
+          return homeName() + " vs. " + awayName();
+      }
+    } else {
+      return "Round #" + t.curRoundNumber.toString();
     }
   }
 
@@ -45,11 +49,15 @@ abstract class IMatchup {
   MatchResult getResult();
 
   bool hasParticipantName(String name) {
-    return homeName() == name || awayName() == name;
+    String nameLc = name.toLowerCase();
+    return homeName().toLowerCase() == nameLc ||
+        awayName().toLowerCase() == nameLc;
   }
 
   bool hasParticipant(IMatchupParticipant p) {
-    return homeName() == p.name() || awayName() == p.name();
+    String nameLc = p.name().toLowerCase();
+    return homeName().toLowerCase() == nameLc ||
+        awayName().toLowerCase() == nameLc;
   }
 
   bool hasParticipants(
@@ -68,12 +76,13 @@ abstract class IMatchup {
     return other is IMatchup &&
         other.type() == type() &&
         other.roundNum() == roundNum() &&
-        other.homeName() == homeName() &&
-        other.awayName() == awayName();
+        other.homeName().toLowerCase() == homeName().toLowerCase() &&
+        other.awayName().toLowerCase() == awayName().toLowerCase();
   }
 
   @override
-  int get hashCode => Object.hash(type(), roundNum(), homeName(), awayName());
+  int get hashCode => Object.hash(
+      type(), roundNum(), homeName().toLowerCase(), awayName().toLowerCase());
 
   // static String getResultName(MatchResult result) {
   //   switch (result) {
@@ -153,9 +162,9 @@ abstract class IMatchupParticipant {
     }
     return other is IMatchupParticipant &&
         other.type() == type() &&
-        other.name() == name();
+        other.name().toLowerCase() == name().toLowerCase();
   }
 
   @override
-  int get hashCode => Object.hash(type(), name());
+  int get hashCode => Object.hash(type(), name().toLowerCase());
 }

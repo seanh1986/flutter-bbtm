@@ -145,7 +145,9 @@ class Coach extends IMatchupParticipant {
       }
     });
 
-    _points = _wins * t.winPts + _ties * t.tiePts + _losses * t.lossPts;
+    _points = _wins * t.scoringDetails.winPts +
+        _ties * t.scoringDetails.tiePts +
+        _losses * t.scoringDetails.lossPts;
   }
 
   Coach.fromJson(int id, Map<String, Object?> json) {
