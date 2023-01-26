@@ -44,6 +44,15 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Widget _welcomeUser() {
+    String userName;
+    if (_authUser.nafName != null) {
+      userName = _authUser.nafName.toString();
+    } else if (_authUser.user?.displayName != null) {
+      userName = _authUser.user!.displayName!.toString();
+    } else {
+      userName = "Guest";
+    }
+
     return Container(
         padding: EdgeInsets.all(7),
         margin: EdgeInsets.all(7),
@@ -52,11 +61,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Welcome " +
-                  (_authUser.nafName != null
-                      ? _authUser.nafName.toString()
-                      : "Guest") +
-                  "!",
+              "Welcome " + userName + "!",
               style: TextStyle(fontSize: 20),
             ),
           ],

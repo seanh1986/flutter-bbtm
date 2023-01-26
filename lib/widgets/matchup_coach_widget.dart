@@ -238,6 +238,10 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       _matchReportBloc
           .add(new UpdateMatchReportEvent.admin(_tournament, _matchup));
     }
+
+    setState(() {
+      _state = UploadState.CanEdit;
+    });
   }
 
   Widget? _itemUploadStatus() {
