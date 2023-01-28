@@ -65,6 +65,21 @@ class TournamentInfo {
     if (tScoringDetails != null) {
       this.scoringDetails = ScoringDetails.fromJson(tScoringDetails);
     }
+
+    final tDetailsWeather = json['details_weather'] as String?;
+    if (tDetailsWeather != null) {
+      this.detailsWeather = tDetailsWeather;
+    }
+
+    final tDetailsKickOff = json['details_kickoff'] as String?;
+    if (tDetailsKickOff != null) {
+      this.detailsKickOff = tDetailsKickOff;
+    }
+
+    final tDetailsSpecialRules = json['details_special_rules'] as String?;
+    if (tDetailsSpecialRules != null) {
+      this.detailsSpecialRules = tDetailsSpecialRules;
+    }
   }
 
   Map<String, dynamic> toJson() => {
@@ -74,6 +89,9 @@ class TournamentInfo {
         'DateTimeEnd': Timestamp.fromDate(dateTimeEnd),
         'organizers': organizers.map((e) => e.toJson()).toList(),
         'scoring_details': scoringDetails.toJson(),
+        'details_weather': detailsWeather,
+        'details_kickoff': detailsKickOff,
+        'details_special_rules': detailsSpecialRules,
       };
 }
 

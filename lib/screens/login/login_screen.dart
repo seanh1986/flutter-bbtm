@@ -15,12 +15,12 @@ class _LoginPage extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        Image.asset(
-          './assets/images/background/background_football_field.png',
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          fit: BoxFit.cover,
-        ),
+        // Image.asset(
+        //   './assets/images/background/background_football_field.png',
+        //   height: MediaQuery.of(context).size.height,
+        //   width: MediaQuery.of(context).size.width,
+        //   fit: BoxFit.cover,
+        // ),
         Scaffold(
             body: Container(
           decoration: BoxDecoration(

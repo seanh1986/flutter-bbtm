@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:math';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
@@ -9,6 +8,7 @@ import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:xml/xml.dart';
 
 enum Authorization {
@@ -136,6 +136,8 @@ class Tournament {
     _coaches.forEach((c) {
       c.overwriteRecord(info);
     });
+
+    curRoundNumber = coachRounds.length;
   }
 
   // Increment to next round by updating the coach/squad rounds
@@ -195,8 +197,8 @@ class Tournament {
   Tournament.fromJson(TournamentInfo info, Map<String, dynamic> json) {
     this.info = info;
 
-    final tRound = json['round'] as int?;
-    this.curRoundNumber = tRound != null ? tRound : 0;
+    // final tRound = json['round'] as int?;
+    // this.curRoundNumber = tRound != null ? tRound : 0;
 
     final tUseSquads = json['use_squads'] as bool?;
     this.useSquads = tUseSquads != null ? tUseSquads : false;
@@ -232,7 +234,7 @@ class Tournament {
   }
 
   Map<String, dynamic> toJson() => {
-        'round': curRoundNumber,
+        // 'round': curRoundNumber,
         'use_squads': useSquads,
         'first_round_matching':
             SwissPairings.getFirstRoundMatchingName(firstRoundMatchingRule),
@@ -267,6 +269,72 @@ class Tournament {
     info.scoringDetails.winPts = 5;
     info.scoringDetails.tiePts = 3;
     info.scoringDetails.lossPts = 1;
+
+    const htmlDetailsWeather = r"""
+<p><u><strong>2. Howling Winds</strong></u><br />
+The fans are shivering in the stands as a ferocious gale blows steadily down the pitch. Any pass attempts have<br />
+an additional -1 modifier. Each player rolls a D6 (re-rolling ties) &ndash; the wind is blowing down the pitch towards the losing<br />
+player&rsquo;s End Zone. Whenever the ball scatters for a kick-off or inaccurate pass, it will be blown down the pitch. Before making<br />
+the Scatter roll, place the Throw-in template over the ball so that the 3-4 result is pointing in the same direction as the wind,<br />
+then roll a D6 and move the ball one space in the corresponding direction. Repeat this a second time, then scatter the ball as<br />
+normal.</p>
+
+<p><u><strong>3.&nbsp;Freezing</strong></u><br />
+A sudden cold snap turns the ground as hard as granite (and not the &lsquo;astro&rsquo; variety that players are used to). Whenever<br />
+a player is Knocked Down, add 1 to the result of the Armour roll.</p>
+
+<p><u><strong>4-10. Brisk</strong></u><br />
+It&rsquo;s rather chilly, but it is as close to perfect Blood Bowl weather as you can hope for at this time of year! This counts as a<br />
+&lsquo;Nice&rsquo; result for purposes of the Changing Weather result on the Kick-off table.</p>
+
+<p><u><strong>11. Heavy Snow</strong></u><br />
+Visibility is low, it&rsquo;s slippery underfoot and it&rsquo;s impossible to spot tripping hazards, making it very difficult indeed<br />
+to block effectively. Whenever a player makes a Blitz Action, their ST is reduced by 1 for the duration of that Action.</p>
+
+<p><u><strong>12. Blizzard</strong></u><br />
+Between the snow, the wind and the icy ground, it is a miracle the game&rsquo;s still in progress! Any player attempting to<br />
+move an extra square (GFI) will slip and be Knocked Down on a roll of 1-2, and only Quick or Short Passes can be attempted.</p>
+    """;
+    info.detailsWeather = htmlDetailsWeather.toString();
+
+    const htmlDetailSpecialRules = r"""
+<p><strong>Norse</strong> teams get <u>+1 dedicated fans</u> at no cost as this is their turf.</p>
+
+<p>Teams MUST be painted to <u>3 colour minimum</u>. There will be penalties for unpainted figures or teams at TO discretion.</p>
+
+<p>After building your roster, <u>pick a player to be Captain</u>, they get PRO for FREE if you have same Captain in both the Canadian Open AND Icebowl (UNLESS you bring the same race to both tournaments - in that instance they get Bone Head)</p>
+
+<p>In general if they cost the same, and have the same stats, minor skill or skill access differences are inconsequential.</p>
+
+<ul>
+	<li>Goblin or Troll from Orc, Goblin, Chaos Pact or Underworld, Snotling</li>
+	<li>Skaven Lineman from Skaven, Chaos Pact or Underworld</li>
+	<li>Minotaur from Chaos, Chaos Dwarf, Chaos Pact</li>
+	<li>Treeman from Halfling, Wood Elf.</li>
+	<li>Ogre from Human, Chaos Pact, Ogres</li>
+</ul>
+
+<p>There are <u>three exceptions</u> that are not allowed. This is for fluff reasons:</p>
+
+<ul>
+	<li>Dwarf &amp; Chaos Dwarf blocker</li>
+	<li>High &amp; Dark Elf blitzer</li>
+	<li>High &amp; Dark Elf lineman</li>
+</ul>
+
+<p><u>Hobby Bonus</u>:</p>
+
+<ul>
+	<li>You may <u>NOT</u> purchase assistant coaches or cheerleaders.</li>
+	<li>If you have a coach model painted +1 assistant coach</li>
+	<li>You MUST have a coach model to argue the call!!!</li>
+	<li>If you have a cheerleader model painted +1 cheerleader (doesnt need to be female/pom poms)<br />
+	A mascot can replace one or other @ TO discretion</li>
+	<li>Max of 1 each, except stunties can have 2 each</li>
+	<li>These do&nbsp;not cost any gold.</li>
+</ul>
+    """;
+    info.detailsSpecialRules = htmlDetailSpecialRules.toString();
 
     info.organizers
         .add(OrganizerInfo("thecanadianopen@gmail.com", "grant85", true));

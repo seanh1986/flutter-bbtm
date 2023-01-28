@@ -39,6 +39,7 @@ dependencies:
   xml: ^5.3.0
   flutter_login: ^4.1.0
   adaptive_dialog: ^1.8.0+1
+  flutter_html: ^2.2.1
 
 dev_dependencies:
   flutter_test:
