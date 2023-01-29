@@ -201,7 +201,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
   Widget _generateCardWidget(List<Widget> children) {
     return Container(
-        margin: EdgeInsets.fromLTRB(20, 2, 20, 2), // EdgeInsets.all(20),
+        margin: EdgeInsets.fromLTRB(20, 2, 20, 2),
         width: double.infinity,
         child: Card(
           margin: EdgeInsets.all(10),

@@ -46,21 +46,35 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   // TODO: Add CurCoach widget at top if non-null
   @override
   Widget build(BuildContext context) {
-    return _matchups.isNotEmpty
-        ? GroupedListView(
-            elements: _matchups,
-            groupBy: (IMatchup matchup) => _groupBy(matchup),
-            groupSeparatorBuilder: _buildGroupSeparator,
-            itemBuilder: (BuildContext context, CoachMatchup matchup) =>
-                MatchupCoachWidget(
-              tournament: _tournament,
-              authUser: _authUser,
-              matchup: matchup,
-              // listener: _listener,
-            ),
-            order: GroupedListOrder.ASC,
-          )
-        : _noMatchUpsYet();
+    if (_matchups.isEmpty) {
+      return _noMatchUpsYet();
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(
+              './assets/images/background/background_football_field.png'),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: GroupedListView(
+          elements: _matchups,
+          groupBy: (IMatchup matchup) => _groupBy(matchup),
+          groupSeparatorBuilder: _buildGroupSeparator,
+          itemBuilder: (BuildContext context, CoachMatchup matchup) =>
+              MatchupCoachWidget(
+            tournament: _tournament,
+            authUser: _authUser,
+            matchup: matchup,
+            // listener: _listener,
+          ),
+          order: GroupedListOrder.ASC,
+        ),
+      ),
+    );
   }
 
   String _groupBy(IMatchup matchup) {
@@ -81,6 +95,15 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
 
 Widget _noMatchUpsYet() {
   return Container(
-    child: Text('Matchups not available yet'),
-  );
+      margin: EdgeInsets.fromLTRB(20, 2, 20, 2), // EdgeInsets.all(20),
+      width: double.infinity,
+      child: Card(
+        margin: EdgeInsets.all(10),
+        child: Container(
+            padding: EdgeInsets.all(2),
+            child: Text(
+              'Matchups not available yet',
+              style: TextStyle(fontSize: 20),
+            )),
+      ));
 }
