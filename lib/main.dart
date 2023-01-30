@@ -7,11 +7,16 @@ import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
 import 'package:bbnaf/screens/tournament_list/tournament_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/tournament_list/tournament_list.dart';
 import 'blocs/tournament_selection/tournament_selection.dart';
 import 'repos/auth/auth_repo.dart';
 import 'repos/tournament/tournament_repo.dart';
+import 'package:uni_links/uni_links.dart';
+
+// Ensure we only handle initial uri once
+bool _initialUriIsHandled = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +43,7 @@ void main() async {
           ..add(AppStartMatchReportEvent())),
   ], child: App()));
 
-  _tournamentRepo.updateTournamentData(Tournament.fromExample());
+  // _tournamentRepo.updateTournamentData(Tournament.fromExample());
 }
 
 /// We are using a StatefulWidget such that we only create the [Future] once,
@@ -53,6 +58,48 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
+  Uri? _initialUri;
+
+  @override
+  void initState() {
+    super.initState();
+    _handleInitialUri();
+  }
+
+  /// Handle the initial Uri - the one the app was started with
+  ///
+  /// **ATTENTION**: `getInitialLink`/`getInitialUri` should be handled
+  /// ONLY ONCE in your app's lifetime, since it is not meant to change
+  /// throughout your app's life.
+  ///
+  /// We handle all exceptions, since it is called from initState.
+  Future<void> _handleInitialUri() async {
+    // In this example app this is an almost useless guard, but it is here to
+    // show we are not going to call getInitialUri multiple times, even if this
+    // was a weidget that will be disposed of (ex. a navigation route change).
+    if (!_initialUriIsHandled) {
+      _initialUriIsHandled = true;
+
+      try {
+        final uri = await getInitialUri();
+        if (uri == null) {
+          print('no initial uri');
+        } else {
+          print('got initial uri: $uri');
+        }
+        if (!mounted) return;
+        setState(() => _initialUri = uri);
+      } on PlatformException {
+        // Platform messages may fail but we ignore the exception
+        print('falied to get initial uri');
+      } on FormatException catch (err) {
+        if (!mounted) return;
+        print('malformed initial uri');
+        // setState(() => _err = err);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     /// The future is part of the state of our widget. We should not call `initializeApp`
@@ -80,8 +127,10 @@ class _AppState extends State<App> {
   }
 
   Widget _launchSuccess() {
-    // Canadian Open: X0qh35qbzPhBQKBb6y6c
-    String? hardcodedTournamentId = "X0qh35qbzPhBQKBb6y6c";
+    String? tId = _initialUri?.queryParameters['tid'];
+
+    // Hardcode for testing (Canadian Open)
+    // tId = "X0qh35qbzPhBQKBb6y6c";
 
     return MaterialApp(
       title: 'BloodBowl Tournament Management',
@@ -94,7 +143,7 @@ class _AppState extends State<App> {
         textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
       ),
       home: TournamentSelectionPage(
-        tournamentId: hardcodedTournamentId,
+        tournamentId: tId,
       ),
     );
   }
