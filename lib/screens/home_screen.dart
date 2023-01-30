@@ -1,17 +1,16 @@
 import 'package:bbnaf/models/coach.dart';
-import 'package:bbnaf/models/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/squad.dart';
-import 'package:bbnaf/models/squad_matchup.dart';
+import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:bbnaf/screens/admin/admin_screen.dart';
 import 'package:bbnaf/screens/overview_screen.dart';
 import 'package:bbnaf/screens/rankings_screen.dart';
 import 'package:bbnaf/screens/tournament_list/tournament_list_screen.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
-import 'package:bbnaf/widgets/placeholder_widget.dart';
 import 'package:flutter/scheduler.dart';
-
 import 'matchups/matchups_coaches_screen.dart';
 import 'matchups/matchups_squad_screen.dart';
 
@@ -47,8 +46,6 @@ class _HomePageState extends State<HomePage> {
 
   List<SquadMatchup> _squadMatchups = [];
 
-  List<CoachMatchup> _selectedCoachMatchups = [];
-
   List<_WidgetFamily> _children = [];
 
   @override
@@ -62,18 +59,24 @@ class _HomePageState extends State<HomePage> {
         ? _tournament.getCoachSquad(widget.authUser.nafName as String)
         : null;
 
-    _squadMatchups = _tournament.curSquadRound!.matches;
+    if (_tournament.squadRounds.isNotEmpty) {
+      _squadMatchups = _tournament.squadRounds.last.matches;
+    }
 
     _coachMatchupListener = new _CoachMatchupListClickListener(this);
 
     List<Widget> matchupWidgets = [];
     if (_tournament.useSquads) {
       matchupWidgets.add(SquadMatchupsPage(
+        tournament: _tournament,
         matchups: _squadMatchups,
         coachMatchupListeners: _coachMatchupListener,
       ));
     }
-    matchupWidgets.add(CoachMatchupsPage(matchups: _selectedCoachMatchups));
+    matchupWidgets.add(CoachMatchupsPage(
+      tournament: _tournament,
+      authUser: _authUser,
+    ));
 
     _children = [
       new _WidgetFamily([
@@ -84,7 +87,12 @@ class _HomePageState extends State<HomePage> {
       ]),
       new _WidgetFamily(matchupWidgets),
       new _WidgetFamily([RankingsPage(tournament: _tournament)]),
-      new _WidgetFamily([PlaceholderWidget(Colors.black)]),
+      new _WidgetFamily([
+        AdminScreen(
+          tournament: _tournament,
+          authUser: _authUser,
+        )
+      ]),
     ];
 
     super.initState();
@@ -107,15 +115,7 @@ class _HomePageState extends State<HomePage> {
           ),
           body: _children[_parentIndex].widgets[_childIndex],
           bottomNavigationBar: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.sports_football), label: 'Matches'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.poll), label: 'Rankings'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.settings), label: 'Settings'),
-            ],
+            items: _getBottomNavigationBarItems(),
             currentIndex: _parentIndex,
             selectedItemColor: Theme.of(context).colorScheme.secondary,
             onTap: _onItemTapped,
@@ -123,10 +123,29 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 
+  List<BottomNavigationBarItem> _getBottomNavigationBarItems() {
+    List<BottomNavigationBarItem> items = [
+      BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+      BottomNavigationBarItem(
+          icon: Icon(Icons.sports_football), label: 'Matches'),
+      BottomNavigationBarItem(icon: Icon(Icons.poll), label: 'Rankings'),
+    ];
+
+    if (_authUser.user != null &&
+        _authUser.user!.email != null &&
+        _tournament.info.organizers
+            .any((element) => element.email == _authUser.user!.email)) {
+      items.add(
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Admin'));
+    }
+
+    return items;
+  }
+
   void _handleBackButton() {
     if (_childIndex == 0) {
       if (_parentIndex == 0) {
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
           Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -161,7 +180,10 @@ class _HomePageState extends State<HomePage> {
       _WidgetFamily wFamily = _children[_parentIndex];
 
       if (wFamily.widgets.length > _childIndex) {
-        Widget w = new CoachMatchupsPage(matchups: coachMatchups);
+        Widget w = new CoachMatchupsPage(
+          tournament: _tournament,
+          authUser: _authUser,
+        );
         wFamily.widgets[_childIndex] = w;
       }
     });

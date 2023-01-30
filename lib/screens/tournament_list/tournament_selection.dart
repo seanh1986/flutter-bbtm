@@ -2,7 +2,6 @@ import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/tournament_list/tournament_list.dart';
 import 'package:bbnaf/blocs/tournament_selection/tournament_selection.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
-import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/home_screen.dart';
 import 'package:bbnaf/screens/login/login_screen.dart';
 import 'package:bbnaf/screens/splash_screen.dart';
@@ -152,43 +151,59 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   /// When a tournment has been selected
   Widget _onSelectedTournament(
       BuildContext context, SelectedTournamentState tournamentState) {
-    return BlocBuilder<AuthBloc, AuthState>(
-        bloc: _authBloc,
-        builder: (content, authState) {
-          if (authState is LoggedInAuthState) {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => HomePage(
-                          tournament: tournamentState.tournament,
-                          authUser: authState.authUser,
-                        )));
-          }
+    return BlocListener<AuthBloc, AuthState>(
+      listener: ((context, authState) => {
+            if (authState is LoggedInAuthState)
+              {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HomePage(
+                              tournament: tournamentState.tournament,
+                              authUser: authState.authUser,
+                            )))
+              }
+          }),
+      child: LoginPage(),
+    );
 
-          // if (authState is OrganizerAuthState ||
-          //     authState is CaptainAuthState ||
-          //     authState is ParticipantAuthState ||
-          //     authState is GuestAuthState) {
-          //   Navigator.push(
-          //       context,
-          //       MaterialPageRoute(
-          //           builder: (context) => HomePage(
-          //                 tournament: tournamentState.tournament,
-          //                 authUser: _authUser,
-          //               )));
-          // }
+    // return BlocBuilder<AuthBloc, AuthState>(
+    //     bloc: _authBloc,
+    //     builder: (content, authState) {
+    //       if (authState is LoggedInAuthState) {
+    //         Navigator.push(
+    //             context,
+    //             MaterialPageRoute(
+    //                 builder: (context) => HomePage(
+    //                       tournament: tournamentState.tournament,
+    //                       authUser: authState.authUser,
+    //                     )));
+    //       }
 
-          return LoginPage();
+    // if (authState is OrganizerAuthState ||
+    //     authState is CaptainAuthState ||
+    //     authState is ParticipantAuthState ||
+    //     authState is GuestAuthState) {
+    //   Navigator.push(
+    //       context,
+    //       MaterialPageRoute(
+    //           builder: (context) => HomePage(
+    //                 tournament: tournamentState.tournament,
+    //                 authUser: _authUser,
+    //               )));
+    // }
 
-          // if (state is SelectedTournamentState) {
-          //   return HomePage(
-          //     tournament: state.tournament,
-          //     authUser: _authUser,
-          //   );
-          // } else {
-          //   return _showTournamentList(context);
-          // }
-        });
+    // return LoginPage();
+
+    // if (state is SelectedTournamentState) {
+    //   return HomePage(
+    //     tournament: state.tournament,
+    //     authUser: _authUser,
+    //   );
+    // } else {
+    //   return _showTournamentList(context);
+    // }
+    // });
   }
 
   Widget _showTournamentList(BuildContext context, TournamentListLoaded state) {

@@ -2,7 +2,6 @@ import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/widgets/rankings_coach_widget.dart';
 import 'package:bbnaf/widgets/rankings_squads_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:bbnaf/models/coach.dart';
 
 class RankingsPage extends StatefulWidget {
   final Tournament tournament;
@@ -26,6 +25,12 @@ class _RankingsPage extends State<RankingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    return _tournament.useSquads
+        ? _squadAndCoachTabs()
+        : RankingCoachPage(tournament: _tournament);
+  }
+
+  Widget _squadAndCoachTabs() {
     return DefaultTabController(
         length: 2,
         child: Scaffold(

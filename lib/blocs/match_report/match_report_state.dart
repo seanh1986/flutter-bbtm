@@ -1,3 +1,4 @@
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class MatchReportState extends Equatable {
@@ -7,56 +8,28 @@ abstract class MatchReportState extends Equatable {
   List<Object> get props => [];
 }
 
-class NotAuthorizedMatchReportState extends MatchReportState {}
+class AppLaunchMatchReportState extends MatchReportState {}
 
-class EditingMatchReportState extends MatchReportState {
-  // list of naf names that the logged in user has access to edit
-  final List<String> nafNames;
+class UpdatedMatchReportState extends MatchReportState {
+  final CoachMatchup matchup;
 
-  EditingMatchReportState(this.nafNames);
-
-  @override
-  List<Object> get props => [nafNames];
+  UpdatedMatchReportState(this.matchup);
 
   @override
-  String toString() => 'EditingMatchReport { nafNames: $nafNames }';
+  List<Object> get props => [matchup];
+
+  @override
+  String toString() => 'UpdatedMatchReportState { matchup: $matchup }';
 }
 
-class UploadedAwaitingMatchReportState extends MatchReportState {
-  // list of naf names that the logged in user has access to edit
-  final List<String> nafNames;
+class FailedToUpdateMatchReportState extends MatchReportState {
+  final CoachMatchup matchup;
 
-  UploadedAwaitingMatchReportState(this.nafNames);
-
-  @override
-  List<Object> get props => [nafNames];
+  FailedToUpdateMatchReportState(this.matchup);
 
   @override
-  String toString() => 'UploadedAwaitingMatchReport { nafNames: $nafNames }';
-}
-
-class UploadedConfirmedMatchReportState extends MatchReportState {
-  // list of naf names that the logged in user has access to edit
-  final List<String> nafNames;
-
-  UploadedConfirmedMatchReportState(this.nafNames);
+  List<Object> get props => [matchup];
 
   @override
-  List<Object> get props => [nafNames];
-
-  @override
-  String toString() => 'UploadedConfirmedMatchReport { nafNames: $nafNames }';
-}
-
-class ErrorMatchReportState extends MatchReportState {
-  // list of naf names that the logged in user has access to edit
-  final List<String> nafNames;
-
-  ErrorMatchReportState(this.nafNames);
-
-  @override
-  List<Object> get props => [nafNames];
-
-  @override
-  String toString() => 'ErrorMatchReport { nafNames: $nafNames }';
+  String toString() => 'FailedToUpdateMatchReportState { matchup: $matchup }';
 }

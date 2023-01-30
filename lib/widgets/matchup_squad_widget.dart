@@ -1,12 +1,18 @@
-import 'package:bbnaf/models/squad_matchup.dart';
+import 'package:bbnaf/models/matchup/squad_matchup.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
 
 class MatchupSquadWidget extends StatefulWidget {
+  Tournament tournament;
   final SquadMatchup matchup;
   final MatchupClickListener? listener;
 
-  MatchupSquadWidget({Key? key, required this.matchup, this.listener})
+  MatchupSquadWidget(
+      {Key? key,
+      required this.tournament,
+      required this.matchup,
+      this.listener})
       : super(key: key);
 
   @override
@@ -16,6 +22,7 @@ class MatchupSquadWidget extends StatefulWidget {
 }
 
 class _MatchupSquadWidget extends State<MatchupSquadWidget> {
+  late Tournament _tournament;
   late SquadMatchup _matchup;
   MatchupClickListener? _listener;
   final double titleFontSize = 20.0;
@@ -24,6 +31,7 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
   @override
   void initState() {
     super.initState();
+    _tournament = widget.tournament;
     _matchup = widget.matchup;
     _listener = widget.listener;
   }
@@ -49,9 +57,9 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
                           child: Container(
                         child: Column(
                           children: [
-                            Text(_matchup.home().name(),
+                            Text(_matchup.homeSquadName,
                                 style: TextStyle(fontSize: titleFontSize)),
-                            Text(_matchup.home().showRecord(),
+                            Text(_matchup.home(_tournament).showRecord(),
                                 style: TextStyle(fontSize: subTitleFontSize)),
                           ],
                         ),
@@ -64,9 +72,9 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
                           child: Container(
                         child: Column(
                           children: [
-                            Text(_matchup.away().name(),
+                            Text(_matchup.awaySquadName,
                                 style: TextStyle(fontSize: titleFontSize)),
-                            Text(_matchup.away().showRecord(),
+                            Text(_matchup.away(_tournament).showRecord(),
                                 style: TextStyle(fontSize: subTitleFontSize)),
                           ],
                         ),

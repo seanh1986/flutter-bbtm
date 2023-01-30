@@ -1,5 +1,6 @@
 import 'dart:collection';
-import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/matchup/i_matchup.dart';
+import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/foundation.dart';
@@ -7,19 +8,45 @@ import 'package:flutter/material.dart';
 
 class MatchupReportWidget extends StatefulWidget {
   final IMatchupParticipant participant;
-  final bool isHome;
-  final UploadState state;
+  final bool showHome;
 
-  MatchupReportWidget(
-      {Key? key,
-      required this.participant,
-      required this.isHome,
-      required this.state})
-      : super(key: key);
+  late UploadState state;
+  late ReportedMatchResult? reportedMatch;
+
+  // Allows passing primitives by reference
+  Map<String, int> counts = LinkedHashMap();
+
+  final String _tdName = "Tds";
+  final String _casName = "Cas";
+
+  MatchupReportWidget({
+    Key? key,
+    required this.reportedMatch,
+    required this.participant,
+    required this.showHome,
+    required this.state,
+  }) : super(key: key) {
+    if (reportedMatch != null) {
+      counts.putIfAbsent(_tdName,
+          () => showHome ? reportedMatch!.homeTds : reportedMatch!.awayTds);
+      counts.putIfAbsent(_casName,
+          () => showHome ? reportedMatch!.homeCas : reportedMatch!.awayCas);
+    }
+  }
 
   @override
   State<MatchupReportWidget> createState() {
     return _MatchupReportWidget();
+  }
+
+  int getTds() {
+    int? tds = counts[_tdName];
+    return tds != null ? tds : 0;
+  }
+
+  int getCas() {
+    int? cas = counts[_casName];
+    return cas != null ? cas : 0;
   }
 }
 
@@ -27,10 +54,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   late IMatchupParticipant _participant;
   late UploadState _state;
 
-  final String _tdName = "Tds";
-  final String _casName = "Cas";
-
-  Map<String, int> counts = LinkedHashMap();
+  late Map<String, int> counts;
 
   final double titleFontSize = kIsWeb ? 20.0 : 14.0;
   final double subTitleFontSize = kIsWeb ? 14.0 : 12.0;
@@ -39,8 +63,8 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   @override
   void initState() {
-    //refreshState();
     super.initState();
+    counts = widget.counts;
   }
 
   @override
@@ -51,7 +75,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          _itemHeadline(_participant, widget.isHome),
+          _itemHeadline(_participant, widget.showHome),
           _itemEditMatchDetails(_participant),
         ]);
   }
@@ -138,19 +162,22 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
         child: Column(
           children: [
             SizedBox(height: 10),
-            _itemCounter(_tdName),
+            _itemCounter(widget._tdName),
             SizedBox(height: 10),
-            _itemCounter(_casName),
+            _itemCounter(widget._casName),
             SizedBox(height: 10),
           ],
         ));
   }
 
   Widget _itemCounter(String name) {
+    int? num = counts[name];
+    String numStr = num != null ? num.toString() : "?";
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        Text(name, style: TextStyle(fontSize: titleFontSize)),
+        Text(numStr, style: TextStyle(fontSize: titleFontSize)),
         Container(
             width: fabSize,
             height: fabSize,
@@ -178,8 +205,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
                               }
                             : null,
                   )),
-        Text(counts[name].toString(),
-            style: TextStyle(fontSize: titleFontSize)),
+        Text(name, style: TextStyle(fontSize: titleFontSize)),
         Container(
             width: fabSize,
             height: fabSize,
@@ -224,7 +250,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   void refreshState() {
     _participant = widget.participant;
     _state = widget.state;
-    counts.putIfAbsent(_tdName, () => 0);
-    counts.putIfAbsent(_casName, () => 0);
+    // widget.homeTds = 0;
+    // widget.cas = 0;
   }
 }

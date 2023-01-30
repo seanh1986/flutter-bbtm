@@ -1,10 +1,9 @@
 import 'dart:collection';
-
 import 'package:bbnaf/models/coach.dart';
-import 'package:bbnaf/models/coach_matchup.dart';
-import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
-import 'package:bbnaf/models/squad_matchup.dart';
+import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 
 // Different options for how squads are used
@@ -16,7 +15,7 @@ enum SquadScoreMode {
 }
 
 class Squad extends IMatchupParticipant {
-  final String _name; // Key
+  late final String _name; // Key
 
   List<String> _coaches = []; // nafNames
 
@@ -96,9 +95,9 @@ class Squad extends IMatchupParticipant {
     for (SquadRound sr in prevSquadRounds) {
       for (SquadMatchup sm in sr.matches) {
         bool isHome;
-        if (sm.homeSquad.name() == _name) {
+        if (sm.homeSquadName == _name) {
           isHome = true;
-        } else if (sm.awaySquad.name() == _name) {
+        } else if (sm.awaySquadName == _name) {
           isHome = false;
         } else {
           continue;
@@ -108,14 +107,16 @@ class Squad extends IMatchupParticipant {
         int numTies = 0;
         int numLosses = 0;
         for (CoachMatchup cm in sm.coachMatchups) {
-          if (cm.homeTds > cm.awayTds) {
+          ReportedMatchResultWithStatus r = cm.getReportedMatchStatus();
+
+          if (r.homeTds > r.awayTds) {
             // home wins
             if (isHome) {
               numWins++;
             } else {
               numLosses++;
             }
-          } else if (cm.homeTds < cm.awayTds) {
+          } else if (r.homeTds < r.awayTds) {
             // away wins
             if (isHome) {
               numLosses++;
@@ -200,4 +201,33 @@ class Squad extends IMatchupParticipant {
         return SquadScoreMode.NO_SQUADS;
     }
   }
+
+  Squad.fromJson(Map<String, Object?> json) {
+    final tName = json['name'] as String?;
+    this._name = tName != null ? tName : "";
+
+    final tCoaches = json['coaches'] as List<String>?;
+    this._coaches = tCoaches != null ? tCoaches : [];
+
+    final tWins = json['wins'] as int?;
+    this._wins = tWins != null ? tWins : 0;
+
+    final tTies = json['ties'] as int?;
+    this._ties = tTies != null ? tTies : 0;
+
+    final tLosses = json['losses'] as int?;
+    this._losses = tLosses != null ? tLosses : 0;
+
+    final tOpponents = json['opponents'] as List<String>?;
+    this._opponents = tOpponents != null ? tOpponents : [];
+  }
+
+  Map toJson() => {
+        'name': _name,
+        'coaches': _coaches,
+        'wins': _wins,
+        'ties': _ties,
+        'losses': _losses,
+        'opponents': _opponents,
+      };
 }

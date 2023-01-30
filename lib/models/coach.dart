@@ -1,24 +1,22 @@
-import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
-// import 'package:json_annotation/json_annotation.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 
-// part 'coach.g.dart';
-
-// @JsonSerializable(nullable: false)
 class Coach extends IMatchupParticipant {
-  final int teamId;
+  late final int teamId;
 
-  final String nafName; // Key
+  late final String nafName; // Key
 
-  final String squadName;
+  late final String squadName;
 
-  final String coachName;
+  late final String coachName;
 
-  final String teamName;
+  late final String teamName;
 
-  final int nafNumber;
+  late final int nafNumber;
 
-  final Race _race;
+  late final Race _race;
 
   int _wins = 0;
   int _ties = 0;
@@ -32,6 +30,8 @@ class Coach extends IMatchupParticipant {
   List<double> _tieBreakers = <double>[];
 
   List<String> _opponents = <String>[];
+
+  List<CoachMatchup> matches = [];
 
   Coach(
     this.teamId,
@@ -93,35 +93,91 @@ class Coach extends IMatchupParticipant {
     return _opponents;
   }
 
-  void addWin() {
-    _wins++;
+  void overwriteRecord(TournamentInfo t) {
+    _wins = 0;
+    _ties = 0;
+    _losses = 0;
+    _points = 0;
+    tds = 0;
+    cas = 0;
+    _opponents.clear();
+
+    matches.forEach((m) {
+      ReportedMatchResultWithStatus matchStats = m.getReportedMatchStatus();
+      MatchResult matchResult = m.getResult();
+
+      if (nafName == m.homeNafName) {
+        switch (matchResult) {
+          case MatchResult.HomeWon:
+            _wins++;
+            break;
+          case MatchResult.AwayWon:
+            _losses++;
+            break;
+          case MatchResult.Draw:
+            _ties++;
+            break;
+          default:
+            break;
+        }
+
+        tds += matchStats.homeTds;
+        cas += matchStats.homeCas;
+        _opponents.add(m.awayNafName);
+      } else if (nafName == m.awayNafName) {
+        switch (matchResult) {
+          case MatchResult.HomeWon:
+            _losses++;
+            break;
+          case MatchResult.AwayWon:
+            _wins++;
+            break;
+          case MatchResult.Draw:
+            _ties++;
+            break;
+          default:
+            break;
+        }
+
+        tds += matchStats.awayTds;
+        cas += matchStats.awayCas;
+        _opponents.add(m.homeNafName);
+      }
+    });
+
+    _points = _wins * t.scoringDetails.winPts +
+        _ties * t.scoringDetails.tiePts +
+        _losses * t.scoringDetails.lossPts;
   }
 
-  void addTie() {
-    _ties++;
+  Coach.fromJson(int id, Map<String, Object?> json) {
+    this.teamId = id;
+
+    final tNafName = json['naf_name'] as String?;
+    this.nafName = tNafName != null ? tNafName : "";
+
+    final tCoachName = json['coach_name'] as String?;
+    this.coachName = tCoachName != null ? tCoachName : "";
+
+    final tTeamName = json['team_name'] as String?;
+    this.teamName = tTeamName != null ? tTeamName : "";
+
+    final tSquadName = json['squad_name'] as String?;
+    this.squadName = tSquadName != null ? tSquadName : "";
+
+    final tRace = json['race'] as String?;
+    this._race = tRace != null ? RaceUtils.getRace(tRace) : Race.Unknown;
+
+    final tNafNumber = json['naf_number'] as int?;
+    this.nafNumber = tNafNumber != null ? tNafNumber : -1;
   }
 
-  void addLoss() {
-    _losses++;
-  }
-
-  void calculatePoints(double winPts, double tiePts, double lossPts) {
-    _points = _wins * winPts + _ties * tiePts + _losses * lossPts;
-  }
-
-  void updateTiebreakers(List<double> tieBreakers) {
-    _tieBreakers = tieBreakers;
-  }
-
-  void addNewOpponent(String opponentName) {
-    _opponents.add(opponentName);
-  }
-
-  void addTds(int t) {
-    tds += t;
-  }
-
-  void addCas(int c) {
-    cas += c;
-  }
+  Map<String, dynamic> toJson() => {
+        'naf_name': nafName,
+        'coach_name': coachName,
+        'team_name': teamName,
+        'squad_name': squadName,
+        'race': RaceUtils.getName(_race),
+        'naf_number': nafNumber,
+      };
 }

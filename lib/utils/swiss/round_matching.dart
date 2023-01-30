@@ -1,8 +1,8 @@
 import 'package:bbnaf/models/coach.dart';
-import 'package:bbnaf/models/coach_matchup.dart';
-import 'package:bbnaf/models/i_matchup.dart';
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/squad.dart';
-import 'package:bbnaf/models/squad_matchup.dart';
+import 'package:bbnaf/models/matchup/squad_matchup.dart';
 
 abstract class RoundMatching {
   int round();
@@ -33,6 +33,11 @@ class SquadRound extends RoundMatching {
   bool hasMatchForSquad(Squad s) {
     return matches.any((SquadMatchup match) => match.hasParticipant(s));
   }
+
+  Map<String, dynamic> toJson() => {
+        'round': _round,
+        'matches': matches.map((e) => e.toJson()).toList(),
+      };
 }
 
 class CoachRound extends RoundMatching {
@@ -59,6 +64,23 @@ class CoachRound extends RoundMatching {
   bool hasMatchForPlayer(Coach c) {
     return matches.any((CoachMatchup match) => match.hasParticipant(c));
   }
+
+  CoachRound.fromJson(Map<String, dynamic> json) {
+    final tRound = json['round'] as int?;
+    this._round = tRound != null ? tRound : 0;
+
+    final tMatches = json['matches'] as List<dynamic>?;
+    if (tMatches != null) {
+      for (int i = 0; i < tMatches.length; i++) {
+        matches.add(CoachMatchup.fromJson(tMatches[i] as Map<String, dynamic>));
+      }
+    }
+  }
+
+  Map<String, dynamic> toJson() => {
+        'round': _round,
+        'matches': matches.map((e) => e.toJson()).toList(),
+      };
 }
 
 class SwissRound extends RoundMatching {
@@ -73,6 +95,10 @@ class SwissRound extends RoundMatching {
 
   List<IMatchup> getMatches() {
     return matches;
+  }
+
+  bool hasMatchForPlayerName(String name) {
+    return matches.any((IMatchup match) => match.hasParticipantName(name));
   }
 
   bool hasMatchForPlayer(IMatchupParticipant p) {

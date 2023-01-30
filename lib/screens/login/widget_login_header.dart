@@ -44,7 +44,9 @@ class LoginScreenHeader extends StatelessWidget {
       child: IconButton(
         icon: Icon(Icons.arrow_back),
         onPressed: () {
-          Navigator.pop(context);
+          // Navigator.pop(context);
+          // Navigator.of(context).pop();
+          Navigator.of(context, rootNavigator: true).pop();
         },
       ),
     );

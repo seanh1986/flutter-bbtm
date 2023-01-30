@@ -1,36 +1,30 @@
 import 'dart:async';
-import 'package:bbnaf/blocs/tournament_selection/tournament_selection_bloc.dart';
-import 'package:bbnaf/repos/auth/auth_repo.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:bloc/bloc.dart';
 
 import 'match_report.dart';
 
 class MatchReportBloc extends Bloc<MatchReportEvent, MatchReportState> {
-  AuthRepository _authRepo;
   TournamentRepository _tounyRepo;
 
-  MatchReportBloc(
-      {required AuthRepository aRepo, required TournamentRepository tRepo})
-      : _authRepo = aRepo,
-        _tounyRepo = tRepo,
-        super(NotAuthorizedMatchReportState());
+  MatchReportBloc({required TournamentRepository tRepo})
+      : _tounyRepo = tRepo,
+        super(AppLaunchMatchReportState());
 
   @override
   Stream<MatchReportState> mapEventToState(MatchReportEvent event) async* {
-    // if(event is )
-    yield NotAuthorizedMatchReportState();
+    if (event is UpdateMatchReportEvent) {
+      yield* _mapToMatchReportState(event);
+    }
+
+    yield AppLaunchMatchReportState();
   }
 
-  // Stream<LoginState> _mapLoginWithNafNameToState({
-  //   required String nafName,
-  // }) async* {
-  //   yield LoadingLoginState();
-  //   try {
-  //     _authRepository.signIn(nafName);
-  //     yield SuccessLoginState();
-  //   } catch (_) {
-  //     yield FailedLoginState();
-  //   }
-  // }
+  Stream<MatchReportState> _mapToMatchReportState(
+      UpdateMatchReportEvent event) async* {
+    _tounyRepo.updateCoachMatchReport(
+        event.tournament, event.matchup, event.isHome);
+
+    yield UpdatedMatchReportState(event.matchup);
+  }
 }

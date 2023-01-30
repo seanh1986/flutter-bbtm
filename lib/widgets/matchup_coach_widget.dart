@@ -1,14 +1,25 @@
-import 'package:bbnaf/models/coach_matchup.dart';
+import 'package:bbnaf/blocs/match_report/match_report.dart';
+import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:bbnaf/widgets/matchup_report_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MatchupCoachWidget extends StatefulWidget {
+  Tournament tournament;
+  final AuthUser authUser;
   final CoachMatchup matchup;
   final MatchupClickListener? listener;
 
-  MatchupCoachWidget({Key? key, required this.matchup, this.listener})
+  MatchupCoachWidget(
+      {Key? key,
+      required this.tournament,
+      required this.authUser,
+      required this.matchup,
+      this.listener})
       : super(key: key);
 
   @override
@@ -18,18 +29,26 @@ class MatchupCoachWidget extends StatefulWidget {
 }
 
 enum UploadState {
-  NotAuthorized,
-  Editing,
-  UploadedAwaiting,
-  UploadedConfirmed,
-  Error,
+  NotYetSet, // Not a valid state (this means not yet initialized)
+  NotAuthorized, // Not authorized to edit match results
+  Editing, // Currently editing
+  // UploadedAwaiting, // Upload pending
+  CanConfirm, // Opponent submitted, please confirm
+  CanEdit, // User already submitted but can edit
+  UploadedConfirmed, // Confirmed that both sides agree
+  Error, // Disagreement in reported results
 }
 
 class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
+  late Tournament _tournament;
+  late AuthUser _authUser;
   late CoachMatchup _matchup;
   MatchupClickListener? _listener;
 
-  late UploadState _state;
+  late MatchReportBloc _matchReportBloc;
+
+  late ReportedMatchResultWithStatus _reportWithStatus;
+  UploadState _state = UploadState.NotYetSet;
 
   final double titleFontSize = kIsWeb ? 20.0 : 14.0;
   final double subTitleFontSize = kIsWeb ? 14.0 : 12.0;
@@ -39,67 +58,190 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
   final double itemUploadSize = kIsWeb ? 50.0 : 40.0;
 
+  late MatchupReportWidget homeReportWidget;
+  late MatchupReportWidget awayReportWidget;
+
   @override
   void initState() {
     super.initState();
+    _tournament = widget.tournament;
+    _authUser = widget.authUser;
     _matchup = widget.matchup;
     _listener = widget.listener;
 
-    // TODO: get state from Matchup repository
-    _state = UploadState.Editing;
+    _matchReportBloc = BlocProvider.of<MatchReportBloc>(context);
+
+    _reportWithStatus = _matchup.getReportedMatchStatus();
+
+    Authorization authorization =
+        _tournament.getMatchAuthorization(_matchup, _authUser);
+
+    if (_state == UploadState.NotYetSet) {
+      _state = _getMatchUploadState(_reportWithStatus, authorization);
+    }
+
+    print("Matchup: " +
+        _matchup.homeNafName +
+        " vs. " +
+        _matchup.awayNafName +
+        " -> " +
+        _state.toString());
+  }
+
+  UploadState _getMatchUploadState(
+      ReportedMatchResultWithStatus reportWithStatus,
+      Authorization authorization) {
+    if (authorization == Authorization.Unauthorized) {
+      return UploadState.NotAuthorized;
+    }
+
+    switch (reportWithStatus.status) {
+      case ReportedMatchStatus.NoReportsYet:
+        return UploadState.Editing;
+      case ReportedMatchStatus.BothReportedAgree:
+        return UploadState.UploadedConfirmed;
+      case ReportedMatchStatus.BothReportedConflict:
+        return UploadState.Error;
+      case ReportedMatchStatus.HomeReported:
+        return authorization == Authorization.HomeCoach ||
+                authorization == Authorization.HomeCaptain ||
+                authorization == Authorization.Admin
+            ? UploadState.CanEdit
+            : UploadState.CanConfirm;
+      case ReportedMatchStatus.AwayReported:
+        return authorization == Authorization.AwayCoach ||
+                authorization == Authorization.AwayCaptain ||
+                authorization == Authorization.Admin
+            ? UploadState.CanEdit
+            : UploadState.CanConfirm;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        alignment: FractionalOffset.center, child: _coachMatchupWidget());
+    homeReportWidget = MatchupReportWidget(
+        reportedMatch: _reportWithStatus,
+        participant: _matchup.home(_tournament),
+        showHome: true,
+        state: _state);
+
+    awayReportWidget = MatchupReportWidget(
+        reportedMatch: _reportWithStatus,
+        participant: _matchup.away(_tournament),
+        showHome: false,
+        state: _state);
+
+    return BlocBuilder<MatchReportBloc, MatchReportState>(
+        bloc: _matchReportBloc,
+        builder: (selectContext, selectState) {
+          return Container(
+              alignment: FractionalOffset.center, child: _coachMatchupWidget());
+        });
   }
 
   Widget _coachMatchupWidget() {
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: <
-        Widget>[
-      Expanded(
-          child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-              child: MatchupReportWidget(
-                participant: _matchup.home(),
-                isHome: true,
-                state: _state,
-              ))),
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          Container(
-              width: itemUploadSize,
-              height: itemUploadSize,
-              child: _hideItemUploadBtn()
-                  ? null
-                  : RawMaterialButton(
-                      shape: CircleBorder(),
-                      fillColor: Theme.of(context).primaryColorLight,
-                      elevation: 0.0,
-                      child: _itemUploadStatus(),
-                      onPressed: () => {
-                        // TODO: send to server?
-                        setState(() {
-                          // Temporarily wrap around
-                          int curIdx = _state.index;
-                          int newIdx = (curIdx + 1) % UploadState.values.length;
-                          _state = UploadState.values[newIdx];
-                        }),
-                      },
-                    )),
-          Text(' vs. ', style: TextStyle(fontSize: titleFontSize)),
-        ],
-      ),
-      Expanded(
-          child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-              child: MatchupReportWidget(
-                  participant: _matchup.away(), isHome: false, state: _state))),
-    ]);
+          Expanded(
+              child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 5.0, vertical: 10.0),
+                  child: homeReportWidget)),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                  width: itemUploadSize,
+                  height: itemUploadSize,
+                  child: _hideItemUploadBtn()
+                      ? null
+                      : RawMaterialButton(
+                          shape: CircleBorder(),
+                          fillColor: Theme.of(context).primaryColorLight,
+                          elevation: 0.0,
+                          child: _itemUploadStatus(),
+                          onPressed: () => {_handleUploadOrEditPressEvent()},
+                        )),
+              Text(' vs. ', style: TextStyle(fontSize: titleFontSize)),
+              Text('Table #' + _matchup.tableNum().toString(),
+                  style: TextStyle(fontSize: titleFontSize))
+            ],
+          ),
+          Expanded(
+              child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 5.0, vertical: 10.0),
+                  child: awayReportWidget)),
+        ]);
+  }
+
+  void _handleUploadOrEditPressEvent() {
+    switch (_state) {
+      case UploadState.Editing:
+      case UploadState.CanConfirm:
+        _uploadToServer();
+        break;
+      case UploadState.CanEdit:
+      case UploadState.Error:
+        setState(() {
+          _state = UploadState.Editing;
+        });
+        break;
+      case UploadState.UploadedConfirmed:
+      // case UploadState.UploadedAwaiting:
+      case UploadState.NotAuthorized:
+      default:
+        return;
+    }
+  }
+
+  void _uploadToServer() {
+    bool? isHome; // fall back (e.g. for admin)
+    if (_matchup.homeNafName == _authUser.nafName) {
+      isHome = true;
+      _matchup.homeReportedResults.homeTds = homeReportWidget.getTds();
+      _matchup.homeReportedResults.homeCas = homeReportWidget.getCas();
+      _matchup.homeReportedResults.awayTds = awayReportWidget.getTds();
+      _matchup.homeReportedResults.awayCas = awayReportWidget.getCas();
+      _matchup.homeReportedResults.reported = true;
+    } else if (_matchup.awayNafName == _authUser.nafName) {
+      isHome = false;
+      _matchup.awayReportedResults.homeTds = homeReportWidget.getTds();
+      _matchup.awayReportedResults.homeCas = homeReportWidget.getCas();
+      _matchup.awayReportedResults.awayTds = awayReportWidget.getTds();
+      _matchup.awayReportedResults.awayCas = awayReportWidget.getCas();
+      _matchup.awayReportedResults.reported = true;
+    }
+    // TODO: check if squad captain
+    // else if () {
+
+    // }
+    else {
+      _matchup.homeReportedResults.homeTds = homeReportWidget.getTds();
+      _matchup.homeReportedResults.homeCas = homeReportWidget.getCas();
+      _matchup.homeReportedResults.awayTds = awayReportWidget.getTds();
+      _matchup.homeReportedResults.awayCas = awayReportWidget.getCas();
+      _matchup.homeReportedResults.reported = true;
+
+      _matchup.awayReportedResults.homeTds = homeReportWidget.getTds();
+      _matchup.awayReportedResults.homeCas = homeReportWidget.getCas();
+      _matchup.awayReportedResults.awayTds = awayReportWidget.getTds();
+      _matchup.awayReportedResults.awayCas = awayReportWidget.getCas();
+      _matchup.awayReportedResults.reported = true;
+    }
+
+    if (isHome != null) {
+      _matchReportBloc
+          .add(new UpdateMatchReportEvent(_tournament, _matchup, isHome));
+    } else {
+      _matchReportBloc
+          .add(new UpdateMatchReportEvent.admin(_tournament, _matchup));
+    }
+
+    setState(() {
+      _state = UploadState.CanEdit;
+    });
   }
 
   Widget? _itemUploadStatus() {
@@ -112,9 +254,21 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           color: Colors.white,
           size: uploadIconSize,
         );
-      case UploadState.UploadedAwaiting:
+      // case UploadState.UploadedAwaiting:
+      //   return Icon(
+      //     Icons.query_builder,
+      //     color: Colors.orange,
+      //     size: uploadIconSize,
+      //   );
+      case UploadState.CanEdit:
         return Icon(
-          Icons.pending_actions,
+          Icons.create_outlined,
+          color: Colors.orange,
+          size: uploadIconSize,
+        );
+      case UploadState.CanConfirm:
+        return Icon(
+          Icons.done,
           color: Colors.orange,
           size: uploadIconSize,
         );
@@ -125,6 +279,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           size: uploadIconSize,
         );
       case UploadState.Error:
+      case UploadState.NotYetSet:
         double shift = 0.5 * uploadIconSize;
 
         return Container(
