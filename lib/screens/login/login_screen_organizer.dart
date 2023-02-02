@@ -80,6 +80,7 @@ class _LoginOrganizerPage extends State<LoginOrganizerPage> {
       onRecoverPassword: _recoverPassword,
       onSubmitAnimationCompleted: () {
         debugPrint('onSubmitAnimationCompleted');
+        _authBloc.add(new LoggedOutAuthEvent());
         _authBloc.add(new LoggedInAuthEvent(authUser: _authUser));
       },
     );

@@ -50,13 +50,13 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   late ReportedMatchResultWithStatus _reportWithStatus;
   UploadState _state = UploadState.NotYetSet;
 
-  final double titleFontSize = kIsWeb ? 20.0 : 14.0;
-  final double subTitleFontSize = kIsWeb ? 14.0 : 12.0;
+  final double titleFontSize = kIsWeb ? 20.0 : 12.0;
+  final double subTitleFontSize = kIsWeb ? 14.0 : 10.0;
 
-  final double uploadIconSize = kIsWeb ? 24.0 : 15.0;
-  final double errUploadIconSize = kIsWeb ? 20.0 : 12.0;
+  final double uploadIconSize = kIsWeb ? 24.0 : 12.0;
+  final double errUploadIconSize = kIsWeb ? 20.0 : 10.0;
 
-  final double itemUploadSize = kIsWeb ? 50.0 : 40.0;
+  final double itemUploadSize = kIsWeb ? 50.0 : 30.0;
 
   late MatchupReportWidget homeReportWidget;
   late MatchupReportWidget awayReportWidget;

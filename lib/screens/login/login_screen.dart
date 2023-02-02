@@ -51,13 +51,13 @@ class _LoginPage extends State<LoginPage> {
       children: <Widget>[
         Scaffold(
             body: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                  './assets/images/background/background_football_field.png'),
-              fit: BoxFit.cover,
-            ),
-          ),
+          // decoration: BoxDecoration(
+          //   image: DecorationImage(
+          //     image: AssetImage(
+          //         './assets/images/background/background_football_field.png'),
+          //     fit: BoxFit.cover,
+          //   ),
+          // ),
           child: Center(
             child: Padding(
                 padding: EdgeInsets.all(10),

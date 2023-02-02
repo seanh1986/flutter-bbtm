@@ -56,10 +56,10 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   late Map<String, int> counts;
 
-  final double titleFontSize = kIsWeb ? 20.0 : 14.0;
-  final double subTitleFontSize = kIsWeb ? 14.0 : 12.0;
+  final double titleFontSize = kIsWeb ? 20.0 : 12.0;
+  final double subTitleFontSize = kIsWeb ? 14.0 : 10.0;
 
-  final double fabSize = kIsWeb ? 40.0 : 35.0;
+  final double fabSize = kIsWeb ? 40.0 : 30.0;
 
   @override
   void initState() {
@@ -93,30 +93,31 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   }
 
   Widget _itemHeaderWeb(IMatchupParticipant participant) {
-    Image logo =
-        Image.asset(RaceUtils.getLogo(_participant.race()), fit: BoxFit.cover);
+    Image raceLogo = Image.asset(
+      RaceUtils.getLogo(_participant.race()),
+      fit: BoxFit.cover,
+      scale: kIsWeb ? 1.0 : 0.75,
+    );
+
+// // TODO: show or hide depending on roster
+//     RawMaterialButton roster = RawMaterialButton(
+//       shape: CircleBorder(),
+//       fillColor: Colors.white,
+//       elevation: 0.0,
+//       child: Icon(
+//         Icons.assignment,
+//         color: Colors.black,
+//       ),
+//       onPressed: () => {},
+//     );
 
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-      leading: ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: 44,
-          minHeight: 44,
-          maxWidth: 64,
-          maxHeight: 64,
-        ),
-        child: logo,
-      ),
-      title: Container(
-        child: Column(
-          children: [
-            Text(_participant.name(),
-                style: TextStyle(fontSize: titleFontSize)),
-            Text(_participant.showRecord(),
-                style: TextStyle(fontSize: subTitleFontSize)),
-          ],
-        ),
-      ),
+      leading: raceLogo,
+      title:
+          Text(_participant.name(), style: TextStyle(fontSize: titleFontSize)),
+      subtitle: Text(_participant.showRecord(),
+          style: TextStyle(fontSize: subTitleFontSize)),
       trailing: null,
     );
   }

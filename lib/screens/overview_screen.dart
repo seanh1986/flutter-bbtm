@@ -53,13 +53,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
     widgets.add(_scoringDetails(_tournament.info));
 
     return Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(
-              './assets/images/background/background_football_field.png'),
-          fit: BoxFit.cover,
-        ),
-      ),
+      // decoration: BoxDecoration(
+      //   image: DecorationImage(
+      //     image: AssetImage(
+      //         './assets/images/background/background_football_field.png'),
+      //     fit: BoxFit.cover,
+      //   ),
+      // ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: ListView(
