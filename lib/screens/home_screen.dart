@@ -86,7 +86,8 @@ class _HomePageState extends State<HomePage> {
         )
       ]),
       new _WidgetFamily(matchupWidgets),
-      new _WidgetFamily([RankingsPage(tournament: _tournament)]),
+      new _WidgetFamily(
+          [RankingsPage(tournament: _tournament, authUser: _authUser)]),
       new _WidgetFamily([
         AdminScreen(
           tournament: _tournament,

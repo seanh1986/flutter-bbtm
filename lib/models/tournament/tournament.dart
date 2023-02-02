@@ -175,10 +175,8 @@ class Tournament {
 
   Authorization getMatchAuthorization(CoachMatchup matchup, AuthUser authUser) {
     // Check if Admin
-    if (authUser.user?.email != null) {
-      if (info.organizers.any((e) => e.email == authUser.user?.email)) {
-        return Authorization.Admin;
-      }
+    if (isUserAdmin(authUser)) {
+      return Authorization.Admin;
     }
 
     // TODO: Check if squad captain
@@ -192,6 +190,11 @@ class Tournament {
     }
 
     return Authorization.Unauthorized;
+  }
+
+  bool isUserAdmin(AuthUser authUser) {
+    return authUser.user?.email != null &&
+        info.organizers.any((e) => e.email == authUser.user?.email);
   }
 
   Tournament.fromJson(TournamentInfo info, Map<String, dynamic> json) {

@@ -3,10 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:bbnaf/models/coach.dart';
 // import 'package:flutter/paginated_data_table.dart';
 
+enum Fields { Pts, W, T, L, Td, Cas, BestSport }
+
 class RankingCoachPage extends StatefulWidget {
   final Tournament tournament;
 
-  RankingCoachPage({Key? key, required this.tournament}) : super(key: key);
+  List<Fields> fields;
+
+  RankingCoachPage({Key? key, required this.tournament, required this.fields})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -16,7 +21,7 @@ class RankingCoachPage extends StatefulWidget {
 
 class _RankingCoachPage extends State<RankingCoachPage> {
   // int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
-  int _sortColumnIndex = 3;
+  late int _sortColumnIndex = widget.tournament.useSquads ? 3 : 2;
   bool _sortAscending = false;
 
   List<Coach> _items = [];
@@ -56,58 +61,31 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     );
 
     if (widget.tournament.useSquads) {
-      columns.add(
-        DataColumn(
-          label: Text('Squad'),
-          onSort: (columnIndex, ascending) =>
-              _sort<String>((Coach c) => c.squadName, columnIndex, ascending),
-        ),
-      );
+      columns.add(DataColumn(
+        label: Text('Squad'),
+        onSort: (columnIndex, ascending) =>
+            _sort<String>((Coach c) => c.squadName, columnIndex, ascending),
+      ));
     }
 
-    columns.addAll([
-      DataColumn(
-        label: Text('Race'),
-        onSort: (columnIndex, ascending) =>
-            _sort<String>((Coach c) => c.raceName(), columnIndex, ascending),
-      ),
-      DataColumn(
-        label: Text('Points'),
-        numeric: true,
-        onSort: (columnIndex, ascending) =>
-            _sort<num>((Coach c) => c.points(), columnIndex, ascending),
-      ),
-      DataColumn(
-        label: Text('Wins'),
-        numeric: true,
-        onSort: (columnIndex, ascending) =>
-            _sort<num>((Coach c) => c.wins(), columnIndex, ascending),
-      ),
-      DataColumn(
-        label: Text('Ties'),
-        numeric: true,
-        onSort: (columnIndex, ascending) =>
-            _sort<num>((Coach c) => c.ties(), columnIndex, ascending),
-      ),
-      DataColumn(
-        label: Text('Losses'),
-        numeric: true,
-        onSort: (columnIndex, ascending) =>
-            _sort<num>((Coach c) => c.losses(), columnIndex, ascending),
-      ),
-      DataColumn(
-        label: Text('TDs'),
-        numeric: true,
-        onSort: (columnIndex, ascending) =>
-            _sort<num>((Coach c) => c.tds, columnIndex, ascending),
-      ),
-      DataColumn(
-        label: Text('Cas'),
-        numeric: true,
-        onSort: (columnIndex, ascending) =>
-            _sort<num>((Coach c) => c.cas, columnIndex, ascending),
-      ),
-    ]);
+    columns.add(DataColumn(
+      label: Text('Race'),
+      onSort: (columnIndex, ascending) =>
+          _sort<String>((Coach c) => c.raceName(), columnIndex, ascending),
+    ));
+
+    widget.fields.forEach((f) {
+      String name = _getColumnName(f);
+
+      if (name.isNotEmpty) {
+        columns.add(DataColumn(
+          label: Text(name),
+          numeric: true,
+          onSort: (columnIndex, ascending) =>
+              _sort<num>((Coach c) => _getValue(c, f), columnIndex, ascending),
+        ));
+      }
+    });
 
     return columns;
   }
@@ -128,12 +106,14 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       }
 
       cells.add(DataCell(Text('${coach.raceName()}')));
-      cells.add(DataCell(Text('${coach.points().toString()}')));
-      cells.add(DataCell(Text('${coach.wins().toString()}')));
-      cells.add(DataCell(Text('${coach.ties().toString()}')));
-      cells.add(DataCell(Text('${coach.losses().toString()}')));
-      cells.add(DataCell(Text('${coach.tds.toString()}')));
-      cells.add(DataCell(Text('${coach.cas.toString()}')));
+
+      widget.fields.forEach((f) {
+        String name = _getColumnName(f);
+
+        if (name.isNotEmpty) {
+          cells.add(DataCell(_getCellValue(coach, f)));
+        }
+      });
 
       rows.add(DataRow(cells: cells));
     });
@@ -188,5 +168,67 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         ),
       ),
     );
+  }
+
+  String _getColumnName(Fields f) {
+    switch (f) {
+      case Fields.Pts:
+        return "Pts";
+      case Fields.W:
+        return "W";
+      case Fields.T:
+        return "T";
+      case Fields.L:
+        return "L";
+      case Fields.Td:
+        return "Td";
+      case Fields.Cas:
+        return "Cas";
+      case Fields.BestSport:
+        return "Sport";
+      default:
+        return "";
+    }
+  }
+
+  Text _getCellValue(Coach c, Fields f) {
+    switch (f) {
+      case Fields.Pts:
+        return Text('${c.points().toString()}');
+      case Fields.W:
+        return Text('${c.wins().toString()}');
+      case Fields.T:
+        return Text('${c.ties().toString()}');
+      case Fields.L:
+        return Text('${c.losses().toString()}');
+      case Fields.Td:
+        return Text('${c.tds.toString()}');
+      case Fields.Cas:
+        return Text('${c.cas.toString()}');
+      case Fields.BestSport: // TODO: later
+      default:
+        return Text('');
+    }
+  }
+
+  double _getValue(Coach c, Fields f) {
+    switch (f) {
+      case Fields.Pts:
+        return c.points();
+      case Fields.W:
+        return c.wins().toDouble();
+      case Fields.T:
+        return c.ties().toDouble();
+      case Fields.L:
+        return c.losses().toDouble();
+      case Fields.Td:
+        return c.tds.toDouble();
+      case Fields.Cas:
+        return c.cas.toDouble();
+      case Fields.BestSport:
+        return 3;
+      default:
+        return 0.0;
+    }
   }
 }
