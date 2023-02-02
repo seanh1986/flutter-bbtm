@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'blocs/tournament_list/tournament_list.dart';
 import 'blocs/tournament_selection/tournament_selection.dart';
 import 'repos/auth/auth_repo.dart';
@@ -133,19 +134,38 @@ class _AppState extends State<App> {
     // tId = "X0qh35qbzPhBQKBb6y6c";
 
     return MaterialApp(
-      title: 'BloodBowl Tournament Management',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.blue,
-          accentColor: Colors.redAccent,
-          cardColor: Colors.lightBlueAccent,
+        title: 'BloodBowl Tournament Management',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSwatch(
+            primarySwatch: Colors.blue,
+            accentColor: Colors.redAccent,
+            cardColor: Colors.lightBlueAccent,
+          ),
+          textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
         ),
-        textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
-      ),
-      home: TournamentSelectionPage(
-        tournamentId: tId,
-      ),
-    );
+        home: TournamentSelectionPage(
+          tournamentId: tId,
+        ),
+        initialRoute: "/",
+        builder: (context, child) => ResponsiveWrapper.builder(
+              child,
+              maxWidth: 1200,
+              minWidth: 480,
+              defaultScale: true,
+              breakpoints: [
+                ResponsiveBreakpoint.resize(480, name: MOBILE),
+                ResponsiveBreakpoint.autoScale(800, name: TABLET),
+                ResponsiveBreakpoint.resize(1000, name: DESKTOP),
+                ResponsiveBreakpoint.autoScale(2460, name: '4K'),
+              ],
+              background: Container(
+                  decoration: BoxDecoration(
+                      image: DecorationImage(
+                image: AssetImage(
+                    './assets/images/background/background_football_field.png'),
+                fit: BoxFit.cover,
+              ))),
+            ));
   }
 
   Widget _launchFailed() {

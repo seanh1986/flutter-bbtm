@@ -14,5 +14,7 @@ abstract class TournamentRepository {
   Future<void> updateCoachMatchReport(
       Tournament tournament, CoachMatchup matchup, bool isHome);
 
+  Future<String> getFileUrl(String filename);
+
   // Stream<Tournament> downloadTournament(TournamentInfo tournamentInfo);
 }

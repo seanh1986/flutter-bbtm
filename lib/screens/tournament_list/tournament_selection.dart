@@ -164,7 +164,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
                             )))
               }
           }),
-      child: LoginPage(),
+      child: LoginPage(tournamentState.tournamentInfo),
     );
 
     // return BlocBuilder<AuthBloc, AuthState>(

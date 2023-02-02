@@ -69,21 +69,28 @@ class _TournamentListPage extends State<TournamentListPage> {
         if (state is TournamentListLoading) {
           return SplashScreen();
         } else if (state is TournamentListLoaded) {
+          List<TournamentInfo> tournament = state.tournaments;
+
+          print("Original ordering: ");
+          tournament.forEach((element) {
+            print(element.name + ": " + element.dateTimeStart.toString());
+          });
+
+          tournament.sort((a, b) => a.dateTimeStart.millisecondsSinceEpoch
+              .compareTo(b.dateTimeEnd.millisecondsSinceEpoch));
+
+          print("Sorted ordering: ");
+          tournament.forEach((element) {
+            print(element.name + ": " + element.dateTimeStart.toString());
+          });
+
           return Container(
-            // decoration: BoxDecoration(
-            //   image: DecorationImage(
-            //     image: AssetImage("background/background_football_field.jpg"),
-            //     fit: BoxFit.cover,
-            //   ),
-            // ),
             child: GroupedListView(
-              elements: state.tournaments,
+              elements: tournament,
               groupBy: (TournamentInfo t) => _groupBy(t),
               groupSeparatorBuilder: _buildGroupSeparator,
               itemBuilder: (BuildContext context, TournamentInfo t) =>
-                  _itemTournament(
-                t,
-              ),
+                  _itemTournament(t),
               order: GroupedListOrder.ASC,
             ),
           );

@@ -15,6 +15,8 @@ class TournamentInfo {
   String detailsKickOff = "";
   String detailsSpecialRules = "";
 
+  String logoFileName = "";
+
   TournamentInfo(
       {required this.id,
       required this.name,
@@ -80,6 +82,11 @@ class TournamentInfo {
     if (tDetailsSpecialRules != null) {
       this.detailsSpecialRules = tDetailsSpecialRules;
     }
+
+    final tLogo = json['logo_file_name'] as String?;
+    if (tLogo != null) {
+      this.logoFileName = tLogo;
+    }
   }
 
   Map<String, dynamic> toJson() => {
@@ -92,6 +99,7 @@ class TournamentInfo {
         'details_weather': detailsWeather,
         'details_kickoff': detailsKickOff,
         'details_special_rules': detailsSpecialRules,
+        'logo_file_name': logoFileName,
       };
 }
 

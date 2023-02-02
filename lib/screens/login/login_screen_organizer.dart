@@ -1,19 +1,29 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/auth/auth_repo.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
+import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
+import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_login/flutter_login.dart';
 
+import 'login_screen.dart';
+
 class LoginOrganizerPage extends StatefulWidget {
+  TournamentInfo tournamentInfo;
+
+  LoginOrganizerPage(this.tournamentInfo);
+
   @override
   _LoginOrganizerPage createState() => _LoginOrganizerPage();
 }
 
 class _LoginOrganizerPage extends State<LoginOrganizerPage> {
   AuthRepository _authRepo = FirebaseAuthRepository();
+  TournamentRepository _tournyRepo = FirebaseTournamentRepository();
 
   late AuthBloc _authBloc;
 
@@ -46,7 +56,9 @@ class _LoginOrganizerPage extends State<LoginOrganizerPage> {
   Widget build(BuildContext context) {
     return FlutterLogin(
       title: 'Bloodbowl Tournament Manager',
-      logo: AssetImage('assets/images/logos/amorical_logo.png'),
+      logo: LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
+      // LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
+      //AssetImage('assets/images/logos/amorical_logo.png'),
       additionalSignupFields: _additionalFields,
       userValidator: (value) {
         if (!value!.contains('@') || !value.endsWith('.com')) {

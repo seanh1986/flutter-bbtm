@@ -1,14 +1,13 @@
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 
 class FirebaseTournamentRepository extends TournamentRepository {
-  firebase_storage.FirebaseStorage _storage =
-      firebase_storage.FirebaseStorage.instance;
+  FirebaseStorage _storage = FirebaseStorage.instance;
 
   // FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -117,6 +116,31 @@ class FirebaseTournamentRepository extends TournamentRepository {
 
     updateTournamentData(dbTournament);
   }
+
+  @override
+  Future<String> getFileUrl(String filename) async {
+    var url = await _storage.ref().child(filename).getDownloadURL();
+    print(url.toString());
+
+    // final ref = _storage.ref().child(filename);
+
+    // var url = await ref.getDownloadURL();
+    // print(url);
+    return url;
+  }
+
+  // Future<Widget> getImage(BuildContext context, String image) async {
+  //   Image m;
+  //   await FireStorageService.loadFromStorage(context, image)
+  //       .then((downloadUrl) {
+  //     m = Image.network(
+  //       downloadUrl.toString(),
+  //       fit: BoxFit.scaleDown,
+  //     );
+  //   });
+
+  //   return m;
+  // }
 
   // @override
   // Stream<Tournament> downloadTournament(TournamentInfo tournamentInfo) async* {

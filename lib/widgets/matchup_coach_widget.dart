@@ -140,6 +140,28 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   Widget _coachMatchupWidget() {
+    List<Widget> tableVsDetails = [];
+
+    if (!_hideItemUploadBtn()) {
+      tableVsDetails.add(Container(
+          child: Wrap(
+        children: [
+          RawMaterialButton(
+            shape: CircleBorder(),
+            fillColor: Theme.of(context).primaryColorLight,
+            elevation: 0.0,
+            child: _itemUploadStatus(),
+            onPressed: () => {_handleUploadOrEditPressEvent()},
+          )
+        ],
+      )));
+    }
+
+    tableVsDetails
+        .add(Text(' vs. ', style: TextStyle(fontSize: titleFontSize)));
+    tableVsDetails.add(Text('Table #' + _matchup.tableNum().toString(),
+        style: TextStyle(fontSize: titleFontSize)));
+
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
@@ -148,25 +170,10 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 5.0, vertical: 10.0),
                   child: homeReportWidget)),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                  width: itemUploadSize,
-                  height: itemUploadSize,
-                  child: _hideItemUploadBtn()
-                      ? null
-                      : RawMaterialButton(
-                          shape: CircleBorder(),
-                          fillColor: Theme.of(context).primaryColorLight,
-                          elevation: 0.0,
-                          child: _itemUploadStatus(),
-                          onPressed: () => {_handleUploadOrEditPressEvent()},
-                        )),
-              Text(' vs. ', style: TextStyle(fontSize: titleFontSize)),
-              Text('Table #' + _matchup.tableNum().toString(),
-                  style: TextStyle(fontSize: titleFontSize))
-            ],
+          Card(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: tableVsDetails),
           ),
           Expanded(
               child: Padding(
