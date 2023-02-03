@@ -21,7 +21,7 @@ class RankingCoachPage extends StatefulWidget {
 
 class _RankingCoachPage extends State<RankingCoachPage> {
   // int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
-  late int _sortColumnIndex = widget.tournament.useSquads ? 3 : 2;
+  late int _sortColumnIndex = widget.tournament.useSquads ? 4 : 3;
   bool _sortAscending = false;
 
   List<Coach> _items = [];
@@ -55,9 +55,11 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     List<DataColumn> columns = [];
 
     columns.add(
-      DataColumn(
-        label: Text('Naf Name'),
-      ),
+      DataColumn(label: Text('#')),
+    );
+
+    columns.add(
+      DataColumn(label: Text('Naf Name')),
     );
 
     if (widget.tournament.useSquads) {
@@ -96,8 +98,11 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     // sort by points ascending
     _sort<num>((Coach c) => c.points(), _sortColumnIndex, _sortAscending);
 
+    int rank = 1;
     _items.forEach((coach) {
       List<DataCell> cells = [];
+
+      cells.add(DataCell(Text(rank.toString())));
 
       cells.add(DataCell(Text('${coach.nafName}')));
 
@@ -116,6 +121,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       });
 
       rows.add(DataRow(cells: cells));
+
+      rank++;
     });
 
     return rows;
@@ -206,6 +213,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       case Fields.Cas:
         return Text('${c.cas.toString()}');
       case Fields.BestSport: // TODO: later
+        return Text(_getValue(c, f).toString());
       default:
         return Text('');
     }
