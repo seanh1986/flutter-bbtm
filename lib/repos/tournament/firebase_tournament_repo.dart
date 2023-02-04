@@ -65,12 +65,12 @@ class FirebaseTournamentRepository extends TournamentRepository {
     return Tournament.fromJson(tournamentInfo, json);
   }
 
-  @override
-  Future<void> updateTournamentInfo(TournamentInfo tournamentInfo) async {
-    Map<String, Object?> json =
-        tournamentInfo.toJson().map((key, value) => value);
-    return _tournamentInfoRef.doc(tournamentInfo.id).set(json);
-  }
+  // @override
+  // Future<void> updateTournamentInfo(TournamentInfo tournamentInfo) async {
+  //   Map<String, Object?> json =
+  //       tournamentInfo.toJson().map((key, value) => value);
+  //   return _tournamentInfoRef.doc(tournamentInfo.id).set(json);
+  // }
 
   @override
   Future<void> updateTournamentData(Tournament tournament) async {

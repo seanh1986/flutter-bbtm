@@ -1,7 +1,6 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/match_report/match_report.dart';
-import 'package:bbnaf/blocs/tournament_update/tournament_update.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
 import 'package:bbnaf/screens/tournament_list/tournament_selection.dart';
@@ -11,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'blocs/tournament_list/tournament_list.dart';
-import 'blocs/tournament_selection/tournament_selection.dart';
 import 'repos/auth/auth_repo.dart';
 import 'repos/tournament/tournament_repo.dart';
 import 'package:uni_links/uni_links.dart';
@@ -33,12 +31,9 @@ void main() async {
     BlocProvider<TournamentListsBloc>(
         create: (context) => TournamentListsBloc(tRepo: _tournamentRepo)
           ..add(RequestLoadTournamentListEvent())),
-    BlocProvider<TournamentSelectionBloc>(
-        create: (context) => TournamentSelectionBloc(tRepo: _tournamentRepo)
-          ..add(DeselectedTournamentEvent())),
-    BlocProvider<TournamentUpdateBloc>(
-        create: (context) => TournamentUpdateBloc(tRepo: _tournamentRepo)
-          ..add(AppStartedTournamentUpdateEvent())),
+    BlocProvider<TournamentBloc>(
+        create: (context) =>
+            TournamentBloc(tRepo: _tournamentRepo)..add(NoTournamentEvent())),
     BlocProvider<MatchReportBloc>(
         create: (context) => MatchReportBloc(tRepo: _tournamentRepo)
           ..add(AppStartMatchReportEvent())),

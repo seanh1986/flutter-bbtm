@@ -1,4 +1,5 @@
-import 'package:bbnaf/blocs/tournament_update/tournament_update.dart';
+import 'package:bbnaf/blocs/tournament/tournament_bloc.dart';
+import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/admin/edit_tournament_widget.dart';
@@ -23,31 +24,29 @@ class AdminScreen extends StatefulWidget {
 class _AdminScreenState extends State<AdminScreen> {
   late Tournament _tournament;
   late AuthUser _authUser;
-  late TournamentUpdateBloc _tournyUpdateBloc;
+  late TournamentBloc _tournyBloc;
 
   @override
   void initState() {
     _tournament = widget.tournament;
     _authUser = widget.authUser;
-    _tournyUpdateBloc = BlocProvider.of<TournamentUpdateBloc>(context);
+    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
 
     super.initState();
   }
 
   @override
   void dispose() {
-    _tournyUpdateBloc.close();
+    _tournyBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TournamentUpdateBloc, TournamentUpdateState>(
-        bloc: _tournyUpdateBloc,
+    return BlocBuilder<TournamentBloc, TournamentState>(
+        bloc: _tournyBloc,
         builder: (selectContext, selectState) {
-          if (selectState is NewRoundState) {
-            _tournament = selectState.tournament;
-          } else if (selectState is TournamentDataUpdatedState) {
+          if (selectState is NewTournamentState) {
             _tournament = selectState.tournament;
           }
           return _generateView();
@@ -141,7 +140,7 @@ class _AdminScreenState extends State<AdminScreen> {
                 context: context, title: "Advance Round", message: msg);
 
             if (pairingError == RoundPairingError.NoError) {
-              _tournyUpdateBloc.add(NewRoundEvent(_tournament));
+              _tournyBloc.add(UpdateTournamentEvent(_tournament));
             }
           },
         ));

@@ -7,7 +7,7 @@ abstract class TournamentRepository {
 
   Stream<Tournament> getTournamentData(String tournamentId);
 
-  Future<void> updateTournamentInfo(TournamentInfo tournamentInfo);
+  // Future<void> updateTournamentInfo(TournamentInfo tournamentInfo);
 
   Future<void> updateTournamentData(Tournament tournament);
 

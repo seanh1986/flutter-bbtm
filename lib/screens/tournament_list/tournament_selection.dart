@@ -1,6 +1,6 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
+import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/blocs/tournament_list/tournament_list.dart';
-import 'package:bbnaf/blocs/tournament_selection/tournament_selection.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/screens/home_screen.dart';
 import 'package:bbnaf/screens/login/login_screen.dart';
@@ -24,7 +24,7 @@ class TournamentSelectionPage extends StatefulWidget {
 class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   late AuthBloc _authBloc;
   late TournamentListsBloc _tournyListBloc;
-  late TournamentSelectionBloc _tournySelectBloc;
+  late TournamentBloc _tournySelectBloc;
 
   final double titleFontSize = 20.0;
   final double subTitleFontSize = 14.0;
@@ -34,7 +34,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
     super.initState();
     _authBloc = BlocProvider.of<AuthBloc>(context);
     _tournyListBloc = BlocProvider.of<TournamentListsBloc>(context);
-    _tournySelectBloc = BlocProvider.of<TournamentSelectionBloc>(context);
+    _tournySelectBloc = BlocProvider.of<TournamentBloc>(context);
   }
 
   @override
@@ -51,7 +51,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
       bloc: _tournyListBloc,
       builder: (listContext, listState) {
         // Inner Bloc is selecting tournament
-        return BlocBuilder<TournamentSelectionBloc, TournamentSelectionState>(
+        return BlocBuilder<TournamentBloc, TournamentState>(
             bloc: _tournySelectBloc,
             builder: (selectContext, selectState) {
               if (listState is TournamentListLoading) {
@@ -59,7 +59,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
                 return SplashScreen();
               } else if (listState is TournamentListLoaded) {
                 // Tournament list loaded, show UI depending on use case
-                if (selectState is SelectedTournamentState) {
+                if (selectState is NewTournamentState) {
                   return _onSelectedTournament(context, selectState);
                 } else {
                   return _onTournamentListLoaded(context, listState);
@@ -78,24 +78,24 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   /// Once tournament list is loaded, we either forward to the hardcoded
   /// selected tournament, if it can be found, or we launch the tournament list
   Widget _onTournamentListLoaded(
-      BuildContext context, TournamentListLoaded state) {
+      BuildContext context, TournamentListLoaded listState) {
     if (widget.tournamentId != null) {
       int tIdx =
-          state.tournaments.indexWhere((t) => t.id == widget.tournamentId);
+          listState.tournaments.indexWhere((t) => t.id == widget.tournamentId);
 
       if (tIdx >= 0) {
-        TournamentInfo tournamentInfo = state.tournaments[tIdx];
+        TournamentInfo tournamentInfo = listState.tournaments[tIdx];
         _processTournamentSelection(tournamentInfo);
 
         return SplashScreen(); // _onTournamentSelected(context, tournamentInfo);
       }
     }
 
-    return _showTournamentList(context, state);
+    return _showTournamentList(context, listState);
   }
 
   void _processTournamentSelection(TournamentInfo tournamentInfo) {
-    _tournySelectBloc.add(LoadingTournamentEvent(tournamentInfo));
+    _tournySelectBloc.add(LoadTournamentEvent(tournamentInfo));
   }
 
   // /// Once a tournament has been selected
@@ -149,8 +149,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   // }
 
   /// When a tournment has been selected
-  Widget _onSelectedTournament(
-      BuildContext context, SelectedTournamentState tournamentState) {
+  Widget _onSelectedTournament(BuildContext context, NewTournamentState state) {
     return BlocListener<AuthBloc, AuthState>(
       listener: ((context, authState) => {
             if (authState is LoggedInAuthState)
@@ -159,12 +158,12 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => HomePage(
-                              tournament: tournamentState.tournament,
+                              tournament: state.tournament,
                               authUser: authState.authUser,
                             )))
               }
           }),
-      child: LoginPage(tournamentState.tournamentInfo),
+      child: LoginPage(state.tournament.info),
     );
 
     // return BlocBuilder<AuthBloc, AuthState>(
