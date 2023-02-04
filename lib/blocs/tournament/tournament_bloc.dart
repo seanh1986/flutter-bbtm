@@ -39,8 +39,7 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
       LoadTournamentEvent event) async* {
     print("TournamentBloc: _mapToLoadTournamentState");
 
-    String tournamentId = event.info.id;
-    _loadTournament(tournamentId);
+    _loadTournament(event.info);
   }
 
   // Trigger load of tournament
@@ -71,14 +70,20 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
         " (" +
         info.id.toString() +
         ")");
-    _loadTournament(info.id);
+    _loadTournament(info);
   }
 
-  void _loadTournament(String tournamentId) {
+  void _loadTournament(TournamentInfo info) {
+    print("TournamentBloc: _loadTournament: " +
+        info.name +
+        " (" +
+        info.id.toString() +
+        ")");
+
     _subscription?.cancel();
 
     _subscription = _repo
-        .getTournamentData(tournamentId)
+        .getTournamentData(info.id)
         .listen((t) => _processLoadedTournament(t));
   }
 

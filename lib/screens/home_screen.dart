@@ -1,8 +1,12 @@
+import 'package:bbnaf/blocs/auth/auth.dart';
+import 'package:bbnaf/blocs/auth/auth_bloc.dart';
+import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/admin/admin_screen.dart';
 import 'package:bbnaf/screens/overview_screen.dart';
@@ -11,15 +15,17 @@ import 'package:bbnaf/screens/tournament_list/tournament_selection.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'matchups/matchups_coaches_screen.dart';
 import 'matchups/matchups_squad_screen.dart';
 
 class HomePage extends StatefulWidget {
-  final Tournament tournament;
-  final AuthUser authUser;
+  // final Tournament tournament;
+  // final AuthUser authUser;
 
-  HomePage({Key? key, required this.tournament, required this.authUser})
-      : super(key: key);
+  // HomePage({Key? key, required this.tournament, required this.authUser})
+  //     : super(key: key);
+  HomePage({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -38,11 +44,16 @@ class _HomePageState extends State<HomePage> {
 
   _CoachMatchupListClickListener? _coachMatchupListener;
 
-  late Tournament _tournament;
-  late AuthUser _authUser;
+  late TournamentBloc _tournySelectBloc;
+  late AuthBloc _authBloc;
 
-  late Coach? _curCoach;
-  late Squad? _curSquad;
+  Tournament _tournament = Tournament.fromJson(
+      TournamentInfo.fromJson("0", Map<String, dynamic>()),
+      Map<String, dynamic>());
+  AuthUser _authUser = AuthUser();
+
+  // late Coach? _curCoach;
+  // late Squad? _curSquad;
 
   List<SquadMatchup> _squadMatchups = [];
 
@@ -50,15 +61,68 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    _tournament = widget.tournament;
-    _authUser = widget.authUser;
-    _curCoach = widget.authUser.nafName != null
-        ? _tournament.getCoach(widget.authUser.nafName as String)
-        : null;
-    _curSquad = widget.authUser.nafName != null
-        ? _tournament.getCoachSquad(widget.authUser.nafName as String)
-        : null;
+    _tournySelectBloc = BlocProvider.of<TournamentBloc>(context);
+    _authBloc = BlocProvider.of<AuthBloc>(context);
+    super.initState();
+  }
 
+  @override
+  void dispose() {
+    _tournySelectBloc.close();
+    _authBloc.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<TournamentBloc, TournamentState>(
+        bloc: _tournySelectBloc,
+        builder: (tournyContext, tournyState) {
+          return BlocBuilder<AuthBloc, AuthState>(
+              bloc: _authBloc,
+              builder: (authContext, authState) {
+                if (authState is LoggedInAuthState) {
+                  _authUser = authState.authUser;
+                } else {
+                  _authUser = AuthUser();
+                }
+
+                if (tournyState is NewTournamentState) {
+                  _tournament = tournyState.tournament;
+                }
+
+                return _generateUi();
+              });
+        });
+  }
+
+  Widget _generateUi() {
+    _init();
+
+    return WillPopScope(
+        onWillPop: () async {
+          _handleBackButton();
+          return false;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            // leading: IconButton(
+            //   icon: Icon(Icons.arrow_back, color: Colors.white),
+            //   onPressed: () => Navigator.of(context).pop(),
+            // ),
+            title: Text(_tournament.info.name),
+          ),
+          body: _children[_parentIndex].widgets[_childIndex],
+          bottomNavigationBar: BottomNavigationBar(
+            items: _getBottomNavigationBarItems(),
+            currentIndex: _parentIndex,
+            selectedItemColor: Theme.of(context).colorScheme.secondary,
+            onTap: _onItemTapped,
+          ),
+        ));
+  }
+
+  void _init() {
     if (_tournament.squadRounds.isNotEmpty) {
       _squadMatchups = _tournament.squadRounds.last.matches;
     }
@@ -95,33 +159,6 @@ class _HomePageState extends State<HomePage> {
         )
       ]),
     ];
-
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async {
-          _handleBackButton();
-          return false;
-        },
-        child: Scaffold(
-          appBar: AppBar(
-            // leading: IconButton(
-            //   icon: Icon(Icons.arrow_back, color: Colors.white),
-            //   onPressed: () => Navigator.of(context).pop(),
-            // ),
-            title: Text(_tournament.info.name),
-          ),
-          body: _children[_parentIndex].widgets[_childIndex],
-          bottomNavigationBar: BottomNavigationBar(
-            items: _getBottomNavigationBarItems(),
-            currentIndex: _parentIndex,
-            selectedItemColor: Theme.of(context).colorScheme.secondary,
-            onTap: _onItemTapped,
-          ),
-        ));
   }
 
   List<BottomNavigationBarItem> _getBottomNavigationBarItems() {

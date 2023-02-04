@@ -22,7 +22,6 @@ class TournamentSelectionPage extends StatefulWidget {
 }
 
 class _TournamentSelectionPage extends State<TournamentSelectionPage> {
-  late AuthBloc _authBloc;
   late TournamentListsBloc _tournyListBloc;
   late TournamentBloc _tournySelectBloc;
 
@@ -32,7 +31,6 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   @override
   void initState() {
     super.initState();
-    _authBloc = BlocProvider.of<AuthBloc>(context);
     _tournyListBloc = BlocProvider.of<TournamentListsBloc>(context);
     _tournySelectBloc = BlocProvider.of<TournamentBloc>(context);
   }
@@ -154,13 +152,11 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
       listener: ((context, authState) => {
             if (authState is LoggedInAuthState)
               {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => HomePage(
-                              tournament: state.tournament,
-                              authUser: authState.authUser,
-                            )))
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => HomePage()))
+                //   tournament: state.tournament,
+                //   authUser: authState.authUser,
+                // )))
               }
           }),
       child: LoginPage(state.tournament.info),
