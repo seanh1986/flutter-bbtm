@@ -1,8 +1,11 @@
+import 'package:bbnaf/blocs/auth/auth_bloc.dart';
+import 'package:bbnaf/blocs/auth/auth_event.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:bbnaf/screens/login/login_screen_participant.dart';
 import 'package:bbnaf/screens/login/widget_login_header.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'login_screen_organizer.dart';
 
 class LoginPage extends StatefulWidget {
@@ -45,8 +48,19 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPage extends State<LoginPage> {
+  // late AuthBloc _authBloc;
+
+  @override
+  void initState() {
+    // _authBloc = BlocProvider.of<AuthBloc>(context);
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // _authBloc.add(new LoggedOutAuthEvent());
+
     return Stack(
       children: <Widget>[
         Scaffold(
@@ -64,7 +78,7 @@ class _LoginPage extends State<LoginPage> {
                 child: ListView(
                   children: <Widget>[
                     SizedBox(height: 20),
-                    LoginScreenHeader(showBackButton: false),
+                    LoginScreenHeader(showBackButton: true),
                     SizedBox(height: 20),
                     Container(
                         height: 50,

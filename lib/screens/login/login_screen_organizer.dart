@@ -5,6 +5,7 @@ import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
+import 'package:bbnaf/screens/login/widget_login_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -54,36 +55,68 @@ class _LoginOrganizerPage extends State<LoginOrganizerPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FlutterLogin(
-      title: 'Bloodbowl Tournament Manager',
-      logo: LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
-      // LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
-      //AssetImage('assets/images/logos/amorical_logo.png'),
-      additionalSignupFields: _additionalFields,
-      userValidator: (value) {
-        if (!value!.contains('@') || !value.endsWith('.com')) {
-          return "Email must contain '@' and end with '.com'";
-        }
-        return null;
-      },
-      passwordValidator: (value) {
-        if (value!.isEmpty) {
-          return 'Password is empty';
-        }
-        return null;
-      },
-      loginAfterSignUp: true,
-      navigateBackAfterRecovery: true,
-      onSignup: _signupUser,
-      onLogin: _tryLoginUser,
-      hideForgotPasswordButton: true,
-      onRecoverPassword: _recoverPassword,
-      onSubmitAnimationCompleted: () {
-        debugPrint('onSubmitAnimationCompleted');
-        _authBloc.add(new LoggedOutAuthEvent());
-        _authBloc.add(new LoggedInAuthEvent(authUser: _authUser));
-      },
-    );
+    return Stack(children: [
+      LoginScreenHeader(showBackButton: true),
+      FlutterLogin(
+        title: 'Bloodbowl Tournament Manager',
+        logo: LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
+        // LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
+        //AssetImage('assets/images/logos/amorical_logo.png'),
+        additionalSignupFields: _additionalFields,
+        userValidator: (value) {
+          if (!value!.contains('@') || !value.endsWith('.com')) {
+            return "Email must contain '@' and end with '.com'";
+          }
+          return null;
+        },
+        passwordValidator: (value) {
+          if (value!.isEmpty) {
+            return 'Password is empty';
+          }
+          return null;
+        },
+        loginAfterSignUp: true,
+        navigateBackAfterRecovery: true,
+        onSignup: _signupUser,
+        onLogin: _tryLoginUser,
+        hideForgotPasswordButton: true,
+        onRecoverPassword: _recoverPassword,
+        onSubmitAnimationCompleted: () {
+          debugPrint('onSubmitAnimationCompleted');
+          _authBloc.add(new LoggedInAuthEvent(authUser: _authUser));
+        },
+      )
+    ]);
+
+    // return FlutterLogin(
+    //     title: 'Bloodbowl Tournament Manager',
+    //     logo: LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
+    //     // LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
+    //     //AssetImage('assets/images/logos/amorical_logo.png'),
+    //     additionalSignupFields: _additionalFields,
+    //     userValidator: (value) {
+    //       if (!value!.contains('@') || !value.endsWith('.com')) {
+    //         return "Email must contain '@' and end with '.com'";
+    //       }
+    //       return null;
+    //     },
+    //     passwordValidator: (value) {
+    //       if (value!.isEmpty) {
+    //         return 'Password is empty';
+    //       }
+    //       return null;
+    //     },
+    //     loginAfterSignUp: true,
+    //     navigateBackAfterRecovery: true,
+    //     onSignup: _signupUser,
+    //     onLogin: _tryLoginUser,
+    //     hideForgotPasswordButton: true,
+    //     onRecoverPassword: _recoverPassword,
+    //     onSubmitAnimationCompleted: () {
+    //       debugPrint('onSubmitAnimationCompleted');
+    //       _authBloc.add(new LoggedInAuthEvent(authUser: _authUser));
+    //     },
+    //   );
   }
 
   Future<String?> _tryLoginUser(LoginData data) async {

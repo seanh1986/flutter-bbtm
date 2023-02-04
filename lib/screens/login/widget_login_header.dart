@@ -1,6 +1,5 @@
 import 'package:bbnaf/utils/bordered_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class LoginScreenHeader extends StatelessWidget {
   LoginScreenHeader({this.showBackButton = false, this.subTitle = ""});
@@ -26,7 +25,7 @@ class LoginScreenHeader extends StatelessWidget {
                   style: TextStyle(
                       color: Colors.blue,
                       fontWeight: FontWeight.w500,
-                      fontSize: 40)),
+                      fontSize: 20)),
             )),
         _getSubTitle(context),
       ],
@@ -44,9 +43,9 @@ class LoginScreenHeader extends StatelessWidget {
       child: IconButton(
         icon: Icon(Icons.arrow_back),
         onPressed: () {
-          // Navigator.pop(context);
+          Navigator.pop(context);
           // Navigator.of(context).pop();
-          Navigator.of(context, rootNavigator: true).pop();
+          // Navigator.of(context, rootNavigator: true).pop();
         },
       ),
     );

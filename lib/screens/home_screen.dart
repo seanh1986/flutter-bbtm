@@ -7,7 +7,7 @@ import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/admin/admin_screen.dart';
 import 'package:bbnaf/screens/overview_screen.dart';
 import 'package:bbnaf/screens/rankings_screen.dart';
-import 'package:bbnaf/screens/tournament_list/tournament_list_screen.dart';
+import 'package:bbnaf/screens/tournament_list/tournament_selection.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -147,9 +147,7 @@ class _HomePageState extends State<HomePage> {
           Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (context) => TournamentListPage(
-                        authUser: _authUser,
-                      )));
+                  builder: (context) => TournamentSelectionPage()));
         });
       } else {
         setState(() {

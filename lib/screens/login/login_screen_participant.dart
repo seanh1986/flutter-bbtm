@@ -1,7 +1,9 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/login/widget_login_header.dart';
+import 'package:bbnaf/screens/tournament_list/tournament_selection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginParticipantPage extends StatefulWidget {
@@ -46,7 +48,9 @@ class _LoginParticipantPage extends State<LoginParticipantPage> {
             child: ListView(
               children: <Widget>[
                 LoginScreenHeader(
-                    showBackButton: true, subTitle: "Participant Login"),
+                  showBackButton: true,
+                  subTitle: "Participant Login",
+                ),
                 Container(
                   padding: EdgeInsets.all(10),
                   child: TextField(
