@@ -132,10 +132,7 @@ class _HomePageState extends State<HomePage> {
       BottomNavigationBarItem(icon: Icon(Icons.poll), label: 'Rankings'),
     ];
 
-    if (_authUser.user != null &&
-        _authUser.user!.email != null &&
-        _tournament.info.organizers
-            .any((element) => element.email == _authUser.user!.email)) {
+    if (_tournament.isUserAdmin(_authUser)) {
       items.add(
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Admin'));
     }

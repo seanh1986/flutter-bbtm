@@ -1,6 +1,7 @@
 import 'package:bbnaf/blocs/tournament_update/tournament_update.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:bbnaf/screens/admin/edit_tournament_widget.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -54,36 +55,58 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   Widget _generateView() {
-    return Container(
-      child: Padding(
-          padding: EdgeInsets.all(7),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[_editTournament(), _advanceRound(context)],
-          )),
+    // List<Widget> widgets = [
+    //   SizedBox(height: 10),
+    //   _editTournament(),
+    //   SizedBox(height: 10),
+    //   _advanceRound(context)
+    // ];
+
+    return Column(
+      children: [
+        EditTournamentWidget(tournament: widget.tournament),
+        ExpansionTile(
+          title: Text("Tournament Management"),
+          subtitle: Text("Advance round or edit previous rounds"),
+          children: [_advanceRound(context)],
+        )
+      ],
     );
+
+    // return ListView(
+    //   children: widgets,
+    // );
+    // return Container(
+    //   child: Padding(
+    //       padding: EdgeInsets.all(7),
+    //       child: Column(
+    //         mainAxisAlignment: MainAxisAlignment.start,
+    //         mainAxisSize: MainAxisSize.min,
+    //         children: <Widget>[_editTournament(), _advanceRound(context)],
+    //       )),
+    // );
   }
 
   Widget _editTournament() {
     return Container(
-        height: 50,
+        height: 60,
         padding: EdgeInsets.all(10),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             primary: Colors.blue,
             textStyle: TextStyle(color: Colors.white),
           ),
-          child: Text('Edit Tournament (To be refactored)'),
+          child: Text('Edit Tournament'),
           onPressed: () {
             // TODO: Handle edit
+            // EditTournamentWidget(tournament: _tournament);
           },
         ));
   }
 
   Widget _advanceRound(BuildContext context) {
     return Container(
-        height: 50,
+        height: 60,
         padding: EdgeInsets.all(10),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
