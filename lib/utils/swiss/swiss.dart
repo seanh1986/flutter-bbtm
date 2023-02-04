@@ -99,7 +99,7 @@ class SwissPairings {
 
       notYetPaired.removeAt(idx_1);
 
-      // Last player will be when lenght is = 1
+      // Last player will be when length is = 1
       int idx_2 = notYetPaired.length > 1
           ? _random.nextInt(notYetPaired.length - 1)
           : 0;

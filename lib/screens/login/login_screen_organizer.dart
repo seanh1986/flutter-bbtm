@@ -56,7 +56,7 @@ class _LoginOrganizerPage extends State<LoginOrganizerPage> {
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
-      LoginScreenHeader(showBackButton: true),
+      //LoginScreenHeader(showBackButton: true),
       FlutterLogin(
         title: 'Bloodbowl Tournament Manager',
         logo: LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),

@@ -239,6 +239,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.17.1"
+  csv:
+    dependency: transitive
+    description:
+      name: csv
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.0.1"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -254,7 +261,7 @@ packages:
     source: hosted
     version: "2.0.1"
   data_tables:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: data_tables
       url: "https://pub.dartlang.org"
@@ -413,7 +420,7 @@ packages:
     source: hosted
     version: "0.5.0"
   flutter_native_splash:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: flutter_native_splash
       url: "https://pub.dartlang.org"
@@ -472,7 +479,7 @@ packages:
     source: hosted
     version: "2.0.0"
   grouped_list:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: grouped_list
       url: "https://pub.dartlang.org"
@@ -549,7 +556,7 @@ packages:
     source: hosted
     version: "4.0.1"
   json_serializable:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: json_serializable
       url: "https://pub.dartlang.org"
@@ -667,20 +674,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.1"
-  pluto_filtered_list:
-    dependency: transitive
-    description:
-      name: pluto_filtered_list
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.0"
   pluto_grid:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: pluto_grid
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.3.0"
+    version: "2.10.3"
   pool:
     dependency: transitive
     description:
@@ -729,7 +729,7 @@ packages:
       name: rxdart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.27.1"
+    version: "0.27.7"
   shelf:
     dependency: transitive
     description:
