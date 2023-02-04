@@ -99,7 +99,6 @@ class _LoginParticipantPage extends State<LoginParticipantPage> {
                           authUser = new AuthUser.nafNameOnly(nafName: nafName);
                         }
 
-                        _authBloc.add(LoggedOutAuthEvent());
                         _authBloc.add(LoggedInAuthEvent(authUser: authUser));
 
                         setState(() {
