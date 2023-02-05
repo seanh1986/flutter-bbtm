@@ -18,7 +18,7 @@ class Coach extends IMatchupParticipant {
 
   late Race _race;
 
-  bool active = true;
+  late bool active;
 
   int _wins = 0;
   int _ties = 0;
@@ -43,7 +43,9 @@ class Coach extends IMatchupParticipant {
     this._race,
     this.teamName,
     this.nafNumber,
-  );
+  ) {
+    active = nafName.isNotEmpty;
+  }
 
   @override
   OrgType type() {
@@ -176,6 +178,9 @@ class Coach extends IMatchupParticipant {
 
     final tNafNumber = json['naf_number'] as int?;
     this.nafNumber = tNafNumber != null ? tNafNumber : -1;
+
+    final tActive = json['active'] as bool?;
+    this.active = tActive != null && tActive;
   }
 
   Map<String, dynamic> toJson() => {
@@ -185,5 +190,6 @@ class Coach extends IMatchupParticipant {
         'squad_name': squadName,
         'race': RaceUtils.getName(_race),
         'naf_number': nafNumber,
+        'active': active,
       };
 }

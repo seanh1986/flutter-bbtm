@@ -1,14 +1,11 @@
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/races.dart';
-import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:data_table_2/data_table_2.dart';
-// import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class EditTournamentWidget extends StatefulWidget {
   final Tournament tournament;
@@ -64,8 +61,9 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
     DataColumn(label: Text("Team")),
     DataColumn(label: Text("Active")),
   ];
+
   List<DataRow> _coachRows = [];
-  late DataTable _coachDataTable;
+  late PaginatedDataTable _coachDataTable;
 
   @override
   void initState() {
@@ -155,19 +153,21 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
   }
 
   void _initOrgas() {
-    // _organizers.removeWhere((element) =>
-    //     element.email.trim().isEmpty || element.nafName.trim().isEmpty);
-
     _organizerRows.clear();
 
     for (int i = 0; i < _organizers.length; i++) {
       OrganizerInfo orga = _organizers[i];
 
+      TextEditingController emailController =
+          TextEditingController(text: orga.email);
       TextFormField emailForm = TextFormField(
-          initialValue: orga.email, onChanged: (value) => {orga.email = value});
+          controller: emailController,
+          onChanged: (value) => {orga.email = value});
 
-      TextFormField nafNamForm = TextFormField(
-          initialValue: orga.nafName,
+      TextEditingController nafNameController =
+          TextEditingController(text: orga.nafName);
+      TextFormField nafNameForm = TextFormField(
+          controller: nafNameController,
           onChanged: (value) {
             orga.nafName = value;
           });
@@ -190,31 +190,6 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
 
       ElevatedButton removeOrgaBtn = ElevatedButton(
         onPressed: () {
-          // emailForm.controller?.value = TextEditingValue(text: "");
-
-          // nafNamForm.controller?.value = TextEditingValue(text: "");
-
-          // primaryCheckbox = Checkbox(
-          //   value: false,
-          //   onChanged: (value) {
-          //     if (value != null) {
-          //       setState(() {
-          //         if (value) {
-          //           _organizers.forEach((element) {
-          //             element.primary = false;
-          //           });
-          //         }
-          //         orga.primary = value;
-          //       });
-          //     }
-          //   },
-          // );
-
-          // _orgaDataTable = DataTable(
-          //   columns: _organizerCols,
-          //   rows: _organizerRows,
-          // );
-
           setState(() {
             _organizers.removeAt(i);
           });
@@ -225,7 +200,7 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
       _organizerRows.add(DataRow(cells: [
         DataCell(removeOrgaBtn),
         DataCell(emailForm),
-        DataCell(nafNamForm),
+        DataCell(nafNameForm),
         DataCell(primaryCheckbox)
       ]));
     }
@@ -247,7 +222,7 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
   // }
 
   Widget _editableTable(
-      String title, DataTable dataTable, VoidCallback addRowCallback) {
+      String title, dynamic dataTable, VoidCallback addRowCallback) {
     return Container(
         padding: const EdgeInsets.all(15),
         child: Column(children: [
@@ -316,76 +291,116 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
   void _initCoaches() {
     _coachRows.clear();
 
-    for (int i = 0; i < _coaches.length; i++) {
-      Coach c = _coaches[i];
-
-      TextFormField nafNameField = TextFormField(
-          initialValue: c.nafName, onChanged: (value) => {c.nafName = value});
-
-      // TextFormField squadField = TextFormField(
-      //     initialValue: c.squadName,
-      //     onChanged: (value) => {c.squadName = value});
-
-      TextFormField coachNameField = TextFormField(
-          initialValue: c.coachName,
-          onChanged: (value) => {c.coachName = value});
-
-      TextFormField teamNameField = TextFormField(
-          initialValue: c.teamName, onChanged: (value) => {c.teamName = value});
-
-      TextFormField nafNumberField = TextFormField(
-          initialValue: c.nafNumber.toString(),
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          onChanged: (value) => {c.teamName = value});
-
-      List<DropdownMenuItem> raceDropDown = Race.values
-          .map((Race r) => RaceUtils.getName(r))
-          .map((String r) => DropdownMenuItem(value: r, child: Text(r)))
-          .toList();
-
-      DropdownButtonFormField raceField = DropdownButtonFormField(
-        value: c.raceName(),
-        items: raceDropDown,
-        onChanged: (value) {
-          c.setRace(RaceUtils.getRace(value));
-        },
-      );
-
-      Checkbox activeCheckbox = Checkbox(
-        value: c.active,
-        onChanged: (value) {
-          if (value != null) {
-            setState(() {
-              c.active = value;
-            });
-          }
-        },
-      );
-
-      ElevatedButton removeBtn = ElevatedButton(
-        onPressed: () {
+    CoachesDataSource coachSource = CoachesDataSource(
+        coaches: _coaches,
+        activeCallback: (cIdx, active) {
           setState(() {
-            _coaches.removeAt(i);
+            _coaches[cIdx].active = active;
           });
         },
-        child: const Text('-'),
-      );
+        removeItemCallback: (cIdx) {
+          setState(() {
+            _coaches.removeAt(cIdx);
+          });
+        });
 
-      _coachRows.add(DataRow(cells: [
-        DataCell(removeBtn),
-        DataCell(coachNameField),
-        DataCell(nafNameField),
-        DataCell(nafNumberField),
-        DataCell(raceField),
-        DataCell(teamNameField),
-        DataCell(activeCheckbox),
-      ]));
-    }
-
-    _coachDataTable = DataTable(
+    _coachDataTable = PaginatedDataTable(
       columns: _coachCols,
-      rows: _coachRows,
+      source: coachSource,
     );
   }
+}
+
+class CoachesDataSource extends DataTableSource {
+  late List<Coach> coaches;
+  Function(int, bool)? activeCallback;
+  Function(int)? removeItemCallback;
+
+  CoachesDataSource(
+      {required this.coaches, this.activeCallback, this.removeItemCallback});
+
+  @override
+  DataRow? getRow(int index) {
+    Coach c = coaches[index];
+
+    print("c_idx: " + index.toString() + " -> " + c.coachName);
+
+    TextEditingController nafNameController =
+        TextEditingController(text: c.nafName);
+    TextFormField nafNameField = TextFormField(
+        controller: nafNameController,
+        onChanged: (value) => {c.nafName = nafNameController.text});
+
+    TextEditingController coachNameController =
+        TextEditingController(text: c.coachName);
+    TextFormField coachNameField = TextFormField(
+        controller: coachNameController,
+        onChanged: (value) => {c.coachName = coachNameController.text});
+
+    TextEditingController teamNameController =
+        TextEditingController(text: c.teamName);
+    TextFormField teamNameField = TextFormField(
+        controller: teamNameController,
+        onChanged: (value) => {c.teamName = teamNameController.text});
+
+    TextEditingController nafNumberController =
+        TextEditingController(text: c.nafNumber.toString());
+    TextFormField nafNumberField = TextFormField(
+        controller: nafNumberController,
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) =>
+            {c.nafNumber = int.parse(nafNumberController.text)});
+
+    List<DropdownMenuItem> raceDropDown = Race.values
+        .map((Race r) => RaceUtils.getName(r))
+        .map((String r) => DropdownMenuItem(value: r, child: Text(r)))
+        .toList();
+
+    DropdownButtonFormField raceField = DropdownButtonFormField(
+      value: c.raceName(),
+      items: raceDropDown,
+      onChanged: (value) {
+        c.setRace(RaceUtils.getRace(value));
+      },
+    );
+
+    Checkbox activeCheckbox = Checkbox(
+      value: c.active,
+      onChanged: (value) {
+        if (value != null && activeCallback != null) {
+          activeCallback!(index, value);
+        }
+      },
+    );
+
+    ElevatedButton removeBtn = ElevatedButton(
+      onPressed: () {
+        coaches.removeAt(index);
+        if (removeItemCallback != null) {
+          removeItemCallback!(index);
+        }
+      },
+      child: const Text('-'),
+    );
+
+    return DataRow(cells: [
+      DataCell(removeBtn),
+      DataCell(coachNameField),
+      DataCell(nafNameField),
+      DataCell(nafNumberField),
+      DataCell(raceField),
+      DataCell(teamNameField),
+      DataCell(activeCheckbox),
+    ]);
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => coaches.length;
+
+  @override
+  int get selectedRowCount => 0;
 }
