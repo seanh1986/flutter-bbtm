@@ -4,19 +4,21 @@ import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 
 class Coach extends IMatchupParticipant {
-  late final int teamId;
+  // late int teamId;
 
-  late final String nafName; // Key
+  late String nafName; // Key
 
-  late final String squadName;
+  late String squadName;
 
-  late final String coachName;
+  late String coachName;
 
-  late final String teamName;
+  late String teamName;
 
-  late final int nafNumber;
+  late int nafNumber;
 
-  late final Race _race;
+  late Race _race;
+
+  bool active = true;
 
   int _wins = 0;
   int _ties = 0;
@@ -34,7 +36,7 @@ class Coach extends IMatchupParticipant {
   List<CoachMatchup> matches = [];
 
   Coach(
-    this.teamId,
+    // this.teamId,
     this.nafName,
     this.squadName,
     this.coachName,
@@ -91,6 +93,10 @@ class Coach extends IMatchupParticipant {
   @override
   List<String> opponents() {
     return _opponents;
+  }
+
+  void setRace(Race r) {
+    this._race = r;
   }
 
   void overwriteRecord(TournamentInfo t) {
@@ -151,7 +157,7 @@ class Coach extends IMatchupParticipant {
   }
 
   Coach.fromJson(int id, Map<String, Object?> json) {
-    this.teamId = id;
+    // this.teamId = id;
 
     final tNafName = json['naf_name'] as String?;
     this.nafName = tNafName != null ? tNafName : "";

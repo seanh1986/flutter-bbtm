@@ -63,7 +63,10 @@ class _AdminScreenState extends State<AdminScreen> {
 
     return Column(
       children: [
-        EditTournamentWidget(tournament: widget.tournament),
+        EditTournamentWidget(
+          tournament: widget.tournament,
+          tournyBloc: _tournyBloc,
+        ),
         ExpansionTile(
           title: Text("Tournament Management"),
           subtitle: Text("Advance round or edit previous rounds"),

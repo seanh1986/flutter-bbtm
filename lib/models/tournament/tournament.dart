@@ -8,7 +8,6 @@ import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:xml/xml.dart';
 
 enum Authorization {
@@ -58,6 +57,14 @@ class Tournament {
     int idx = _coaches.length;
     _coaches.add(c);
     _coachIdxMap.putIfAbsent(c.name(), () => idx);
+  }
+
+  void updateCoaches(List<Coach> coaches) {
+    _coaches.clear();
+    _coachIdxMap.clear();
+    coaches.forEach((c) {
+      addCoach(c);
+    });
   }
 
   Coach? getCoach(String nafName) {
@@ -351,32 +358,31 @@ move an extra square (GFI) will slip and be Knocked Down on a roll of 1-2, and o
     curRoundNumber = 0;
 
     int id = -1;
-    addCoach(Coach(id++, "seanh1986", "", "Sean", Race.NecromanticHorror,
-        "Sean Team", 23461));
     addCoach(Coach(
-        id++, "grant85", "", "Grant", Race.DaemonOfKhorne, "Grant Team", 6482));
-    addCoach(Coach(
-        id++, "hammer16", "", "Chris H", Race.Ogre, "Chris H Team", 20377));
-    addCoach(Coach(id++, "Duke_of_Edmund", "", "Andew W", Race.ShamblingUndead,
-        "Andrew Team", 27220));
-    addCoach(Coach(id++, "Grither", "", "Bryan T", Race.ChaosDwarf,
-        "Bryan T Team", 10904));
-    addCoach(Coach(
-        id++, "L3athalK", "", "Leathan", Race.Amazon, "Leathan Team", 7465));
-    addCoach(Coach(id++, "KidRichard", "", "Derek T", Race.Snotling,
-        "Derek T Team", 24415));
-    addCoach(Coach(
-        id++, "delevus", "", "Matt V", Race.Vampire, "Vanderby Team", 9884));
-    addCoach(Coach(
-        id++, "Stimme", "", "Alex W", Race.TombKings, "Alex W Team", 17245));
-    addCoach(Coach(id++, "Manz62", "", "Manu", Race.Slann, "Manu Team", 9753));
-    addCoach(Coach(id++, "Buffalo_Chris", "", "Buffalo", Race.WoodElf,
-        "Buffalo Team", 5624));
-    addCoach(Coach(id++, "AviD", "", "Avi", Race.HighElf, "Avi Team", 25207));
-    addCoach(Coach(
-        id++, "runki_khrum", "", "Colin", Race.Skaven, "Colin Team", 6780));
+        "seanh1986", "", "Sean", Race.NecromanticHorror, "Sean Team", 23461));
     addCoach(
-        Coach(id++, "TrevCraig", "", "Trev", Race.Goblin, "Tev Team", 23648));
+        Coach("grant85", "", "Grant", Race.DaemonOfKhorne, "Grant Team", 6482));
+    addCoach(
+        Coach("hammer16", "", "Chris H", Race.Ogre, "Chris H Team", 20377));
+    addCoach(Coach("Duke_of_Edmund", "", "Andew W", Race.ShamblingUndead,
+        "Andrew Team", 27220));
+    addCoach(Coach(
+        "Grither", "", "Bryan T", Race.ChaosDwarf, "Bryan T Team", 10904));
+    addCoach(
+        Coach("L3athalK", "", "Leathan", Race.Amazon, "Leathan Team", 7465));
+    addCoach(Coach(
+        "KidRichard", "", "Derek T", Race.Snotling, "Derek T Team", 24415));
+    addCoach(
+        Coach("delevus", "", "Matt V", Race.Vampire, "Vanderby Team", 9884));
+    addCoach(
+        Coach("Stimme", "", "Alex W", Race.TombKings, "Alex W Team", 17245));
+    addCoach(Coach("Manz62", "", "Manu", Race.Slann, "Manu Team", 9753));
+    addCoach(Coach(
+        "Buffalo_Chris", "", "Buffalo", Race.WoodElf, "Buffalo Team", 5624));
+    addCoach(Coach("AviD", "", "Avi", Race.HighElf, "Avi Team", 25207));
+    addCoach(
+        Coach("runki_khrum", "", "Colin", Race.Skaven, "Colin Team", 6780));
+    addCoach(Coach("TrevCraig", "", "Trev", Race.Goblin, "Tev Team", 23648));
   }
 
   // factory Tournament.fromXml(XmlDocument xml, TournamentInfo info) {
