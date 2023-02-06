@@ -22,22 +22,7 @@ class EditTournamentWidget extends StatefulWidget {
   }
 }
 
-enum EditTournamentSections {
-  None,
-  Info,
-  Coaches,
-  Squads,
-  Rounds,
-}
-
-enum ViewState {
-  Expanded,
-  Compressed,
-}
-
 class _EditTournamentWidget extends State<EditTournamentWidget> {
-  EditTournamentSections expandedState = EditTournamentSections.None;
-
   late String _name;
   late String _location;
   late List<OrganizerInfo> _organizers = [];
@@ -234,9 +219,9 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
             SizedBox(width: 20),
             ElevatedButton(
               onPressed: () {
-                _addNewCoach();
+                _addNewOrga();
               },
-              child: const Text('Add Row'),
+              child: const Text('Add Organizer'),
             )
           ]),
           SizedBox(height: 10),
@@ -277,7 +262,7 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
               onPressed: () {
                 _addNewCoach();
               },
-              child: const Text('Add Row'),
+              child: const Text('Add Coach'),
             )
           ]),
           SizedBox(height: 10),
