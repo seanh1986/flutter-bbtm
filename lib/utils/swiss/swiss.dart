@@ -110,10 +110,10 @@ class SwissPairings {
 
       if (tournament.useSquads) {
         matchings.matches
-            .add(SquadMatchup(1, tableNum, player_1.name(), player_2.name()));
+            .add(SquadMatchup(tableNum, player_1.name(), player_2.name()));
       } else {
         matchings.matches
-            .add(CoachMatchup(1, tableNum, player_1.name(), player_2.name()));
+            .add(CoachMatchup(tableNum, player_1.name(), player_2.name()));
       }
 
       tableNum++;
@@ -291,9 +291,9 @@ class SwissPairings {
       }
 
       if (bestPlayer.type() == OrgType.Coach) {
-        return CoachMatchup(roundNum, -1, bestPlayer.name(), nextPlayer.name());
+        return CoachMatchup(-1, bestPlayer.name(), nextPlayer.name());
       } else {
-        return SquadMatchup(roundNum, -1, bestPlayer.name(), nextPlayer.name());
+        return SquadMatchup(-1, bestPlayer.name(), nextPlayer.name());
       }
     }
 
@@ -392,15 +392,15 @@ class SwissPairings {
           }
 
           if (bestPlayer.type() == OrgType.Coach) {
-            newMatchups.matches.add(
-                CoachMatchup(roundNum, -1, bestPlayer.name(), player_2.name()));
-            newMatchups.matches.add(CoachMatchup(
-                roundNum, -1, player_1.name(), switchPlayer.name()));
+            newMatchups.matches
+                .add(CoachMatchup(-1, bestPlayer.name(), player_2.name()));
+            newMatchups.matches
+                .add(CoachMatchup(-1, player_1.name(), switchPlayer.name()));
           } else {
-            newMatchups.matches.add(
-                SquadMatchup(roundNum, -1, bestPlayer.name(), player_2.name()));
-            newMatchups.matches.add(SquadMatchup(
-                roundNum, -1, player_1.name(), switchPlayer.name()));
+            newMatchups.matches
+                .add(SquadMatchup(-1, bestPlayer.name(), player_2.name()));
+            newMatchups.matches
+                .add(SquadMatchup(-1, player_1.name(), switchPlayer.name()));
           }
 
           return true;
@@ -423,15 +423,15 @@ class SwissPairings {
           }
 
           if (bestPlayer.type() == OrgType.Coach) {
-            newMatchups.matches.add(
-                CoachMatchup(roundNum, -1, bestPlayer.name(), player_1.name()));
-            newMatchups.matches.add(CoachMatchup(
-                roundNum, -1, player_2.name(), switchPlayer.name()));
+            newMatchups.matches
+                .add(CoachMatchup(-1, bestPlayer.name(), player_1.name()));
+            newMatchups.matches
+                .add(CoachMatchup(-1, player_2.name(), switchPlayer.name()));
           } else {
-            newMatchups.matches.add(
-                SquadMatchup(roundNum, -1, bestPlayer.name(), player_1.name()));
-            newMatchups.matches.add(SquadMatchup(
-                roundNum, -1, player_2.name(), switchPlayer.name()));
+            newMatchups.matches
+                .add(SquadMatchup(-1, bestPlayer.name(), player_1.name()));
+            newMatchups.matches
+                .add(SquadMatchup(-1, player_2.name(), switchPlayer.name()));
           }
 
           return true;

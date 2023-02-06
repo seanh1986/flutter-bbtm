@@ -114,7 +114,7 @@ class Tournament {
     return true;
   }
 
-  void _reProcessAllRounds() {
+  void reProcessAllRounds() {
     // Clear all coach matchups
     _coaches.forEach((c) {
       c.matches.clear();
@@ -236,7 +236,7 @@ class Tournament {
       }
     }
 
-    _reProcessAllRounds();
+    reProcessAllRounds();
     _syncSquadsAndCoaches();
   }
 

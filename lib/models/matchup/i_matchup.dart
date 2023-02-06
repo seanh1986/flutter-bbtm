@@ -17,7 +17,6 @@ enum MatchResult {
 
 abstract class IMatchup {
   OrgType type();
-  int roundNum();
   int tableNum();
 
   String homeName();
@@ -75,14 +74,13 @@ abstract class IMatchup {
     }
     return other is IMatchup &&
         other.type() == type() &&
-        other.roundNum() == roundNum() &&
         other.homeName().toLowerCase() == homeName().toLowerCase() &&
         other.awayName().toLowerCase() == awayName().toLowerCase();
   }
 
   @override
-  int get hashCode => Object.hash(
-      type(), roundNum(), homeName().toLowerCase(), awayName().toLowerCase());
+  int get hashCode =>
+      Object.hash(type(), homeName().toLowerCase(), awayName().toLowerCase());
 
   // static String getResultName(MatchResult result) {
   //   switch (result) {

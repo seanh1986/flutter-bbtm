@@ -21,7 +21,6 @@ class ReportedMatchResultWithStatus extends ReportedMatchResult {
 }
 
 class CoachMatchup extends IMatchup {
-  late final int _roundNum;
   late int _tableNum;
 
   late final String homeNafName;
@@ -30,17 +29,11 @@ class CoachMatchup extends IMatchup {
   late final String awayNafName;
   ReportedMatchResult awayReportedResults = ReportedMatchResult();
 
-  CoachMatchup(
-      this._roundNum, this._tableNum, this.homeNafName, this.awayNafName);
+  CoachMatchup(this._tableNum, this.homeNafName, this.awayNafName);
 
   @override
   OrgType type() {
     return OrgType.Coach;
-  }
-
-  @override
-  int roundNum() {
-    return _roundNum;
   }
 
   @override
@@ -140,9 +133,6 @@ class CoachMatchup extends IMatchup {
   }
 
   CoachMatchup.fromJson(Map<String, dynamic> json) {
-    final tRound = json['round'] as int?;
-    this._roundNum = tRound != null ? tRound : 0;
-
     final tTable = json['table'] as int?;
     this._tableNum = tTable != null ? tTable : -1;
 
@@ -166,7 +156,6 @@ class CoachMatchup extends IMatchup {
   }
 
   Map<String, dynamic> toJson() => {
-        'round': _roundNum,
         'table': _tableNum,
         'home_nafname': homeNafName,
         'away_nafname': awayNafName,

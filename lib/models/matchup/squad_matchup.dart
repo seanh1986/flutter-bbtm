@@ -3,7 +3,6 @@ import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 
 class SquadMatchup extends IMatchup {
-  late final int _roundNum;
   late int _tableNum;
 
   late final String homeSquadName;
@@ -11,17 +10,11 @@ class SquadMatchup extends IMatchup {
 
   List<CoachMatchup> coachMatchups = [];
 
-  SquadMatchup(
-      this._roundNum, this._tableNum, this.homeSquadName, this.awaySquadName);
+  SquadMatchup(this._tableNum, this.homeSquadName, this.awaySquadName);
 
   @override
   OrgType type() {
     return OrgType.Squad;
-  }
-
-  @override
-  int roundNum() {
-    return _roundNum;
   }
 
   @override
@@ -64,7 +57,6 @@ class SquadMatchup extends IMatchup {
 
   SquadMatchup.fromJson(Map<String, dynamic> json) {
     final tRound = json['round'] as int?;
-    this._roundNum = tRound != null ? tRound : 0;
 
     final tTable = json['table'] as int?;
     this._tableNum = tTable != null ? tTable : -1;
@@ -79,7 +71,6 @@ class SquadMatchup extends IMatchup {
   }
 
   Map<String, dynamic> toJson() => {
-        'round': _roundNum,
         'table': _tableNum,
         'home_name': homeSquadName,
         'away_name': awaySquadName,
