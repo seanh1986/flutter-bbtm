@@ -60,11 +60,8 @@ class Tournament {
   }
 
   void updateCoaches(List<Coach> coaches) {
-    _coaches.clear();
-    _coachIdxMap.clear();
-    coaches.forEach((c) {
-      addCoach(c);
-    });
+    _coaches = coaches;
+    _syncSquadsAndCoaches();
   }
 
   Coach? getCoach(String nafName) {
@@ -268,7 +265,7 @@ class Tournament {
     }
   }
 
-  Tournament.fromExample() {
+  Tournament.fromCanadianOpen() {
     info = TournamentInfo(
         id: "X0qh35qbzPhBQKBb6y6c",
         name: "Canadian Open",

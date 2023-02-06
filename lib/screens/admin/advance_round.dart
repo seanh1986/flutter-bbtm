@@ -1,11 +1,17 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
+import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 
 class AdvanceRoundWidget extends StatefulWidget {
-  Tournament tournament;
+  final Tournament tournament;
+  final TournamentBloc tournyBloc;
 
-  AdvanceRoundWidget({Key? key, required this.tournament}) : super(key: key);
+  AdvanceRoundWidget(
+      {Key? key, required this.tournament, required this.tournyBloc})
+      : super(key: key);
 
   @override
   State<AdvanceRoundWidget> createState() {
@@ -21,86 +27,55 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> topBar = [Text('Info'), Text('Coaches')];
-    List<Widget> views = [_viewInfo(), _viewCoaches()];
-
-    assert(topBar.length == views.length);
-
-    int tabLength = topBar.length;
-
-    return DefaultTabController(
-        length: tabLength,
-        child: Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              flexibleSpace: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TabBar(
-                    tabs: topBar,
-                  )
-                ],
-              ),
-            ),
-            body: TabBarView(
-              children: views,
-            )));
-  }
-
-  Widget _viewInfo() {
-    final _formKey = GlobalKey<FormState>();
-
-    return Scaffold(
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              CustomTextFormField(
-                title: 'Name',
-                callback: (value) => widget.tournament.info.name = value,
-              ),
-              CustomTextFormField(
-                title: 'Location',
-                callback: (value) => widget.tournament.info.location = value,
-              ),
-              // CustomDateFormField(
-              //   initialValue: PickerDateRange(
-              //       widget.tournament.info.dateTimeStart,
-              //       widget.tournament.info.dateTimeEnd),
-              //   callback: (arg) => _onDatePickerSelectionChanged,
-              // ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: const Text('Discard'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: const Text('Update'),
-                  )
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
+    return ExpansionTile(
+      title: Text("Tournament Management"),
+      subtitle: Text("Advance round or edit previous rounds"),
+      children: [_advanceRound(context)],
     );
+
+    return _advanceRound(context);
   }
 
-  // void _onDatePickerSelectionChanged(DateRangePickerSelectionChangedArgs arg) {
-  //   if (arg.value is PickerDateRange) {
-  //     widget.tournament.info.dateTimeStart = arg.value.startDate;
-  //     widget.tournament.info.dateTimeEnd = arg.value.endDate;
-  //   } else if (arg.value is DateTime) {
-  //     widget.tournament.info.dateTimeStart = arg.value;
-  //     widget.tournament.info.dateTimeEnd = arg.value;
-  //   }
-  // }
+  Widget _advanceRound(BuildContext context) {
+    return Container(
+        height: 60,
+        padding: EdgeInsets.all(10),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            primary: Colors.blue,
+            textStyle: TextStyle(color: Colors.white),
+          ),
+          child: Text('Advance to Round: ' +
+              (widget.tournament.curRoundNumber + 1).toString()),
+          onPressed: () {
+            widget.tournament.processRound();
 
-  Widget _viewCoaches() {
-    return Text("Coaches!");
+            String msg;
+            SwissPairings swiss = SwissPairings(widget.tournament);
+            RoundPairingError pairingError = swiss.pairNextRound();
+
+            switch (pairingError) {
+              case RoundPairingError.NoError:
+                msg = "Succesful";
+                break;
+              case RoundPairingError.MissingPreviousResults:
+                msg = "Missing Previous Results";
+                break;
+              case RoundPairingError.UnableToFindValidMatches:
+                msg = "Unable To Find Valid Matches";
+                break;
+              default:
+                msg = "Unknown Error";
+                break;
+            }
+
+            showOkAlertDialog(
+                context: context, title: "Advance Round", message: msg);
+
+            if (pairingError == RoundPairingError.NoError) {
+              widget.tournyBloc.add(UpdateTournamentEvent(widget.tournament));
+            }
+          },
+        ));
   }
 }

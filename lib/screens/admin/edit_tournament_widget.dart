@@ -1,3 +1,4 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/races.dart';
@@ -62,7 +63,6 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
     DataColumn(label: Text("Active")),
   ];
 
-  List<DataRow> _coachRows = [];
   late PaginatedDataTable _coachDataTable;
 
   @override
@@ -83,7 +83,7 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
       subtitle: Text("Edit information/details, coaches, squads, etc."),
       children: [
         ExpansionTile(title: Text("Info"), children: _viewInfos()),
-        ExpansionTile(title: Text("Coaches"), children: _viewCoaches()),
+        ExpansionTile(title: Text("Coaches"), children: _viewCoaches(context)),
       ],
     );
   }
@@ -108,7 +108,7 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
         title: 'Tournament Location (City, Province)',
         callback: (value) => _location = value,
       ),
-      _editableTable("Organizers", _orgaDataTable, _addNewOrga),
+      _createOrgaTable(),
       // CustomDateFormField(
       //   initialValue: PickerDateRange(
       //       widget.tournament.info.dateTimeStart,
@@ -132,17 +132,19 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
           SizedBox(width: 20),
           ElevatedButton(
             onPressed: () {
-              widget.tournament.info.name = _name;
-              widget.tournament.info.location = _location;
+              VoidCallback callback = () {
+                widget.tournament.info.name = _name;
+                widget.tournament.info.location = _location;
 
-              // Remove empty rows
-              _organizers.removeWhere((element) =>
-                  element.email.trim().isEmpty ||
-                  element.nafName.trim().isEmpty);
+                // Remove empty rows
+                _organizers.removeWhere((element) =>
+                    element.email.trim().isEmpty ||
+                    element.nafName.trim().isEmpty);
 
-              widget.tournament.info.organizers = _organizers;
+                widget.tournament.info.organizers = _organizers;
+              };
 
-              widget.tournyBloc.add(UpdateTournamentEvent(widget.tournament));
+              _showDialogToConfirmOverwrite(context, callback);
             },
             child: const Text('Update'),
           )
@@ -211,6 +213,37 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
     );
   }
 
+  Widget _createOrgaTable() {
+    return Container(
+        padding: const EdgeInsets.all(15),
+        child: Column(children: [
+          SizedBox(height: 10),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Column(children: [
+              Text("Organizers", style: TextStyle(fontSize: 18)),
+              Text(
+                  "[Primary/Total]: " +
+                      _organizers
+                          .where((element) => element.primary)
+                          .length
+                          .toString() +
+                      " / " +
+                      _organizers.length.toString(),
+                  style: TextStyle(fontSize: 14))
+            ]),
+            SizedBox(width: 20),
+            ElevatedButton(
+              onPressed: () {
+                _addNewCoach();
+              },
+              child: const Text('Add Row'),
+            )
+          ]),
+          SizedBox(height: 10),
+          _orgaDataTable
+        ]));
+  }
+
   // void _onDatePickerSelectionChanged(DateRangePickerSelectionChangedArgs arg) {
   //   if (arg.value is PickerDateRange) {
   //     widget.tournament.info.dateTimeStart = arg.value.startDate;
@@ -221,27 +254,34 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
   //   }
   // }
 
-  Widget _editableTable(
-      String title, dynamic dataTable, VoidCallback addRowCallback) {
+  Widget _createCoachTable() {
     return Container(
         padding: const EdgeInsets.all(15),
         child: Column(children: [
           SizedBox(height: 10),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(
-              title,
-              style: TextStyle(fontSize: 14),
-            ),
+            Column(children: [
+              Text("Coaches", style: TextStyle(fontSize: 18)),
+              Text(
+                  "[Active/Total]: " +
+                      _coaches
+                          .where((element) => element.active)
+                          .length
+                          .toString() +
+                      " / " +
+                      _coaches.length.toString(),
+                  style: TextStyle(fontSize: 14))
+            ]),
             SizedBox(width: 20),
             ElevatedButton(
               onPressed: () {
-                addRowCallback();
+                _addNewCoach();
               },
-              child: const Text('+'),
+              child: const Text('Add Row'),
             )
           ]),
           SizedBox(height: 10),
-          dataTable
+          _coachDataTable
         ]));
   }
 
@@ -251,11 +291,11 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
     });
   }
 
-  List<Widget> _viewCoaches() {
+  List<Widget> _viewCoaches(BuildContext context) {
     _initCoaches();
 
     return [
-      _editableTable("Coaches", _coachDataTable, _addNewCoach),
+      _createCoachTable(),
       SizedBox(height: 10),
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -271,14 +311,16 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
           SizedBox(width: 20),
           ElevatedButton(
             onPressed: () {
-              // Remove empty rows
-              _coaches.removeWhere((element) =>
-                  element.coachName.trim().isEmpty ||
-                  element.nafName.trim().isEmpty);
+              VoidCallback callback = () {
+                // Remove empty rows
+                _coaches.removeWhere((element) =>
+                    element.coachName.trim().isEmpty &&
+                    element.nafName.trim().isEmpty);
 
-              widget.tournament.updateCoaches(_coaches);
+                widget.tournament.updateCoaches(_coaches);
+              };
 
-              widget.tournyBloc.add(UpdateTournamentEvent(widget.tournament));
+              _showDialogToConfirmOverwrite(context, callback);
             },
             child: const Text('Update'),
           )
@@ -289,7 +331,10 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
   }
 
   void _initCoaches() {
-    _coachRows.clear();
+    print("Coach List:");
+    for (int i = 0; i < _coaches.length; i++) {
+      print("[" + i.toString() + "]: " + _coaches[i].coachName);
+    }
 
     CoachesDataSource coachSource = CoachesDataSource(
         coaches: _coaches,
@@ -308,6 +353,42 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
       columns: _coachCols,
       source: coachSource,
     );
+  }
+
+  void _showDialogToConfirmOverwrite(
+      BuildContext context, VoidCallback confirmedUpdateCallback) {
+    StringBuffer sb = new StringBuffer();
+
+    sb.writeln(
+        "Warning this will overwrite existing tournament data. Please confirm!");
+    sb.writeln("");
+    sb.writeln("NumOrganizers: " +
+        _organizers.length.toString() +
+        " (Primary: " +
+        _organizers.where((element) => element.primary).length.toString() +
+        ")");
+
+    sb.writeln("NumCoaches: " +
+        _coaches.length.toString() +
+        " (Active: " +
+        _coaches.where((element) => element.active).length.toString() +
+        ")");
+
+    showOkCancelAlertDialog(
+            context: context,
+            title: "Update Tournament",
+            message: sb.toString(),
+            okLabel: "Update",
+            cancelLabel: "Dismiss")
+        .then((value) => {
+              if (value == OkCancelResult.ok)
+                {_processUpdate(confirmedUpdateCallback)}
+            });
+  }
+
+  void _processUpdate(VoidCallback confirmedUpdateCallback) {
+    confirmedUpdateCallback();
+    widget.tournyBloc.add(UpdateTournamentEvent(widget.tournament));
   }
 }
 
