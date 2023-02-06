@@ -28,7 +28,7 @@ class SwissPairings {
 
   /// Return true if pairing successful, false if
   RoundPairingError pairNextRound() {
-    int round = tournament.curRoundNumber + 1;
+    int round = tournament.curRoundNumber() + 1;
 
     RoundPairingError errorType = RoundPairingError.NoError;
 

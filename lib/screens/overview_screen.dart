@@ -79,7 +79,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       userName = "Guest";
     }
 
-    String roundNumber = _tournament.curRoundNumber.toString();
+    String roundNumber = _tournament.curRoundNumber().toString();
 
     return _generateCardWidget([
       Text(

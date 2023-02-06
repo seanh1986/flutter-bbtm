@@ -25,8 +25,6 @@ class Tournament {
   late final FirstRoundMatchingRule firstRoundMatchingRule;
   late final bool useSquads;
 
-  int curRoundNumber = 0;
-
   // Key: squad name, Value: Idx in squad list
   HashMap<String, int> _squadIdxMap = new HashMap<String, int>();
   List<Squad> _squads = [];
@@ -80,6 +78,10 @@ class Tournament {
 
   List<Coach> getCoaches() {
     return _coaches;
+  }
+
+  int curRoundNumber() {
+    return coachRounds.length;
   }
 
   // Try to process round (i.e., populate coaches with results)
@@ -140,20 +142,17 @@ class Tournament {
     _coaches.forEach((c) {
       c.overwriteRecord(info);
     });
-
-    curRoundNumber = coachRounds.length;
   }
 
   // Increment to next round by updating the coach/squad rounds
   bool updateRound(RoundMatching matchups) {
     int newRound = matchups.round();
 
-    if (newRound != curRoundNumber + 1) {
+    if (newRound != curRoundNumber() + 1) {
       debugPrint('Failed to update round: Round numbers do not coincide');
       return false;
     }
 
-    curRoundNumber = newRound;
     if (useSquads) {
       SquadRound squadRound = SquadRound.fromRoundMatching(matchups);
       if (squadRound.getMatches().isEmpty) {
@@ -203,9 +202,6 @@ class Tournament {
 
   Tournament.fromJson(TournamentInfo info, Map<String, dynamic> json) {
     this.info = info;
-
-    // final tRound = json['round'] as int?;
-    // this.curRoundNumber = tRound != null ? tRound : 0;
 
     final tUseSquads = json['use_squads'] as bool?;
     this.useSquads = tUseSquads != null ? tUseSquads : false;
@@ -351,8 +347,6 @@ move an extra square (GFI) will slip and be Knocked Down on a roll of 1-2, and o
 
     firstRoundMatchingRule = FirstRoundMatchingRule.MatchRandom;
     useSquads = false;
-
-    curRoundNumber = 0;
 
     int id = -1;
     addCoach(Coach(

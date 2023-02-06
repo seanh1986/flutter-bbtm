@@ -37,7 +37,7 @@ abstract class IMatchup {
           return homeName() + " vs. " + awayName();
       }
     } else {
-      return "Round #" + t.curRoundNumber.toString();
+      return "Round #" + t.curRoundNumber().toString();
     }
   }
 

@@ -155,13 +155,13 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
             textStyle: TextStyle(color: Colors.white),
           ),
           child: Text('Advance to Round: ' +
-              (widget.tournament.curRoundNumber + 1).toString()),
+              (widget.tournament.curRoundNumber() + 1).toString()),
           onPressed: () {
             StringBuffer sb = new StringBuffer();
             sb.writeln("Are you sure you want to process round " +
-                widget.tournament.curRoundNumber.toString() +
+                widget.tournament.curRoundNumber().toString() +
                 " and advance to round " +
-                (widget.tournament.curRoundNumber + 1).toString() +
+                (widget.tournament.curRoundNumber() + 1).toString() +
                 "?");
 
             VoidCallback advanceCallback = () {
@@ -218,13 +218,13 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
             textStyle: TextStyle(color: Colors.white),
           ),
           child: Text('Discard Current Round (' +
-              widget.tournament.curRoundNumber.toString() +
+              widget.tournament.curRoundNumber().toString() +
               ")"),
           onPressed: () {
             StringBuffer sb = new StringBuffer();
             sb.writeln(
                 "Are you sure you want to discard the current drawn (round " +
-                    widget.tournament.curRoundNumber.toString() +
+                    widget.tournament.curRoundNumber().toString() +
                     ")?");
 
             VoidCallback discardCallback = () {
