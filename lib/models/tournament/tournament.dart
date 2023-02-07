@@ -19,6 +19,14 @@ enum Authorization {
   Admin,
 }
 
+enum TieBreaker {
+  OppScore,
+  Td,
+  Cas,
+  TdDiff,
+  CasDiff,
+}
+
 class Tournament {
   late final TournamentInfo info;
 
@@ -35,6 +43,12 @@ class Tournament {
 
   List<SquadRound> squadRounds = [];
   List<CoachRound> coachRounds = [];
+
+  List<TieBreaker> tieBreakers = [
+    TieBreaker.OppScore,
+    TieBreaker.Td,
+    TieBreaker.Cas
+  ];
 
   void addSquad(Squad s) {
     int idx = _squads.length;
@@ -136,11 +150,23 @@ class Tournament {
         homeCoach?.matches.add(m);
         awayCoach?.matches.add(m);
       });
+
+      // Check for byes
+      _coaches.forEach((c) {
+        if (!r.hasMatchForPlayer(c)) {
+          c.matches.add(CoachMatchup(-1, c.nafName, CoachMatchup.Bye));
+        }
+      });
     });
 
     // Overwrite records
     _coaches.forEach((c) {
       c.overwriteRecord(info);
+    });
+
+    // Update opponent score
+    _coaches.forEach((c) {
+      c.updateOppScoreAndTieBreakers(this);
     });
   }
 
@@ -237,7 +263,6 @@ class Tournament {
   }
 
   Map<String, dynamic> toJson() => {
-        // 'round': curRoundNumber,
         'use_squads': useSquads,
         'first_round_matching':
             SwissPairings.getFirstRoundMatchingName(firstRoundMatchingRule),

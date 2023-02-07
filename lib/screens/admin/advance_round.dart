@@ -49,7 +49,10 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
     List<ExpansionTile> widgets = [];
 
     for (int i = 0; i < widget.tournament.coachRounds.length; i++) {
-      widgets.add(_generateRoundSummary(i));
+      ExpansionTile? tile = _generateRoundSummary(i);
+      if (tile != null) {
+        widgets.add(tile);
+      }
     }
 
     widgets.add(_advanceOrDiscardRound(context));
@@ -61,7 +64,11 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
     );
   }
 
-  ExpansionTile _generateRoundSummary(int round) {
+  ExpansionTile? _generateRoundSummary(int round) {
+    if (round >= _coachRounds.length) {
+      return null;
+    }
+
     CoachRound coachRound = _coachRounds[round];
 
     CoachRoundDataSource dataSource =
@@ -272,12 +279,12 @@ class CoachRoundDataSource extends DataTableSource {
   DataRow? getRow(int index) {
     CoachMatchup m = coachRound.matches[index];
 
-    print("m_idx: " +
-        index.toString() +
-        " -> " +
-        m.homeNafName +
-        " vs. " +
-        m.awayNafName);
+    // print("m_idx: " +
+    //     index.toString() +
+    //     " -> " +
+    //     m.homeNafName +
+    //     " vs. " +
+    //     m.awayNafName);
 
     Text tableNum = Text(m.tableNum().toString());
     Text homeNafName = Text(m.homeNafName);

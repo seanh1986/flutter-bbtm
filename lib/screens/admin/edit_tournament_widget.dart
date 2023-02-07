@@ -316,10 +316,10 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
   }
 
   void _initCoaches() {
-    print("Coach List:");
-    for (int i = 0; i < _coaches.length; i++) {
-      print("[" + i.toString() + "]: " + _coaches[i].coachName);
-    }
+    // print("Coach List:");
+    // for (int i = 0; i < _coaches.length; i++) {
+    //   print("[" + i.toString() + "]: " + _coaches[i].coachName);
+    // }
 
     CoachesDataSource coachSource = CoachesDataSource(
         coaches: _coaches,

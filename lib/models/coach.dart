@@ -1,6 +1,7 @@
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 
 class Coach extends IMatchupParticipant {
@@ -29,6 +30,11 @@ class Coach extends IMatchupParticipant {
   int tds = 0;
   int cas = 0;
 
+  int oppTds = 0;
+  int oppCas = 0;
+
+  double oppPoints = 0.0;
+
   List<double> _tieBreakers = <double>[];
 
   List<String> _opponents = <String>[];
@@ -36,7 +42,6 @@ class Coach extends IMatchupParticipant {
   List<CoachMatchup> matches = [];
 
   Coach(
-    // this.teamId,
     this.nafName,
     this.squadName,
     this.coachName,
@@ -108,6 +113,8 @@ class Coach extends IMatchupParticipant {
     _points = 0;
     tds = 0;
     cas = 0;
+    oppTds = 0;
+    oppCas = 0;
     _opponents.clear();
 
     matches.forEach((m) {
@@ -131,6 +138,9 @@ class Coach extends IMatchupParticipant {
 
         tds += matchStats.homeTds;
         cas += matchStats.homeCas;
+        oppTds += matchStats.awayTds;
+        oppCas += matchStats.awayCas;
+
         _opponents.add(m.awayNafName);
       } else if (nafName == m.awayNafName) {
         switch (matchResult) {
@@ -149,6 +159,8 @@ class Coach extends IMatchupParticipant {
 
         tds += matchStats.awayTds;
         cas += matchStats.awayCas;
+        oppTds += matchStats.homeTds;
+        oppCas += matchStats.homeCas;
         _opponents.add(m.homeNafName);
       }
     });
@@ -158,9 +170,37 @@ class Coach extends IMatchupParticipant {
         _losses * t.scoringDetails.lossPts;
   }
 
-  Coach.fromJson(int id, Map<String, Object?> json) {
-    // this.teamId = id;
+  void updateOppScoreAndTieBreakers(Tournament t) {
+    oppPoints = 0.0;
+    _opponents.forEach((opp) {
+      Coach? oppCoach = t.getCoach(opp);
+      if (oppCoach != null) {
+        oppPoints += oppCoach.points();
+      }
+    });
 
+    t.tieBreakers.forEach((tb) {
+      switch (tb) {
+        case TieBreaker.OppScore:
+          _tieBreakers.add(oppPoints);
+          break;
+        case TieBreaker.Td:
+          _tieBreakers.add(tds.toDouble());
+          break;
+        case TieBreaker.Cas:
+          _tieBreakers.add(cas.toDouble());
+          break;
+        case TieBreaker.TdDiff:
+          _tieBreakers.add((tds - oppTds).toDouble());
+          break;
+        case TieBreaker.CasDiff:
+          _tieBreakers.add((cas - oppCas).toDouble());
+          break;
+      }
+    });
+  }
+
+  Coach.fromJson(int id, Map<String, Object?> json) {
     final tNafName = json['naf_name'] as String?;
     this.nafName = tNafName != null ? tNafName : "";
 

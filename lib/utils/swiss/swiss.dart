@@ -41,7 +41,9 @@ class SwissPairings {
         matching = _applySwiss(round, tournament.getSquads());
         // TODO: Match coaches too
       } else {
-        matching = _applySwiss(round, tournament.getCoaches());
+        List<Coach> coaches =
+            tournament.getCoaches().where((c) => c.active).toList();
+        matching = _applySwiss(round, coaches);
       }
     } else {
       debugPrint('Not all results entered');
@@ -145,39 +147,30 @@ class SwissPairings {
     return allCoachesEntered && allSquadsEntered;
   }
 
-  /// Want to sort in descending order
-  /// a > b  | Returns a negative value.
-  /// a == b | Returns 0.
-  /// a < b  | Returns a positive value.
-  int sortDescendingOperator(IMatchupParticipant a, IMatchupParticipant b) {
-    int ptsCompare = a.points().compareTo(b.points());
-    if (ptsCompare != 0) {
-      return -1 * ptsCompare;
-    }
-
-    List<double> aTieBreakers = a.tiebreakers();
-    List<double> bTieBreakers = b.tiebreakers();
-    if (aTieBreakers.length != bTieBreakers.length || aTieBreakers.isEmpty) {
-      return -1 * ptsCompare;
-    }
-
-    for (int i = 0; i < aTieBreakers.length; i++) {
-      double aI = aTieBreakers[i];
-      double bI = bTieBreakers[i];
-
-      int iCompare = aI.compareTo(bI);
-      if (iCompare != 0) {
-        return -1 * iCompare;
-      }
-    }
-
-    return -1 * ptsCompare;
-  }
-
   SwissRound? _applySwiss(int roundNum, List<IMatchupParticipant> players) {
     // 1. Sort using tie breakers
     List<Coach> sortedPlayers = new List.from(players);
-    sortedPlayers.sort((a, b) => sortDescendingOperator(a, b));
+    sortedPlayers
+        .sort((a, b) => IMatchupParticipant.sortDescendingOperator(a, b));
+
+    print("SortedPlayers:");
+    int i = 1;
+    sortedPlayers.forEach((p) {
+      StringBuffer sb = new StringBuffer();
+      sb.write(i.toString() +
+          ": " +
+          p.name() +
+          ": " +
+          p.points().toString() +
+          " -> [");
+      p.tiebreakers().forEach((tb) {
+        sb.write(tb.toString() + ",");
+      });
+      sb.write("]");
+      print(sb.toString());
+      i++;
+    });
+    print("");
 
     // 2. Handle case of non-even number of players
     int byePlayerIdx = _findByePlayerIndex(sortedPlayers);
@@ -192,6 +185,20 @@ class SwissPairings {
           matchup.setTableNum(i + 1);
         }
       }
+
+      print("Results:");
+      pairings.matches.forEach((m) {
+        StringBuffer sb = new StringBuffer();
+        sb.write("T" +
+            m.tableNum().toString() +
+            ": " +
+            m.homeName() +
+            " vs. " +
+            m.awayName());
+        print(sb.toString());
+        i++;
+      });
+      print("");
     }
 
     return pairings;
@@ -209,29 +216,36 @@ class SwissPairings {
       if (byePlayerIdx == i) {
         debugPrint("round " +
             roundNum.toString() +
-            " Player on bye:" +
+            " Player on bye: " +
             bestPlayer.name());
         continue; // check if this player is on bye
       }
       // check if this player is already scheduled this round
       if (newMatchups.hasMatchForPlayer(bestPlayer)) {
-        debugPrint("round " +
-            roundNum.toString() +
-            " Match already exists for" +
-            bestPlayer.name());
+        // debugPrint("round " +
+        //     roundNum.toString() +
+        //     " Skip " +
+        //     bestPlayer.name() +
+        //     " since they already have a match assigned");
         continue;
       }
 
-      IMatchup? matchup =
-          _findMatchupForPlayer(roundNum, sortedPlayers, i, byePlayerIdx);
+      IMatchup? matchup = _findMatchupForPlayer(
+          newMatchups, roundNum, sortedPlayers, i, byePlayerIdx);
       if (matchup != null) {
         newMatchups.matches.add(matchup);
-        continue; // Move on ot ext player
+        continue; // Move on to next player
       }
 
-      if (newMatchups.matches.length == sortedPlayers.length / 2) {
+      int numMatchupsWeShouldHave = (sortedPlayers.length / 2).floor();
+      if (newMatchups.matches.length == numMatchupsWeShouldHave) {
         return newMatchups; // All necessary matchups
       }
+
+      debugPrint("Could not find match for " +
+          bestPlayer.name() +
+          " -> # matchups assigned: " +
+          newMatchups.matches.length.toString());
 
       bool success = _handleNoMatchForBestPlayer(
           roundNum, sortedPlayers, i, byePlayerIdx, newMatchups);
@@ -245,26 +259,42 @@ class SwissPairings {
   }
 
   int _findByePlayerIndex(List<IMatchupParticipant> sortedPlayers) {
-    int byePlayerIdx = -1;
+    // No byes necessary
+    if (sortedPlayers.length % 2 == 0) {
+      return -1;
+    }
 
-    if (sortedPlayers.length % 2 == 1) {
-      // Choose bye player
-      int idx = sortedPlayers.length - 1;
-      while (idx >= 0) {
-        IMatchupParticipant p = sortedPlayers[idx];
-        bool hadBye = p.opponents().any((opp) => opp == "bye");
-        if (!hadBye) {
-          byePlayerIdx = idx;
-          break;
-        }
-        idx--;
+    // All zeros array (index is playerIdx)
+    List<int> numByes = List.filled(sortedPlayers.length, 0);
+
+    for (int i = sortedPlayers.length - 1; i >= 0; i--) {
+      IMatchupParticipant p = sortedPlayers[i];
+
+      int byes = p.opponents().where((opp) => opp == CoachMatchup.Bye).length;
+      if (byes == 0) {
+        print("Bye player: " + p.name());
+        return i; // First player that hasn't gotten a bye yet
       }
+
+      numByes[i] = byes;
+    }
+
+    // All players had at least 1 bye
+    // Find "last" player with min number of byes
+    int minByes = numByes.reduce(min);
+    int byePlayerIdx = numByes.lastIndexWhere((element) => element == minByes);
+
+    if (byePlayerIdx >= 0) {
+      print("Bye player: " + sortedPlayers[byePlayerIdx].name());
+    } else {
+      print("Bye player: Not found");
     }
 
     return byePlayerIdx;
   }
 
   IMatchup? _findMatchupForPlayer(
+      SwissRound newMatchups,
       int roundNum,
       List<IMatchupParticipant> sortedPlayers,
       int bestPlayerIdx,
@@ -283,9 +313,21 @@ class SwissPairings {
           bestPlayer.opponents().any((name) => nextPlayer.name() == name);
 
       if (haveAlreadyPlayed) {
-        debugPrint("game already exists between (" +
+        debugPrint("skip " +
             bestPlayer.name() +
-            " & " +
+            " vs. " +
+            nextPlayer.name() +
+            " -> already played");
+        continue;
+      }
+
+      // check that the next player is not already scheduled
+      if (newMatchups.hasMatchForPlayerName(nextPlayer.name())) {
+        debugPrint("skip " +
+            bestPlayer.name() +
+            " vs. " +
+            nextPlayer.name() +
+            " -> already assigned matchup for: " +
             nextPlayer.name());
         continue;
       }
@@ -332,6 +374,15 @@ class SwissPairings {
       bool hasBestPlayerPlayedVsPlayer_2 =
           bestPlayer.opponents().any((name) => player_2.name() == name);
 
+      debugPrint("  -> Matchup to break(?): " +
+          player_1.name().toString() +
+          " vs. " +
+          player_2.name().toString() +
+          ". hasBestPlayerPlayedVsPlayer_1: " +
+          (hasBestPlayerPlayedVsPlayer_1 ? "Y" : "N") +
+          ". hasBestPlayerPlayedVsPlayer_2: " +
+          (hasBestPlayerPlayedVsPlayer_2 ? "Y" : "N"));
+
       if (hasBestPlayerPlayedVsPlayer_1 && hasBestPlayerPlayedVsPlayer_2) {
         // Can't use this pair because the best score user already played vs both of them
         continue;
@@ -351,7 +402,7 @@ class SwissPairings {
         if (newMatchups.hasMatchForPlayerName(switchPlayer.name())) {
           debugPrint("round " +
               roundNum.toString() +
-              " Match already exists for switchlayer: " +
+              " Match already exists for switchPlayer: " +
               bestPlayer.name());
           continue;
         }
@@ -360,11 +411,11 @@ class SwissPairings {
             p == byePlayerIdx ||
             switchPlayer == player_1 ||
             switchPlayer == player_2) {
-          debugPrint("round " +
-              roundNum.toString() +
-              " switch player: " +
-              switchPlayer.name() +
-              " is either best score, bye, p1, or p2");
+          // debugPrint("round " +
+          //     roundNum.toString() +
+          //     " switch player: " +
+          //     switchPlayer.name() +
+          //     " is either bestPlayer, bye, p1, or p2");
           continue;
         }
 

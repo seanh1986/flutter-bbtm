@@ -21,6 +21,8 @@ class ReportedMatchResultWithStatus extends ReportedMatchResult {
 }
 
 class CoachMatchup extends IMatchup {
+  static String Bye = "bye";
+
   late int _tableNum;
 
   late final String homeNafName;

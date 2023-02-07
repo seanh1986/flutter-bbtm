@@ -165,4 +165,34 @@ abstract class IMatchupParticipant {
 
   @override
   int get hashCode => Object.hash(type(), name().toLowerCase());
+
+  /// Want to sort in descending order
+  /// a > b  | Returns a negative value.
+  /// a == b | Returns 0.
+  /// a < b  | Returns a positive value.
+  static int sortDescendingOperator(
+      IMatchupParticipant a, IMatchupParticipant b) {
+    int ptsCompare = a.points().compareTo(b.points());
+    if (ptsCompare != 0) {
+      return -1 * ptsCompare;
+    }
+
+    List<double> aTieBreakers = a.tiebreakers();
+    List<double> bTieBreakers = b.tiebreakers();
+    if (aTieBreakers.length != bTieBreakers.length || aTieBreakers.isEmpty) {
+      return -1 * ptsCompare;
+    }
+
+    for (int i = 0; i < aTieBreakers.length; i++) {
+      double aI = aTieBreakers[i];
+      double bI = bTieBreakers[i];
+
+      int iCompare = aI.compareTo(bI);
+      if (iCompare != 0) {
+        return -1 * iCompare;
+      }
+    }
+
+    return -1 * ptsCompare;
+  }
 }

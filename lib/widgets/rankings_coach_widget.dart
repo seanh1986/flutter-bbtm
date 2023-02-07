@@ -212,7 +212,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         return Text('${c.tds.toString()}');
       case Fields.Cas:
         return Text('${c.cas.toString()}');
-      case Fields.BestSport: // TODO: later
+      case Fields.BestSport:
         return Text(_getValue(c, f).toString());
       default:
         return Text('');
