@@ -6,6 +6,7 @@ import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AdvanceRoundWidget extends StatefulWidget {
   final Tournament tournament;
@@ -22,12 +23,7 @@ class AdvanceRoundWidget extends StatefulWidget {
 }
 
 class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
-  @override
-  void initState() {
-    super.initState();
-
-    _coachRounds = widget.tournament.coachRounds;
-  }
+  late TournamentBloc _tournyBloc;
 
   List<CoachRound> _coachRounds = [];
 
@@ -45,6 +41,21 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+
+    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
+
+    _coachRounds = widget.tournament.coachRounds;
+  }
+
+  @override
+  void dispose() {
+    _tournyBloc.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     List<ExpansionTile> widgets = [];
 
@@ -57,11 +68,18 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
 
     widgets.add(_advanceOrDiscardRound(context));
 
-    return ExpansionTile(
-      title: Text("Tournament Management"),
-      subtitle: Text("Advance round or edit previous rounds"),
-      children: widgets, //[_advanceRound(context)],
-    );
+    return BlocBuilder<TournamentBloc, TournamentState>(
+        bloc: _tournyBloc,
+        builder: (selectContext, selectState) {
+          if (selectState is NewTournamentState) {
+            _coachRounds = selectState.tournament.coachRounds;
+          }
+          return ExpansionTile(
+            title: Text("Tournament Management"),
+            subtitle: Text("Advance round or edit previous rounds"),
+            children: widgets, //[_advanceRound(context)],
+          );
+        });
   }
 
   ExpansionTile? _generateRoundSummary(int round) {

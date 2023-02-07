@@ -7,6 +7,7 @@ import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class EditTournamentWidget extends StatefulWidget {
   final Tournament tournament;
@@ -27,6 +28,8 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
   late String _location;
   late List<OrganizerInfo> _organizers = [];
   late List<Coach> _coaches = [];
+
+  late TournamentBloc _tournyBloc;
 
   List<DataColumn> _organizerCols = [
     DataColumn(label: Text("")), // For add/remove rows
@@ -54,23 +57,43 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
   void initState() {
     super.initState();
 
-    _name = widget.tournament.info.name;
-    _location = widget.tournament.info.location;
-    _organizers = widget.tournament.info.organizers;
+    _initFromTournament(widget.tournament);
 
-    _coaches = widget.tournament.getCoaches();
+    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
+  }
+
+  void _initFromTournament(Tournament t) {
+    _name = t.info.name;
+    _location = t.info.location;
+    _organizers = t.info.organizers;
+
+    _coaches = t.getCoaches();
+  }
+
+  @override
+  void dispose() {
+    _tournyBloc.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ExpansionTile(
-      title: Text("Tournament Details"),
-      subtitle: Text("Edit information/details, coaches, squads, etc."),
-      children: [
-        ExpansionTile(title: Text("Info"), children: _viewInfos()),
-        ExpansionTile(title: Text("Coaches"), children: _viewCoaches(context)),
-      ],
-    );
+    return BlocBuilder<TournamentBloc, TournamentState>(
+        bloc: _tournyBloc,
+        builder: (selectContext, selectState) {
+          if (selectState is NewTournamentState) {
+            _initFromTournament(selectState.tournament);
+          }
+          return ExpansionTile(
+            title: Text("Tournament Details"),
+            subtitle: Text("Edit information/details, coaches, squads, etc."),
+            children: [
+              ExpansionTile(title: Text("Info"), children: _viewInfos()),
+              ExpansionTile(
+                  title: Text("Coaches"), children: _viewCoaches(context)),
+            ],
+          );
+        });
   }
 
   void _addNewOrga() {
