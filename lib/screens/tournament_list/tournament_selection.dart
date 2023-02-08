@@ -11,7 +11,7 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 
 class TournamentSelectionPage extends StatefulWidget {
-  String? tournamentId;
+  final String? tournamentId;
 
   TournamentSelectionPage({Key? key, this.tournamentId}) : super(key: key);
 
@@ -85,7 +85,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
         TournamentInfo tournamentInfo = listState.tournaments[tIdx];
         _processTournamentSelection(tournamentInfo);
 
-        return SplashScreen(); // _onTournamentSelected(context, tournamentInfo);
+        return SplashScreen();
       }
     }
 
@@ -96,56 +96,6 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
     _tournySelectBloc.add(LoadTournamentEvent(tournamentInfo));
   }
 
-  // /// Once a tournament has been selected
-  // Widget _onTournamentSelected(
-  //     BuildContext context, TournamentInfo tournamentInfo) {
-  //   LoadingTournamentEvent loadingTournamentEvent =
-  //       new LoadingTournamentEvent(tournamentInfo);
-
-  //   _tournySelectBloc.add(loadingTournamentEvent);
-
-  //   return BlocBuilder<TournamentSelectionBloc, TournamentSelectionState>(
-  //       bloc: _tournySelectBloc,
-  //       builder: (content, state) {
-  //         if (state is SelectedTournamentState) {
-  //           return _onSelectedTournament(context, state);
-  //         } else {
-  //           return SplashScreen();
-  //         }
-
-  //         // if (state is SelectedTournamentState) {
-  //         //   return HomePage(
-  //         //     tournament: state.tournament,
-  //         //     authUser: _authUser,
-  //         //   );
-  //         // } else {
-  //         //   return _showTournamentList(context);
-  //         // }
-  //       });
-  // }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return BlocBuilder<TournamentSelectionBloc, TournamentSelectionState>(
-  //       bloc: _tournySelectBloc,
-  //       builder: (content, state) {
-  //         if (state is SelectedTournamentState) {
-  //           return _selectedTournament(context, state);
-  //         } else {
-  //           return _showTournamentList(context);
-  //         }
-
-  //         // if (state is SelectedTournamentState) {
-  //         //   return HomePage(
-  //         //     tournament: state.tournament,
-  //         //     authUser: _authUser,
-  //         //   );
-  //         // } else {
-  //         //   return _showTournamentList(context);
-  //         // }
-  //       });
-  // }
-
   /// When a tournment has been selected
   Widget _onSelectedTournament(BuildContext context, NewTournamentState state) {
     return BlocListener<AuthBloc, AuthState>(
@@ -154,104 +104,29 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
               {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => HomePage()))
-                //   tournament: state.tournament,
-                //   authUser: authState.authUser,
-                // )))
               }
           }),
       child: LoginPage(state.tournament.info),
     );
-
-    // return BlocBuilder<AuthBloc, AuthState>(
-    //     bloc: _authBloc,
-    //     builder: (content, authState) {
-    //       if (authState is LoggedInAuthState) {
-    //         Navigator.push(
-    //             context,
-    //             MaterialPageRoute(
-    //                 builder: (context) => HomePage(
-    //                       tournament: tournamentState.tournament,
-    //                       authUser: authState.authUser,
-    //                     )));
-    //       }
-
-    // if (authState is OrganizerAuthState ||
-    //     authState is CaptainAuthState ||
-    //     authState is ParticipantAuthState ||
-    //     authState is GuestAuthState) {
-    //   Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //           builder: (context) => HomePage(
-    //                 tournament: tournamentState.tournament,
-    //                 authUser: _authUser,
-    //               )));
-    // }
-
-    // return LoginPage();
-
-    // if (state is SelectedTournamentState) {
-    //   return HomePage(
-    //     tournament: state.tournament,
-    //     authUser: _authUser,
-    //   );
-    // } else {
-    //   return _showTournamentList(context);
-    // }
-    // });
   }
 
   Widget _showTournamentList(BuildContext context, TournamentListLoaded state) {
     return Container(
-      // decoration: BoxDecoration(
-      //   image: DecorationImage(
-      //     image: AssetImage("background/background_football_field.jpg"),
-      //     fit: BoxFit.cover,
-      //   ),
-      // ),
-      child: GroupedListView(
+      child: GroupedListView<dynamic, DateTime>(
         elements: state.tournaments,
-        groupBy: (TournamentInfo t) => _groupBy(t),
+        groupBy: (t) => t.dateTimeStart,
         groupSeparatorBuilder: _buildGroupSeparator,
-        itemBuilder: (BuildContext context, TournamentInfo t) =>
-            _itemTournament(
-          t,
-        ),
+        itemBuilder: (context, t) => _itemTournament(t),
         order: GroupedListOrder.ASC,
       ),
     );
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Container(
-  //     decoration: BoxDecoration(
-  //       image: DecorationImage(
-  //         image: AssetImage("background/background_football_field.jpg"),
-  //         fit: BoxFit.cover,
-  //       ),
-  //     ),
-  //     child: GroupedListView(
-  //       elements: _tournaments,
-  //       groupBy: (Tournament t) => _groupBy(t),
-  //       groupSeparatorBuilder: _buildGroupSeparator,
-  //       itemBuilder: (BuildContext context, Tournament t) => _itemTournament(
-  //         t,
-  //       ),
-  //       order: GroupedListOrder.ASC,
-  //     ),
-  //   );
-  // }
-
-  String _groupBy(TournamentInfo t) {
-    return DateFormat.yMMMEd().format(t.dateTimeStart);
-  }
-
-  Widget _buildGroupSeparator(String dateTime) {
+  Widget _buildGroupSeparator(DateTime dateTime) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(
-        dateTime,
+        DateFormat.yMMMEd().format(dateTime),
         textAlign: TextAlign.center,
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
@@ -263,11 +138,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
         child: ListTile(
-            onTap: () => {
-                  _processTournamentSelection(t)
-                  // _onTournamentSelected(context, t)
-                  // _tournySelectBloc.add(LoadingTournamentEvent(t))
-                },
+            onTap: () => {_processTournamentSelection(t)},
             title: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Container(
