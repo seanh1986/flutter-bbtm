@@ -130,8 +130,18 @@ class CoachMatchup extends IMatchup {
     }
   }
 
+  bool isHome(String? nafName) {
+    return nafName != null &&
+        homeNafName.toLowerCase() == nafName.toLowerCase();
+  }
+
+  bool isAway(String? nafName) {
+    return nafName != null &&
+        awayNafName.toLowerCase() == nafName.toLowerCase();
+  }
+
   bool hasPlayer(String nafName) {
-    return homeNafName == nafName || awayNafName == nafName;
+    return isHome(nafName) || isAway(nafName);
   }
 
   CoachMatchup.fromJson(Map<String, dynamic> json) {

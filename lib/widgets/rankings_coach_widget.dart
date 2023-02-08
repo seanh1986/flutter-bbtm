@@ -78,15 +78,11 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     if (widget.tournament.useSquads) {
       columns.add(DataColumn(
         label: Text('Squad'),
-        // onSort: (columnIndex, ascending) =>
-        //     _sort<String>((Coach c) => c.squadName, columnIndex, ascending),
       ));
     }
 
     columns.add(DataColumn(
       label: Text('Race'),
-      // onSort: (columnIndex, ascending) =>
-      //     _sort<String>((Coach c) => c.raceName(), columnIndex, ascending),
     ));
 
     widget.fields.forEach((f) {
@@ -280,7 +276,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       case Fields.OppScore:
         return c.oppPoints.toDouble();
       case Fields.BestSport:
-        return 3; // TODO...
+        return c.bestSportPoints.toDouble();
       default:
         return 0.0;
     }

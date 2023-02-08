@@ -24,13 +24,90 @@ class _BestSportWidget extends State<BestSportWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return _basicRatings(context);
-    // return _bbDiceRatings(context);
+    return Container(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+          _header(),
+          SizedBox(height: 20),
+          _guide(),
+          SizedBox(height: 10),
+          _basicRatings(context),
+        ]));
+  }
+
+  Widget _header() {
+    return Text("Rate your opponent\'s sportsmanship",
+        style: TextStyle(fontSize: 20));
+  }
+
+  Widget _guide() {
+    return DataTable(
+        headingRowHeight: 0,
+        dividerThickness: double.minPositive,
+        columns: [
+          DataColumn(label: Container()),
+          DataColumn(label: Container()),
+          DataColumn(label: Container()),
+        ],
+        rows: [
+          DataRow(cells: [
+            DataCell(Row(children: [
+              Text("5"),
+              Icon(Icons.star_rounded, color: Colors.yellow, size: 20)
+            ])),
+            DataCell(Text("Very Positive",
+                style: TextStyle(decoration: TextDecoration.underline))),
+            DataCell(Text(
+                "Your opponent really made this a match to remember based on their actions or attitude."))
+          ]),
+          DataRow(cells: [
+            DataCell(Row(children: [
+              Text("4"),
+              Icon(Icons.star_rounded, color: Colors.yellow, size: 20)
+            ])),
+            DataCell(Text("Positive",
+                style: TextStyle(decoration: TextDecoration.underline))),
+            DataCell(Text(
+                "Your opponent had a great attitude and really enhanced your bloodbowl experience!"))
+          ]),
+          DataRow(cells: [
+            DataCell(Row(children: [
+              Text("3"),
+              Icon(Icons.star_rounded, color: Colors.yellow, size: 20)
+            ])),
+            DataCell(Text("Standard",
+                style: TextStyle(decoration: TextDecoration.underline))),
+            DataCell(Text(
+                "A fun enjoyable game of bloodbowl! Nothing extremely positive or negative."))
+          ]),
+          DataRow(cells: [
+            DataCell(Row(children: [
+              Text("2"),
+              Icon(Icons.star_rounded, color: Colors.yellow, size: 20)
+            ])),
+            DataCell(Text("Negative",
+                style: TextStyle(decoration: TextDecoration.underline))),
+            DataCell(Text(
+                "Your opponent complained about dice a bit too much. Room for improvement."))
+          ]),
+          DataRow(cells: [
+            DataCell(Row(children: [
+              Text("1"),
+              Icon(Icons.star_rounded, color: Colors.yellow, size: 20)
+            ])),
+            DataCell(Text("Very Negative",
+                style: TextStyle(decoration: TextDecoration.underline))),
+            DataCell(Text(
+                "The match was not enjoyable due to your opponent's actions or attitude."))
+          ]),
+        ]);
   }
 
   Widget _basicRatings(BuildContext context) {
     return RatingBar.builder(
-      initialRating: 3,
+      initialRating: widget.result.bestSportOppRank.toDouble(),
       minRating: 1,
       direction: Axis.horizontal,
       allowHalfRating: false,

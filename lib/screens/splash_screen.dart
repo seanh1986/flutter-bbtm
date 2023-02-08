@@ -17,10 +17,6 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // decoration: BoxDecoration(
-      //     image: DecorationImage(
-      //         image: AssetImage('background/background_football_field.jpg'),
-      //         fit: BoxFit.cover)),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -30,8 +26,6 @@ class SplashScreenState extends State<SplashScreen> {
               height: 40.0,
               child: CircularProgressIndicator(),
             ),
-            //Image.asset('logos/amorical_logo.png'),
-            // Text("Loading..."),
           ],
         ),
       ),

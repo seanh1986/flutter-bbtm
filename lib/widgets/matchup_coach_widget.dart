@@ -1,3 +1,4 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/blocs/match_report/match_report.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
@@ -46,7 +47,6 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   late Tournament _tournament;
   late AuthUser _authUser;
   late CoachMatchup _matchup;
-  // MatchupClickListener? _listener;
 
   late MatchReportBloc _matchReportBloc;
 
@@ -72,7 +72,6 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     _tournament = widget.tournament;
     _authUser = widget.authUser;
     _matchup = widget.matchup;
-    // _listener = widget.listener;
 
     _matchReportBloc = BlocProvider.of<MatchReportBloc>(context);
 
@@ -178,6 +177,9 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   Widget? _getBestSportWidget(BuildContext context) {
+    bool enableEditing =
+        _state == UploadState.Editing || _state == UploadState.Error;
+
     Widget? bestSportWidget;
 
     ReportedMatchResult? result;
@@ -185,16 +187,20 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     Color? color;
     Alignment alignment = Alignment.center;
 
-    if (_matchup.homeNafName == _authUser.nafName) {
+    if (_matchup.isHome(_authUser.nafName)) {
       result = _matchup.homeReportedResults;
       opponent = _tournament.getCoach(_matchup.awayNafName);
       color = Theme.of(context).colorScheme.primary;
       alignment = Alignment.centerLeft;
-    } else if (_matchup.awayNafName == _authUser.nafName) {
+    } else if (_matchup.isAway(_authUser.nafName)) {
       result = _matchup.awayReportedResults;
       opponent = _tournament.getCoach(_matchup.homeNafName);
       color = Theme.of(context).colorScheme.secondary;
       alignment = Alignment.centerRight;
+    }
+
+    if (!enableEditing) {
+      color = Colors.grey;
     }
 
     if (result != null && opponent != null) {
@@ -214,22 +220,70 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                   ),
                 ),
                 onPressed: () {
+                  // Give meaningful error message if editing is disabled
+                  if (!enableEditing) {
+                    int curRating = 3;
+
+                    if (_matchup.isHome(_authUser.nafName)) {
+                      curRating = _matchup.homeReportedResults.bestSportOppRank;
+                    } else if (_matchup.isAway(_authUser.nafName)) {
+                      curRating = _matchup.awayReportedResults.bestSportOppRank;
+                    }
+
+                    StringBuffer sb = new StringBuffer();
+                    sb.writeln("You have already submitted your results.");
+                    sb.writeln(
+                        "If you wish to edit them, please press the edit icon to update your sportsmanship rating and then re-submit.");
+                    sb.writeln("");
+                    sb.writeln("Your current rating is: " +
+                        curRating.toString() +
+                        "\u272D");
+
+                    showOkAlertDialog(
+                        context: context,
+                        title: "Rate opponent\'s sportsmanship",
+                        message: sb.toString());
+                    return;
+                  }
+
                   BestSportWidget widget =
                       BestSportWidget(result: result!, opponent: opponent!);
 
-                  AlertDialog alert = AlertDialog(content: widget);
+                  AlertDialog alert = AlertDialog(
+                    content: widget,
+                    actions: [
+                      ElevatedButton(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 10.0),
+                          child: Text(
+                            'Confirm',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ),
+                        onPressed: () {
+                          print("bestSportOppRank: " +
+                              widget.result.bestSportOppRank.toString());
+
+                          if (_matchup.isHome(_authUser.nafName)) {
+                            _matchup.homeReportedResults.bestSportOppRank =
+                                widget.result.bestSportOppRank;
+                          } else if (_matchup.isAway(_authUser.nafName)) {
+                            _matchup.awayReportedResults.bestSportOppRank =
+                                widget.result.bestSportOppRank;
+                          }
+
+                          Navigator.of(context, rootNavigator: true)
+                              .pop('dialog');
+                        },
+                      )
+                    ],
+                  );
 
                   showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return alert;
                       });
-
-                  // VoidCallback callback = () {
-                  //   widget.tournament.coachRounds[round] = coachRound;
-                  // };
-
-                  // _showDialogToConfirmOverwrite(context, callback);
                 },
               )));
     }
@@ -296,14 +350,14 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
   void _uploadToServer() {
     bool? isHome; // fall back (e.g. for admin)
-    if (_matchup.homeNafName == _authUser.nafName) {
+    if (_matchup.isHome(_authUser.nafName)) {
       isHome = true;
       _matchup.homeReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.homeReportedResults.homeCas = homeReportWidget.getCas();
       _matchup.homeReportedResults.awayTds = awayReportWidget.getTds();
       _matchup.homeReportedResults.awayCas = awayReportWidget.getCas();
       _matchup.homeReportedResults.reported = true;
-    } else if (_matchup.awayNafName == _authUser.nafName) {
+    } else if (_matchup.isAway(_authUser.nafName)) {
       isHome = false;
       _matchup.awayReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.awayReportedResults.homeCas = homeReportWidget.getCas();

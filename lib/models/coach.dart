@@ -5,8 +5,6 @@ import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 
 class Coach extends IMatchupParticipant {
-  // late int teamId;
-
   late String nafName; // Key
 
   late String squadName;
@@ -34,6 +32,8 @@ class Coach extends IMatchupParticipant {
   int oppCas = 0;
 
   double oppPoints = 0.0;
+
+  int bestSportPoints = 0;
 
   List<double> _tieBreakers = <double>[];
 
@@ -135,13 +135,14 @@ class Coach extends IMatchupParticipant {
     cas = 0;
     oppTds = 0;
     oppCas = 0;
+    bestSportPoints = 0;
     _opponents.clear();
 
     matches.forEach((m) {
       ReportedMatchResultWithStatus matchStats = m.getReportedMatchStatus();
       MatchResult matchResult = m.getResult();
 
-      if (nafName == m.homeNafName) {
+      if (m.isHome(nafName)) {
         switch (matchResult) {
           case MatchResult.HomeWon:
             _wins++;
@@ -161,8 +162,11 @@ class Coach extends IMatchupParticipant {
         oppTds += matchStats.awayTds;
         oppCas += matchStats.awayCas;
 
+        // Based on opponent's vote
+        bestSportPoints += m.awayReportedResults.bestSportOppRank;
+
         _opponents.add(m.awayNafName);
-      } else if (nafName == m.awayNafName) {
+      } else if (m.isAway(nafName)) {
         switch (matchResult) {
           case MatchResult.HomeWon:
             _losses++;
@@ -181,6 +185,10 @@ class Coach extends IMatchupParticipant {
         cas += matchStats.awayCas;
         oppTds += matchStats.homeTds;
         oppCas += matchStats.homeCas;
+
+        // Based on opponent's vote
+        bestSportPoints += m.homeReportedResults.bestSportOppRank;
+
         _opponents.add(m.homeNafName);
       }
     });
