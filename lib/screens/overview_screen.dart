@@ -35,14 +35,14 @@ class _OverviewScreenState extends State<OverviewScreen> {
       _welcomeUserAndDisplayCurrentRound(),
     ];
 
-    Widget? weatherTable = _customWeatherTable(_tournament.info);
-    if (weatherTable != null) {
-      widgets.add(weatherTable);
-    }
-
     Widget? kickOffTable = _customKickOffTable(_tournament.info);
     if (kickOffTable != null) {
       widgets.add(kickOffTable);
+    }
+
+    Widget? weatherTable = _customWeatherTable(_tournament.info);
+    if (weatherTable != null) {
+      widgets.add(weatherTable);
     }
 
     Widget? specialRules = _customSpecialRules(_tournament.info);
