@@ -156,6 +156,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
   void _processUpdate(VoidCallback confirmedUpdateCallback) {
     confirmedUpdateCallback();
     widget.tournyBloc.add(UpdateTournamentEvent(widget.tournament));
+    setState(() {});
   }
 
   ExpansionTile _advanceOrDiscardRound(BuildContext context) {
