@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/races.dart';
@@ -56,10 +57,11 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   late Map<String, int> counts;
 
-  final double titleFontSize = kIsWeb ? 18.0 : 10.0;
-  final double subTitleFontSize = kIsWeb ? 12.0 : 9.0;
+  final double titleFontSize = kIsWeb ? 16.0 : 10.0;
+  final double subTitleFontSize = kIsWeb ? 11.0 : 9.0;
 
-  final double fabSize = kIsWeb ? 30.0 : 20.0;
+  final double fabSize = kIsWeb ? 25.0 : 15.0;
+  final double raceIconSize = kIsWeb ? 50.0 : 30.0;
 
   @override
   void initState() {
@@ -83,7 +85,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   Widget _itemHeadline(IMatchupParticipant participant, bool isHome) {
     return Card(
         elevation: 8.0,
-        margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+        margin: EdgeInsets.symmetric(horizontal: 2.0, vertical: 6.0),
         color: isHome
             ? Theme.of(context).colorScheme.primary
             : Theme.of(context).colorScheme.secondary,
@@ -98,17 +100,66 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     Image raceLogo = Image.asset(
       RaceUtils.getLogo(_participant.race()),
       fit: BoxFit.cover,
+      height: raceIconSize,
       // scale: kIsWeb ? 1.0 : 0.75,
     );
 
-    return ListTile(
-      leading: raceLogo,
-      title:
-          Text(_participant.name(), style: TextStyle(fontSize: titleFontSize)),
-      subtitle: Text(_participant.showRecord(),
-          style: TextStyle(fontSize: subTitleFontSize)),
-      trailing: null,
-    );
+    RawMaterialButton? roster = null;
+
+    if (participant is Coach) {
+      // && participant) {
+      roster = RawMaterialButton(
+        shape: CircleBorder(),
+        fillColor: Colors.white,
+        elevation: 0.0,
+        child: Icon(
+          Icons.assignment,
+          color: Colors.black,
+        ),
+        onPressed: () => {
+          // TODO...
+        },
+      );
+    }
+
+    Widget result;
+
+    if (kIsWeb) {
+      result = ListTile(
+        leading: raceLogo,
+        title: Text(_participant.name(),
+            style: TextStyle(fontSize: titleFontSize)),
+        subtitle: Text(_participant.showRecord(),
+            style: TextStyle(fontSize: subTitleFontSize)),
+        trailing: roster,
+        isThreeLine: true,
+      );
+    } else {
+      List<Widget> iconWidgets = [raceLogo];
+      if (roster != null) {
+        iconWidgets.add(roster);
+      }
+
+      result = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: iconWidgets),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(_participant.name(),
+                  style: TextStyle(fontSize: titleFontSize)),
+              Text(_participant.showRecord(),
+                  style: TextStyle(fontSize: subTitleFontSize)),
+            ],
+          ),
+        ],
+      );
+    }
+
+    return result;
   }
 
 //   Widget _itemHeaderWeb(IMatchupParticipant participant) {
@@ -178,7 +229,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   Widget _itemEditMatchDetails(IMatchupParticipant participant) {
     return Card(
         elevation: 8.0,
-        margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+        margin: EdgeInsets.symmetric(horizontal: 2.0, vertical: 6.0),
         child: Wrap(
           children: [
             SizedBox(height: 10),
@@ -261,7 +312,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
     // Wrap width, Match height ?
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
+      margin: EdgeInsets.symmetric(horizontal: 1.0, vertical: 5.0),
       child: Column(mainAxisSize: MainAxisSize.max, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: widgets)
       ]),

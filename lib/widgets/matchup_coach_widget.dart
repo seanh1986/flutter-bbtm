@@ -158,9 +158,9 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     }
 
     tableVsDetails
-        .add(Text(' vs. ', style: TextStyle(fontSize: titleFontSize)));
-    tableVsDetails.add(Text('Table #' + _matchup.tableNum().toString(),
-        style: TextStyle(fontSize: titleFontSize)));
+        .add(Text(' vs. ', style: TextStyle(fontSize: subTitleFontSize)));
+    tableVsDetails.add(Text('T#' + _matchup.tableNum().toString(),
+        style: TextStyle(fontSize: subTitleFontSize)));
 
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -168,17 +168,19 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           Expanded(
               child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 5.0, vertical: 10.0),
+                      horizontal: 1.0, vertical: 10.0),
                   child: homeReportWidget)),
           Card(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: tableVsDetails),
+            child: Padding(
+                padding: EdgeInsets.fromLTRB(1.0, 2.0, 1.0, 2.0),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: tableVsDetails)),
           ),
           Expanded(
               child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 5.0, vertical: 10.0),
+                      horizontal: 1.0, vertical: 10.0),
                   child: awayReportWidget)),
         ]);
   }

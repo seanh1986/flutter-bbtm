@@ -83,13 +83,14 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
 
   Widget _buildGroupSeparator(String matchupName) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(
-        matchupName,
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-      ),
-    );
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+            child:
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text(matchupName,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+        ])));
   }
 }
 
