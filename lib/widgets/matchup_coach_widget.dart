@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MatchupCoachWidget extends StatefulWidget {
-  Tournament tournament;
+  final Tournament tournament;
   final AuthUser authUser;
   final CoachMatchup matchup;
   final MatchupClickListener? listener;
@@ -43,7 +43,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   late Tournament _tournament;
   late AuthUser _authUser;
   late CoachMatchup _matchup;
-  MatchupClickListener? _listener;
+  // MatchupClickListener? _listener;
 
   late MatchReportBloc _matchReportBloc;
 
@@ -67,7 +67,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     _tournament = widget.tournament;
     _authUser = widget.authUser;
     _matchup = widget.matchup;
-    _listener = widget.listener;
+    // _listener = widget.listener;
 
     _matchReportBloc = BlocProvider.of<MatchReportBloc>(context);
 
@@ -171,11 +171,9 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                       horizontal: 1.0, vertical: 10.0),
                   child: homeReportWidget)),
           Card(
-            child: Padding(
-                padding: EdgeInsets.fromLTRB(1.0, 2.0, 1.0, 2.0),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: tableVsDetails)),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: tableVsDetails),
           ),
           Expanded(
               child: Padding(

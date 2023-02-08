@@ -11,11 +11,11 @@ class MatchupReportWidget extends StatefulWidget {
   final IMatchupParticipant participant;
   final bool showHome;
 
-  late UploadState state;
-  late ReportedMatchResult? reportedMatch;
+  late final UploadState state;
+  late final ReportedMatchResult? reportedMatch;
 
   // Allows passing primitives by reference
-  Map<String, int> counts = LinkedHashMap();
+  final Map<String, int> counts = LinkedHashMap();
 
   final String _tdName = "Tds";
   final String _casName = "Cas";
@@ -122,9 +122,14 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
       );
     }
 
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    print("screenWidth: " + screenWidth.toString());
+
     Widget result;
 
-    if (kIsWeb) {
+    if (kIsWeb && screenWidth > 750) {
+      // Ensure screen isn't too narrow
       result = ListTile(
         leading: raceLogo,
         title: Text(_participant.name(),
@@ -132,7 +137,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
         subtitle: Text(_participant.showRecord(),
             style: TextStyle(fontSize: subTitleFontSize)),
         trailing: roster,
-        isThreeLine: true,
+        isThreeLine: false,
       );
     } else {
       List<Widget> iconWidgets = [raceLogo];

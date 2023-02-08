@@ -77,6 +77,26 @@ class Coach extends IMatchupParticipant {
     return _points;
   }
 
+  // Approximate
+  double pointsWithTieBreakersBuiltIn() {
+    // Shift by mStep after each tiebreaker
+    int mStep = 100;
+    int m = 1;
+
+    double ptsWithT = 0.0;
+
+    // Reverse order for tiebreakers
+    for (int i = _tieBreakers.length - 1; i >= 0; i--) {
+      double tbPts = _tieBreakers[i];
+      ptsWithT += tbPts * m;
+      m += mStep;
+    }
+
+    ptsWithT += _points;
+
+    return ptsWithT;
+  }
+
   @override
   int wins() {
     return _wins;

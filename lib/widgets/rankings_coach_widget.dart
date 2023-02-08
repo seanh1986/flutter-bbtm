@@ -1,14 +1,28 @@
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/coach.dart';
-// import 'package:flutter/paginated_data_table.dart';
 
-enum Fields { Pts, W, T, L, Td, Cas, BestSport }
+enum Fields {
+  Pts,
+  W,
+  T,
+  L,
+  W_T_L,
+  W_Percent,
+  Td,
+  Cas,
+  OppTd,
+  OppCas,
+  OppScore,
+  DeltaTd,
+  DeltaCas,
+  BestSport
+}
 
 class RankingCoachPage extends StatefulWidget {
   final Tournament tournament;
 
-  List<Fields> fields;
+  final List<Fields> fields;
 
   RankingCoachPage({Key? key, required this.tournament, required this.fields})
       : super(key: key);
@@ -20,17 +34,16 @@ class RankingCoachPage extends StatefulWidget {
 }
 
 class _RankingCoachPage extends State<RankingCoachPage> {
-  // int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   late int _sortColumnIndex = widget.tournament.useSquads ? 4 : 3;
   bool _sortAscending = false;
 
   List<Coach> _items = [];
-  // int _rowsOffset = 0;
 
   @override
   void initState() {
-    _items = widget.tournament.getCoaches();
     super.initState();
+
+    _items = widget.tournament.getCoaches();
   }
 
   void _sort<T>(
@@ -65,26 +78,43 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     if (widget.tournament.useSquads) {
       columns.add(DataColumn(
         label: Text('Squad'),
-        onSort: (columnIndex, ascending) =>
-            _sort<String>((Coach c) => c.squadName, columnIndex, ascending),
+        // onSort: (columnIndex, ascending) =>
+        //     _sort<String>((Coach c) => c.squadName, columnIndex, ascending),
       ));
     }
 
     columns.add(DataColumn(
       label: Text('Race'),
-      onSort: (columnIndex, ascending) =>
-          _sort<String>((Coach c) => c.raceName(), columnIndex, ascending),
+      // onSort: (columnIndex, ascending) =>
+      //     _sort<String>((Coach c) => c.raceName(), columnIndex, ascending),
     ));
 
     widget.fields.forEach((f) {
       String name = _getColumnName(f);
 
       if (name.isNotEmpty) {
+        DataColumnSortCallback? sorter;
+        switch (f) {
+          case Fields.Pts:
+            // Take into account tie breakers
+            sorter = (columnIndex, ascending) => _sort<num>(
+                (Coach c) => c.pointsWithTieBreakersBuiltIn(),
+                columnIndex,
+                ascending);
+            break;
+          case Fields.W_T_L:
+            sorter = null;
+            break;
+          default:
+            sorter = (columnIndex, ascending) => _sort<num>(
+                (Coach c) => _getValue(c, f), columnIndex, ascending);
+            break;
+        }
+
         columns.add(DataColumn(
           label: Text(name),
           numeric: true,
-          onSort: (columnIndex, ascending) =>
-              _sort<num>((Coach c) => _getValue(c, f), columnIndex, ascending),
+          onSort: sorter,
         ));
       }
     });
@@ -163,18 +193,16 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
   SingleChildScrollView dataBody() {
     return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: ConstrainedBox(
-        constraints:
-            BoxConstraints.expand(width: MediaQuery.of(context).size.width),
-        child: DataTable(
-          columns: _getColumns(),
-          rows: _getRows(),
-          sortAscending: _sortAscending,
-          sortColumnIndex: _sortColumnIndex,
-        ),
-      ),
-    );
+        scrollDirection: Axis.vertical,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            columns: _getColumns(),
+            rows: _getRows(),
+            sortAscending: _sortAscending,
+            sortColumnIndex: _sortColumnIndex,
+          ),
+        ));
   }
 
   String _getColumnName(Fields f) {
@@ -187,10 +215,24 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         return "T";
       case Fields.L:
         return "L";
+      case Fields.W_T_L:
+        return "W/T/L";
+      case Fields.W_Percent:
+        return "%";
       case Fields.Td:
-        return "Td";
+        return "Td+";
       case Fields.Cas:
-        return "Cas";
+        return "Cas+";
+      case Fields.OppTd:
+        return "Td-";
+      case Fields.OppCas:
+        return "Cas-";
+      case Fields.DeltaTd:
+        return "Td\u0394";
+      case Fields.DeltaCas:
+        return "Cas\u0394";
+      case Fields.OppScore:
+        return "OppScore";
       case Fields.BestSport:
         return "Sport";
       default:
@@ -200,22 +242,14 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
   Text _getCellValue(Coach c, Fields f) {
     switch (f) {
-      case Fields.Pts:
-        return Text('${c.points().toString()}');
-      case Fields.W:
-        return Text('${c.wins().toString()}');
-      case Fields.T:
-        return Text('${c.ties().toString()}');
-      case Fields.L:
-        return Text('${c.losses().toString()}');
-      case Fields.Td:
-        return Text('${c.tds.toString()}');
-      case Fields.Cas:
-        return Text('${c.cas.toString()}');
-      case Fields.BestSport:
-        return Text(_getValue(c, f).toString());
+      case Fields.W_T_L:
+        return Text(c.wins().toString() +
+            "/" +
+            c.ties().toString() +
+            "/" +
+            c.losses().toString());
       default:
-        return Text('');
+        return Text(_getValue(c, f).toString());
     }
   }
 
@@ -229,12 +263,24 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         return c.ties().toDouble();
       case Fields.L:
         return c.losses().toDouble();
+      case Fields.W_Percent:
+        return c.winPercent();
       case Fields.Td:
         return c.tds.toDouble();
       case Fields.Cas:
         return c.cas.toDouble();
+      case Fields.OppTd:
+        return c.oppTds.toDouble();
+      case Fields.OppCas:
+        return c.oppCas.toDouble();
+      case Fields.DeltaTd:
+        return (c.tds - c.oppTds).toDouble();
+      case Fields.DeltaCas:
+        return c.cas - c.oppCas.toDouble();
+      case Fields.OppScore:
+        return c.oppPoints.toDouble();
       case Fields.BestSport:
-        return 3;
+        return 3; // TODO...
       default:
         return 0.0;
     }

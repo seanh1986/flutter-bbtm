@@ -1,23 +1,18 @@
+import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:grouped_list/grouped_list.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CoachMatchupsPage extends StatefulWidget {
   final Tournament tournament;
   final AuthUser authUser;
-  // final MatchupListClickListener matchupListClickListener;
 
   CoachMatchupsPage(
       {Key? key, required this.tournament, required this.authUser})
       : super(key: key);
-
-  // void setCoachMatchups(List<CoachMatchup> matchups) {
-  //   this.matchups = matchups;
-  // }
 
   @override
   State<StatefulWidget> createState() {
@@ -29,7 +24,8 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   late Tournament _tournament;
   late AuthUser _authUser;
   List<CoachMatchup> _matchups = [];
-  // MatchupClickListener _listener;
+
+  late TournamentBloc _tournyBloc;
 
   @override
   void initState() {
@@ -40,57 +36,75 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     if (_tournament.coachRounds.isNotEmpty) {
       _matchups = _tournament.coachRounds.last.matches;
     }
-    // _listener = new _MatchupClickListener(widget.matchupListClickListener);
+
+    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
+  }
+
+  @override
+  void dispose() {
+    _tournyBloc.close();
+    super.dispose();
   }
 
   // TODO: Add CurCoach widget at top if non-null
   @override
   Widget build(BuildContext context) {
-    if (_matchups.isEmpty) {
-      return _noMatchUpsYet();
-    }
+    return BlocBuilder<TournamentBloc, TournamentState>(
+        bloc: _tournyBloc,
+        builder: (selectContext, selectState) {
+          if (selectState is NewTournamentState) {
+            _tournament = selectState.tournament;
 
-    return Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(
-              './assets/images/background/background_football_field.png'),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: GroupedListView(
-          elements: _matchups,
-          groupBy: (IMatchup matchup) => _groupBy(matchup),
-          groupSeparatorBuilder: _buildGroupSeparator,
-          itemBuilder: (BuildContext context, CoachMatchup matchup) =>
-              MatchupCoachWidget(
-            tournament: _tournament,
-            authUser: _authUser,
-            matchup: matchup,
-            // listener: _listener,
-          ),
-          order: GroupedListOrder.ASC,
-        ),
-      ),
-    );
+            if (_tournament.coachRounds.isNotEmpty) {
+              _matchups = _tournament.coachRounds.last.matches;
+            }
+          }
+
+          if (_matchups.isEmpty) {
+            return _noMatchUpsYet();
+          }
+
+          List<Widget> matchupWidgets = [
+            SizedBox(height: 10),
+            _getRoundTitle(),
+            SizedBox(height: 10)
+          ];
+
+          _matchups.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
+                tournament: _tournament,
+                authUser: _authUser,
+                matchup: m,
+              )));
+
+          return Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(
+                    './assets/images/background/background_football_field.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Scaffold(
+                backgroundColor: Colors.transparent,
+                body: ListView(
+                  children: matchupWidgets,
+                )),
+          );
+        });
   }
 
-  String _groupBy(IMatchup matchup) {
-    return matchup.groupByName(_tournament);
-  }
-
-  Widget _buildGroupSeparator(String matchupName) {
-    return Padding(
+  Widget _getRoundTitle() {
+    return Wrap(alignment: WrapAlignment.center, children: [
+      Card(
+          child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Card(
-            child:
-                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text(matchupName,
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text("Round #" + _tournament.curRoundNumber().toString(),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
-        ])));
+        ]),
+      ))
+    ]);
   }
 }
 
