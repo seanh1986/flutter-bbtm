@@ -114,10 +114,14 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
     return Container(
       child: GroupedListView<dynamic, DateTime>(
         elements: state.tournaments,
-        groupBy: (t) => t.dateTimeStart,
+        groupBy: (t) => DateFormat("yMMMM")
+            .parse(DateFormat.yMMMM().format(t.dateTimeStart)),
         groupSeparatorBuilder: _buildGroupSeparator,
         itemBuilder: (context, t) => _itemTournament(t),
+        itemComparator: (t1, t2) =>
+            t1.dateTimeStart.compareTo(t2.dateTimeStart),
         order: GroupedListOrder.ASC,
+        sort: true,
       ),
     );
   }
@@ -126,7 +130,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(
-        DateFormat.yMMMEd().format(dateTime),
+        DateFormat.yMMMM().format(dateTime),
         textAlign: TextAlign.center,
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
@@ -134,6 +138,17 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   }
 
   Widget _itemTournament(TournamentInfo t) {
+    String startDate = DateFormat.MMMMd().format(t.dateTimeStart);
+    String endDate = DateFormat.MMMMd().format(t.dateTimeEnd);
+
+    StringBuffer sb = new StringBuffer(startDate);
+    if (startDate != endDate) {
+      sb.write(" - ");
+      sb.write(endDate);
+    }
+
+    String dateString = sb.toString();
+
     return Card(
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
@@ -147,6 +162,8 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
                       Text(t.name, style: TextStyle(fontSize: titleFontSize)),
                       Text(t.location,
                           style: TextStyle(fontSize: subTitleFontSize)),
+                      Text(dateString,
+                          style: TextStyle(fontSize: subTitleFontSize))
                     ],
                   ),
                 ))));
