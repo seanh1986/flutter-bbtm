@@ -124,7 +124,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
     double screenWidth = MediaQuery.of(context).size.width;
 
-    print("screenWidth: " + screenWidth.toString());
+    // print("screenWidth: " + screenWidth.toString());
 
     Widget result;
 

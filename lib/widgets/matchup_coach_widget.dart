@@ -1,8 +1,11 @@
 import 'package:bbnaf/blocs/match_report/match_report.dart';
+import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
+import 'package:bbnaf/widgets/best_sport_widget.dart';
 import 'package:bbnaf/widgets/matchup_report_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +60,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   final double errUploadIconSize = kIsWeb ? 20.0 : 10.0;
 
   final double itemUploadSize = kIsWeb ? 50.0 : 30.0;
+
+  final double vsTableNumWidth = kIsWeb ? 55.0 : 35.0;
 
   late MatchupReportWidget homeReportWidget;
   late MatchupReportWidget awayReportWidget;
@@ -140,6 +145,99 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   Widget _coachMatchupWidget() {
+    Widget rowItemWidget = Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Expanded(
+              child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 1.0, vertical: 10.0),
+                  child: homeReportWidget)),
+          _getVsAndTableWidget(),
+          Expanded(
+              child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 1.0, vertical: 10.0),
+                  child: awayReportWidget)),
+        ]);
+
+    List<Widget> matchAndSportWidgets = [rowItemWidget];
+
+    Widget? bestSportWidget = _getBestSportWidget(context);
+
+    if (bestSportWidget != null) {
+      matchAndSportWidgets.add(SizedBox(height: 5));
+      matchAndSportWidgets.add(bestSportWidget);
+      matchAndSportWidgets.add(SizedBox(height: 5));
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: matchAndSportWidgets,
+    );
+  }
+
+  Widget? _getBestSportWidget(BuildContext context) {
+    Widget? bestSportWidget;
+
+    ReportedMatchResult? result;
+    Coach? opponent;
+    Color? color;
+    Alignment alignment = Alignment.center;
+
+    if (_matchup.homeNafName == _authUser.nafName) {
+      result = _matchup.homeReportedResults;
+      opponent = _tournament.getCoach(_matchup.awayNafName);
+      color = Theme.of(context).colorScheme.primary;
+      alignment = Alignment.centerLeft;
+    } else if (_matchup.awayNafName == _authUser.nafName) {
+      result = _matchup.awayReportedResults;
+      opponent = _tournament.getCoach(_matchup.homeNafName);
+      color = Theme.of(context).colorScheme.secondary;
+      alignment = Alignment.centerRight;
+    }
+
+    if (result != null && opponent != null) {
+      bestSportWidget = Padding(
+          padding: EdgeInsets.all(5.0),
+          child: Align(
+              alignment: alignment,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: color,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 10.0),
+                  child: Text(
+                    'Rate opponent\'s sportsmanship',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                onPressed: () {
+                  BestSportWidget widget =
+                      BestSportWidget(result: result!, opponent: opponent!);
+
+                  AlertDialog alert = AlertDialog(content: widget);
+
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return alert;
+                      });
+
+                  // VoidCallback callback = () {
+                  //   widget.tournament.coachRounds[round] = coachRound;
+                  // };
+
+                  // _showDialogToConfirmOverwrite(context, callback);
+                },
+              )));
+    }
+
+    return bestSportWidget;
+  }
+
+  Widget _getVsAndTableWidget() {
     List<Widget> tableVsDetails = [];
 
     if (!_hideItemUploadBtn()) {
@@ -151,10 +249,15 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
             fillColor: Theme.of(context).primaryColorLight,
             elevation: 0.0,
             child: _itemUploadStatus(),
-            onPressed: () => {_handleUploadOrEditPressEvent()},
+            onPressed: () => {
+              if (!_hideItemUploadBtn()) {_handleUploadOrEditPressEvent()}
+            },
           )
         ],
       )));
+    } else {
+      tableVsDetails
+          .add(SizedBox(width: uploadIconSize, height: uploadIconSize));
     }
 
     tableVsDetails
@@ -162,25 +265,13 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     tableVsDetails.add(Text('T#' + _matchup.tableNum().toString(),
         style: TextStyle(fontSize: subTitleFontSize)));
 
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          Expanded(
-              child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 1.0, vertical: 10.0),
-                  child: homeReportWidget)),
-          Card(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: tableVsDetails),
-          ),
-          Expanded(
-              child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 1.0, vertical: 10.0),
-                  child: awayReportWidget)),
-        ]);
+    return SizedBox(
+        width: vsTableNumWidth,
+        child: Card(
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: tableVsDetails),
+        ));
   }
 
   void _handleUploadOrEditPressEvent() {
@@ -254,7 +345,11 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   Widget? _itemUploadStatus() {
     switch (_state) {
       case UploadState.NotAuthorized:
-        return null;
+        return Icon(
+          Icons.question_mark,
+          color: Colors.transparent,
+          size: uploadIconSize,
+        );
       case UploadState.Editing:
         return Icon(
           Icons.cloud_upload_rounded,

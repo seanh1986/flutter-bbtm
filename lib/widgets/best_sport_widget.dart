@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class BestSportWidget extends StatefulWidget {
-  ReportedMatchResult result;
-  Coach opponent;
+  final ReportedMatchResult result;
+  final Coach opponent;
 
   BestSportWidget({Key? key, required this.result, required this.opponent})
       : super(key: key);
