@@ -1,9 +1,6 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
-import 'package:bbnaf/blocs/auth/auth_bloc.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
@@ -111,6 +108,12 @@ class _HomePageState extends State<HomePage> {
             //   onPressed: () => Navigator.of(context).pop(),
             // ),
             title: Text(_tournament.info.name),
+            actions: [
+              IconButton(
+                  icon: Icon(Icons.refresh),
+                  onPressed: () => _tournySelectBloc
+                      .add(LoadTournamentEvent(_tournament.info)))
+            ],
           ),
           body: _children[_parentIndex].widgets[_childIndex],
           bottomNavigationBar: BottomNavigationBar(

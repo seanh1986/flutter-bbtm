@@ -50,6 +50,7 @@ dependencies:
   data_tables: ^1.0.3
   grouped_list: ^4.0.0
   flutter_native_splash: ^1.2.0
+  fluttertoast: ^8.1.2
 
 dev_dependencies:
   flutter_test:

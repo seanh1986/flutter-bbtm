@@ -1,5 +1,4 @@
 import 'package:bbnaf/blocs/auth/auth.dart';
-import 'package:bbnaf/blocs/match_report/match_report.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
@@ -34,9 +33,6 @@ void main() async {
     BlocProvider<TournamentBloc>(
         create: (context) =>
             TournamentBloc(tRepo: _tournamentRepo)..add(NoTournamentEvent())),
-    BlocProvider<MatchReportBloc>(
-        create: (context) => MatchReportBloc(tRepo: _tournamentRepo)
-          ..add(AppStartMatchReportEvent())),
   ], child: App()));
 
   // _tournamentRepo.updateTournamentData(Tournament.fromIceBowl());

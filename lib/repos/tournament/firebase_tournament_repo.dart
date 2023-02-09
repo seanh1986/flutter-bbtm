@@ -1,10 +1,9 @@
-import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 
 class FirebaseTournamentRepository extends TournamentRepository {
   FirebaseStorage _storage = FirebaseStorage.instance;
@@ -85,33 +84,39 @@ class FirebaseTournamentRepository extends TournamentRepository {
   }
 
   @override
-  Future<void> updateCoachMatchReport(
-      Tournament tournament, CoachMatchup matchup, bool isHome) async {
+  Future<void> updateCoachMatchReport(UpdateMatchReportEvent event) async {
     Tournament dbTournament = await _tournamentInfoRef
-        .doc(tournament.info.id)
+        .doc(event.tournament.info.id)
         .get()
         .then((value) => _parseTournamentResponse(value));
 
-    if (dbTournament.coachRounds.length != tournament.coachRounds.length) {
+    if (dbTournament.coachRounds.length !=
+        event.tournament.coachRounds.length) {
       return;
     }
 
     int roundIdx = dbTournament.coachRounds.length - 1;
 
     int matchIdx = dbTournament.coachRounds.last.matches.indexWhere((e) =>
-        e.awayNafName == matchup.awayNafName &&
-        e.homeNafName == matchup.homeNafName);
+        e.awayNafName.toLowerCase() ==
+            event.matchup.awayNafName.toLowerCase() &&
+        e.homeNafName.toLowerCase() == event.matchup.homeNafName.toLowerCase());
 
     if (roundIdx < 0 || matchIdx < 0) {
       return;
     }
 
-    if (isHome) {
+    if (event.isHome) {
       dbTournament.coachRounds[roundIdx].matches[matchIdx].homeReportedResults =
-          matchup.homeReportedResults;
+          event.matchup.homeReportedResults;
+    } else if (event.isAdmin) {
+      dbTournament.coachRounds[roundIdx].matches[matchIdx].homeReportedResults =
+          event.matchup.homeReportedResults;
+      dbTournament.coachRounds[roundIdx].matches[matchIdx].awayReportedResults =
+          event.matchup.awayReportedResults;
     } else {
-      dbTournament.coachRounds[roundIdx].matches[matchIdx].homeReportedResults =
-          matchup.awayReportedResults;
+      dbTournament.coachRounds[roundIdx].matches[matchIdx].awayReportedResults =
+          event.matchup.awayReportedResults;
     }
 
     updateTournamentData(dbTournament);

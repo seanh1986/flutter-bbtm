@@ -1,4 +1,4 @@
-import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 
@@ -11,8 +11,7 @@ abstract class TournamentRepository {
 
   Future<void> updateTournamentData(Tournament tournament);
 
-  Future<void> updateCoachMatchReport(
-      Tournament tournament, CoachMatchup matchup, bool isHome);
+  Future<void> updateCoachMatchReport(UpdateMatchReportEvent event);
 
   Future<String> getFileUrl(String filename);
 

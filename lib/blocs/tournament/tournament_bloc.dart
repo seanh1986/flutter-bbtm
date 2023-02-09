@@ -24,9 +24,9 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
       yield* _mapToUpdateTournamentState(event);
     } else if (event is SelectTournamentEvent) {
       yield* _mapToNewTournamentState(event);
+    } else if (event is UpdateMatchReportEvent) {
+      yield* _mapToUpdateMatchReportState(event);
     }
-
-    // yield NoTournamentState();
   }
 
   Stream<TournamentState> _mapToNoTournamentState(
@@ -49,6 +49,15 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
 
     _repo
         .updateTournamentData(event.tournament)
+        .then((value) => _handleUpdatedTournamentData(event.tournament.info));
+  }
+
+  Stream<TournamentState> _mapToUpdateMatchReportState(
+      UpdateMatchReportEvent event) async* {
+    print("TournamentBloc: _mapToUpdateMatchReportState");
+
+    _repo
+        .updateCoachMatchReport(event)
         .then((value) => _handleUpdatedTournamentData(event.tournament.info));
   }
 

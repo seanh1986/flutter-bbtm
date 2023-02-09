@@ -1,5 +1,5 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:bbnaf/blocs/match_report/match_report.dart';
+import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
@@ -48,7 +48,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   late AuthUser _authUser;
   late CoachMatchup _matchup;
 
-  late MatchReportBloc _matchReportBloc;
+  late TournamentBloc _tournyBloc;
 
   late ReportedMatchResultWithStatus _reportWithStatus;
   UploadState _state = UploadState.NotYetSet;
@@ -73,7 +73,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     _authUser = widget.authUser;
     _matchup = widget.matchup;
 
-    _matchReportBloc = BlocProvider.of<MatchReportBloc>(context);
+    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
 
     _reportWithStatus = _matchup.getReportedMatchStatus();
 
@@ -90,6 +90,12 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
         _matchup.awayNafName +
         " -> " +
         _state.toString());
+  }
+
+  @override
+  void dispose() {
+    _tournyBloc.close();
+    super.dispose();
   }
 
   UploadState _getMatchUploadState(
@@ -135,12 +141,18 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
         showHome: false,
         state: _state);
 
-    return BlocBuilder<MatchReportBloc, MatchReportState>(
-        bloc: _matchReportBloc,
-        builder: (selectContext, selectState) {
-          return Container(
-              alignment: FractionalOffset.center, child: _coachMatchupWidget());
-        });
+    return Container(
+        alignment: FractionalOffset.center, child: _coachMatchupWidget());
+
+    // return BlocBuilder<TournamentBloc, TournamentState>(
+    //     bloc: _tournyBloc,
+    //     builder: (selectContext, selectState) {
+    //       if (selectState is NewTournamentState) {
+    //         _tournament = selectState.tournament;
+
+    //       }
+
+    //     });
   }
 
   Widget _coachMatchupWidget() {
@@ -384,11 +396,10 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     }
 
     if (isHome != null) {
-      _matchReportBloc
+      _tournyBloc
           .add(new UpdateMatchReportEvent(_tournament, _matchup, isHome));
     } else {
-      _matchReportBloc
-          .add(new UpdateMatchReportEvent.admin(_tournament, _matchup));
+      _tournyBloc.add(new UpdateMatchReportEvent.admin(_tournament, _matchup));
     }
 
     setState(() {

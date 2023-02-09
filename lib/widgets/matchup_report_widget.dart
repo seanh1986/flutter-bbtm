@@ -7,15 +7,16 @@ import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class MatchupReportWidget extends StatefulWidget {
   final IMatchupParticipant participant;
   final bool showHome;
 
   late final UploadState state;
-  late final ReportedMatchResult? reportedMatch;
+  late ReportedMatchResult? reportedMatch;
 
   // Allows passing primitives by reference
-  final Map<String, int> counts = LinkedHashMap();
+  Map<String, int> counts = LinkedHashMap();
 
   final String _tdName = "Tds";
   final String _casName = "Cas";
@@ -55,8 +56,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   late IMatchupParticipant _participant;
   late UploadState _state;
 
-  late Map<String, int> counts;
-
   final double titleFontSize = kIsWeb ? 16.0 : 10.0;
   final double subTitleFontSize = kIsWeb ? 11.0 : 9.0;
 
@@ -66,7 +65,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   @override
   void initState() {
     super.initState();
-    counts = widget.counts;
   }
 
   @override
@@ -179,7 +177,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   }
 
   Widget _itemCounter(String name) {
-    int? num = counts[name];
+    int? num = widget.counts[name];
     String numStr = num != null ? num.toString() : "?";
 
     bool showFabs = !_hideFabs();
@@ -205,9 +203,9 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
             ),
             onPressed: _editableState() // only click-able in editing mode
                 ? () {
-                    if (counts.containsKey(name)) {
+                    if (widget.counts.containsKey(name)) {
                       setState(() {
-                        counts.update(name, (value) => value + 1);
+                        widget.counts.update(name, (value) => value + 1);
                       });
                     }
                   }
@@ -235,9 +233,10 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
             ),
             onPressed: _editableState() // only click-able in editing mode
                 ? () {
-                    if (counts.containsKey(name) && counts[name]! > 0) {
+                    if (widget.counts.containsKey(name) &&
+                        widget.counts[name]! > 0) {
                       setState(() {
-                        counts.update(name, (value) => value - 1);
+                        widget.counts.update(name, (value) => value - 1);
                       });
                     }
                   }

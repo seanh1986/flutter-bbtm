@@ -57,12 +57,12 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
 
   @override
   Widget build(BuildContext context) {
-    List<ExpansionTile> widgets = [];
+    List<Widget> widgets = [];
 
     for (int i = 0; i < widget.tournament.coachRounds.length; i++) {
-      ExpansionTile? tile = _generateRoundSummary(i);
-      if (tile != null) {
-        widgets.add(tile);
+      Widget? widget = _generateRoundSummary(i);
+      if (widget != null) {
+        widgets.add(widget);
       }
     }
 
@@ -74,15 +74,18 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
           if (selectState is NewTournamentState) {
             _coachRounds = selectState.tournament.coachRounds;
           }
-          return ExpansionTile(
-            title: Text("Tournament Management"),
-            subtitle: Text("Advance round or edit previous rounds"),
-            children: widgets,
-          );
+          return Container(
+              height: MediaQuery.of(context).size.height * 0.5,
+              child: SingleChildScrollView(
+                  child: ExpansionTile(
+                title: Text("Tournament Management"),
+                subtitle: Text("Advance round or edit previous rounds"),
+                children: widgets,
+              )));
         });
   }
 
-  ExpansionTile? _generateRoundSummary(int round) {
+  Widget? _generateRoundSummary(int round) {
     if (round >= _coachRounds.length) {
       return null;
     }
@@ -97,9 +100,10 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
       source: dataSource,
     );
 
-    return ExpansionTile(
-        title: Text("Round " + coachRound.round().toString()),
-        children: [
+    return SingleChildScrollView(
+        child: ExpansionTile(
+            title: Text("Round " + coachRound.round().toString()),
+            children: [
           roundDataTable,
           SizedBox(height: 10),
           Row(
@@ -127,7 +131,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
             ],
           ),
           SizedBox(height: 10),
-        ]);
+        ]));
   }
 
   void _showDialogToConfirmOverwrite(
@@ -156,7 +160,6 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
   void _processUpdate(VoidCallback confirmedUpdateCallback) {
     confirmedUpdateCallback();
     widget.tournyBloc.add(UpdateTournamentEvent(widget.tournament));
-    setState(() {});
   }
 
   ExpansionTile _advanceOrDiscardRound(BuildContext context) {

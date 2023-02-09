@@ -21,13 +21,11 @@ class AdminScreen extends StatefulWidget {
 
 class _AdminScreenState extends State<AdminScreen> {
   late Tournament _tournament;
-  // late AuthUser _authUser;
   late TournamentBloc _tournyBloc;
 
   @override
   void initState() {
     _tournament = widget.tournament;
-    // _authUser = widget.authUser;
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
 
     super.initState();
