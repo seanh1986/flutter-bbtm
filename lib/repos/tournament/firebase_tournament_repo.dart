@@ -4,6 +4,7 @@ import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/services.dart';
 
 class FirebaseTournamentRepository extends TournamentRepository {
   FirebaseStorage _storage = FirebaseStorage.instance;
@@ -134,6 +135,20 @@ class FirebaseTournamentRepository extends TournamentRepository {
     return url;
   }
 
+  @override
+  Future<void> downloadFile(String filename) async {
+    // Create a storage reference from our app
+    final storageRef = FirebaseStorage.instance.ref();
+
+    // Create a reference with an initial file path and name
+    final pathReference = storageRef.child(filename);
+
+    print(pathReference.toString());
+
+    pathReference.getData();
+  }
+}
+
   // Future<Widget> getImage(BuildContext context, String image) async {
   //   Image m;
   //   await FireStorageService.loadFromStorage(context, image)
@@ -248,4 +263,4 @@ class FirebaseTournamentRepository extends TournamentRepository {
   //       'at path: ${ref.fullPath} \n'
   //       'Wrote "${ref.fullPath}" to ref.name');
   // }
-}
+// }

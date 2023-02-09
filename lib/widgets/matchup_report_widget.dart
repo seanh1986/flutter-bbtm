@@ -3,6 +3,8 @@ import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/races.dart';
+import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
+import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -62,6 +64,8 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   final double fabSize = kIsWeb ? 25.0 : 15.0;
   final double raceIconSize = kIsWeb ? 50.0 : 30.0;
 
+  TournamentRepository _repo = FirebaseTournamentRepository();
+
   @override
   void initState() {
     super.initState();
@@ -112,6 +116,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
         ),
         onPressed: () => {
           // TODO: Download Roster
+          _repo.downloadFile("2023-02-CanadianOpen-Sean-Skaven-2.pdf")
         },
       );
     }
