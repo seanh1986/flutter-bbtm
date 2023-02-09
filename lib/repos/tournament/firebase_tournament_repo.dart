@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
+import 'dart:html' as html;
 
 class FirebaseTournamentRepository extends TournamentRepository {
   FirebaseStorage _storage = FirebaseStorage.instance;
@@ -126,7 +130,7 @@ class FirebaseTournamentRepository extends TournamentRepository {
   @override
   Future<String> getFileUrl(String filename) async {
     var url = await _storage.ref().child(filename).getDownloadURL();
-    print(url.toString());
+    // print(url.toString());
 
     // final ref = _storage.ref().child(filename);
 
@@ -137,15 +141,22 @@ class FirebaseTournamentRepository extends TournamentRepository {
 
   @override
   Future<void> downloadFile(String filename) async {
-    // Create a storage reference from our app
-    final storageRef = FirebaseStorage.instance.ref();
+    if (filename.isEmpty) return;
+    if (!kIsWeb) return;
 
-    // Create a reference with an initial file path and name
-    final pathReference = storageRef.child(filename);
+    Uint8List? data = await _storage.ref(filename).getData();
+    if (data == null) return;
+    String encodedData = base64Encode(data);
 
-    print(pathReference.toString());
-
-    pathReference.getData();
+    try {
+      html.AnchorElement(
+          href:
+              'data:application/octet-stream;charset=utf-8;base64,$encodedData')
+        ..setAttribute('download', filename)
+        ..click();
+    } catch (error) {
+      print(error);
+    }
   }
 }
 
