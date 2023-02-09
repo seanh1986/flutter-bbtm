@@ -16,7 +16,7 @@ class ToastUtils {
       {Color backgroundColor = Colors.white, Icon? icon}) {
     List<Widget> widgets = [];
     if (icon != null) {
-      widgets.add(Icon(Icons.check));
+      widgets.add(icon);
       widgets.add(SizedBox(width: 12.0));
     }
     widgets.add(Text(msg));

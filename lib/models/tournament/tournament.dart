@@ -288,6 +288,13 @@ class Tournament {
       Coach c = _coaches[i];
       _coachIdxMap.putIfAbsent(c.name(), () => i);
     }
+
+    // TODO: Eventually logic can be moved elsewhere
+    _coaches.forEach((c) {
+      if (c.rosterFileName.isEmpty) {
+        c.rosterFileName = info.id + "/" + c.nafName.toLowerCase() + ".pdf";
+      }
+    });
   }
 
   Tournament.fromIceBowl() {

@@ -5,9 +5,11 @@ import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
+import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 // ignore: must_be_immutable
 class MatchupReportWidget extends StatefulWidget {
@@ -66,9 +68,17 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   TournamentRepository _repo = FirebaseTournamentRepository();
 
+  late FToast fToast;
+
+  String _rosterFileName = "";
+  bool isDownloaded = false;
+
   @override
   void initState() {
     super.initState();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   @override
@@ -94,6 +104,17 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
         child: _itemHeader(participant));
   }
 
+  void _handleRosterDownload() {
+    fToast.init(context);
+    if (isDownloaded) {
+      ToastUtils.showFailed(fToast, "Already Downloaded: " + _rosterFileName);
+      return;
+    }
+    ToastUtils.show(fToast, "Downloading: " + _rosterFileName);
+    isDownloaded = true;
+    _repo.downloadFile(_rosterFileName);
+  }
+
   Widget _itemHeader(IMatchupParticipant participant) {
     Image raceLogo = Image.asset(
       RaceUtils.getLogo(_participant.race()),
@@ -106,19 +127,28 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
     if (participant is Coach) {
       // && participant) {
-      roster = RawMaterialButton(
-        shape: CircleBorder(),
-        fillColor: Colors.white,
-        elevation: 0.0,
-        child: Icon(
-          Icons.assignment,
-          color: Colors.black,
-        ),
-        onPressed: () => {
-          // TODO: Download Roster
-          _repo.downloadFile("2023-02-CanadianOpen-Sean-Skaven-2.pdf")
-        },
-      );
+
+      if (_rosterFileName.isNotEmpty) {
+        roster = RawMaterialButton(
+            shape: CircleBorder(),
+            fillColor: Colors.white,
+            elevation: 0.0,
+            child: Icon(
+              Icons.assignment,
+              color: Colors.black,
+            ),
+            onPressed: () => {_handleRosterDownload()});
+      } else {
+        try {
+          _repo.getFileUrl(participant.rosterFileName).then((value) => {
+                setState(() {
+                  _rosterFileName = participant.rosterFileName;
+                })
+              });
+        } catch (e) {
+          // Do nothing
+        }
+      }
     }
 
     double screenWidth = MediaQuery.of(context).size.width;

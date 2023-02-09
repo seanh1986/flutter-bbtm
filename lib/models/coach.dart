@@ -19,6 +19,8 @@ class Coach extends IMatchupParticipant {
 
   late bool active;
 
+  String rosterFileName = "";
+
   int _wins = 0;
   int _ties = 0;
   int _losses = 0;
@@ -259,6 +261,9 @@ class Coach extends IMatchupParticipant {
 
     final tActive = json['active'] as bool?;
     this.active = tActive != null && tActive;
+
+    final tRoster = json['roster'] as String?;
+    this.rosterFileName = tRoster != null ? tRoster : "";
   }
 
   Map<String, dynamic> toJson() => {
@@ -269,5 +274,6 @@ class Coach extends IMatchupParticipant {
         'race': RaceUtils.getName(_race),
         'naf_number': nafNumber,
         'active': active,
+        'roster': rosterFileName,
       };
 }
