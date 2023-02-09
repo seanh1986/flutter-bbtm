@@ -43,7 +43,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   void initState() {
     super.initState();
 
-    _items = widget.tournament.getCoaches();
+    _items = List.from(widget.tournament.getCoaches());
   }
 
   void _sort<T>(
@@ -103,7 +103,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
             break;
           default:
             sorter = (columnIndex, ascending) => _sort<num>(
-                (Coach c) => _getValue(c, f), columnIndex, ascending);
+                (Coach c) => _getSortingValue(c, f), columnIndex, ascending);
             break;
         }
 
@@ -121,8 +121,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   List<DataRow> _getRows() {
     List<DataRow> rows = [];
 
-    // sort by points ascending
-    _sort<num>((Coach c) => c.points(), _sortColumnIndex, _sortAscending);
+    // sort by field
+    Fields field = widget.fields.first;
+    _sort<num>((Coach c) => _getSortingValue(c, field), _sortColumnIndex,
+        _sortAscending);
 
     int rank = 1;
     _items.forEach((coach) {
@@ -245,11 +247,20 @@ class _RankingCoachPage extends State<RankingCoachPage> {
             "/" +
             c.losses().toString());
       default:
-        return Text(_getValue(c, f).toString());
+        return Text(_getViewValue(c, f).toString());
     }
   }
 
-  double _getValue(Coach c, Fields f) {
+  double _getSortingValue(Coach c, Fields f) {
+    switch (f) {
+      case Fields.Pts:
+        return c.pointsWithTieBreakersBuiltIn();
+      default:
+        return _getViewValue(c, f);
+    }
+  }
+
+  double _getViewValue(Coach c, Fields f) {
     switch (f) {
       case Fields.Pts:
         return c.points();

@@ -5,6 +5,7 @@ import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CoachMatchupsPage extends StatefulWidget {
   final Tournament tournament;
@@ -25,16 +26,22 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   late AuthUser _authUser;
   List<CoachMatchup> _matchups = [];
 
+  FToast? fToast;
+
   late TournamentBloc _tournyBloc;
 
   @override
   void initState() {
     super.initState();
+
+    fToast = FToast();
+    fToast!.init(context);
+
     _tournament = widget.tournament;
     _authUser = widget.authUser;
 
     if (_tournament.coachRounds.isNotEmpty) {
-      _matchups = _tournament.coachRounds.last.matches;
+      _matchups = List.from(_tournament.coachRounds.last.matches);
     }
 
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
@@ -56,7 +63,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
             _tournament = selectState.tournament;
 
             if (_tournament.coachRounds.isNotEmpty) {
-              _matchups = _tournament.coachRounds.last.matches;
+              _matchups = List.from(_tournament.coachRounds.last.matches);
             }
           }
 

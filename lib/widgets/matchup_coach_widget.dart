@@ -6,11 +6,13 @@ import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
+import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/best_sport_widget.dart';
 import 'package:bbnaf/widgets/matchup_report_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class MatchupCoachWidget extends StatefulWidget {
   final Tournament tournament;
@@ -66,9 +68,15 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   late MatchupReportWidget homeReportWidget;
   late MatchupReportWidget awayReportWidget;
 
+  late FToast fToast;
+
   @override
   void initState() {
     super.initState();
+
+    fToast = FToast();
+    fToast.init(context);
+
     _tournament = widget.tournament;
     _authUser = widget.authUser;
     _matchup = widget.matchup;
@@ -402,9 +410,11 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       _tournyBloc.add(new UpdateMatchReportEvent.admin(_tournament, _matchup));
     }
 
-    setState(() {
-      _state = UploadState.CanEdit;
-    });
+    ToastUtils.show(fToast, "Uploading Match Report!");
+
+    // setState(() {
+    //   _state = UploadState.CanEdit;
+    // });
   }
 
   Widget? _itemUploadStatus() {

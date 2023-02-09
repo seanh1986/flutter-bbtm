@@ -3,10 +3,12 @@ import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
+import 'package:bbnaf/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class AdvanceRoundWidget extends StatefulWidget {
   final Tournament tournament;
@@ -24,6 +26,8 @@ class AdvanceRoundWidget extends StatefulWidget {
 
 class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
   late TournamentBloc _tournyBloc;
+
+  late FToast fToast;
 
   List<CoachRound> _coachRounds = [];
 
@@ -43,6 +47,9 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
   @override
   void initState() {
     super.initState();
+
+    fToast = FToast();
+    fToast.init(context);
 
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
 
@@ -73,15 +80,17 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
         builder: (selectContext, selectState) {
           if (selectState is NewTournamentState) {
             _coachRounds = selectState.tournament.coachRounds;
+
+            // ToastUtils.showSuccess(fToast, "Tournament Loaded");
           }
           return Container(
-              height: MediaQuery.of(context).size.height * 0.5,
+              // height: MediaQuery.of(context).size.height * 0.5,
               child: SingleChildScrollView(
                   child: ExpansionTile(
-                title: Text("Tournament Management"),
-                subtitle: Text("Advance round or edit previous rounds"),
-                children: widgets,
-              )));
+            title: Text("Tournament Management"),
+            subtitle: Text("Advance round or edit previous rounds"),
+            children: widgets,
+          )));
         });
   }
 
@@ -100,10 +109,9 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
       source: dataSource,
     );
 
-    return SingleChildScrollView(
-        child: ExpansionTile(
-            title: Text("Round " + coachRound.round().toString()),
-            children: [
+    return ExpansionTile(
+        title: Text("Round " + coachRound.round().toString()),
+        children: [
           roundDataTable,
           SizedBox(height: 10),
           Row(
@@ -131,7 +139,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
             ],
           ),
           SizedBox(height: 10),
-        ]));
+        ]);
   }
 
   void _showDialogToConfirmOverwrite(
@@ -160,6 +168,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
   void _processUpdate(VoidCallback confirmedUpdateCallback) {
     confirmedUpdateCallback();
     widget.tournyBloc.add(UpdateTournamentEvent(widget.tournament));
+    ToastUtils.show(fToast, "Updating Tournament Data");
   }
 
   ExpansionTile _advanceOrDiscardRound(BuildContext context) {
@@ -220,6 +229,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
 
               if (pairingError == RoundPairingError.NoError) {
                 widget.tournyBloc.add(UpdateTournamentEvent(widget.tournament));
+                ToastUtils.show(fToast, "Updating Tournament Data");
               }
             };
 
@@ -258,6 +268,8 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
 
             VoidCallback discardCallback = () {
               widget.tournament.coachRounds.removeLast();
+              ToastUtils.showSuccess(fToast, "Removed Last Round");
+              setState(() {});
             };
 
             showOkCancelAlertDialog(
@@ -316,8 +328,10 @@ class CoachRoundDataSource extends DataTableSource {
 
     Text textStatus = Text(_convertToString(report));
 
-    TextEditingController homeTdController =
-        TextEditingController(text: report.homeTds.toString());
+    TextEditingController homeTdController = TextEditingController(
+        text: report.status != ReportedMatchStatus.NoReportsYet
+            ? report.homeTds.toString()
+            : "");
 
     ValueChanged<String> homeTdCallback = (value) {
       int td = int.parse(homeTdController.text);
@@ -333,8 +347,10 @@ class CoachRoundDataSource extends DataTableSource {
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: homeTdCallback);
 
-    TextEditingController awayTdController =
-        TextEditingController(text: report.awayTds.toString());
+    TextEditingController awayTdController = TextEditingController(
+        text: report.status != ReportedMatchStatus.NoReportsYet
+            ? report.awayTds.toString()
+            : "");
 
     ValueChanged<String> awayTdCallback = (value) {
       int td = int.parse(awayTdController.text);
@@ -350,8 +366,10 @@ class CoachRoundDataSource extends DataTableSource {
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: awayTdCallback);
 
-    TextEditingController homeCasController =
-        TextEditingController(text: report.homeCas.toString());
+    TextEditingController homeCasController = TextEditingController(
+        text: report.status != ReportedMatchStatus.NoReportsYet
+            ? report.homeCas.toString()
+            : "");
 
     ValueChanged<String> homeCasCallback = (value) {
       int cas = int.parse(homeCasController.text);
@@ -367,8 +385,10 @@ class CoachRoundDataSource extends DataTableSource {
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: homeCasCallback);
 
-    TextEditingController awayCasController =
-        TextEditingController(text: report.awayCas.toString());
+    TextEditingController awayCasController = TextEditingController(
+        text: report.status != ReportedMatchStatus.NoReportsYet
+            ? report.awayCas.toString()
+            : "");
 
     ValueChanged<String> awayCasCallback = (value) {
       int cas = int.parse(awayCasController.text);
@@ -385,7 +405,9 @@ class CoachRoundDataSource extends DataTableSource {
         onChanged: awayCasCallback);
 
     TextEditingController homeSportController = TextEditingController(
-        text: m.awayReportedResults.bestSportOppRank.toString());
+        text: report.status != ReportedMatchStatus.NoReportsYet
+            ? m.awayReportedResults.bestSportOppRank.toString()
+            : "");
 
     ValueChanged<String> homeSportCallback = (value) {
       int sport = int.parse(homeSportController.text);
@@ -400,7 +422,9 @@ class CoachRoundDataSource extends DataTableSource {
         onChanged: homeSportCallback);
 
     TextEditingController awaySportController = TextEditingController(
-        text: m.homeReportedResults.bestSportOppRank.toString());
+        text: report.status != ReportedMatchStatus.NoReportsYet
+            ? m.homeReportedResults.bestSportOppRank.toString()
+            : "");
 
     ValueChanged<String> awaySportCallback = (value) {
       int sport = int.parse(awaySportController.text);

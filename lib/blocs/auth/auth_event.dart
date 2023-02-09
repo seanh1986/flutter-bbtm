@@ -1,4 +1,3 @@
-import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:equatable/equatable.dart';
 

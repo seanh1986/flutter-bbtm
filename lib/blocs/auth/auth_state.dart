@@ -9,7 +9,7 @@ abstract class AuthState extends Equatable {
 }
 
 // Initial state (non-authorized)
-class AppStartAuthState extends AuthState {}
+class NotLoggedInAuthState extends AuthState {}
 
 class LoggedInAuthState extends AuthState {
   final AuthUser authUser;

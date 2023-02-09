@@ -89,10 +89,20 @@ class Coach extends IMatchupParticipant {
     for (int i = _tieBreakers.length - 1; i >= 0; i--) {
       double tbPts = _tieBreakers[i];
       ptsWithT += tbPts * m;
-      m += mStep;
+      m *= mStep;
     }
 
-    ptsWithT += _points;
+    m *= 10; // Extra Buffer
+    ptsWithT += _points * m;
+
+    // StringBuffer sb = new StringBuffer();
+    // sb.write(name() + ": " + points().toString() + " -> [");
+    // tiebreakers().forEach((tb) {
+    //   sb.write(tb.toString() + ",");
+    // });
+    // sb.write("] -> ");
+    // sb.write(ptsWithT.toDouble());
+    // print(sb.toString());
 
     return ptsWithT;
   }

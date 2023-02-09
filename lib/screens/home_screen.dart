@@ -10,18 +10,15 @@ import 'package:bbnaf/screens/overview_screen.dart';
 import 'package:bbnaf/screens/rankings_screen.dart';
 import 'package:bbnaf/screens/tournament_list/tournament_selection.dart';
 import 'package:bbnaf/utils/item_click_listener.dart';
+import 'package:bbnaf/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'matchups/matchups_coaches_screen.dart';
 import 'matchups/matchups_squad_screen.dart';
 
 class HomePage extends StatefulWidget {
-  // final Tournament tournament;
-  // final AuthUser authUser;
-
-  // HomePage({Key? key, required this.tournament, required this.authUser})
-  //     : super(key: key);
   HomePage({Key? key}) : super(key: key);
 
   @override
@@ -44,13 +41,12 @@ class _HomePageState extends State<HomePage> {
   late TournamentBloc _tournySelectBloc;
   late AuthBloc _authBloc;
 
+  late FToast fToast;
+
   Tournament _tournament = Tournament.fromJson(
       TournamentInfo.fromJson("0", Map<String, dynamic>()),
       Map<String, dynamic>());
   AuthUser _authUser = AuthUser();
-
-  // late Coach? _curCoach;
-  // late Squad? _curSquad;
 
   List<SquadMatchup> _squadMatchups = [];
 
@@ -61,6 +57,9 @@ class _HomePageState extends State<HomePage> {
     _tournySelectBloc = BlocProvider.of<TournamentBloc>(context);
     _authBloc = BlocProvider.of<AuthBloc>(context);
     super.initState();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   @override
@@ -78,6 +77,19 @@ class _HomePageState extends State<HomePage> {
           return BlocBuilder<AuthBloc, AuthState>(
               bloc: _authBloc,
               builder: (authContext, authState) {
+                bool shouldLogout = tournyState is NoTournamentState ||
+                    authState is NotLoggedInAuthState;
+
+                if (shouldLogout) {
+                  // Try to go back
+                  SchedulerBinding.instance.addPostFrameCallback((_) {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TournamentSelectionPage()));
+                  });
+                }
+
                 if (authState is LoggedInAuthState) {
                   _authUser = authState.authUser;
                 } else {
@@ -93,6 +105,19 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
+  void _handleLogoutPressed() {
+    print("Logout Pressed");
+    _authBloc.add(LoggedOutAuthEvent());
+    _tournySelectBloc.add(NoTournamentEvent());
+    ToastUtils.showSuccess(fToast, "Logging out");
+  }
+
+  void _handleRefreshTournamentPressed() {
+    print("Refresh Tournament Pressed");
+    _tournySelectBloc.add(LoadTournamentEvent(_tournament.info));
+    ToastUtils.showSuccess(fToast, "Refreshing Tournament Data");
+  }
+
   Widget _generateUi() {
     _init();
 
@@ -103,6 +128,7 @@ class _HomePageState extends State<HomePage> {
         },
         child: Scaffold(
           appBar: AppBar(
+            automaticallyImplyLeading: false,
             // leading: IconButton(
             //   icon: Icon(Icons.arrow_back, color: Colors.white),
             //   onPressed: () => Navigator.of(context).pop(),
@@ -111,8 +137,10 @@ class _HomePageState extends State<HomePage> {
             actions: [
               IconButton(
                   icon: Icon(Icons.refresh),
-                  onPressed: () => _tournySelectBloc
-                      .add(LoadTournamentEvent(_tournament.info)))
+                  onPressed: () => _handleRefreshTournamentPressed()),
+              IconButton(
+                  icon: Icon(Icons.logout),
+                  onPressed: () => _handleLogoutPressed())
             ],
           ),
           body: _children[_parentIndex].widgets[_childIndex],
@@ -183,12 +211,12 @@ class _HomePageState extends State<HomePage> {
   void _handleBackButton() {
     if (_childIndex == 0) {
       if (_parentIndex == 0) {
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => TournamentSelectionPage()));
-        });
+        // SchedulerBinding.instance.addPostFrameCallback((_) {
+        //   Navigator.pushReplacement(
+        //       context,
+        //       MaterialPageRoute(
+        //           builder: (context) => TournamentSelectionPage()));
+        // });
       } else {
         setState(() {
           _parentIndex = 0;

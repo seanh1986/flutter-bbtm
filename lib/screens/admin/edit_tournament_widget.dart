@@ -67,7 +67,7 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
     _location = t.info.location;
     _organizers = t.info.organizers;
 
-    _coaches = t.getCoaches();
+    _coaches = List.from(t.getCoaches());
   }
 
   @override
@@ -84,7 +84,11 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
           if (selectState is NewTournamentState) {
             _initFromTournament(selectState.tournament);
           }
-          return ExpansionTile(
+
+          return Container(
+              //height: MediaQuery.of(context).size.height * 0.5,
+              child: SingleChildScrollView(
+                  child: ExpansionTile(
             title: Text("Tournament Details"),
             subtitle: Text("Edit information/details, coaches, squads, etc."),
             children: [
@@ -92,7 +96,7 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
               ExpansionTile(
                   title: Text("Coaches"), children: _viewCoaches(context)),
             ],
-          );
+          )));
         });
   }
 
@@ -311,7 +315,7 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
           ElevatedButton(
             onPressed: () {
               setState(() {
-                _coaches = widget.tournament.getCoaches();
+                _coaches = List.from(widget.tournament.getCoaches());
               });
             },
             child: const Text('Discard'),

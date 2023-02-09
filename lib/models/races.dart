@@ -38,7 +38,7 @@ class RaceUtils {
   static final String _baseLogoFolder = "assets/images/teams/";
 
   static final Map<Race, String> _raceToLogo = {
-    Race.Unknown: "",
+    Race.Unknown: _baseLogoFolder + "unknown.png",
     Race.Amazon: _baseLogoFolder + "logo_amazon.png",
     Race.BlackOrc: _baseLogoFolder + "logo_blackorcs.png",
     Race.Bretonnian: _baseLogoFolder + "logo_bretonnians.png",

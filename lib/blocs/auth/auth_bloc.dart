@@ -10,7 +10,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   AuthBloc({required AuthRepository aRepo})
       : _authRepository = aRepo,
-        super(AppStartAuthState());
+        super(NotLoggedInAuthState());
 
   @override
   Stream<AuthState> mapEventToState(AuthEvent event) async* {
@@ -30,10 +30,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         AuthUser authUser = _authRepository.getAuthUser();
         yield LoggedInAuthState(authUser);
       } else {
-        yield AppStartAuthState();
+        yield NotLoggedInAuthState();
       }
     } catch (_) {
-      yield AppStartAuthState();
+      yield NotLoggedInAuthState();
     }
   }
 
@@ -44,9 +44,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Stream<AuthState> _mapLoggedOutToState() async* {
     print("AuthBloc: _mapLoggedOutToState");
-    AuthUser authUser = new AuthUser();
 
-    yield LoggedInAuthState(authUser);
+    await _authRepository.signOut();
+
+    yield NotLoggedInAuthState();
   }
 
   @override
