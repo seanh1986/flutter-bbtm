@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
@@ -38,14 +40,15 @@ class _HomePageState extends State<HomePage> {
 
   _CoachMatchupListClickListener? _coachMatchupListener;
 
-  late TournamentBloc _tournySelectBloc;
+  late TournamentBloc _tournyBloc;
   late AuthBloc _authBloc;
+
+  late StreamSubscription _tournySub;
+  late StreamSubscription _authSub;
 
   late FToast fToast;
 
-  Tournament _tournament = Tournament.fromJson(
-      TournamentInfo.fromJson("0", Map<String, dynamic>()),
-      Map<String, dynamic>());
+  Tournament _tournament = Tournament.empty();
   AuthUser _authUser = AuthUser();
 
   List<SquadMatchup> _squadMatchups = [];
@@ -54,9 +57,36 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    _tournySelectBloc = BlocProvider.of<TournamentBloc>(context);
-    _authBloc = BlocProvider.of<AuthBloc>(context);
     super.initState();
+
+    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
+    _authBloc = BlocProvider.of<AuthBloc>(context);
+
+    _tournySub = _tournyBloc.stream.listen((tournyState) {
+      if (tournyState is NewTournamentState) {
+        ToastUtils.showSuccess(fToast, "Tournament Data Loaded");
+        setState(() {
+          _tournament = tournyState.tournament;
+        });
+      } else {
+        setState(() {
+          _tournament = Tournament.empty();
+        });
+      }
+    });
+
+    _authSub = _authBloc.stream.listen((authState) {
+      if (authState is LoggedInAuthState) {
+        setState(() {
+          _authUser = authState.authUser;
+        });
+      } else {
+        ToastUtils.showSuccess(fToast, "Logged Out");
+        setState(() {
+          _authUser = AuthUser();
+        });
+      }
+    });
 
     fToast = FToast();
     fToast.init(context);
@@ -64,58 +94,90 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    _tournySelectBloc.close();
+    _tournyBloc.close();
     _authBloc.close();
+
+    _tournySub.cancel();
+    _authSub.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TournamentBloc, TournamentState>(
-        bloc: _tournySelectBloc,
-        builder: (tournyContext, tournyState) {
-          return BlocBuilder<AuthBloc, AuthState>(
-              bloc: _authBloc,
-              builder: (authContext, authState) {
-                bool shouldLogout = tournyState is NoTournamentState ||
-                    authState is NotLoggedInAuthState;
+    if (_tournyBloc.state is NewTournamentState) {
+      _tournament = (_tournyBloc.state as NewTournamentState).tournament;
+    } else {
+      _tournament = Tournament.empty();
+    }
 
-                if (shouldLogout) {
-                  // Try to go back
-                  SchedulerBinding.instance.addPostFrameCallback((_) {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => TournamentSelectionPage()));
-                  });
-                }
+    if (_authBloc.state is LoggedInAuthState) {
+      _authUser = (_authBloc.state as LoggedInAuthState).authUser;
+    } else {
+      _authUser = AuthUser();
+    }
 
-                if (authState is LoggedInAuthState) {
-                  _authUser = authState.authUser;
-                } else {
-                  _authUser = AuthUser();
-                }
+    bool shouldLogout = _tournyBloc.state is NoTournamentState &&
+        _authBloc.state is NotLoggedInAuthState;
 
-                if (tournyState is NewTournamentState) {
-                  _tournament = tournyState.tournament;
-                }
+    if (shouldLogout) {
+      // Try to go back
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => TournamentSelectionPage()));
+      });
+    }
 
-                return _generateUi();
-              });
-        });
+    return _generateUi();
+
+    // return BlocBuilder<TournamentBloc, TournamentState>(
+    //     bloc: _tournyBloc,
+    //     builder: (tournyContext, tournyState) {
+    //       return BlocBuilder<AuthBloc, AuthState>(
+    //           bloc: _authBloc,
+    //           builder: (authContext, authState) {
+    //             bool shouldLogout = tournyState is NoTournamentState ||
+    //                 authState is NotLoggedInAuthState;
+
+    //             if (shouldLogout) {
+    //               // Try to go back
+    //               SchedulerBinding.instance.addPostFrameCallback((_) {
+    //                 Navigator.pushReplacement(
+    //                     context,
+    //                     MaterialPageRoute(
+    //                         builder: (context) => TournamentSelectionPage()));
+    //               });
+    //             }
+
+    //             if (authState is LoggedInAuthState) {
+    //               _authUser = authState.authUser;
+    //             } else {
+    //               _authUser = AuthUser();
+    //             }
+
+    //             if (tournyState is NewTournamentState) {
+    //               _tournament = tournyState.tournament;
+
+    //               // SchedulerBinding.instance.addPostFrameCallback((_) {
+    //               //   ToastUtils.showSuccess(fToast, "Tournament Data Loaded");
+    //               // });
+    //             }
+
+    //             return _generateUi();
+    //           });
+    //     });
   }
 
   void _handleLogoutPressed() {
     print("Logout Pressed");
+    ToastUtils.show(fToast, "Logging out");
     _authBloc.add(LoggedOutAuthEvent());
-    _tournySelectBloc.add(NoTournamentEvent());
-    ToastUtils.showSuccess(fToast, "Logging out");
+    _tournyBloc.add(NoTournamentEvent());
   }
 
   void _handleRefreshTournamentPressed() {
     print("Refresh Tournament Pressed");
-    _tournySelectBloc.add(LoadTournamentEvent(_tournament.info));
-    ToastUtils.showSuccess(fToast, "Refreshing Tournament Data");
+    ToastUtils.show(fToast, "Refreshing Tournament Data");
+    _tournyBloc.add(LoadTournamentEvent(_tournament.info));
   }
 
   Widget _generateUi() {

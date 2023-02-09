@@ -226,6 +226,10 @@ class Tournament {
         info.organizers.any((e) => e.email == authUser.user?.email);
   }
 
+  Tournament.empty()
+      : this.fromJson(TournamentInfo.fromJson("0", Map<String, dynamic>()),
+            Map<String, dynamic>());
+
   Tournament.fromJson(TournamentInfo info, Map<String, dynamic> json) {
     this.info = info;
 
