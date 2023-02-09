@@ -1,11 +1,9 @@
 import 'dart:async';
-
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/admin/admin_screen.dart';
 import 'package:bbnaf/screens/overview_screen.dart';
@@ -88,8 +86,17 @@ class _HomePageState extends State<HomePage> {
       }
     });
 
-    fToast = FToast();
-    fToast.init(context);
+    if (_tournyBloc.state is NewTournamentState) {
+      _tournament = (_tournyBloc.state as NewTournamentState).tournament;
+    } else {
+      _tournament = Tournament.empty();
+    }
+
+    if (_authBloc.state is LoggedInAuthState) {
+      _authUser = (_authBloc.state as LoggedInAuthState).authUser;
+    } else {
+      _authUser = AuthUser();
+    }
   }
 
   @override
@@ -104,17 +111,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_tournyBloc.state is NewTournamentState) {
-      _tournament = (_tournyBloc.state as NewTournamentState).tournament;
-    } else {
-      _tournament = Tournament.empty();
-    }
-
-    if (_authBloc.state is LoggedInAuthState) {
-      _authUser = (_authBloc.state as LoggedInAuthState).authUser;
-    } else {
-      _authUser = AuthUser();
-    }
+    fToast = FToast();
+    fToast.init(context);
 
     bool shouldLogout = _tournyBloc.state is NoTournamentState &&
         _authBloc.state is NotLoggedInAuthState;
