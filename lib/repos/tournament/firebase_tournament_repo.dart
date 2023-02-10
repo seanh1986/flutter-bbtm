@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:io';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
@@ -7,7 +7,6 @@ import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart';
 import 'dart:html' as html;
 
 class FirebaseTournamentRepository extends TournamentRepository {
@@ -142,8 +141,15 @@ class FirebaseTournamentRepository extends TournamentRepository {
   @override
   Future<void> downloadFile(String filename) async {
     if (filename.isEmpty) return;
-    if (!kIsWeb) return;
+    if (kIsWeb) {
+      _downloadFileWeb(filename);
+    }
+    // else {
+    //   _downloadFileMobile(filename);
+    // }
+  }
 
+  Future<void> _downloadFileWeb(String filename) async {
     Uint8List? data = await _storage.ref(filename).getData();
     if (data == null) return;
     String encodedData = base64Encode(data);
@@ -159,6 +165,20 @@ class FirebaseTournamentRepository extends TournamentRepository {
     }
   }
 }
+
+// Future<void> _downloadFileMobile(String filename) async {
+//   //First you get the documents folder location on the device...
+//   Directory appDocDir = await getApplicationDocumentsDirectory();
+//   File downloadToFile = File('${appDocDir.path}/' + filename);
+
+//   //Now you can try to download the specified file, and write it to the downloadToFile.
+//   try {
+//     await _storage.ref(filename).writeToFile(downloadToFile);
+//   } on firebase_core.FirebaseException catch (e) {
+//     // e.g, e.code == 'canceled'
+//     print('Download error: $e');
+//   }
+// }
 
   // Future<Widget> getImage(BuildContext context, String image) async {
   //   Image m;
