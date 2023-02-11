@@ -51,6 +51,7 @@ dependencies:
   grouped_list: ^4.0.0
   flutter_native_splash: ^1.2.0
   fluttertoast: ^8.1.2
+  file_picker: ^5.2.5
 
 dev_dependencies:
   flutter_test:

@@ -2,12 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament_backup.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:html' as html;
+
+import 'package:intl/intl.dart';
 
 class FirebaseTournamentRepository extends TournamentRepository {
   FirebaseStorage _storage = FirebaseStorage.instance;
@@ -163,6 +166,40 @@ class FirebaseTournamentRepository extends TournamentRepository {
     } catch (error) {
       print(error);
     }
+  }
+
+  @override
+  Future<void> downloadBackupFile(Tournament tournament) async {
+    TournamentBackup backup = TournamentBackup(tournament: tournament);
+    String json = jsonEncode(backup);
+
+    String time = DateFormat('yyyy_MM_dd_H_m_s').format(DateTime.now());
+    String fileName = time +
+        "_" +
+        tournament.info.name.replaceAll(" ", "_") +
+        "_" +
+        "round_" +
+        tournament.curRoundNumber().toString() +
+        ".json";
+
+    print(fileName);
+
+    // prepare
+    final bytes = utf8.encode(json);
+    final blob = html.Blob([bytes]);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.document.createElement('a') as html.AnchorElement
+      ..href = url
+      ..style.display = 'none'
+      ..download = fileName;
+    html.document.body?.children.add(anchor);
+
+    // download
+    anchor.click();
+
+    // cleanup
+    html.document.body?.children.remove(anchor);
+    html.Url.revokeObjectUrl(url);
   }
 }
 

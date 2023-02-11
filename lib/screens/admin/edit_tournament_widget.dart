@@ -78,26 +78,17 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TournamentBloc, TournamentState>(
-        bloc: _tournyBloc,
-        builder: (selectContext, selectState) {
-          if (selectState is NewTournamentState) {
-            _initFromTournament(selectState.tournament);
-          }
-
-          return Container(
-              //height: MediaQuery.of(context).size.height * 0.5,
-              child: SingleChildScrollView(
-                  child: ExpansionTile(
-            title: Text("Tournament Details"),
-            subtitle: Text("Edit information/details, coaches, squads, etc."),
-            children: [
-              ExpansionTile(title: Text("Info"), children: _viewInfos()),
-              ExpansionTile(
-                  title: Text("Coaches"), children: _viewCoaches(context)),
-            ],
-          )));
-        });
+    return Container(
+        //height: MediaQuery.of(context).size.height * 0.5,
+        child: SingleChildScrollView(
+            child: ExpansionTile(
+      title: Text("Tournament Details"),
+      subtitle: Text("Edit information/details, coaches, squads, etc."),
+      children: [
+        ExpansionTile(title: Text("Info"), children: _viewInfos()),
+        ExpansionTile(title: Text("Coaches"), children: _viewCoaches(context)),
+      ],
+    )));
   }
 
   void _addNewOrga() {

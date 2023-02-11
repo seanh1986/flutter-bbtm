@@ -39,14 +39,7 @@ class _AdminScreenState extends State<AdminScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TournamentBloc, TournamentState>(
-        bloc: _tournyBloc,
-        builder: (selectContext, selectState) {
-          if (selectState is NewTournamentState) {
-            _tournament = selectState.tournament;
-          }
-          return _generateView();
-        });
+    return _generateView();
   }
 
   Widget _generateView() {

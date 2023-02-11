@@ -73,3 +73,16 @@ class SelectTournamentEvent extends TournamentEvent {
   @override
   String toString() => 'SelectTournamentEvent';
 }
+
+/// Download tournament backup file
+class DownloadTournamentBackup extends TournamentEvent {
+  final Tournament tournament;
+
+  const DownloadTournamentBackup(this.tournament);
+
+  @override
+  List<Object> get props => [tournament];
+
+  @override
+  String toString() => 'DownloadTournamentBackup';
+}

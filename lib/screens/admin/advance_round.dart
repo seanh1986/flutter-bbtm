@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/tournament/tournament_backup.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:bbnaf/utils/toast.dart';
@@ -9,6 +12,7 @@ import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:file_picker/file_picker.dart';
 
 class AdvanceRoundWidget extends StatefulWidget {
   final Tournament tournament;
@@ -75,23 +79,14 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
 
     widgets.add(_advanceOrDiscardRound(context));
 
-    return BlocBuilder<TournamentBloc, TournamentState>(
-        bloc: _tournyBloc,
-        builder: (selectContext, selectState) {
-          if (selectState is NewTournamentState) {
-            _coachRounds = selectState.tournament.coachRounds;
-
-            // ToastUtils.showSuccess(fToast, "Tournament Loaded");
-          }
-          return Container(
-              // height: MediaQuery.of(context).size.height * 0.5,
-              child: SingleChildScrollView(
-                  child: ExpansionTile(
-            title: Text("Tournament Management"),
-            subtitle: Text("Advance round or edit previous rounds"),
-            children: widgets,
-          )));
-        });
+    return Container(
+        // height: MediaQuery.of(context).size.height * 0.5,
+        child: SingleChildScrollView(
+            child: ExpansionTile(
+      title: Text("Tournament Management"),
+      subtitle: Text("Advance round or edit previous rounds"),
+      children: widgets,
+    )));
   }
 
   Widget? _generateRoundSummary(int round) {
@@ -177,7 +172,11 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         _advanceRoundButton(context),
         SizedBox(width: 20),
-        _discardCurrentRoundButton(context)
+        _discardCurrentRoundButton(context),
+        SizedBox(width: 20),
+        _downloadFileBackup(context),
+        SizedBox(width: 20),
+        _recoverBackupFromFile(context),
       ]),
       SizedBox(height: 10),
     ]);
@@ -269,7 +268,6 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
             VoidCallback discardCallback = () {
               widget.tournament.coachRounds.removeLast();
               ToastUtils.showSuccess(fToast, "Removed Last Round");
-              setState(() {});
             };
 
             showOkCancelAlertDialog(
@@ -281,6 +279,127 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                 .then((value) => {
                       if (value == OkCancelResult.ok)
                         {_processUpdate(discardCallback)}
+                    });
+          },
+        ));
+  }
+
+  Widget _downloadFileBackup(BuildContext context) {
+    return Container(
+        height: 60,
+        padding: EdgeInsets.all(10),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            primary: Colors.blue,
+            textStyle: TextStyle(color: Colors.white),
+          ),
+          child: Text('Download Backup'),
+          onPressed: () {
+            VoidCallback downloadBackupCallback = () {
+              _tournyBloc.add(DownloadTournamentBackup(widget.tournament));
+              ToastUtils.showSuccess(fToast, "Downloading Backup");
+            };
+
+            showOkCancelAlertDialog(
+                    context: context,
+                    title: "Download Backup",
+                    message:
+                        "This will download a backup file which can be used as a backup to restore at a later time",
+                    okLabel: "Download",
+                    cancelLabel: "Cancel")
+                .then((value) => {
+                      if (value == OkCancelResult.ok)
+                        {_processUpdate(downloadBackupCallback)}
+                    });
+          },
+        ));
+  }
+
+  Widget _recoverBackupFromFile(BuildContext context) {
+    return Container(
+        height: 60,
+        padding: EdgeInsets.all(10),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            primary: Colors.blue,
+            textStyle: TextStyle(color: Colors.white),
+          ),
+          child: Text('Recover Backup'),
+          onPressed: () {
+            VoidCallback recoveryCallback = () async {
+              var picked =
+                  await FilePicker.platform.pickFiles(allowMultiple: false);
+
+              if (picked != null) {
+                print(picked.files.first.name);
+
+                if (picked.files.first.extension == 'json') {
+                  try {
+                    String s =
+                        new String.fromCharCodes(picked.files.first.bytes!);
+
+                    Map<String, dynamic> json = jsonDecode(s);
+
+                    TournamentBackup tournyBackup =
+                        TournamentBackup.fromJson(json);
+
+                    StringBuffer sb = new StringBuffer();
+                    sb.writeln(
+                        "The recovery file has been successfull parsed. Please find a summary below.");
+                    sb.writeln("");
+                    sb.writeln("Tournament Name: " +
+                        tournyBackup.tournament.info.name);
+                    sb.writeln("# of Organizers: " +
+                        tournyBackup.tournament.info.organizers.length
+                            .toString());
+                    sb.writeln("# of Squads: " +
+                        tournyBackup.tournament.getSquads().length.toString());
+                    sb.writeln("# of Coaches: " +
+                        tournyBackup.tournament.getCoaches().length.toString());
+                    sb.writeln("CurRound: " +
+                        tournyBackup.tournament.curRoundNumber().toString());
+                    sb.writeln("");
+                    sb.writeln(
+                        "Please confirm that you wish to OVERWRITE your tournament with the recovery file. This process cannot be undone.");
+
+                    VoidCallback confirmedRecoveryCallback = () {
+                      widget.tournyBloc
+                          .add(UpdateTournamentEvent(tournyBackup.tournament));
+                      ToastUtils.showSuccess(fToast, "Recovering Backup");
+                    };
+
+                    showOkCancelAlertDialog(
+                            context: context,
+                            title: "Process Recovery Backup",
+                            message: sb.toString(),
+                            okLabel: "Overwrite",
+                            cancelLabel: "Cancel")
+                        .then((value) => {
+                              if (value == OkCancelResult.ok)
+                                {confirmedRecoveryCallback()}
+                            });
+                  } catch (_) {
+                    ToastUtils.showFailed(
+                        fToast, "Failed to parse recovery file");
+                  }
+                } else {
+                  ToastUtils.showFailed(
+                      fToast, "Incorrect file format (must be .json)");
+                }
+              } else {
+                ToastUtils.show(fToast, "Recovering Cancelled");
+              }
+            };
+
+            showOkCancelAlertDialog(
+                    context: context,
+                    title: "Recover Backup",
+                    message:
+                        "Uploading a recovery file will reset the tournament info/data. Are you sure you wish to proceed?",
+                    okLabel: "Yes",
+                    cancelLabel: "Cancel")
+                .then((value) => {
+                      if (value == OkCancelResult.ok) {recoveryCallback()}
                     });
           },
         ));

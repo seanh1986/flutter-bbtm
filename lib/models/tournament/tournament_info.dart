@@ -1,5 +1,4 @@
 import 'dart:core';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TournamentInfo {
   String id = "";
@@ -27,24 +26,24 @@ class TournamentInfo {
   TournamentInfo.fromJson(String documentId, Map<String, dynamic> json) {
     this.id = documentId;
 
-    final tName = json['Name'] as String?;
+    final tName = json['name'] as String?;
     if (tName != null) {
       this.name = tName;
     }
 
-    final tLocation = json['Location'] as String?;
+    final tLocation = json['location'] as String?;
     if (tLocation != null) {
       this.location = tLocation;
     }
 
-    final Timestamp? tStart = json['DateTimeStart'] as Timestamp?;
+    final String? tStart = json['date_time_start'] as String?;
     if (tStart != null) {
-      this.dateTimeStart = tStart.toDate();
+      this.dateTimeStart = DateTime.parse(tStart);
     }
 
-    final Timestamp? tEnd = json['DateTimeEnd'] as Timestamp?;
+    final String? tEnd = json['date_time_end'] as String?;
     if (tEnd != null) {
-      this.dateTimeEnd = tEnd.toDate();
+      this.dateTimeEnd = DateTime.parse(tEnd);
     }
 
     final tOrganizers = json['organizers'] as List<dynamic>?;
@@ -81,10 +80,10 @@ class TournamentInfo {
   }
 
   Map<String, dynamic> toJson() => {
-        'Name': name,
-        'Location': location,
-        'DateTimeStart': Timestamp.fromDate(dateTimeStart),
-        'DateTimeEnd': Timestamp.fromDate(dateTimeEnd),
+        'name': name,
+        'location': location,
+        'date_time_start': dateTimeStart.toIso8601String(),
+        'date_time_end': dateTimeEnd.toIso8601String(),
         'organizers': organizers.map((e) => e.toJson()).toList(),
         'scoring_details': scoringDetails.toJson(),
         'details_weather': detailsWeather,

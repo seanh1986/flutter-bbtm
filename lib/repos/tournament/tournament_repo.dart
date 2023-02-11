@@ -18,5 +18,7 @@ abstract class TournamentRepository {
 
   Future<void> downloadFile(String filename);
 
+  Future<void> downloadBackupFile(Tournament tournament);
+
   // Stream<Tournament> downloadTournament(TournamentInfo tournamentInfo);
 }

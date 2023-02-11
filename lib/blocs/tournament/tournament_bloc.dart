@@ -26,6 +26,8 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
       yield* _mapToNewTournamentState(event);
     } else if (event is UpdateMatchReportEvent) {
       yield* _mapToUpdateMatchReportState(event);
+    } else if (event is DownloadTournamentBackup) {
+      yield* _mapToDownloadBackup(event);
     }
   }
 
@@ -64,6 +66,12 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
   Stream<TournamentState> _mapToNewTournamentState(
       SelectTournamentEvent event) async* {
     yield NewTournamentState(event.tournament);
+  }
+
+  Stream<TournamentState> _mapToDownloadBackup(
+      DownloadTournamentBackup event) async* {
+    _repo.downloadBackupFile(event.tournament);
+    // _processLoadedTournament(event.tournament);
   }
 
   @override

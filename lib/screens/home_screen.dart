@@ -114,8 +114,9 @@ class _HomePageState extends State<HomePage> {
     fToast = FToast();
     fToast.init(context);
 
-    bool shouldLogout = _tournyBloc.state is NoTournamentState &&
-        _authBloc.state is NotLoggedInAuthState;
+    bool isTournamentSelected = !(_tournyBloc.state is NoTournamentState);
+    bool isUserLoggedIn = !(_authBloc.state is NotLoggedInAuthState);
+    bool shouldLogout = !isTournamentSelected && !isUserLoggedIn;
 
     if (shouldLogout) {
       // Try to go back
