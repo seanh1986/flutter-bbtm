@@ -81,21 +81,34 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
     yield NewTournamentState(event.tournament);
   }
 
-  Future<bool> refreshTournamentData(String tournamentId) async {
-    print("TournamentBloc: refreshTournamentData");
+  // Future<bool> refreshTournamentData(String tournamentId) async {
+  //   print("TournamentBloc: refreshTournamentData");
+
+  //   try {
+  //     Tournament? tournament = await _repo.getTournamentDataAsync(tournamentId);
+  //     bool success = tournament != null;
+
+  //     if (success) {
+  //       add(SelectTournamentEvent(tournament));
+  //     }
+
+  //     return success;
+  //   } catch (e) {
+  //     print(e.toString());
+  //     return false;
+  //   }
+  // }
+
+  Future<Tournament?> getRefreshedTournamentData(String tournamentId) async {
+    print("TournamentBloc: getRefreshedTournamentData");
 
     try {
       Tournament? tournament = await _repo.getTournamentDataAsync(tournamentId);
-      bool success = tournament != null;
 
-      if (success) {
-        add(SelectTournamentEvent(tournament));
-      }
-
-      return success;
+      return tournament;
     } catch (e) {
       print(e.toString());
-      return false;
+      return null;
     }
   }
 

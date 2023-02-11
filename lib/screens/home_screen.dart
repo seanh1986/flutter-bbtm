@@ -139,9 +139,21 @@ class _HomePageState extends State<HomePage> {
   void _handleRefreshTournamentPressed() async {
     print("Refresh Tournament Pressed");
     ToastUtils.show(fToast, "Refreshing Tournament Data");
-    bool success = await _tournyBloc.refreshTournamentData(_tournament.info.id);
-    if (!success) {
-      ToastUtils.showSuccess(fToast, "Tournament refresh failed");
+
+    Tournament? refreshedTournament =
+        await _tournyBloc.getRefreshedTournamentData(_tournament.info.id);
+
+    if (refreshedTournament != null) {
+      ToastUtils.showSuccess(fToast, "Tournament refreshed");
+      _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
+      if (mounted) {
+        setState(() {
+          _tournament = refreshedTournament;
+        });
+      }
+    } else {
+      ToastUtils.showFailed(fToast,
+          "Automatic tournament refresh failed. Please refresh the page.");
     }
   }
 

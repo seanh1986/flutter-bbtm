@@ -169,7 +169,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
 
     if (success) {
       ToastUtils.showSuccess(fToast, "Update successful.");
-      _tournyBloc.refreshTournamentData(widget.tournament.info.id);
+      // _tournyBloc.get(widget.tournament.info.id);
     } else {
       ToastUtils.showFailed(fToast, "Update failed.");
     }
@@ -244,7 +244,18 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                 if (success) {
                   ToastUtils.showSuccess(
                       fToast, "Tournament data successfully updated.");
-                  _tournyBloc.refreshTournamentData(widget.tournament.info.id);
+                  Tournament? refreshedTournament = await _tournyBloc
+                      .getRefreshedTournamentData(widget.tournament.info.id);
+                  if (refreshedTournament != null) {
+                    _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
+
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  } else {
+                    ToastUtils.showFailed(
+                        fToast, "Failed to refresh tournament.");
+                  }
                 } else {
                   ToastUtils.showFailed(
                       fToast, "Tournament data failed to update.");
@@ -399,8 +410,20 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                       if (success) {
                         ToastUtils.showSuccess(
                             fToast, "Recovering Backup successful.");
-                        _tournyBloc
-                            .refreshTournamentData(widget.tournament.info.id);
+
+                        Tournament? refreshedTournament =
+                            await _tournyBloc.getRefreshedTournamentData(
+                                widget.tournament.info.id);
+
+                        if (refreshedTournament != null) {
+                          ToastUtils.showSuccess(
+                              fToast, "Tournament refreshed");
+                          _tournyBloc
+                              .add(SelectTournamentEvent(refreshedTournament));
+                        } else {
+                          ToastUtils.showFailed(fToast,
+                              "Automatic tournament refresh failed. Please refresh the page.");
+                        }
                       } else {
                         ToastUtils.showFailed(
                             fToast, "Recovering Backup failed.");

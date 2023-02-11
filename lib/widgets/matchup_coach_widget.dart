@@ -425,17 +425,19 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       if (updateSuccess) {
         ToastUtils.showSuccess(fToast, "Uploaded Match Report!");
 
-        bool refreshSuccess =
-            await _tournyBloc.refreshTournamentData(_tournament.info.id);
+        Tournament? refreshedTournament =
+            await _tournyBloc.getRefreshedTournamentData(_tournament.info.id);
 
-        if (!refreshSuccess) {
+        if (refreshedTournament != null) {
+          _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
+          if (mounted) {
+            setState(() {
+              _tournament = refreshedTournament;
+            });
+          }
+        } else {
           ToastUtils.showFailed(fToast,
               "Automatic tournament refresh failed. Please refresh the page.");
-        } else {
-          // Refresh UI
-          if (mounted) {
-            setState(() {});
-          }
         }
       } else {
         ToastUtils.showFailed(fToast,
