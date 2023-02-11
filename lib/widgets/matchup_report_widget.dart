@@ -1,14 +1,14 @@
 import 'dart:collection';
+import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/races.dart';
-import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
-import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 // ignore: must_be_immutable
@@ -66,7 +66,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   final double fabSize = kIsWeb ? 25.0 : 15.0;
   final double raceIconSize = kIsWeb ? 50.0 : 30.0;
 
-  TournamentRepository _repo = FirebaseTournamentRepository();
+  late TournamentBloc _tournyBloc;
 
   late FToast fToast;
 
@@ -77,14 +77,22 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   void initState() {
     super.initState();
 
+    _participant = widget.participant;
+    _state = widget.state;
+
     fToast = FToast();
     fToast.init(context);
   }
 
   @override
+  void dispose() {
+    _tournyBloc.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Refresh state
-    refreshState();
+    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
 
     return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -104,15 +112,16 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
         child: _itemHeader(participant));
   }
 
-  void _handleRosterDownload() {
+  void _handleRosterDownload() async {
     fToast.init(context);
     if (isDownloaded) {
       ToastUtils.showFailed(fToast, "Already Downloaded: " + _rosterFileName);
       return;
     }
     ToastUtils.show(fToast, "Downloading: " + _rosterFileName);
-    isDownloaded = true;
-    _repo.downloadFile(_rosterFileName);
+
+    isDownloaded =
+        await _tournyBloc.downloadFile(DownloadFile(_rosterFileName));
   }
 
   Widget _itemHeader(IMatchupParticipant participant) {
@@ -140,10 +149,13 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
             onPressed: () => {_handleRosterDownload()});
       } else {
         try {
-          _repo.getFileUrl(participant.rosterFileName).then((value) => {
-                setState(() {
-                  _rosterFileName = participant.rosterFileName;
-                })
+          _tournyBloc.getFileUrl(participant.rosterFileName).then((value) => {
+                if (mounted)
+                  {
+                    setState(() {
+                      _rosterFileName = participant.rosterFileName;
+                    })
+                  }
               });
         } catch (e) {
           // Do nothing
@@ -239,9 +251,11 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
             onPressed: _editableState() // only click-able in editing mode
                 ? () {
                     if (widget.counts.containsKey(name)) {
-                      setState(() {
-                        widget.counts.update(name, (value) => value + 1);
-                      });
+                      if (mounted) {
+                        setState(() {
+                          widget.counts.update(name, (value) => value + 1);
+                        });
+                      }
                     }
                   }
                 : null,
@@ -270,9 +284,11 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
                 ? () {
                     if (widget.counts.containsKey(name) &&
                         widget.counts[name]! > 0) {
-                      setState(() {
-                        widget.counts.update(name, (value) => value - 1);
-                      });
+                      if (mounted) {
+                        setState(() {
+                          widget.counts.update(name, (value) => value - 1);
+                        });
+                      }
                     }
                   }
                 : null,
@@ -297,10 +313,5 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   bool _hideFabs() {
     return _state == UploadState.NotAuthorized ||
         _state == UploadState.UploadedConfirmed;
-  }
-
-  void refreshState() {
-    _participant = widget.participant;
-    _state = widget.state;
   }
 }

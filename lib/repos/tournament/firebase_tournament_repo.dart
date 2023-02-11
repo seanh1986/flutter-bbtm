@@ -79,54 +79,67 @@ class FirebaseTournamentRepository extends TournamentRepository {
   // }
 
   @override
-  Future<void> updateTournamentData(Tournament tournament) async {
-    Map<String, dynamic> jsonA = tournament.info.toJson();
+  Future<bool> updateTournamentData(Tournament tournament) async {
+    try {
+      Map<String, dynamic> jsonA = tournament.info.toJson();
 
-    jsonA.putIfAbsent("data", () => tournament.toJson());
+      jsonA.putIfAbsent("data", () => tournament.toJson());
 
-    Map<String, Object?> json =
-        jsonA.map((key, value) => MapEntry<String, Object?>(key, value));
+      Map<String, Object?> json =
+          jsonA.map((key, value) => MapEntry<String, Object?>(key, value));
 
-    return _tournamentInfoRef.doc(tournament.info.id).set(json);
+      await _tournamentInfoRef.doc(tournament.info.id).set(json);
+
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   @override
-  Future<void> updateCoachMatchReport(UpdateMatchReportEvent event) async {
-    Tournament dbTournament = await _tournamentInfoRef
-        .doc(event.tournament.info.id)
-        .get()
-        .then((value) => _parseTournamentResponse(value));
+  Future<bool> updateCoachMatchReport(UpdateMatchReportEvent event) async {
+    try {
+      var tInfoRef = await _tournamentInfoRef.doc(event.tournament.info.id);
 
-    if (dbTournament.coachRounds.length !=
-        event.tournament.coachRounds.length) {
-      return;
+      var doc = await tInfoRef.get();
+
+      Tournament dbTournament = _parseTournamentResponse(doc);
+
+      if (dbTournament.coachRounds.length !=
+          event.tournament.coachRounds.length) {
+        return false;
+      }
+
+      int roundIdx = dbTournament.coachRounds.length - 1;
+
+      int matchIdx = dbTournament.coachRounds.last.matches.indexWhere((e) =>
+          e.awayNafName.toLowerCase() ==
+              event.matchup.awayNafName.toLowerCase() &&
+          e.homeNafName.toLowerCase() ==
+              event.matchup.homeNafName.toLowerCase());
+
+      if (roundIdx < 0 || matchIdx < 0) {
+        return false;
+      }
+
+      if (event.isHome) {
+        dbTournament.coachRounds[roundIdx].matches[matchIdx]
+            .homeReportedResults = event.matchup.homeReportedResults;
+      } else if (event.isAdmin) {
+        dbTournament.coachRounds[roundIdx].matches[matchIdx]
+            .homeReportedResults = event.matchup.homeReportedResults;
+        dbTournament.coachRounds[roundIdx].matches[matchIdx]
+            .awayReportedResults = event.matchup.awayReportedResults;
+      } else {
+        dbTournament.coachRounds[roundIdx].matches[matchIdx]
+            .awayReportedResults = event.matchup.awayReportedResults;
+      }
+
+      updateTournamentData(dbTournament);
+      return true;
+    } catch (_) {
+      return false;
     }
-
-    int roundIdx = dbTournament.coachRounds.length - 1;
-
-    int matchIdx = dbTournament.coachRounds.last.matches.indexWhere((e) =>
-        e.awayNafName.toLowerCase() ==
-            event.matchup.awayNafName.toLowerCase() &&
-        e.homeNafName.toLowerCase() == event.matchup.homeNafName.toLowerCase());
-
-    if (roundIdx < 0 || matchIdx < 0) {
-      return;
-    }
-
-    if (event.isHome) {
-      dbTournament.coachRounds[roundIdx].matches[matchIdx].homeReportedResults =
-          event.matchup.homeReportedResults;
-    } else if (event.isAdmin) {
-      dbTournament.coachRounds[roundIdx].matches[matchIdx].homeReportedResults =
-          event.matchup.homeReportedResults;
-      dbTournament.coachRounds[roundIdx].matches[matchIdx].awayReportedResults =
-          event.matchup.awayReportedResults;
-    } else {
-      dbTournament.coachRounds[roundIdx].matches[matchIdx].awayReportedResults =
-          event.matchup.awayReportedResults;
-    }
-
-    updateTournamentData(dbTournament);
   }
 
   @override
@@ -142,66 +155,96 @@ class FirebaseTournamentRepository extends TournamentRepository {
   }
 
   @override
-  Future<void> downloadFile(String filename) async {
-    if (filename.isEmpty) return;
+  Future<bool> downloadFile(String filename) async {
+    if (filename.isEmpty) {
+      return false;
+    }
     if (kIsWeb) {
-      _downloadFileWeb(filename);
+      return _downloadFileWeb(filename);
     }
     // else {
     //   _downloadFileMobile(filename);
     // }
+
+    return false;
   }
 
-  Future<void> _downloadFileWeb(String filename) async {
-    Uint8List? data = await _storage.ref(filename).getData();
-    if (data == null) return;
-    String encodedData = base64Encode(data);
-
+  Future<bool> _downloadFileWeb(String filename) async {
     try {
+      Uint8List? data = await _storage.ref(filename).getData();
+      if (data == null) {
+        return false;
+      }
+
+      String encodedData = base64Encode(data);
+
       html.AnchorElement(
           href:
               'data:application/octet-stream;charset=utf-8;base64,$encodedData')
         ..setAttribute('download', filename)
         ..click();
+
+      return true;
     } catch (error) {
       print(error);
+      return false;
     }
   }
 
   @override
-  Future<void> downloadBackupFile(Tournament tournament) async {
-    TournamentBackup backup = TournamentBackup(tournament: tournament);
-    String json = jsonEncode(backup);
+  Future<bool> downloadBackupFile(Tournament tournament) async {
+    try {
+      TournamentBackup backup = TournamentBackup(tournament: tournament);
+      String json = jsonEncode(backup);
 
-    String time = DateFormat('yyyy_MM_dd_H_m_s').format(DateTime.now());
-    String fileName = time +
-        "_" +
-        tournament.info.name.replaceAll(" ", "_") +
-        "_" +
-        "round_" +
-        tournament.curRoundNumber().toString() +
-        ".json";
+      String time = DateFormat('yyyy_MM_dd_H_m_s').format(DateTime.now());
+      String fileName = time +
+          "_" +
+          tournament.info.name.replaceAll(" ", "_") +
+          "_" +
+          "round_" +
+          tournament.curRoundNumber().toString() +
+          ".json";
 
-    print(fileName);
+      print(fileName);
 
-    // prepare
-    final bytes = utf8.encode(json);
-    final blob = html.Blob([bytes]);
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    final anchor = html.document.createElement('a') as html.AnchorElement
-      ..href = url
-      ..style.display = 'none'
-      ..download = fileName;
-    html.document.body?.children.add(anchor);
+      // prepare
+      final bytes = utf8.encode(json);
+      final blob = html.Blob([bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.document.createElement('a') as html.AnchorElement
+        ..href = url
+        ..style.display = 'none'
+        ..download = fileName;
+      html.document.body?.children.add(anchor);
 
-    // download
-    anchor.click();
+      // download
+      anchor.click();
 
-    // cleanup
-    html.document.body?.children.remove(anchor);
-    html.Url.revokeObjectUrl(url);
+      // cleanup
+      html.document.body?.children.remove(anchor);
+      html.Url.revokeObjectUrl(url);
+
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<Tournament?> getTournamentDataAsync(String tournamentId) async {
+    try {
+      Tournament t = await _tournamentInfoRef
+          .doc(tournamentId)
+          .get()
+          .then((value) => _parseTournamentResponse(value));
+      return t;
+    } catch (_) {
+      return null;
+    }
   }
 }
+
 
 // Future<void> _downloadFileMobile(String filename) async {
 //   //First you get the documents folder location on the device...

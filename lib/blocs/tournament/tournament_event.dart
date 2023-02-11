@@ -26,40 +26,18 @@ class LoadTournamentEvent extends TournamentEvent {
   String toString() => 'LoadTournamentEvent';
 }
 
-class UpdateMatchReportEvent extends TournamentEvent {
-  final Tournament tournament;
-  final CoachMatchup matchup;
-  late final bool isHome;
-  late final bool isAdmin;
-
-  UpdateMatchReportEvent(this.tournament, this.matchup, this.isHome) {
-    this.isAdmin = false;
-  }
-
-  UpdateMatchReportEvent.admin(this.tournament, this.matchup) {
-    this.isHome = false;
-    this.isAdmin = true;
-  }
-
-  @override
-  List<Object> get props => [tournament, matchup, isHome, isAdmin];
-
-  @override
-  String toString() => 'UpdateMatchReportEvent';
-}
-
 /// Update tournament info or data (also hanles selection/update)
-class UpdateTournamentEvent extends TournamentEvent {
-  final Tournament tournament;
+// class UpdateTournamentEvent extends TournamentEvent {
+//   final Tournament tournament;
 
-  const UpdateTournamentEvent(this.tournament);
+//   const UpdateTournamentEvent(this.tournament);
 
-  @override
-  List<Object> get props => [tournament];
+//   @override
+//   List<Object> get props => [tournament];
 
-  @override
-  String toString() => 'UpdateTournamentEvent';
-}
+//   @override
+//   String toString() => 'UpdateTournamentEvent';
+// }
 
 /// Select tournament & refresh UI
 class SelectTournamentEvent extends TournamentEvent {
@@ -75,14 +53,40 @@ class SelectTournamentEvent extends TournamentEvent {
 }
 
 /// Download tournament backup file
-class DownloadTournamentBackup extends TournamentEvent {
+class DownloadTournamentBackup {
   final Tournament tournament;
 
   const DownloadTournamentBackup(this.tournament);
 
   @override
-  List<Object> get props => [tournament];
+  String toString() => 'DownloadTournamentBackup';
+}
+
+/// Download file
+class DownloadFile {
+  final String fileName;
+
+  const DownloadFile(this.fileName);
 
   @override
-  String toString() => 'DownloadTournamentBackup';
+  String toString() => 'DownloadFile';
+}
+
+class UpdateMatchReportEvent {
+  final Tournament tournament;
+  final CoachMatchup matchup;
+  late final bool isHome;
+  late final bool isAdmin;
+
+  UpdateMatchReportEvent(this.tournament, this.matchup, this.isHome) {
+    this.isAdmin = false;
+  }
+
+  UpdateMatchReportEvent.admin(this.tournament, this.matchup) {
+    this.isHome = false;
+    this.isAdmin = true;
+  }
+
+  @override
+  String toString() => 'UpdateMatchReportEvent';
 }

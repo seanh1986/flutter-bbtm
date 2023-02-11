@@ -140,7 +140,8 @@ class _AppState extends State<App> {
             accentColor: Colors.redAccent,
             cardColor: Colors.lightBlueAccent,
           ),
-          textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
+          textTheme:
+              const TextTheme(bodyMedium: TextStyle(color: Colors.black)),
         ),
         home: TournamentSelectionPage(
           tournamentId: tId,

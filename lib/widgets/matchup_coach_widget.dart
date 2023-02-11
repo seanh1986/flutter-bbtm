@@ -74,30 +74,9 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   void initState() {
     super.initState();
 
-    fToast = FToast();
-    fToast.init(context);
-
     _tournament = widget.tournament;
     _authUser = widget.authUser;
     _matchup = widget.matchup;
-
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-
-    _reportWithStatus = _matchup.getReportedMatchStatus();
-
-    Authorization authorization =
-        _tournament.getMatchAuthorization(_matchup, _authUser);
-
-    if (_state == UploadState.NotYetSet) {
-      _state = _getMatchUploadState(_reportWithStatus, authorization);
-    }
-
-    print("Matchup: " +
-        _matchup.homeNafName +
-        " vs. " +
-        _matchup.awayNafName +
-        " -> " +
-        _state.toString());
   }
 
   @override
@@ -137,6 +116,24 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
   @override
   Widget build(BuildContext context) {
+    fToast = FToast();
+    fToast.init(context);
+    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
+
+    _reportWithStatus = _matchup.getReportedMatchStatus();
+
+    Authorization authorization =
+        _tournament.getMatchAuthorization(_matchup, _authUser);
+
+    _state = _getMatchUploadState(_reportWithStatus, authorization);
+
+    print("Matchup: " +
+        _matchup.homeNafName +
+        " vs. " +
+        _matchup.awayNafName +
+        " -> " +
+        _state.toString());
+
     homeReportWidget = MatchupReportWidget(
         reportedMatch: _reportWithStatus,
         participant: _matchup.home(_tournament),
@@ -151,16 +148,6 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
     return Container(
         alignment: FractionalOffset.center, child: _coachMatchupWidget());
-
-    // return BlocBuilder<TournamentBloc, TournamentState>(
-    //     bloc: _tournyBloc,
-    //     builder: (selectContext, selectState) {
-    //       if (selectState is NewTournamentState) {
-    //         _tournament = selectState.tournament;
-
-    //       }
-
-    //     });
   }
 
   Widget _coachMatchupWidget() {
@@ -352,14 +339,16 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     switch (_state) {
       case UploadState.Editing:
       case UploadState.CanConfirm:
-        _uploadToServer();
-        break;
       case UploadState.CanEdit:
       case UploadState.Error:
-        setState(() {
-          _state = UploadState.Editing;
-        });
+        _uploadToServer();
         break;
+      // case UploadState.CanEdit:
+      // case UploadState.Error:
+      //   setState(() {
+      //     _state = UploadState.Editing;
+      //   });
+      //   break;
       case UploadState.UploadedConfirmed:
       // case UploadState.UploadedAwaiting:
       case UploadState.NotAuthorized:
@@ -368,12 +357,13 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     }
   }
 
-  void _uploadToServer() {
+  void _uploadToServer() async {
     bool? isHome; // fall back (e.g. for admin)
     if (_matchup.isHome(_authUser.nafName)) {
       isHome = true;
       _matchup.homeReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.homeReportedResults.homeCas = homeReportWidget.getCas();
+
       _matchup.homeReportedResults.awayTds = awayReportWidget.getTds();
       _matchup.homeReportedResults.awayCas = awayReportWidget.getCas();
       _matchup.homeReportedResults.reported = true;
@@ -381,6 +371,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       isHome = false;
       _matchup.awayReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.awayReportedResults.homeCas = homeReportWidget.getCas();
+
       _matchup.awayReportedResults.awayTds = awayReportWidget.getTds();
       _matchup.awayReportedResults.awayCas = awayReportWidget.getCas();
       _matchup.awayReportedResults.reported = true;
@@ -392,25 +383,52 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     else {
       _matchup.homeReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.homeReportedResults.homeCas = homeReportWidget.getCas();
+
       _matchup.homeReportedResults.awayTds = awayReportWidget.getTds();
       _matchup.homeReportedResults.awayCas = awayReportWidget.getCas();
       _matchup.homeReportedResults.reported = true;
 
       _matchup.awayReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.awayReportedResults.homeCas = homeReportWidget.getCas();
+
       _matchup.awayReportedResults.awayTds = awayReportWidget.getTds();
       _matchup.awayReportedResults.awayCas = awayReportWidget.getCas();
       _matchup.awayReportedResults.reported = true;
     }
 
-    if (isHome != null) {
-      _tournyBloc
-          .add(new UpdateMatchReportEvent(_tournament, _matchup, isHome));
-    } else {
-      _tournyBloc.add(new UpdateMatchReportEvent.admin(_tournament, _matchup));
-    }
+    try {
+      UpdateMatchReportEvent event = isHome != null
+          ? new UpdateMatchReportEvent(_tournament, _matchup, isHome)
+          : new UpdateMatchReportEvent.admin(_tournament, _matchup);
 
-    ToastUtils.show(fToast, "Uploading Match Report!");
+      ToastUtils.show(fToast, "Uploading Match Report!");
+
+      //_tournyBloc.add(event);
+
+      bool updateSuccess = await _tournyBloc.updateMatchEvent(event);
+      if (updateSuccess) {
+        ToastUtils.showSuccess(fToast, "Uploaded Match Report!");
+
+        bool refreshSuccess =
+            await _tournyBloc.refreshTournamentData(_tournament.info.id);
+
+        if (!refreshSuccess) {
+          ToastUtils.showFailed(fToast,
+              "Automatic tournament refresh failed. Please refresh the page.");
+        } else {
+          // Refresh UI
+          if (mounted) {
+            setState(() {});
+          }
+        }
+      } else {
+        ToastUtils.showFailed(fToast,
+            "Uploading Match Failed. Please reload the page and try again.");
+      }
+    } catch (_) {
+      ToastUtils.showFailed(fToast,
+          "Uploading Match Failed. Please reload the page and try again.");
+    }
 
     // setState(() {
     //   _state = UploadState.CanEdit;

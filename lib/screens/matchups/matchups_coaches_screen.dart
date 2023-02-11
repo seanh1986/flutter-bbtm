@@ -1,10 +1,8 @@
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/widgets/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class CoachMatchupsPage extends StatefulWidget {
@@ -28,15 +26,22 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
 
   FToast? fToast;
 
-  late TournamentBloc _tournyBloc;
-
   @override
   void initState() {
     super.initState();
 
     fToast = FToast();
     fToast!.init(context);
+  }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  // TODO: Add CurCoach widget at top if non-null
+  @override
+  Widget build(BuildContext context) {
     _tournament = widget.tournament;
     _authUser = widget.authUser;
 
@@ -44,60 +49,36 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
       _matchups = List.from(_tournament.coachRounds.last.matches);
     }
 
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-  }
+    if (_matchups.isEmpty) {
+      return _noMatchUpsYet();
+    }
 
-  @override
-  void dispose() {
-    _tournyBloc.close();
-    super.dispose();
-  }
+    List<Widget> matchupWidgets = [
+      SizedBox(height: 10),
+      _getRoundTitle(),
+      SizedBox(height: 10)
+    ];
 
-  // TODO: Add CurCoach widget at top if non-null
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<TournamentBloc, TournamentState>(
-        bloc: _tournyBloc,
-        builder: (selectContext, selectState) {
-          if (selectState is NewTournamentState) {
-            _tournament = selectState.tournament;
+    _matchups.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
+          tournament: _tournament,
+          authUser: _authUser,
+          matchup: m,
+        )));
 
-            if (_tournament.coachRounds.isNotEmpty) {
-              _matchups = List.from(_tournament.coachRounds.last.matches);
-            }
-          }
-
-          if (_matchups.isEmpty) {
-            return _noMatchUpsYet();
-          }
-
-          List<Widget> matchupWidgets = [
-            SizedBox(height: 10),
-            _getRoundTitle(),
-            SizedBox(height: 10)
-          ];
-
-          _matchups.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
-                tournament: _tournament,
-                authUser: _authUser,
-                matchup: m,
-              )));
-
-          return Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(
-                    './assets/images/background/background_football_field.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Scaffold(
-                backgroundColor: Colors.transparent,
-                body: ListView(
-                  children: matchupWidgets,
-                )),
-          );
-        });
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(
+              './assets/images/background/background_football_field.png'),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: ListView(
+            children: matchupWidgets,
+          )),
+    );
   }
 
   Widget _getRoundTitle() {

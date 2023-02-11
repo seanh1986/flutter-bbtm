@@ -44,18 +44,6 @@ class _RankingsPage extends State<RankingsPage> {
     }
 
     return _coachRankingsWithToggles();
-    // return BlocBuilder<TournamentBloc, TournamentState>(
-    //     bloc: _tournyBloc,
-    //     builder: (selectContext, selectState) {
-    //       if (selectState is NewTournamentState) {
-    //         _tournament = selectState.tournament;
-    //       }
-    //       if (_tournament.useSquads) {
-    //         return _squadAndCoachTabs();
-    //       }
-
-    //       return _coachRankingsWithToggles();
-    //     });
   }
 
   List<Fields> _getFieldsCombined() {

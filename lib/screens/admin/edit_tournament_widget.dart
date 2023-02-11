@@ -4,10 +4,12 @@ import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class EditTournamentWidget extends StatefulWidget {
   final Tournament tournament;
@@ -53,11 +55,14 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
 
   late PaginatedDataTable _coachDataTable;
 
+  late FToast fToast;
+
   @override
   void initState() {
     super.initState();
 
-    _initFromTournament(widget.tournament);
+    fToast = FToast();
+    fToast.init(context);
 
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
   }
@@ -78,6 +83,8 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
 
   @override
   Widget build(BuildContext context) {
+    _initFromTournament(widget.tournament);
+
     return Container(
         //height: MediaQuery.of(context).size.height * 0.5,
         child: SingleChildScrollView(
@@ -389,9 +396,18 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
             });
   }
 
-  void _processUpdate(VoidCallback confirmedUpdateCallback) {
+  void _processUpdate(VoidCallback confirmedUpdateCallback) async {
     confirmedUpdateCallback();
-    widget.tournyBloc.add(UpdateTournamentEvent(widget.tournament));
+
+    ToastUtils.show(fToast, "Updating Tournament Data");
+
+    bool success = await widget.tournyBloc.updateTournament(widget.tournament);
+
+    if (success) {
+      ToastUtils.show(fToast, "Update successful.");
+    } else {
+      ToastUtils.show(fToast, "Update failed.");
+    }
   }
 }
 

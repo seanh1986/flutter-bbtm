@@ -160,10 +160,19 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
             });
   }
 
-  void _processUpdate(VoidCallback confirmedUpdateCallback) {
+  void _processUpdate(VoidCallback confirmedUpdateCallback) async {
     confirmedUpdateCallback();
-    widget.tournyBloc.add(UpdateTournamentEvent(widget.tournament));
+
     ToastUtils.show(fToast, "Updating Tournament Data");
+
+    bool success = await _tournyBloc.updateTournament(widget.tournament);
+
+    if (success) {
+      ToastUtils.showSuccess(fToast, "Update successful.");
+      _tournyBloc.refreshTournamentData(widget.tournament.info.id);
+    } else {
+      ToastUtils.showFailed(fToast, "Update failed.");
+    }
   }
 
   ExpansionTile _advanceOrDiscardRound(BuildContext context) {
@@ -188,7 +197,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
         padding: EdgeInsets.all(10),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Colors.blue,
+            backgroundColor: Colors.blue,
             textStyle: TextStyle(color: Colors.white),
           ),
           child: Text('Advance to Round: ' +
@@ -201,7 +210,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                 (widget.tournament.curRoundNumber() + 1).toString() +
                 "?");
 
-            VoidCallback advanceCallback = () {
+            VoidCallback advanceCallback = () async {
               widget.tournament.processRound();
 
               String msg;
@@ -227,8 +236,19 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                   context: context, title: "Advance Round", message: msg);
 
               if (pairingError == RoundPairingError.NoError) {
-                widget.tournyBloc.add(UpdateTournamentEvent(widget.tournament));
                 ToastUtils.show(fToast, "Updating Tournament Data");
+
+                bool success =
+                    await _tournyBloc.updateTournament(widget.tournament);
+
+                if (success) {
+                  ToastUtils.showSuccess(
+                      fToast, "Tournament data successfully updated.");
+                  _tournyBloc.refreshTournamentData(widget.tournament.info.id);
+                } else {
+                  ToastUtils.showFailed(
+                      fToast, "Tournament data failed to update.");
+                }
               }
             };
 
@@ -239,8 +259,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                     okLabel: "Advance",
                     cancelLabel: "Cancel")
                 .then((value) => {
-                      if (value == OkCancelResult.ok)
-                        {_processUpdate(advanceCallback)}
+                      if (value == OkCancelResult.ok) {advanceCallback()}
                     });
           },
         ));
@@ -252,7 +271,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
         padding: EdgeInsets.all(10),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Colors.blue,
+            backgroundColor: Colors.blue,
             textStyle: TextStyle(color: Colors.white),
           ),
           child: Text('Discard Current Round (' +
@@ -290,14 +309,23 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
         padding: EdgeInsets.all(10),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Colors.blue,
+            backgroundColor: Colors.blue,
             textStyle: TextStyle(color: Colors.white),
           ),
           child: Text('Download Backup'),
           onPressed: () {
-            VoidCallback downloadBackupCallback = () {
-              _tournyBloc.add(DownloadTournamentBackup(widget.tournament));
-              ToastUtils.showSuccess(fToast, "Downloading Backup");
+            VoidCallback downloadBackupCallback = () async {
+              ToastUtils.show(fToast, "Downloading Backup");
+
+              bool success = await _tournyBloc.downloadTournamentBackup(
+                  DownloadTournamentBackup(widget.tournament));
+
+              if (success) {
+                ToastUtils.showSuccess(
+                    fToast, "Backup successfully downloaded");
+              } else {
+                ToastUtils.showFailed(fToast, "Backup failed to download");
+              }
             };
 
             showOkCancelAlertDialog(
@@ -321,7 +349,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
         padding: EdgeInsets.all(10),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Colors.blue,
+            backgroundColor: Colors.blue,
             textStyle: TextStyle(color: Colors.white),
           ),
           child: Text('Recover Backup'),
@@ -362,10 +390,21 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                     sb.writeln(
                         "Please confirm that you wish to OVERWRITE your tournament with the recovery file. This process cannot be undone.");
 
-                    VoidCallback confirmedRecoveryCallback = () {
-                      widget.tournyBloc
-                          .add(UpdateTournamentEvent(tournyBackup.tournament));
-                      ToastUtils.showSuccess(fToast, "Recovering Backup");
+                    VoidCallback confirmedRecoveryCallback = () async {
+                      ToastUtils.show(fToast, "Recovering Backup");
+
+                      bool success = await widget.tournyBloc
+                          .updateTournament(tournyBackup.tournament);
+
+                      if (success) {
+                        ToastUtils.showSuccess(
+                            fToast, "Recovering Backup successful.");
+                        _tournyBloc
+                            .refreshTournamentData(widget.tournament.info.id);
+                      } else {
+                        ToastUtils.showFailed(
+                            fToast, "Recovering Backup failed.");
+                      }
                     };
 
                     showOkCancelAlertDialog(
@@ -448,9 +487,8 @@ class CoachRoundDataSource extends DataTableSource {
     Text textStatus = Text(_convertToString(report));
 
     TextEditingController homeTdController = TextEditingController(
-        text: report.status != ReportedMatchStatus.NoReportsYet
-            ? report.homeTds.toString()
-            : "");
+        text: _getValue(report.status, m.homeReportedResults.homeTds,
+            m.awayReportedResults.homeTds));
 
     ValueChanged<String> homeTdCallback = (value) {
       int td = int.parse(homeTdController.text);
@@ -467,9 +505,8 @@ class CoachRoundDataSource extends DataTableSource {
         onChanged: homeTdCallback);
 
     TextEditingController awayTdController = TextEditingController(
-        text: report.status != ReportedMatchStatus.NoReportsYet
-            ? report.awayTds.toString()
-            : "");
+        text: _getValue(report.status, m.homeReportedResults.awayTds,
+            m.awayReportedResults.awayTds));
 
     ValueChanged<String> awayTdCallback = (value) {
       int td = int.parse(awayTdController.text);
@@ -486,9 +523,8 @@ class CoachRoundDataSource extends DataTableSource {
         onChanged: awayTdCallback);
 
     TextEditingController homeCasController = TextEditingController(
-        text: report.status != ReportedMatchStatus.NoReportsYet
-            ? report.homeCas.toString()
-            : "");
+        text: _getValue(report.status, m.homeReportedResults.homeCas,
+            m.awayReportedResults.homeCas));
 
     ValueChanged<String> homeCasCallback = (value) {
       int cas = int.parse(homeCasController.text);
@@ -505,9 +541,8 @@ class CoachRoundDataSource extends DataTableSource {
         onChanged: homeCasCallback);
 
     TextEditingController awayCasController = TextEditingController(
-        text: report.status != ReportedMatchStatus.NoReportsYet
-            ? report.awayCas.toString()
-            : "");
+        text: _getValue(report.status, m.homeReportedResults.awayCas,
+            m.awayReportedResults.awayCas));
 
     ValueChanged<String> awayCasCallback = (value) {
       int cas = int.parse(awayCasController.text);
@@ -524,7 +559,7 @@ class CoachRoundDataSource extends DataTableSource {
         onChanged: awayCasCallback);
 
     TextEditingController homeSportController = TextEditingController(
-        text: report.status != ReportedMatchStatus.NoReportsYet
+        text: _hasReported(report.status, false)
             ? m.awayReportedResults.bestSportOppRank.toString()
             : "");
 
@@ -541,7 +576,7 @@ class CoachRoundDataSource extends DataTableSource {
         onChanged: homeSportCallback);
 
     TextEditingController awaySportController = TextEditingController(
-        text: report.status != ReportedMatchStatus.NoReportsYet
+        text: _hasReported(report.status, true)
             ? m.homeReportedResults.bestSportOppRank.toString()
             : "");
 
@@ -579,4 +614,31 @@ class CoachRoundDataSource extends DataTableSource {
 
   @override
   int get selectedRowCount => 0;
+
+  bool _hasReported(ReportedMatchStatus status, bool home) {
+    if (home) {
+      return status == ReportedMatchStatus.HomeReported ||
+          status == ReportedMatchStatus.BothReportedAgree ||
+          status == ReportedMatchStatus.BothReportedConflict;
+    } else {
+      return status == ReportedMatchStatus.AwayReported ||
+          status == ReportedMatchStatus.BothReportedAgree ||
+          status == ReportedMatchStatus.BothReportedConflict;
+    }
+  }
+
+  String _getValue(ReportedMatchStatus status, int homeVal, int awayVal) {
+    switch (status) {
+      case ReportedMatchStatus.BothReportedConflict:
+        return homeVal == awayVal ? homeVal.toString() : "";
+      case ReportedMatchStatus.AwayReported:
+        return awayVal.toString();
+      case ReportedMatchStatus.HomeReported:
+      case ReportedMatchStatus.BothReportedAgree:
+        return homeVal.toString();
+      case ReportedMatchStatus.NoReportsYet:
+      default:
+        return "";
+    }
+  }
 }
