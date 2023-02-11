@@ -88,7 +88,7 @@ class _LoginParticipantPage extends State<LoginParticipantPage> {
                       ),
                       child: Text('Sign in'),
                       onPressed: () {
-                        String nafName = nafNameController.text;
+                        String nafName = nafNameController.text.trim();
 
                         AuthUser authUser;
                         if (nafName.trim().isEmpty) {
