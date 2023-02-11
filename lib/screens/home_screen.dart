@@ -127,43 +127,6 @@ class _HomePageState extends State<HomePage> {
     }
 
     return _generateUi();
-
-    // return BlocBuilder<TournamentBloc, TournamentState>(
-    //     bloc: _tournyBloc,
-    //     builder: (tournyContext, tournyState) {
-    //       return BlocBuilder<AuthBloc, AuthState>(
-    //           bloc: _authBloc,
-    //           builder: (authContext, authState) {
-    //             bool shouldLogout = tournyState is NoTournamentState ||
-    //                 authState is NotLoggedInAuthState;
-
-    //             if (shouldLogout) {
-    //               // Try to go back
-    //               SchedulerBinding.instance.addPostFrameCallback((_) {
-    //                 Navigator.pushReplacement(
-    //                     context,
-    //                     MaterialPageRoute(
-    //                         builder: (context) => TournamentSelectionPage()));
-    //               });
-    //             }
-
-    //             if (authState is LoggedInAuthState) {
-    //               _authUser = authState.authUser;
-    //             } else {
-    //               _authUser = AuthUser();
-    //             }
-
-    //             if (tournyState is NewTournamentState) {
-    //               _tournament = tournyState.tournament;
-
-    //               // SchedulerBinding.instance.addPostFrameCallback((_) {
-    //               //   ToastUtils.showSuccess(fToast, "Tournament Data Loaded");
-    //               // });
-    //             }
-
-    //             return _generateUi();
-    //           });
-    //     });
   }
 
   void _handleLogoutPressed() {
@@ -173,10 +136,13 @@ class _HomePageState extends State<HomePage> {
     _tournyBloc.add(NoTournamentEvent());
   }
 
-  void _handleRefreshTournamentPressed() {
+  void _handleRefreshTournamentPressed() async {
     print("Refresh Tournament Pressed");
     ToastUtils.show(fToast, "Refreshing Tournament Data");
-    _tournyBloc.add(LoadTournamentEvent(_tournament.info));
+    bool success = await _tournyBloc.refreshTournamentData(_tournament.info.id);
+    if (!success) {
+      ToastUtils.showSuccess(fToast, "Tournament refresh failed");
+    }
   }
 
   Widget _generateUi() {

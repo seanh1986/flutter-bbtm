@@ -184,8 +184,10 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   Widget? _getBestSportWidget(BuildContext context) {
-    bool enableEditing =
-        _state == UploadState.Editing || _state == UploadState.Error;
+    // bool enableEditing =
+    //     _state == UploadState.Editing || _state == UploadState.Error;
+
+    bool enableEditing = true;
 
     Widget? bestSportWidget;
 
@@ -271,12 +273,26 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                           print("bestSportOppRank: " +
                               widget.result.bestSportOppRank.toString());
 
+                          ReportedMatchResult? result;
+                          bool? isHome;
+
                           if (_matchup.isHome(_authUser.nafName)) {
-                            _matchup.homeReportedResults.bestSportOppRank =
-                                widget.result.bestSportOppRank;
+                            result = _matchup.homeReportedResults;
+                            isHome = true;
                           } else if (_matchup.isAway(_authUser.nafName)) {
-                            _matchup.awayReportedResults.bestSportOppRank =
+                            result = _matchup.awayReportedResults;
+                            isHome = false;
+                          }
+
+                          if (result != null) {
+                            result.bestSportOppRank =
                                 widget.result.bestSportOppRank;
+
+                            if (result.reported && isHome != null) {
+                              _tournyBloc.updateMatchEvent(
+                                  UpdateMatchReportEvent(
+                                      _tournament, _matchup, isHome));
+                            }
                           }
 
                           Navigator.of(context, rootNavigator: true)

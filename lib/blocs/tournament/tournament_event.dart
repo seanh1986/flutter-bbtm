@@ -26,19 +26,6 @@ class LoadTournamentEvent extends TournamentEvent {
   String toString() => 'LoadTournamentEvent';
 }
 
-/// Update tournament info or data (also hanles selection/update)
-// class UpdateTournamentEvent extends TournamentEvent {
-//   final Tournament tournament;
-
-//   const UpdateTournamentEvent(this.tournament);
-
-//   @override
-//   List<Object> get props => [tournament];
-
-//   @override
-//   String toString() => 'UpdateTournamentEvent';
-// }
-
 /// Select tournament & refresh UI
 class SelectTournamentEvent extends TournamentEvent {
   final Tournament tournament;
