@@ -8,6 +8,7 @@ import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:xml/xml.dart';
 
 enum Authorization {
@@ -525,6 +526,72 @@ Both teams have enjoyed a pre-match party. All players on both teams gain the Dr
         "catleesi's team", 26640));
     addCoach(Coach("clockwerks77", "", "Adam(D.Hall friend) Stephens",
         Race.Lizardmen, "clockwerks77's team", 34310));
+  }
+
+  XmlDocument generateNafUploadFile() {
+    OrganizerInfo mainOrganizer = info.organizers.firstWhere((o) => o.primary);
+    DateTime roundTime = info.dateTimeStart;
+    print("Start Time: " + DateFormat("y-M-d H:mm").format(roundTime));
+
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0"');
+
+    Map<String, String> nafReportAttribute = {};
+    nafReportAttribute.putIfAbsent(
+        "xmlns:blo=", () => "\"http://www.bloodbowl.net\"");
+
+    builder.element("nafReport", attributes: nafReportAttribute, nest: () {
+      // Organizer
+      builder.element("organizer", nest: mainOrganizer.primary);
+      //Coaches
+      builder.element("coaches", nest: () {
+        _coaches.forEach((c) {
+          builder.element("coach", nest: () {
+            builder.element("name", nest: c.nafName);
+            builder.element("number", nest: c.nafNumber);
+            builder.element("team", nest: c.raceName());
+          });
+        });
+      });
+
+      // Matches
+      coachRounds.forEach((cr) {
+        String roundTimeStr = DateFormat("y-M-d H:mm").format(roundTime);
+
+        print("Round " + cr.round().toString() + " time: " + roundTimeStr);
+
+        // For each Match
+        cr.matches.forEach((m) {
+          Coach c1 = getCoach(m.homeNafName)!;
+          Coach c2 = getCoach(m.awayNafName)!;
+
+          ReportedMatchResultWithStatus r = m.getReportedMatchStatus();
+
+          builder.element("game", nest: () {
+            builder.element("timeStamp", nest: roundTimeStr);
+            builder.element("playerRecord", nest: () {
+              builder.element("name", nest: c1.nafName);
+              builder.element("number", nest: c1.nafNumber);
+              builder.element("teamRating", nest: 100);
+              builder.element("touchDowns", nest: r.homeTds);
+              builder.element("badlyHurt", nest: r.homeCas);
+            });
+            builder.element("playerRecord", nest: () {
+              builder.element("name", nest: c2.nafName);
+              builder.element("number", nest: c2.nafNumber);
+              builder.element("teamRating", nest: 100);
+              builder.element("touchDowns", nest: r.awayTds);
+              builder.element("badlyHurt", nest: r.awayCas);
+            });
+          });
+        });
+
+        roundTime = roundTime.add(Duration(hours: 2, minutes: 30));
+      });
+    });
+
+    XmlDocument xml = builder.buildDocument();
+    return xml;
   }
 
   // factory Tournament.fromXml(XmlDocument xml, TournamentInfo info) {

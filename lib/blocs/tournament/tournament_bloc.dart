@@ -139,6 +139,10 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
     return _repo.downloadBackupFile(event.tournament);
   }
 
+  Future<bool> downloadNafUploadFile(Tournament tournament) async {
+    return _repo.downloadNafUploadFile(tournament);
+  }
+
   Future<bool> downloadFile(DownloadFile event) async {
     return _repo.downloadFile(event.fileName);
   }

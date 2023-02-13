@@ -186,6 +186,8 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
         _downloadFileBackup(context),
         SizedBox(width: 20),
         _recoverBackupFromFile(context),
+        SizedBox(width: 20),
+        _downloadNafUploadFile(context),
       ]),
       SizedBox(height: 10),
     ]);
@@ -462,6 +464,45 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                     cancelLabel: "Cancel")
                 .then((value) => {
                       if (value == OkCancelResult.ok) {recoveryCallback()}
+                    });
+          },
+        ));
+  }
+
+  Widget _downloadNafUploadFile(BuildContext context) {
+    return Container(
+        height: 60,
+        padding: EdgeInsets.all(10),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            textStyle: TextStyle(color: Colors.white),
+          ),
+          child: Text('Download Naf Upload'),
+          onPressed: () {
+            VoidCallback downloadNafUploadCallback = () async {
+              ToastUtils.show(fToast, "Downloading Naf Upload File");
+
+              bool success =
+                  await _tournyBloc.downloadNafUploadFile(widget.tournament);
+
+              if (success) {
+                ToastUtils.showSuccess(fToast, "Naf Upload downloaded");
+              } else {
+                ToastUtils.showFailed(fToast, "Naf Upload failed to download");
+              }
+            };
+
+            showOkCancelAlertDialog(
+                    context: context,
+                    title: "Download Naf Upload File",
+                    message:
+                        "This will download a the naf upload file which can be used to upload tournament results",
+                    okLabel: "Download",
+                    cancelLabel: "Cancel")
+                .then((value) => {
+                      if (value == OkCancelResult.ok)
+                        {_processUpdate(downloadNafUploadCallback)}
                     });
           },
         ));

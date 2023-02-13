@@ -17,5 +17,7 @@ abstract class TournamentRepository {
 
   Future<bool> downloadBackupFile(Tournament tournament);
 
+  Future<bool> downloadNafUploadFile(Tournament tournament);
+
   Future<Tournament?> getTournamentDataAsync(String tournamentId);
 }

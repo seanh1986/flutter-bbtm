@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:html' as html;
 
 import 'package:intl/intl.dart';
+import 'package:xml/xml.dart';
 
 class FirebaseTournamentRepository extends TournamentRepository {
   FirebaseStorage _storage = FirebaseStorage.instance;
@@ -208,8 +209,38 @@ class FirebaseTournamentRepository extends TournamentRepository {
 
       print(fileName);
 
+      return _downloadFile(fileName, json);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> downloadNafUploadFile(Tournament tournament) async {
+    try {
+      XmlDocument xml = tournament.generateNafUploadFile();
+      String contents = xml.toXmlString();
+
+      String time = DateFormat('yyyy_MM_dd_H_m_s').format(DateTime.now());
+      String fileName = time +
+          "_" +
+          tournament.info.name.replaceAll(" ", "_") +
+          "_" +
+          "naf_upload_" +
+          ".xml";
+
+      print(fileName);
+
+      return _downloadFile(fileName, contents);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> _downloadFile(String fileName, String contents) async {
+    try {
       // prepare
-      final bytes = utf8.encode(json);
+      final bytes = utf8.encode(contents);
       final blob = html.Blob([bytes]);
       final url = html.Url.createObjectUrlFromBlob(blob);
       final anchor = html.document.createElement('a') as html.AnchorElement
