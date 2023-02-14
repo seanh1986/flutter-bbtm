@@ -219,7 +219,7 @@ class FirebaseTournamentRepository extends TournamentRepository {
   Future<bool> downloadNafUploadFile(Tournament tournament) async {
     try {
       XmlDocument xml = tournament.generateNafUploadFile();
-      String contents = xml.toXmlString();
+      String contents = xml.toXmlString(pretty: true, indent: '\t');
 
       String time = DateFormat('yyyy_MM_dd_H_m_s').format(DateTime.now());
       String fileName = time +

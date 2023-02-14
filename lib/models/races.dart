@@ -80,7 +80,7 @@ class RaceUtils {
     Race.ChaosDwarf: "Chaos Dwarf",
     Race.ChaosRenegade: "Chaos Renegade",
     Race.DarkElf: "Dark Elf",
-    Race.DaemonOfKhorne: "Daemon of Khorne",
+    Race.DaemonOfKhorne: "Khorne",
     Race.Dwarf: "Dwarf",
     Race.ElfUnion: "Elf Union",
     Race.Goblin: "Goblin",

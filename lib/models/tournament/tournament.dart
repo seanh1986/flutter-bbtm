@@ -534,11 +534,11 @@ Both teams have enjoyed a pre-match party. All players on both teams gain the Dr
     print("Start Time: " + DateFormat("y-M-d H:mm").format(roundTime));
 
     final builder = XmlBuilder();
-    builder.processing('xml', 'version="1.0"');
+    builder.processing('xml', 'version="1.0" encoding="UTF-8"');
 
     Map<String, String> nafReportAttribute = {};
     nafReportAttribute.putIfAbsent(
-        "xmlns:blo=", () => "\"http://www.bloodbowl.net\"");
+        "xmlns:blo", () => "http://www.bloodbowl.net");
 
     builder.element("nafReport", attributes: nafReportAttribute, nest: () {
       // Organizer
