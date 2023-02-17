@@ -20,20 +20,9 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
       yield* _mapToNoTournamentState(event);
     } else if (event is LoadTournamentEvent) {
       yield* _mapToLoadTournamentState(event);
-    }
-    // else if (event is UpdateTournamentEvent) {
-    //   yield* _mapToUpdateTournamentState(event);
-    // }
-    else if (event is SelectTournamentEvent) {
+    } else if (event is SelectTournamentEvent) {
       yield* _mapToNewTournamentState(event);
     }
-    // else if (event is UpdateMatchReportEvent) {
-    //   yield* _mapToUpdateMatchReportState(event);
-    // } else if (event is DownloadFile) {
-    //   yield* _mapToDownloadFile(event);
-    // } else if (event is DownloadTournamentBackup) {
-    //   yield* _mapToDownloadBackup(event);
-    // }
   }
 
   Future<String> getFileUrl(String filename) {
@@ -53,51 +42,10 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
     _loadTournament(event.info);
   }
 
-  // Trigger load of tournament
-  // Stream<TournamentState> _mapToUpdateTournamentState(
-  //     UpdateTournamentEvent event) async* {
-  //   print("TournamentBloc: _mapToUpdateTournamentState");
-
-  //   _repo
-  //       .updateTournamentData(event.tournament)
-  //       .then((value) => _handleUpdatedTournamentData(event.tournament.info));
-  // }
-
-  // Stream<TournamentState> _mapToUpdateMatchReportState(
-  //     UpdateMatchReportEvent event) async* {
-  //   print("TournamentBloc: _mapToUpdateMatchReportState");
-
-  //   try {
-  //     _repo
-  //         .updateCoachMatchReport(event)
-  //         .then((value) => _handleUpdatedTournamentData(event.tournament.info));
-  //   } catch (e) {
-  //     print(e.toString());
-  //   }
-  // }
-
   Stream<TournamentState> _mapToNewTournamentState(
       SelectTournamentEvent event) async* {
     yield NewTournamentState(event.tournament);
   }
-
-  // Future<bool> refreshTournamentData(String tournamentId) async {
-  //   print("TournamentBloc: refreshTournamentData");
-
-  //   try {
-  //     Tournament? tournament = await _repo.getTournamentDataAsync(tournamentId);
-  //     bool success = tournament != null;
-
-  //     if (success) {
-  //       add(SelectTournamentEvent(tournament));
-  //     }
-
-  //     return success;
-  //   } catch (e) {
-  //     print(e.toString());
-  //     return false;
-  //   }
-  // }
 
   Future<Tournament?> getRefreshedTournamentData(String tournamentId) async {
     print("TournamentBloc: getRefreshedTournamentData");
@@ -141,6 +89,10 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
 
   Future<bool> downloadNafUploadFile(Tournament tournament) async {
     return _repo.downloadNafUploadFile(tournament);
+  }
+
+  Future<bool> downloadGlamFile(Tournament tournament) async {
+    return _repo.downloadGlamFile(tournament);
   }
 
   Future<bool> downloadFile(DownloadFile event) async {

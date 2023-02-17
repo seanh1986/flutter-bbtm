@@ -43,6 +43,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   void initState() {
     super.initState();
 
+    widget.tournament.reProcessAllRounds();
+
     _items = List.from(widget.tournament.getCoaches());
   }
 

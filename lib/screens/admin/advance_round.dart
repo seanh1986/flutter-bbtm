@@ -188,6 +188,8 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
         _recoverBackupFromFile(context),
         SizedBox(width: 20),
         _downloadNafUploadFile(context),
+        SizedBox(width: 20),
+        _downloadGlamFile(context),
       ]),
       SizedBox(height: 10),
     ]);
@@ -503,6 +505,45 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                 .then((value) => {
                       if (value == OkCancelResult.ok)
                         {_processUpdate(downloadNafUploadCallback)}
+                    });
+          },
+        ));
+  }
+
+  Widget _downloadGlamFile(BuildContext context) {
+    return Container(
+        height: 60,
+        padding: EdgeInsets.all(10),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            textStyle: TextStyle(color: Colors.white),
+          ),
+          child: Text('Download Glam'),
+          onPressed: () {
+            VoidCallback downloadGlamCallback = () async {
+              ToastUtils.show(fToast, "Downloading Glam File");
+
+              bool success =
+                  await _tournyBloc.downloadGlamFile(widget.tournament);
+
+              if (success) {
+                ToastUtils.showSuccess(fToast, "Glam downloaded");
+              } else {
+                ToastUtils.showFailed(fToast, "Glam failed to download");
+              }
+            };
+
+            showOkCancelAlertDialog(
+                    context: context,
+                    title: "Glam Upload File",
+                    message:
+                        "This will download a the file which can be used to upload Glam results",
+                    okLabel: "Download",
+                    cancelLabel: "Cancel")
+                .then((value) => {
+                      if (value == OkCancelResult.ok)
+                        {_processUpdate(downloadGlamCallback)}
                     });
           },
         ));

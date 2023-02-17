@@ -226,7 +226,29 @@ class FirebaseTournamentRepository extends TournamentRepository {
           "_" +
           tournament.info.name.replaceAll(" ", "_") +
           "_" +
-          "naf_upload_" +
+          "naf_upload" +
+          ".xml";
+
+      print(fileName);
+
+      return _downloadFile(fileName, contents);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> downloadGlamFile(Tournament tournament) async {
+    try {
+      XmlDocument xml = tournament.generateGlamFile();
+      String contents = xml.toXmlString(pretty: true, indent: '\t');
+
+      String time = DateFormat('yyyy_MM_dd_H_m_s').format(DateTime.now());
+      String fileName = time +
+          "_" +
+          tournament.info.name.replaceAll(" ", "_") +
+          "_" +
+          "glam" +
           ".xml";
 
       print(fileName);

@@ -594,6 +594,51 @@ Both teams have enjoyed a pre-match party. All players on both teams gain the Dr
     return xml;
   }
 
+  XmlDocument generateGlamFile() {
+    OrganizerInfo mainOrganizer = info.organizers.firstWhere((o) => o.primary);
+
+    List<Coach> coachResults = List.from(_coaches);
+    // Sort in descending order
+    coachResults.sort((a, b) =>
+        -1 *
+        a
+            .pointsWithTieBreakersBuiltIn()
+            .compareTo(b.pointsWithTieBreakersBuiltIn()));
+
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0" encoding="UTF-8"');
+
+    Map<String, String> glamAttribute = {};
+    glamAttribute.putIfAbsent("xmlns:blo", () => "http://www.glamts.com");
+
+    builder.element("glam", attributes: glamAttribute, nest: () {
+      // Tournament
+      builder.element("tournament", nest: () {
+        builder.element("name", nest: info.name);
+        builder.element("location", nest: info.location);
+        builder.element("num_games", nest: coachRounds.length);
+        builder.element("organizer", nest: mainOrganizer.nafName);
+      });
+      //Coaches
+      builder.element("results", nest: () {
+        coachResults.forEach((c) {
+          builder.element("nafName", nest: c.nafName);
+          builder.element("race", nest: c.raceName());
+          builder.element("wins", nest: c.wins());
+          builder.element("ties", nest: c.ties());
+          builder.element("losses", nest: c.losses());
+          builder.element("td_for", nest: c.tds);
+          builder.element("td_vs", nest: c.oppTds);
+          builder.element("cas_for", nest: c.cas);
+          builder.element("cas_vs", nest: c.oppCas);
+        });
+      });
+    });
+
+    XmlDocument xml = builder.buildDocument();
+    return xml;
+  }
+
   // factory Tournament.fromXml(XmlDocument xml, TournamentInfo info) {
   //   List<Squad> squads = [];
   //   HashMap<String, int> squadMap = new HashMap<String, int>();
