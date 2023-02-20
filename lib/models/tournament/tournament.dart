@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:bbnaf/screens/admin/edit_tournament_widget.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:bbnaf/models/coach.dart';
@@ -10,6 +11,7 @@ import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:xml/xml.dart';
+import 'package:collection/collection.dart';
 
 enum Authorization {
   Unauthorized,
@@ -72,8 +74,28 @@ class Tournament {
     _coachIdxMap.putIfAbsent(c.name(), () => idx);
   }
 
-  void updateCoaches(List<Coach> coaches) {
-    _coaches = coaches;
+  void updateCoaches(List<Coach> newCoaches, List<RenameNafName> renames) {
+    // Update coach list
+    _coaches = List.from(newCoaches);
+
+    // Rename all coaches if necesssary
+    renames.forEach((r) {
+      Coach? coach = newCoaches.firstWhereOrNull((element) =>
+          element.nafName.toLowerCase() == r.newNafName.toLowerCase());
+
+      if (coach != null) {
+        coachRounds.forEach((cr) {
+          cr.matches.forEach((m) {
+            if (m.isHome(r.oldNafName)) {
+              m.homeNafName = coach.nafName;
+            } else if (m.isAway(r.oldNafName)) {
+              m.awayNafName = coach.nafName;
+            }
+          });
+        });
+      }
+    });
+
     _syncSquadsAndCoaches();
   }
 

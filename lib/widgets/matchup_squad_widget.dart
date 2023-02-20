@@ -4,7 +4,7 @@ import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
 
 class MatchupSquadWidget extends StatefulWidget {
-  Tournament tournament;
+  final Tournament tournament;
   final SquadMatchup matchup;
   final MatchupClickListener? listener;
 

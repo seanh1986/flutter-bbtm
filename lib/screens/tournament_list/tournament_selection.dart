@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/blocs/tournament_list/tournament_list.dart';

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:collection/collection.dart';
 
 class EditTournamentWidget extends StatefulWidget {
   final Tournament tournament;
@@ -53,6 +54,8 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
     DataColumn(label: Text("Active")),
   ];
 
+  late CoachesDataSource _coachSource;
+
   late PaginatedDataTable _coachDataTable;
 
   late FToast fToast;
@@ -65,6 +68,8 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
     fToast.init(context);
 
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
+
+    _initFromTournament(widget.tournament);
   }
 
   void _initFromTournament(Tournament t) {
@@ -83,8 +88,6 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
 
   @override
   Widget build(BuildContext context) {
-    _initFromTournament(widget.tournament);
-
     return Container(
         //height: MediaQuery.of(context).size.height * 0.5,
         child: SingleChildScrollView(
@@ -142,16 +145,29 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
           SizedBox(width: 20),
           ElevatedButton(
             onPressed: () {
-              VoidCallback callback = () {
-                widget.tournament.info.name = _name;
-                widget.tournament.info.location = _location;
+              VoidCallback callback = () async {
+                TournamentInfo info = widget.tournament.info;
+
+                info.name = _name;
+                info.location = _location;
 
                 // Remove empty rows
                 _organizers.removeWhere((element) =>
                     element.email.trim().isEmpty ||
                     element.nafName.trim().isEmpty);
 
-                widget.tournament.info.organizers = _organizers;
+                info.organizers = _organizers;
+
+                ToastUtils.show(fToast, "Updating Tournament Data");
+
+                bool success =
+                    await widget.tournyBloc.overwriteTournamentInfo(info);
+
+                if (success) {
+                  ToastUtils.show(fToast, "Update successful.");
+                } else {
+                  ToastUtils.show(fToast, "Update failed.");
+                }
               };
 
               _showDialogToConfirmOverwrite(context, callback);
@@ -321,13 +337,19 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
           SizedBox(width: 20),
           ElevatedButton(
             onPressed: () {
-              VoidCallback callback = () {
+              VoidCallback callback = () async {
                 // Remove empty rows
                 _coaches.removeWhere((element) =>
                     element.coachName.trim().isEmpty &&
                     element.nafName.trim().isEmpty);
 
-                widget.tournament.updateCoaches(_coaches);
+                List<RenameNafName> renames =
+                    _coachSource.coachIdxNafRenames.values.toList();
+
+                bool success = await _tournyBloc.overwriteCoaches(
+                    widget.tournament.info.id, _coaches, renames);
+
+                _showSuccessFailToast(success);
               };
 
               _showDialogToConfirmOverwrite(context, callback);
@@ -346,7 +368,7 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
     //   print("[" + i.toString() + "]: " + _coaches[i].coachName);
     // }
 
-    CoachesDataSource coachSource = CoachesDataSource(
+    _coachSource = CoachesDataSource(
         coaches: _coaches,
         activeCallback: (cIdx, active) {
           setState(() {
@@ -361,7 +383,7 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
 
     _coachDataTable = PaginatedDataTable(
       columns: _coachCols,
-      source: coachSource,
+      source: _coachSource,
     );
   }
 
@@ -391,30 +413,46 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
             okLabel: "Update",
             cancelLabel: "Dismiss")
         .then((value) => {
-              if (value == OkCancelResult.ok)
-                {_processUpdate(confirmedUpdateCallback)}
+              if (value == OkCancelResult.ok) {confirmedUpdateCallback()}
+              // {_processUpdate(confirmedUpdateCallback)}
             });
   }
 
-  void _processUpdate(VoidCallback confirmedUpdateCallback) async {
-    confirmedUpdateCallback();
-
-    ToastUtils.show(fToast, "Updating Tournament Data");
-
-    bool success = await widget.tournyBloc.updateTournament(widget.tournament);
-
+  void _showSuccessFailToast(bool success) {
     if (success) {
       ToastUtils.show(fToast, "Update successful.");
     } else {
       ToastUtils.show(fToast, "Update failed.");
     }
   }
+
+  // void _processUpdate(VoidCallback confirmedUpdateCallback) async {
+  //   confirmedUpdateCallback();
+
+  //   ToastUtils.show(fToast, "Updating Tournament Data");
+
+  //   bool success = await widget.tournyBloc.updateTournament(widget.tournament);
+
+  //   if (success) {
+  //     ToastUtils.show(fToast, "Update successful.");
+  //   } else {
+  //     ToastUtils.show(fToast, "Update failed.");
+  //   }
+  // }
+}
+
+class RenameNafName {
+  final String oldNafName;
+  final String newNafName;
+  RenameNafName(this.oldNafName, this.newNafName);
 }
 
 class CoachesDataSource extends DataTableSource {
   late List<Coach> coaches;
   Function(int, bool)? activeCallback;
   Function(int)? removeItemCallback;
+
+  Map<int, RenameNafName> coachIdxNafRenames = {};
 
   CoachesDataSource(
       {required this.coaches, this.activeCallback, this.removeItemCallback});
@@ -425,11 +463,23 @@ class CoachesDataSource extends DataTableSource {
 
     print("c_idx: " + index.toString() + " -> " + c.coachName);
 
+    ValueChanged<String> nafNameCallback = (value) {
+      RenameNafName? renameNafName = coachIdxNafRenames[index];
+      if (renameNafName == null) {
+        coachIdxNafRenames.putIfAbsent(
+            index, () => RenameNafName(c.nafName, value));
+      } else {
+        coachIdxNafRenames.update(
+            index, (old) => RenameNafName(c.nafName, value));
+      }
+
+      c.nafName = value;
+    };
+
     TextEditingController nafNameController =
         TextEditingController(text: c.nafName);
     TextFormField nafNameField = TextFormField(
-        controller: nafNameController,
-        onChanged: (value) => {c.nafName = nafNameController.text});
+        controller: nafNameController, onChanged: nafNameCallback);
 
     TextEditingController coachNameController =
         TextEditingController(text: c.coachName);
@@ -461,7 +511,7 @@ class CoachesDataSource extends DataTableSource {
       value: c.raceName(),
       items: raceDropDown,
       onChanged: (value) {
-        c.setRace(RaceUtils.getRace(value));
+        c.race = RaceUtils.getRace(value);
       },
     );
 

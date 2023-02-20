@@ -1,37 +1,35 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
+import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_backup.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
+import 'package:bbnaf/screens/admin/edit_tournament_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:html' as html;
-
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:xml/xml.dart';
 
 class FirebaseTournamentRepository extends TournamentRepository {
   FirebaseStorage _storage = FirebaseStorage.instance;
 
-  // FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   // Reference to tournament info list
   // Converter guarantees type safety
-  final _tournamentInfoRef =
-      FirebaseFirestore.instance.collection("tournaments");
-  // .withConverter<TournamentInfo>(
-  //   fromFirestore: (snapshots, _) =>
-  //       TournamentInfo.fromJson(snapshots.data()!),
-  //   toFirestore: (tournamentInfo, _) => tournamentInfo.toJson(),
-  // );
+  final _tournyRef = FirebaseFirestore.instance.collection("tournaments");
+
+  // ------------------
+  // Read only operations
+  // ------------------
 
   @override
   Stream<List<TournamentInfo>> getTournamentInfos() {
     print("FirebaseTournamentRepository: getTournamentInfos");
-    return _tournamentInfoRef.snapshots().map((snapshot) {
+    return _tournyRef.snapshots().map((snapshot) {
       return snapshot.docs
           .map((doc) => TournamentInfo.fromJson(doc.id, doc.data()))
           .toList();
@@ -42,7 +40,7 @@ class FirebaseTournamentRepository extends TournamentRepository {
   Stream<Tournament> getTournamentData(String tournamentId) async* {
     print("FirebaseTournamentRepository: getTournamentData");
 
-    Tournament t = await _tournamentInfoRef
+    Tournament t = await _tournyRef
         .doc(tournamentId)
         .get()
         .then((value) => _parseTournamentResponse(value));
@@ -72,76 +70,191 @@ class FirebaseTournamentRepository extends TournamentRepository {
     return Tournament.fromJson(tournamentInfo, json);
   }
 
-  // @override
-  // Future<void> updateTournamentInfo(TournamentInfo tournamentInfo) async {
-  //   Map<String, Object?> json =
-  //       tournamentInfo.toJson().map((key, value) => value);
-  //   return _tournamentInfoRef.doc(tournamentInfo.id).set(json);
-  // }
+  @override
+  Future<Tournament?> getTournamentDataAsync(String tournamentId) async {
+    try {
+      Tournament t = await _tournyRef
+          .doc(tournamentId)
+          .get()
+          .then((value) => _parseTournamentResponse(value));
+      return t;
+    } catch (_) {
+      return null;
+    }
+  }
+
+// @override
+// Future<void> updateTournamentInfo(TournamentInfo tournamentInfo) async {
+//   Map<String, Object?> json =
+//       tournamentInfo.toJson().map((key, value) => value);
+//   return _tournyRef.doc(tournamentInfo.id).set(json);
+// }
+
+  // ------------------
+  // Update Operations
+  // ------------------
 
   @override
-  Future<bool> updateTournamentData(Tournament tournament) async {
-    try {
-      Map<String, dynamic> jsonA = tournament.info.toJson();
+  Future<bool> overwriteTournamentInfo(TournamentInfo info) {
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      var tRef = _tournyRef.doc(info.id);
 
-      jsonA.putIfAbsent("data", () => tournament.toJson());
+      var doc = await tRef.get();
 
-      Map<String, Object?> json =
-          jsonA.map((key, value) => MapEntry<String, Object?>(key, value));
+      Tournament dbTournament = _parseTournamentResponse(doc);
 
-      await _tournamentInfoRef.doc(tournament.info.id).set(json);
+      dbTournament.info = info;
 
+      await _overrwiteTournamentData(dbTournament);
+    }).then((value) {
       return true;
-    } catch (_) {
+    }).catchError((e) {
       return false;
-    }
+    });
+  }
+
+  @override
+  Future<bool> overwriteCoaches(String tournamentId, List<Coach> newCoaches,
+      List<RenameNafName> renames) {
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      var tRef = _tournyRef.doc(tournamentId);
+
+      var doc = await tRef.get();
+
+      Tournament dbTournament = _parseTournamentResponse(doc);
+
+      dbTournament.updateCoaches(newCoaches, renames);
+
+      await _overrwiteTournamentData(dbTournament);
+    }).then((value) {
+      return true;
+    }).catchError((e) {
+      return false;
+    });
   }
 
   @override
   Future<bool> updateCoachMatchReport(UpdateMatchReportEvent event) async {
-    try {
-      var tInfoRef = await _tournamentInfoRef.doc(event.tournament.info.id);
+    return updateCoachMatchReports([event]);
+  }
 
-      var doc = await tInfoRef.get();
+  @override
+  Future<bool> updateCoachMatchReports(
+      List<UpdateMatchReportEvent> events) async {
+    Tournament tournament = events.first.tournament;
+
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      var tRef = _tournyRef.doc(tournament.info.id);
+
+      var doc = await tRef.get();
 
       Tournament dbTournament = _parseTournamentResponse(doc);
 
-      if (dbTournament.coachRounds.length !=
-          event.tournament.coachRounds.length) {
-        return false;
+      if (dbTournament.coachRounds.length != tournament.coachRounds.length) {
+        throw new Exception("Tournament lengths do not align");
       }
 
-      int roundIdx = dbTournament.coachRounds.length - 1;
+      events.forEach((event) {
+        int roundIdx = dbTournament.coachRounds.length - 1;
 
-      int matchIdx = dbTournament.coachRounds.last.matches.indexWhere((e) =>
-          e.awayNafName.toLowerCase() ==
-              event.matchup.awayNafName.toLowerCase() &&
-          e.homeNafName.toLowerCase() ==
-              event.matchup.homeNafName.toLowerCase());
+        int matchIdx = dbTournament.coachRounds.last.matches.indexWhere((e) =>
+            e.awayNafName.toLowerCase() ==
+                event.matchup.awayNafName.toLowerCase() &&
+            e.homeNafName.toLowerCase() ==
+                event.matchup.homeNafName.toLowerCase());
 
-      if (roundIdx < 0 || matchIdx < 0) {
-        return false;
-      }
+        if (roundIdx < 0 || matchIdx < 0) {
+          throw new Exception("Couldn't find index match");
+        }
 
-      if (event.isHome) {
-        dbTournament.coachRounds[roundIdx].matches[matchIdx]
-            .homeReportedResults = event.matchup.homeReportedResults;
-      } else if (event.isAdmin) {
-        dbTournament.coachRounds[roundIdx].matches[matchIdx]
-            .homeReportedResults = event.matchup.homeReportedResults;
-        dbTournament.coachRounds[roundIdx].matches[matchIdx]
-            .awayReportedResults = event.matchup.awayReportedResults;
-      } else {
-        dbTournament.coachRounds[roundIdx].matches[matchIdx]
-            .awayReportedResults = event.matchup.awayReportedResults;
-      }
+        if (event.isHome) {
+          dbTournament.coachRounds[roundIdx].matches[matchIdx]
+              .homeReportedResults = event.matchup.homeReportedResults;
+        } else if (event.isAdmin) {
+          dbTournament.coachRounds[roundIdx].matches[matchIdx]
+              .homeReportedResults = event.matchup.homeReportedResults;
+          dbTournament.coachRounds[roundIdx].matches[matchIdx]
+              .awayReportedResults = event.matchup.awayReportedResults;
+        } else {
+          dbTournament.coachRounds[roundIdx].matches[matchIdx]
+              .awayReportedResults = event.matchup.awayReportedResults;
+        }
+      });
 
-      updateTournamentData(dbTournament);
+      await _overrwiteTournamentData(dbTournament);
+    }).then((value) {
       return true;
-    } catch (_) {
+    }).catchError((e) {
       return false;
-    }
+    });
   }
+
+  @override
+  Future<bool> recoverTournamentBackup(Tournament t) async {
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      await _overrwiteTournamentData(t);
+    }).then((value) {
+      return true;
+    }).catchError((e) {
+      return false;
+    });
+  }
+
+  Future<bool> advanceRound(Tournament t) async {
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      await _overrwiteTournamentData(t);
+    }).then((value) {
+      return true;
+    }).catchError((e) {
+      return false;
+    });
+  }
+
+  @override
+  Future<bool> discardCurrentRound(Tournament t) async {
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      var tRef = _tournyRef.doc(t.info.id);
+
+      var doc = await tRef.get();
+
+      Tournament dbTournament = _parseTournamentResponse(doc);
+
+      if (dbTournament.coachRounds.length != t.coachRounds.length) {
+        throw new Exception("Tournament coach round lengths do not align");
+      } else if (dbTournament.squadRounds.length != t.squadRounds.length) {
+        throw new Exception("Tournament squad round lengths do not align");
+      }
+
+      if (dbTournament.squadRounds.isNotEmpty) {
+        dbTournament.squadRounds.removeLast();
+      }
+
+      if (dbTournament.coachRounds.isNotEmpty) {
+        dbTournament.coachRounds.removeLast();
+      }
+
+      await _overrwiteTournamentData(dbTournament);
+    }).then((value) {
+      return true;
+    }).catchError((e) {
+      return false;
+    });
+  }
+
+  Future<void> _overrwiteTournamentData(Tournament tournament) async {
+    Map<String, dynamic> jsonA = tournament.info.toJson();
+
+    jsonA.putIfAbsent("data", () => tournament.toJson());
+
+    Map<String, Object?> json =
+        jsonA.map((key, value) => MapEntry<String, Object?>(key, value));
+
+    await _tournyRef.doc(tournament.info.id).set(json);
+  }
+
+  // ------------------
+  // File Downloads
+  // ------------------
 
   @override
   Future<String> getFileUrl(String filename) async {
@@ -283,20 +396,9 @@ class FirebaseTournamentRepository extends TournamentRepository {
       return false;
     }
   }
-
-  @override
-  Future<Tournament?> getTournamentDataAsync(String tournamentId) async {
-    try {
-      Tournament t = await _tournamentInfoRef
-          .doc(tournamentId)
-          .get()
-          .then((value) => _parseTournamentResponse(value));
-      return t;
-    } catch (_) {
-      return null;
-    }
-  }
 }
+
+
 
 
 // Future<void> _downloadFileMobile(String filename) async {

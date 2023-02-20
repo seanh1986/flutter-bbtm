@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:bbnaf/blocs/tournament/tournament_event.dart';
 import 'package:bbnaf/blocs/tournament/tournament_state.dart';
+import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
+import 'package:bbnaf/screens/admin/edit_tournament_widget.dart';
 import 'package:bloc/bloc.dart';
 
 class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
@@ -60,28 +62,45 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
     }
   }
 
+  // ---------------
+  // Update DB
+  // ---------------
+
   Future<bool> updateMatchEvent(UpdateMatchReportEvent event) async {
     print("TournamentBloc: updateMatchEvent");
-
-    try {
-      _repo.updateCoachMatchReport(event);
-      return true;
-    } catch (e) {
-      print(e.toString());
-      return false;
-    }
+    return _repo.updateCoachMatchReport(event);
   }
 
-  Future<bool> updateTournament(Tournament tournament) async {
-    print("TournamentBloc: updateTournament");
-
-    try {
-      return _repo.updateTournamentData(tournament);
-    } catch (e) {
-      print(e.toString());
-      return false;
-    }
+  Future<bool> updateMatchEvents(List<UpdateMatchReportEvent> events) async {
+    print("TournamentBloc: updateMatchEvents");
+    return _repo.updateCoachMatchReports(events);
   }
+
+  Future<bool> overwriteTournamentInfo(TournamentInfo info) {
+    return _repo.overwriteTournamentInfo(info);
+  }
+
+  Future<bool> overwriteCoaches(
+      String tId, List<Coach> newCoaches, List<RenameNafName> renames) {
+    return _repo.overwriteCoaches(tId, newCoaches, renames);
+  }
+
+  // Recovering backup
+  Future<bool> recoverTournamentBackup(Tournament tournament) {
+    return _repo.recoverTournamentBackup(tournament);
+  }
+
+  Future<bool> advanceRound(Tournament tournament) {
+    return _repo.advanceRound(tournament);
+  }
+
+  Future<bool> discardCurrentRound(Tournament tournament) {
+    return _repo.discardCurrentRound(tournament);
+  }
+
+  // ---------------
+  // Download Files
+  // ---------------
 
   Future<bool> downloadTournamentBackup(DownloadTournamentBackup event) async {
     return _repo.downloadBackupFile(event.tournament);

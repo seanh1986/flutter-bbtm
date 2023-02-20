@@ -187,7 +187,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     // bool enableEditing =
     //     _state == UploadState.Editing || _state == UploadState.Error;
 
-    bool enableEditing = true;
+    // bool enableEditing = true;
 
     Widget? bestSportWidget;
 
@@ -208,9 +208,9 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       alignment = Alignment.centerRight;
     }
 
-    if (!enableEditing) {
-      color = Colors.grey;
-    }
+    // if (!enableEditing) {
+    //   color = Colors.grey;
+    // }
 
     if (result != null && opponent != null) {
       bestSportWidget = Padding(
@@ -219,7 +219,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
               alignment: alignment,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: color,
+                  backgroundColor: color,
                 ),
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 10.0),
@@ -230,30 +230,30 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                 ),
                 onPressed: () {
                   // Give meaningful error message if editing is disabled
-                  if (!enableEditing) {
-                    int curRating = 3;
+                  // if (!enableEditing) {
+                  //   int curRating = 3;
 
-                    if (_matchup.isHome(_authUser.nafName)) {
-                      curRating = _matchup.homeReportedResults.bestSportOppRank;
-                    } else if (_matchup.isAway(_authUser.nafName)) {
-                      curRating = _matchup.awayReportedResults.bestSportOppRank;
-                    }
+                  //   if (_matchup.isHome(_authUser.nafName)) {
+                  //     curRating = _matchup.homeReportedResults.bestSportOppRank;
+                  //   } else if (_matchup.isAway(_authUser.nafName)) {
+                  //     curRating = _matchup.awayReportedResults.bestSportOppRank;
+                  //   }
 
-                    StringBuffer sb = new StringBuffer();
-                    sb.writeln("You have already submitted your results.");
-                    sb.writeln(
-                        "If you wish to edit them, please press the edit icon to update your sportsmanship rating and then re-submit.");
-                    sb.writeln("");
-                    sb.writeln("Your current rating is: " +
-                        curRating.toString() +
-                        "\u272D");
+                  //   StringBuffer sb = new StringBuffer();
+                  //   sb.writeln("You have already submitted your results.");
+                  //   sb.writeln(
+                  //       "If you wish to edit them, please press the edit icon to update your sportsmanship rating and then re-submit.");
+                  //   sb.writeln("");
+                  //   sb.writeln("Your current rating is: " +
+                  //       curRating.toString() +
+                  //       "\u272D");
 
-                    showOkAlertDialog(
-                        context: context,
-                        title: "Rate opponent\'s sportsmanship",
-                        message: sb.toString());
-                    return;
-                  }
+                  //   showOkAlertDialog(
+                  //       context: context,
+                  //       title: "Rate opponent\'s sportsmanship",
+                  //       message: sb.toString());
+                  //   return;
+                  // }
 
                   BestSportWidget widget =
                       BestSportWidget(result: result!, opponent: opponent!);

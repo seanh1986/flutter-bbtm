@@ -1,15 +1,12 @@
-import 'package:bbnaf/blocs/auth/auth_bloc.dart';
-import 'package:bbnaf/blocs/auth/auth_event.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:bbnaf/screens/login/login_screen_participant.dart';
 import 'package:bbnaf/screens/login/widget_login_header.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'login_screen_organizer.dart';
 
 class LoginPage extends StatefulWidget {
-  TournamentInfo tournamentInfo;
+  final TournamentInfo tournamentInfo;
 
   LoginPage(this.tournamentInfo);
 
@@ -85,7 +82,7 @@ class _LoginPage extends State<LoginPage> {
                         padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.blue,
+                            backgroundColor: Colors.blue,
                             textStyle: TextStyle(color: Colors.white),
                           ),
                           child: Text('Organizer'),
@@ -103,7 +100,7 @@ class _LoginPage extends State<LoginPage> {
                         padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.blue,
+                            backgroundColor: Colors.blue,
                             textStyle: TextStyle(color: Colors.white),
                           ),
                           child: Text('Participant'),

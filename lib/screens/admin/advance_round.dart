@@ -124,7 +124,13 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
               ElevatedButton(
                 onPressed: () {
                   VoidCallback callback = () {
-                    widget.tournament.coachRounds[round] = coachRound;
+                    List<UpdateMatchReportEvent> matchesToUpdate = dataSource
+                        .editedMatchIndices
+                        .map((mIdx) => UpdateMatchReportEvent.admin(
+                            widget.tournament, coachRound.matches[mIdx]))
+                        .toList();
+
+                    _tournyBloc.updateMatchEvents(matchesToUpdate);
                   };
 
                   _showDialogToConfirmOverwrite(context, callback);
@@ -155,25 +161,24 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
             okLabel: "Update",
             cancelLabel: "Dismiss")
         .then((value) => {
-              if (value == OkCancelResult.ok)
-                {_processUpdate(confirmedUpdateCallback)}
+              if (value == OkCancelResult.ok) {confirmedUpdateCallback()}
             });
   }
 
-  void _processUpdate(VoidCallback confirmedUpdateCallback) async {
-    confirmedUpdateCallback();
+  // void _processUpdate(VoidCallback confirmedUpdateCallback) async {
+  //   confirmedUpdateCallback();
 
-    ToastUtils.show(fToast, "Updating Tournament Data");
+  //   ToastUtils.show(fToast, "Updating Tournament Data");
 
-    bool success = await _tournyBloc.updateTournament(widget.tournament);
+  //   bool success = await _tournyBloc.updateTournament(widget.tournament);
 
-    if (success) {
-      ToastUtils.showSuccess(fToast, "Update successful.");
-      // _tournyBloc.get(widget.tournament.info.id);
-    } else {
-      ToastUtils.showFailed(fToast, "Update failed.");
-    }
-  }
+  //   if (success) {
+  //     ToastUtils.showSuccess(fToast, "Update successful.");
+  //     // _tournyBloc.get(widget.tournament.info.id);
+  //   } else {
+  //     ToastUtils.showFailed(fToast, "Update failed.");
+  //   }
+  // }
 
   ExpansionTile _advanceOrDiscardRound(BuildContext context) {
     return ExpansionTile(title: Text("Advance or Discard Round"), children: [
@@ -243,7 +248,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                 ToastUtils.show(fToast, "Updating Tournament Data");
 
                 bool success =
-                    await _tournyBloc.updateTournament(widget.tournament);
+                    await _tournyBloc.advanceRound(widget.tournament);
 
                 if (success) {
                   ToastUtils.showSuccess(
@@ -299,9 +304,15 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                     widget.tournament.curRoundNumber().toString() +
                     ")?");
 
-            VoidCallback discardCallback = () {
+            VoidCallback discardCallback = () async {
               widget.tournament.coachRounds.removeLast();
-              ToastUtils.showSuccess(fToast, "Removed Last Round");
+              bool success =
+                  await _tournyBloc.discardCurrentRound(widget.tournament);
+              if (success) {
+                ToastUtils.showSuccess(fToast, "Removed current round");
+              } else {
+                ToastUtils.showFailed(fToast, "Failed to remove current round");
+              }
             };
 
             showOkCancelAlertDialog(
@@ -311,8 +322,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                     okLabel: "Discard",
                     cancelLabel: "Cancel")
                 .then((value) => {
-                      if (value == OkCancelResult.ok)
-                        {_processUpdate(discardCallback)}
+                      if (value == OkCancelResult.ok) {discardCallback()}
                     });
           },
         ));
@@ -351,8 +361,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                     okLabel: "Download",
                     cancelLabel: "Cancel")
                 .then((value) => {
-                      if (value == OkCancelResult.ok)
-                        {_processUpdate(downloadBackupCallback)}
+                      if (value == OkCancelResult.ok) {downloadBackupCallback()}
                     });
           },
         ));
@@ -409,7 +418,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                       ToastUtils.show(fToast, "Recovering Backup");
 
                       bool success = await widget.tournyBloc
-                          .updateTournament(tournyBackup.tournament);
+                          .recoverTournamentBackup(tournyBackup.tournament);
 
                       if (success) {
                         ToastUtils.showSuccess(
@@ -504,7 +513,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                     cancelLabel: "Cancel")
                 .then((value) => {
                       if (value == OkCancelResult.ok)
-                        {_processUpdate(downloadNafUploadCallback)}
+                        {downloadNafUploadCallback()}
                     });
           },
         ));
@@ -542,8 +551,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                     okLabel: "Download",
                     cancelLabel: "Cancel")
                 .then((value) => {
-                      if (value == OkCancelResult.ok)
-                        {_processUpdate(downloadGlamCallback)}
+                      if (value == OkCancelResult.ok) {downloadGlamCallback()}
                     });
           },
         ));
@@ -552,6 +560,8 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
 
 class CoachRoundDataSource extends DataTableSource {
   late CoachRound coachRound;
+
+  Set<int> editedMatchIndices = {};
 
   CoachRoundDataSource({required this.coachRound});
 
@@ -601,6 +611,7 @@ class CoachRoundDataSource extends DataTableSource {
       m.awayReportedResults.homeTds = td;
       m.homeReportedResults.reported = true;
       m.awayReportedResults.reported = true;
+      editedMatchIndices.add(index);
     };
 
     TextFormField homeTdField = TextFormField(
@@ -619,6 +630,7 @@ class CoachRoundDataSource extends DataTableSource {
       m.awayReportedResults.awayTds = td;
       m.homeReportedResults.reported = true;
       m.awayReportedResults.reported = true;
+      editedMatchIndices.add(index);
     };
 
     TextFormField awayTdField = TextFormField(
@@ -637,6 +649,7 @@ class CoachRoundDataSource extends DataTableSource {
       m.awayReportedResults.homeCas = cas;
       m.homeReportedResults.reported = true;
       m.awayReportedResults.reported = true;
+      editedMatchIndices.add(index);
     };
 
     TextFormField homeCasField = TextFormField(
@@ -655,6 +668,7 @@ class CoachRoundDataSource extends DataTableSource {
       m.awayReportedResults.awayCas = cas;
       m.homeReportedResults.reported = true;
       m.awayReportedResults.reported = true;
+      editedMatchIndices.add(index);
     };
 
     TextFormField awayCasField = TextFormField(
@@ -672,6 +686,7 @@ class CoachRoundDataSource extends DataTableSource {
       int sport = int.parse(homeSportController.text);
       m.awayReportedResults.bestSportOppRank = sport;
       m.awayReportedResults.reported = true;
+      editedMatchIndices.add(index);
     };
 
     TextFormField homeSportField = TextFormField(
@@ -689,6 +704,7 @@ class CoachRoundDataSource extends DataTableSource {
       int sport = int.parse(awaySportController.text);
       m.homeReportedResults.bestSportOppRank = sport;
       m.homeReportedResults.reported = true;
+      editedMatchIndices.add(index);
     };
 
     TextFormField awaySportField = TextFormField(

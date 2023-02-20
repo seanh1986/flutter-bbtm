@@ -15,7 +15,7 @@ class Coach extends IMatchupParticipant {
 
   late int nafNumber;
 
-  late Race _race;
+  late Race race;
 
   late bool active;
 
@@ -47,7 +47,7 @@ class Coach extends IMatchupParticipant {
     this.nafName,
     this.squadName,
     this.coachName,
-    this._race,
+    this.race,
     this.teamName,
     this.nafNumber,
   ) {
@@ -67,11 +67,6 @@ class Coach extends IMatchupParticipant {
   @override
   String parentName() {
     return squadName;
-  }
-
-  @override
-  Race race() {
-    return _race;
   }
 
   @override
@@ -134,8 +129,9 @@ class Coach extends IMatchupParticipant {
     return _opponents;
   }
 
-  void setRace(Race r) {
-    this._race = r;
+  // Returns "" if not valid
+  String raceName() {
+    return RaceUtils.getName(race);
   }
 
   void overwriteRecord(TournamentInfo t) {
@@ -254,7 +250,7 @@ class Coach extends IMatchupParticipant {
     this.squadName = tSquadName != null ? tSquadName : "";
 
     final tRace = json['race'] as String?;
-    this._race = tRace != null ? RaceUtils.getRace(tRace) : Race.Unknown;
+    this.race = tRace != null ? RaceUtils.getRace(tRace) : Race.Unknown;
 
     final tNafNumber = json['naf_number'] as int?;
     this.nafNumber = tNafNumber != null ? tNafNumber : -1;
@@ -271,7 +267,7 @@ class Coach extends IMatchupParticipant {
         'coach_name': coachName,
         'team_name': teamName,
         'squad_name': squadName,
-        'race': RaceUtils.getName(_race),
+        'race': RaceUtils.getName(race),
         'naf_number': nafNumber,
         'active': active,
         'roster': rosterFileName,

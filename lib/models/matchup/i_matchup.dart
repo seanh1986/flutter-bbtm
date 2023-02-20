@@ -117,18 +117,12 @@ abstract class IMatchupParticipant {
   OrgType type();
   String name();
   String parentName();
-  Race race();
   double points();
   int wins();
   int ties();
   int losses();
   List<double> tiebreakers();
   List<String> opponents();
-
-  // Returns "" if not valid
-  String raceName() {
-    return RaceUtils.getName(race());
-  }
 
   String showRecord() {
     return wins().toString() +

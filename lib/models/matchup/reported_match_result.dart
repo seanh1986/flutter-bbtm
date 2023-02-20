@@ -16,7 +16,7 @@ class ReportedMatchResult {
     this.homeTds = r.homeTds;
     this.homeCas = r.homeCas;
     this.awayTds = r.awayTds;
-    this.awayCas = r.awayTds;
+    this.awayCas = r.awayCas;
     this.bestSportOppRank = r.bestSportOppRank;
   }
 

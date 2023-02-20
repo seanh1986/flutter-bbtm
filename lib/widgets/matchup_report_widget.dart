@@ -125,17 +125,19 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   }
 
   Widget _itemHeader(IMatchupParticipant participant) {
-    Image raceLogo = Image.asset(
-      RaceUtils.getLogo(_participant.race()),
-      fit: BoxFit.cover,
-      height: raceIconSize,
-      // scale: kIsWeb ? 1.0 : 0.75,
-    );
+    Image? raceLogo;
 
     RawMaterialButton? roster;
 
     if (participant is Coach) {
       // && participant) {
+
+      raceLogo = Image.asset(
+        RaceUtils.getLogo(participant.race),
+        fit: BoxFit.cover,
+        height: raceIconSize,
+        // scale: kIsWeb ? 1.0 : 0.75,
+      );
 
       if (_rosterFileName.isNotEmpty) {
         roster = RawMaterialButton(
@@ -181,7 +183,12 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
         isThreeLine: false,
       );
     } else {
-      List<Widget> iconWidgets = [raceLogo];
+      List<Widget> iconWidgets = [];
+
+      if (raceLogo != null) {
+        iconWidgets.add(raceLogo);
+      }
+
       if (roster != null) {
         iconWidgets.add(roster);
       }
