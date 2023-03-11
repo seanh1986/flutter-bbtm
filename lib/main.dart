@@ -12,6 +12,8 @@ import 'blocs/tournament_list/tournament_list.dart';
 import 'repos/auth/auth_repo.dart';
 import 'repos/tournament/tournament_repo.dart';
 import 'package:uni_links/uni_links.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 // Ensure we only handle initial uri once
 bool _initialUriIsHandled = false;
@@ -63,6 +65,9 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
+
+    _setupFirebaseMessaging();
+
     _handleInitialUri();
   }
 
@@ -205,5 +210,57 @@ class _AppState extends State<App> {
         ),
       ),
     );
+  }
+
+  void _setupFirebaseMessaging() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    print('User granted permission: ${settings.authorizationStatus}');
+
+    FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) {
+      // Note: This callback is fired at each app startup and whenever a new
+      // token is generated.
+      saveTokens(fcmToken);
+    }).onError((err) {
+      // Error getting token.
+    });
+
+    final fcmToken = await FirebaseMessaging.instance.getToken(
+        vapidKey:
+            "BI23EBqN0hNqqa_fnFRokHQFqeA3uN9J32vNKnNQQtRtALIOcObQ0Pia_C0gNuaox-2u2qCddTZOTmTraaWubz8");
+
+    saveTokens(fcmToken);
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a message whilst in the foreground!');
+      print('Message data: ${message.data}');
+
+      if (message.notification != null) {
+        print('Message also contained a notification: ${message.notification}');
+      }
+    });
+
+    // FirebaseMessaging.onBackgroundMessage(
+    //     (BackgroundMessageHandler message) {});
+  }
+
+  Future<void> saveTokens(var token) async {
+    try {
+      await FirebaseFirestore.instance.collection('tokens').add({
+        'token': token,
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 }

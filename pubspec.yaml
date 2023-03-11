@@ -36,6 +36,7 @@ dependencies:
   firebase_storage: ^11.0.11
   universal_html: ^2.0.8
   firebase_storage_web: ^3.3.20
+  firebase_messaging: ^14.2.4
   xml: ^5.3.0
   flutter_login: ^4.1.0
   adaptive_dialog: ^1.8.0+1
