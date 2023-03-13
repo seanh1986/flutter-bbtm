@@ -22,14 +22,16 @@ class TournamentSelectionPage extends StatefulWidget {
   }
 }
 
+enum DateType {
+  Past_Tournaments,
+  Recent_or_Upcoming_Tournaments,
+  Future_Tournaments,
+}
+
 class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   late TournamentListsBloc _tournyListBloc;
   late TournamentBloc _tournyBloc;
 
-  // late StreamSubscription _tournyListSub;
-  // late StreamSubscription _tournySub;
-
-  // late TournamentListState _listState;
   late TournamentState _selectState;
 
   late FToast fToast;
@@ -38,6 +40,12 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   final double subTitleFontSize = 14.0;
 
   String? tournamentId;
+
+  DateType dateType = DateType.Recent_or_Upcoming_Tournaments;
+
+  List<TournamentInfo> _pastTournaments = [];
+  List<TournamentInfo> _recentAndUpcomingTournaments = [];
+  List<TournamentInfo> _futureTournaments = [];
 
   @override
   void initState() {
@@ -48,19 +56,6 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
     _tournyListBloc = BlocProvider.of<TournamentListsBloc>(context);
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
 
-    // _tournySub = _tournyBloc.stream.listen((tournyState) {
-    //   setState(() {
-    //     _selectState = tournyState;
-    //   });
-    // });
-
-    // _tournyListSub = _tournyListBloc.stream.listen((tournyListState) {
-    //   setState(() {
-    //     _listState = tournyListState;
-    //   });
-    // });
-
-    // _listState = _tournyListBloc.state;
     _selectState = _tournyBloc.state;
 
     fToast = FToast();
@@ -71,9 +66,6 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   void dispose() {
     _tournyListBloc.close();
     _tournyBloc.close();
-
-    // _tournySub.cancel();
-    // _tournyListSub.cancel();
 
     super.dispose();
   }
@@ -104,34 +96,6 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
         }
       },
     );
-
-    // // Outermost Bloc is loading tournament list
-    // return BlocBuilder<TournamentListsBloc, TournamentListState>(
-    //   bloc: _tournyListBloc,
-    //   builder: (listContext, listState) {
-    //     // Inner Bloc is selecting tournament
-    //     return BlocBuilder<TournamentBloc, TournamentState>(
-    //         bloc: _tournySelectBloc,
-    //         builder: (selectContext, selectState) {
-    //           if (listState is TournamentListLoading) {
-    //             // While loading, show splash
-    //             return SplashScreen();
-    //           } else if (listState is TournamentListLoaded) {
-    //             // Tournament list loaded, show UI depending on use case
-    //             if (selectState is NewTournamentState) {
-    //               return _onSelectedTournament(context, selectState);
-    //             } else {
-    //               return _onTournamentListLoaded(context, listState);
-    //             }
-    //           } else {
-    //             // If we failed to load tournament list, show error
-    //             return Container(
-    //               child: Text("Failed to load!"),
-    //             );
-    //           }
-    //         });
-    //   },
-    // );
   }
 
   void _initTournamentStateListener() {
@@ -191,33 +155,111 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
                   })
                 }
             }),
-        child: Container(
-          child: GroupedListView<dynamic, DateTime>(
-            elements: state.tournaments,
-            groupBy: (t) => DateFormat("yMMMM")
-                .parse(DateFormat.yMMMM().format(t.dateTimeStart)),
-            groupSeparatorBuilder: _buildGroupSeparator,
-            itemBuilder: (context, t) => _itemTournament(t),
-            itemComparator: (t1, t2) =>
-                t1.dateTimeStart.compareTo(t2.dateTimeStart),
-            order: GroupedListOrder.ASC,
-            sort: true,
-          ),
-        ));
+        child: _generateView(state));
+  }
 
-    // return Container(
-    //   child: GroupedListView<dynamic, DateTime>(
-    //     elements: state.tournaments,
-    //     groupBy: (t) => DateFormat("yMMMM")
-    //         .parse(DateFormat.yMMMM().format(t.dateTimeStart)),
-    //     groupSeparatorBuilder: _buildGroupSeparator,
-    //     itemBuilder: (context, t) => _itemTournament(t),
-    //     itemComparator: (t1, t2) =>
-    //         t1.dateTimeStart.compareTo(t2.dateTimeStart),
-    //     order: GroupedListOrder.ASC,
-    //     sort: true,
-    //   ),
-    // );
+  // Widget _generateTournamentListUI_old(TournamentListLoaded state) {
+  //   return Container(
+  //     child: GroupedListView<dynamic, DateTime>(
+  //       elements: state.tournaments,
+  //       groupBy: (t) => DateFormat("yMMMM")
+  //           .parse(DateFormat.yMMMM().format(t.dateTimeStart)),
+  //       groupSeparatorBuilder: _buildGroupSeparator,
+  //       itemBuilder: (context, t) => _itemTournament(t),
+  //       itemComparator: (t1, t2) =>
+  //           t1.dateTimeStart.compareTo(t2.dateTimeStart),
+  //       order: GroupedListOrder.ASC,
+  //       sort: true,
+  //     ),
+  //   );
+  // }
+
+  Widget _generateView(TournamentListLoaded state) {
+    _updatePastFutureRecentUpcomingTournaments(state);
+
+    Widget subScreenWidget = _getSubScreen();
+
+    return Column(children: <Widget>[
+      _toggleButtonsList(context),
+      SizedBox(height: 20),
+      Expanded(child: subScreenWidget),
+    ]);
+  }
+
+  Widget _toggleButtonsList(BuildContext context) {
+    List<Widget> toggleWidgets = [];
+
+    DateType.values.forEach((element) {
+      toggleWidgets.add(ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Theme.of(context).primaryColor,
+          textStyle: TextStyle(color: Colors.white),
+        ),
+        child: Text(element.name.replaceAll("_", " ")),
+        onPressed: () {
+          setState(() {
+            dateType = element;
+          });
+        },
+      ));
+
+      toggleWidgets.add(SizedBox(width: 10));
+    });
+
+    return Container(
+        height: 60,
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(10),
+        child: ListView(
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            children: toggleWidgets));
+  }
+
+  void _updatePastFutureRecentUpcomingTournaments(TournamentListLoaded state) {
+    DateTime now = DateTime.now();
+
+    _pastTournaments.clear();
+    _futureTournaments.clear();
+    _recentAndUpcomingTournaments.clear();
+
+    state.tournaments.forEach((t) {
+      if (t.dateTimeStart.isBefore(now.subtract(Duration(days: 7)))) {
+        _pastTournaments.add(t);
+      } else if (t.dateTimeStart.isAfter(now.add(Duration(days: 300)))) {
+        _futureTournaments.add(t);
+      } else {
+        _recentAndUpcomingTournaments.add(t);
+      }
+    });
+  }
+
+  Widget _getSubScreen() {
+    switch (dateType) {
+      case DateType.Past_Tournaments:
+        return _createTournamentListView(_pastTournaments);
+      case DateType.Future_Tournaments:
+        return _createTournamentListView(_futureTournaments);
+      case DateType.Recent_or_Upcoming_Tournaments:
+      default:
+        return _createTournamentListView(_recentAndUpcomingTournaments);
+    }
+  }
+
+  Widget _createTournamentListView(List<TournamentInfo> tournaments) {
+    return Container(
+      child: GroupedListView<dynamic, DateTime>(
+        elements: tournaments,
+        groupBy: (t) => DateFormat("yMMMM")
+            .parse(DateFormat.yMMMM().format(t.dateTimeStart)),
+        groupSeparatorBuilder: _buildGroupSeparator,
+        itemBuilder: (context, t) => _itemTournament(t),
+        itemComparator: (t1, t2) =>
+            t1.dateTimeStart.compareTo(t2.dateTimeStart),
+        order: GroupedListOrder.ASC,
+        sort: true,
+      ),
+    );
   }
 
   Widget _buildGroupSeparator(DateTime dateTime) {
