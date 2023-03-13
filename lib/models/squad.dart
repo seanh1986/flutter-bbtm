@@ -2,7 +2,6 @@ import 'dart:collection';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
-import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 
@@ -25,8 +24,6 @@ class Squad extends IMatchupParticipant {
 
   double _points = 0.0;
 
-  bool stunty = false;
-
   List<double> _tieBreakers = <double>[];
 
   List<String> _opponents = <String>[];
@@ -41,11 +38,6 @@ class Squad extends IMatchupParticipant {
   @override
   String name() {
     return _name;
-  }
-
-  @override
-  Race race() {
-    return Race.Unknown;
   }
 
   @override
@@ -225,9 +217,5 @@ class Squad extends IMatchupParticipant {
   Map toJson() => {
         'name': _name,
         'coaches': _coaches,
-        'wins': _wins,
-        'ties': _ties,
-        'losses': _losses,
-        'opponents': _opponents,
       };
 }

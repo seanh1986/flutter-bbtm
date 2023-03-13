@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
@@ -7,6 +6,7 @@ import 'package:bbnaf/models/tournament/tournament_backup.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:bbnaf/utils/toast.dart';
+import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:flutter/services.dart';
@@ -14,21 +14,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:file_picker/file_picker.dart';
 
-class AdvanceRoundWidget extends StatefulWidget {
+class RoundManagementWidget extends StatefulWidget {
   final Tournament tournament;
   final TournamentBloc tournyBloc;
 
-  AdvanceRoundWidget(
+  RoundManagementWidget(
       {Key? key, required this.tournament, required this.tournyBloc})
       : super(key: key);
 
   @override
-  State<AdvanceRoundWidget> createState() {
-    return _AdvanceRoundWidget();
+  State<RoundManagementWidget> createState() {
+    return _RoundManagementWidget();
   }
 }
 
-class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
+class _RoundManagementWidget extends State<RoundManagementWidget> {
   late TournamentBloc _tournyBloc;
 
   late FToast fToast;
@@ -68,6 +68,53 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> _widgets = [
+      TitleBar(title: "Round Management"),
+      _advanceDiscardBackupBtns(context),
+      SizedBox(height: 20),
+    ];
+
+    List<Widget> _rounds = _viewRounds(context);
+
+    if (_rounds.isNotEmpty) {
+      _widgets.add(Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: _viewRounds(context)));
+    }
+
+    return Column(children: _widgets);
+
+    // return Column(children: [
+    //   Row(children: [
+    //     TitleBar(title: "Round Management"),
+    //     _advanceDiscardBackupBtns(context),
+    //   ]),
+    //   SizedBox(height: 20),
+    //   _roundWidget
+    //   // Column(children: _viewRounds(context))
+    //   // Container(
+    //   //     child: SingleChildScrollView(
+    //   //         child: Column(
+    //   //             mainAxisAlignment: MainAxisAlignment.center,
+    //   //             children: _viewRounds(context))))
+    // ]);
+  }
+
+  Widget _advanceDiscardBackupBtns(BuildContext context) {
+    return Container(
+        height: 60,
+        padding: EdgeInsets.all(10),
+        child: ListView(scrollDirection: Axis.horizontal, children: [
+          SizedBox(width: 20),
+          _advanceRoundButton(context),
+          SizedBox(width: 20),
+          _discardCurrentRoundButton(context),
+          SizedBox(width: 20),
+          _recoverBackupFromFile(context),
+        ]));
+  }
+
+  List<Widget> _viewRounds(BuildContext context) {
     List<Widget> widgets = [];
 
     for (int i = 0; i < widget.tournament.coachRounds.length; i++) {
@@ -77,16 +124,7 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
       }
     }
 
-    widgets.add(_advanceOrDiscardRound(context));
-
-    return Container(
-        // height: MediaQuery.of(context).size.height * 0.5,
-        child: SingleChildScrollView(
-            child: ExpansionTile(
-      title: Text("Tournament Management"),
-      subtitle: Text("Advance round or edit previous rounds"),
-      children: widgets,
-    )));
+    return widgets;
   }
 
   Widget? _generateRoundSummary(int round) {
@@ -163,41 +201,6 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
         .then((value) => {
               if (value == OkCancelResult.ok) {confirmedUpdateCallback()}
             });
-  }
-
-  // void _processUpdate(VoidCallback confirmedUpdateCallback) async {
-  //   confirmedUpdateCallback();
-
-  //   ToastUtils.show(fToast, "Updating Tournament Data");
-
-  //   bool success = await _tournyBloc.updateTournament(widget.tournament);
-
-  //   if (success) {
-  //     ToastUtils.showSuccess(fToast, "Update successful.");
-  //     // _tournyBloc.get(widget.tournament.info.id);
-  //   } else {
-  //     ToastUtils.showFailed(fToast, "Update failed.");
-  //   }
-  // }
-
-  ExpansionTile _advanceOrDiscardRound(BuildContext context) {
-    return ExpansionTile(title: Text("Advance or Discard Round"), children: [
-      SizedBox(height: 10),
-      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        _advanceRoundButton(context),
-        SizedBox(width: 20),
-        _discardCurrentRoundButton(context),
-        SizedBox(width: 20),
-        _downloadFileBackup(context),
-        SizedBox(width: 20),
-        _recoverBackupFromFile(context),
-        SizedBox(width: 20),
-        _downloadNafUploadFile(context),
-        SizedBox(width: 20),
-        _downloadGlamFile(context),
-      ]),
-      SizedBox(height: 10),
-    ]);
   }
 
   Widget _advanceRoundButton(BuildContext context) {
@@ -328,45 +331,6 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
         ));
   }
 
-  Widget _downloadFileBackup(BuildContext context) {
-    return Container(
-        height: 60,
-        padding: EdgeInsets.all(10),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            textStyle: TextStyle(color: Colors.white),
-          ),
-          child: Text('Download Backup'),
-          onPressed: () {
-            VoidCallback downloadBackupCallback = () async {
-              ToastUtils.show(fToast, "Downloading Backup");
-
-              bool success = await _tournyBloc.downloadTournamentBackup(
-                  DownloadTournamentBackup(widget.tournament));
-
-              if (success) {
-                ToastUtils.showSuccess(
-                    fToast, "Backup successfully downloaded");
-              } else {
-                ToastUtils.showFailed(fToast, "Backup failed to download");
-              }
-            };
-
-            showOkCancelAlertDialog(
-                    context: context,
-                    title: "Download Backup",
-                    message:
-                        "This will download a backup file which can be used as a backup to restore at a later time",
-                    okLabel: "Download",
-                    cancelLabel: "Cancel")
-                .then((value) => {
-                      if (value == OkCancelResult.ok) {downloadBackupCallback()}
-                    });
-          },
-        ));
-  }
-
   Widget _recoverBackupFromFile(BuildContext context) {
     return Container(
         height: 60,
@@ -475,83 +439,6 @@ class _AdvanceRoundWidget extends State<AdvanceRoundWidget> {
                     cancelLabel: "Cancel")
                 .then((value) => {
                       if (value == OkCancelResult.ok) {recoveryCallback()}
-                    });
-          },
-        ));
-  }
-
-  Widget _downloadNafUploadFile(BuildContext context) {
-    return Container(
-        height: 60,
-        padding: EdgeInsets.all(10),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            textStyle: TextStyle(color: Colors.white),
-          ),
-          child: Text('Download Naf Upload'),
-          onPressed: () {
-            VoidCallback downloadNafUploadCallback = () async {
-              ToastUtils.show(fToast, "Downloading Naf Upload File");
-
-              bool success =
-                  await _tournyBloc.downloadNafUploadFile(widget.tournament);
-
-              if (success) {
-                ToastUtils.showSuccess(fToast, "Naf Upload downloaded");
-              } else {
-                ToastUtils.showFailed(fToast, "Naf Upload failed to download");
-              }
-            };
-
-            showOkCancelAlertDialog(
-                    context: context,
-                    title: "Download Naf Upload File",
-                    message:
-                        "This will download a the naf upload file which can be used to upload tournament results",
-                    okLabel: "Download",
-                    cancelLabel: "Cancel")
-                .then((value) => {
-                      if (value == OkCancelResult.ok)
-                        {downloadNafUploadCallback()}
-                    });
-          },
-        ));
-  }
-
-  Widget _downloadGlamFile(BuildContext context) {
-    return Container(
-        height: 60,
-        padding: EdgeInsets.all(10),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            textStyle: TextStyle(color: Colors.white),
-          ),
-          child: Text('Download Glam'),
-          onPressed: () {
-            VoidCallback downloadGlamCallback = () async {
-              ToastUtils.show(fToast, "Downloading Glam File");
-
-              bool success =
-                  await _tournyBloc.downloadGlamFile(widget.tournament);
-
-              if (success) {
-                ToastUtils.showSuccess(fToast, "Glam downloaded");
-              } else {
-                ToastUtils.showFailed(fToast, "Glam failed to download");
-              }
-            };
-
-            showOkCancelAlertDialog(
-                    context: context,
-                    title: "Glam Upload File",
-                    message:
-                        "This will download a the file which can be used to upload Glam results",
-                    okLabel: "Download",
-                    cancelLabel: "Cancel")
-                .then((value) => {
-                      if (value == OkCancelResult.ok) {downloadGlamCallback()}
                     });
           },
         ));

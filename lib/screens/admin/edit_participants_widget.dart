@@ -3,45 +3,31 @@ import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/utils/toast.dart';
-import 'package:bbnaf/widgets/custom_form_field.dart';
+import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:collection/collection.dart';
 
-class EditTournamentWidget extends StatefulWidget {
+class EditParticipantsWidget extends StatefulWidget {
   final Tournament tournament;
   final TournamentBloc tournyBloc;
 
-  EditTournamentWidget(
+  EditParticipantsWidget(
       {Key? key, required this.tournament, required this.tournyBloc})
       : super(key: key);
 
   @override
-  State<EditTournamentWidget> createState() {
-    return _EditTournamentWidget();
+  State<EditParticipantsWidget> createState() {
+    return _EditParticipantsWidget();
   }
 }
 
-class _EditTournamentWidget extends State<EditTournamentWidget> {
-  late String _name;
-  late String _location;
-  late List<OrganizerInfo> _organizers = [];
+class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   late List<Coach> _coaches = [];
 
   late TournamentBloc _tournyBloc;
-
-  List<DataColumn> _organizerCols = [
-    DataColumn(label: Text("")), // For add/remove rows
-    DataColumn(label: Text("Email")),
-    DataColumn(label: Text("NafName")),
-    DataColumn(label: Text("Primary")),
-  ];
-  List<DataRow> _organizerRows = [];
-  late DataTable _orgaDataTable;
 
   List<DataColumn> _coachCols = [
     DataColumn(label: Text("")), // For add/remove rows
@@ -73,10 +59,6 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
   }
 
   void _initFromTournament(Tournament t) {
-    _name = t.info.name;
-    _location = t.info.location;
-    _organizers = t.info.organizers;
-
     _coaches = List.from(t.getCoaches());
   }
 
@@ -88,197 +70,34 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        //height: MediaQuery.of(context).size.height * 0.5,
-        child: SingleChildScrollView(
-            child: ExpansionTile(
-      title: Text("Tournament Details"),
-      subtitle: Text("Edit information/details, coaches, squads, etc."),
-      children: [
-        ExpansionTile(title: Text("Info"), children: _viewInfos()),
-        ExpansionTile(title: Text("Coaches"), children: _viewCoaches(context)),
-      ],
-    )));
+    return Column(children: [
+      TitleBar(title: "Edit Tournament Participants"),
+      SizedBox(height: 20),
+      Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: _viewCoaches(context))
+    ]);
+
+    // List<Widget> _widgets = [
+    //   TitleBar(title: "Edit Tournament Participants"),
+    //   SizedBox(height: 20),
+    // ];
+
+    // _widgets.addAll(_viewCoaches(context));
+
+    // return Container(
+    //     child: SingleChildScrollView(child: Column(children: _widgets)));
+
+    // return Column(children: [
+    //   TitleBar(title: "Edit Tournament Participants"),
+    //   SizedBox(height: 20),
+    //   Container(
+    //       child: SingleChildScrollView(
+    //           child: Column(
+    //               mainAxisAlignment: MainAxisAlignment.center,
+    //               children: _viewCoaches(context))))
+    // ]);
   }
-
-  void _addNewOrga() {
-    setState(() {
-      _organizers.add(OrganizerInfo("", "", false));
-    });
-  }
-
-  List<Widget> _viewInfos() {
-    _initOrgas();
-
-    return [
-      CustomTextFormField(
-        initialValue: _name,
-        title: 'Tournament Name',
-        callback: (value) => _name = value,
-      ),
-      CustomTextFormField(
-        initialValue: _location,
-        title: 'Tournament Location (City, Province)',
-        callback: (value) => _location = value,
-      ),
-      _createOrgaTable(),
-      // CustomDateFormField(
-      //   initialValue: PickerDateRange(
-      //       widget.tournament.info.dateTimeStart,
-      //       widget.tournament.info.dateTimeEnd),
-      //   callback: (arg) => _onDatePickerSelectionChanged,
-      // ),
-      SizedBox(height: 10),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _name = widget.tournament.info.name;
-                _location = widget.tournament.info.location;
-                _organizers = widget.tournament.info.organizers;
-              });
-            },
-            child: const Text('Discard'),
-          ),
-          SizedBox(width: 20),
-          ElevatedButton(
-            onPressed: () {
-              VoidCallback callback = () async {
-                TournamentInfo info = widget.tournament.info;
-
-                info.name = _name;
-                info.location = _location;
-
-                // Remove empty rows
-                _organizers.removeWhere((element) =>
-                    element.email.trim().isEmpty ||
-                    element.nafName.trim().isEmpty);
-
-                info.organizers = _organizers;
-
-                ToastUtils.show(fToast, "Updating Tournament Data");
-
-                bool success =
-                    await widget.tournyBloc.overwriteTournamentInfo(info);
-
-                if (success) {
-                  ToastUtils.show(fToast, "Update successful.");
-                } else {
-                  ToastUtils.show(fToast, "Update failed.");
-                }
-              };
-
-              _showDialogToConfirmOverwrite(context, callback);
-            },
-            child: const Text('Update'),
-          )
-        ],
-      ),
-      SizedBox(height: 10),
-    ];
-  }
-
-  void _initOrgas() {
-    _organizerRows.clear();
-
-    for (int i = 0; i < _organizers.length; i++) {
-      OrganizerInfo orga = _organizers[i];
-
-      TextEditingController emailController =
-          TextEditingController(text: orga.email);
-      TextFormField emailForm = TextFormField(
-          controller: emailController,
-          onChanged: (value) => {orga.email = value});
-
-      TextEditingController nafNameController =
-          TextEditingController(text: orga.nafName);
-      TextFormField nafNameForm = TextFormField(
-          controller: nafNameController,
-          onChanged: (value) {
-            orga.nafName = value;
-          });
-
-      Checkbox primaryCheckbox = Checkbox(
-        value: orga.primary,
-        onChanged: (value) {
-          if (value != null) {
-            setState(() {
-              if (value) {
-                _organizers.forEach((element) {
-                  element.primary = false;
-                });
-              }
-              orga.primary = value;
-            });
-          }
-        },
-      );
-
-      ElevatedButton removeOrgaBtn = ElevatedButton(
-        onPressed: () {
-          setState(() {
-            _organizers.removeAt(i);
-          });
-        },
-        child: const Text('-'),
-      );
-
-      _organizerRows.add(DataRow(cells: [
-        DataCell(removeOrgaBtn),
-        DataCell(emailForm),
-        DataCell(nafNameForm),
-        DataCell(primaryCheckbox)
-      ]));
-    }
-
-    _orgaDataTable = DataTable(
-      columns: _organizerCols,
-      rows: _organizerRows,
-    );
-  }
-
-  Widget _createOrgaTable() {
-    return Container(
-        padding: const EdgeInsets.all(15),
-        child: Column(children: [
-          SizedBox(height: 10),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Column(children: [
-              Text("Organizers", style: TextStyle(fontSize: 18)),
-              Text(
-                  "[Primary/Total]: " +
-                      _organizers
-                          .where((element) => element.primary)
-                          .length
-                          .toString() +
-                      " / " +
-                      _organizers.length.toString(),
-                  style: TextStyle(fontSize: 14))
-            ]),
-            SizedBox(width: 20),
-            ElevatedButton(
-              onPressed: () {
-                _addNewOrga();
-              },
-              child: const Text('Add Organizer'),
-            )
-          ]),
-          SizedBox(height: 10),
-          _orgaDataTable
-        ]));
-  }
-
-  // void _onDatePickerSelectionChanged(DateRangePickerSelectionChangedArgs arg) {
-  //   if (arg.value is PickerDateRange) {
-  //     widget.tournament.info.dateTimeStart = arg.value.startDate;
-  //     widget.tournament.info.dateTimeEnd = arg.value.endDate;
-  //   } else if (arg.value is DateTime) {
-  //     widget.tournament.info.dateTimeStart = arg.value;
-  //     widget.tournament.info.dateTimeEnd = arg.value;
-  //   }
-  // }
 
   Widget _createCoachTable() {
     return Container(
@@ -394,11 +213,6 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
     sb.writeln(
         "Warning this will overwrite existing tournament data. Please confirm!");
     sb.writeln("");
-    sb.writeln("NumOrganizers: " +
-        _organizers.length.toString() +
-        " (Primary: " +
-        _organizers.where((element) => element.primary).length.toString() +
-        ")");
 
     sb.writeln("NumCoaches: " +
         _coaches.length.toString() +
@@ -414,7 +228,6 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
             cancelLabel: "Dismiss")
         .then((value) => {
               if (value == OkCancelResult.ok) {confirmedUpdateCallback()}
-              // {_processUpdate(confirmedUpdateCallback)}
             });
   }
 
@@ -425,20 +238,6 @@ class _EditTournamentWidget extends State<EditTournamentWidget> {
       ToastUtils.show(fToast, "Update failed.");
     }
   }
-
-  // void _processUpdate(VoidCallback confirmedUpdateCallback) async {
-  //   confirmedUpdateCallback();
-
-  //   ToastUtils.show(fToast, "Updating Tournament Data");
-
-  //   bool success = await widget.tournyBloc.updateTournament(widget.tournament);
-
-  //   if (success) {
-  //     ToastUtils.show(fToast, "Update successful.");
-  //   } else {
-  //     ToastUtils.show(fToast, "Update failed.");
-  //   }
-  // }
 }
 
 class RenameNafName {

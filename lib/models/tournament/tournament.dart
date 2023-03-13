@@ -1,6 +1,6 @@
 import 'dart:collection';
 import 'package:bbnaf/repos/auth/auth_user.dart';
-import 'package:bbnaf/screens/admin/edit_tournament_widget.dart';
+import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:bbnaf/models/coach.dart';

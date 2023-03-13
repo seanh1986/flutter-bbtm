@@ -2,7 +2,7 @@ import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
-import 'package:bbnaf/screens/admin/edit_tournament_widget.dart';
+import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
 
 abstract class TournamentRepository {
   // ------------------

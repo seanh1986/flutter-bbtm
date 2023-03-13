@@ -56,8 +56,6 @@ class SquadMatchup extends IMatchup {
   }
 
   SquadMatchup.fromJson(Map<String, dynamic> json) {
-    final tRound = json['round'] as int?;
-
     final tTable = json['table'] as int?;
     this._tableNum = tTable != null ? tTable : -1;
 
