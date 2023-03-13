@@ -54,15 +54,19 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
   Widget _downloadFileBtns(BuildContext context) {
     return Container(
         height: 60,
+        alignment: Alignment.center,
         padding: EdgeInsets.all(10),
-        child: ListView(scrollDirection: Axis.horizontal, children: [
-          SizedBox(width: 20),
-          _downloadFileBackup(context),
-          SizedBox(width: 20),
-          _downloadNafUploadFile(context),
-          SizedBox(width: 20),
-          _downloadGlamFile(context),
-        ]));
+        child: ListView(
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            children: [
+              SizedBox(width: 20),
+              _downloadFileBackup(context),
+              SizedBox(width: 20),
+              _downloadNafUploadFile(context),
+              SizedBox(width: 20),
+              _downloadGlamFile(context),
+            ]));
   }
 
   Widget _downloadFileBackup(BuildContext context) {

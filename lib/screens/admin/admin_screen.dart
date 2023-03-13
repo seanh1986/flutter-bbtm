@@ -23,6 +23,7 @@ class AdminScreen extends StatefulWidget {
 
 enum AdminSubScreens {
   EDIT_INFO,
+  EDIT_SQUADS,
   EDIT_PARTICIPANTS,
   ROUND_MANAGEMENT,
   DOWNLOAD_FILES,
@@ -86,9 +87,12 @@ class _AdminScreenState extends State<AdminScreen> {
 
     return Container(
         height: 60,
+        alignment: Alignment.center,
         padding: EdgeInsets.all(10),
         child: ListView(
-            scrollDirection: Axis.horizontal, children: toggleWidgets));
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            children: toggleWidgets));
   }
 
   Widget? _getSubScreen() {
@@ -96,6 +100,8 @@ class _AdminScreenState extends State<AdminScreen> {
       case AdminSubScreens.EDIT_INFO:
         return EditTournamentInfoWidget(
             tournament: _tournament, tournyBloc: _tournyBloc);
+      case AdminSubScreens.EDIT_SQUADS:
+        return null; // TODO...
       case AdminSubScreens.EDIT_PARTICIPANTS:
         return EditParticipantsWidget(
             tournament: _tournament, tournyBloc: _tournyBloc);

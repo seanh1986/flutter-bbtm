@@ -103,15 +103,19 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   Widget _advanceDiscardBackupBtns(BuildContext context) {
     return Container(
         height: 60,
+        alignment: Alignment.center,
         padding: EdgeInsets.all(10),
-        child: ListView(scrollDirection: Axis.horizontal, children: [
-          SizedBox(width: 20),
-          _advanceRoundButton(context),
-          SizedBox(width: 20),
-          _discardCurrentRoundButton(context),
-          SizedBox(width: 20),
-          _recoverBackupFromFile(context),
-        ]));
+        child: ListView(
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            children: [
+              SizedBox(width: 20),
+              _advanceRoundButton(context),
+              SizedBox(width: 20),
+              _discardCurrentRoundButton(context),
+              SizedBox(width: 20),
+              _recoverBackupFromFile(context),
+            ]));
   }
 
   List<Widget> _viewRounds(BuildContext context) {
