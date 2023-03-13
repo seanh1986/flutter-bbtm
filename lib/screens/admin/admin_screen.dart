@@ -5,7 +5,6 @@ import 'package:bbnaf/screens/admin/download_files_widget.dart';
 import 'package:bbnaf/screens/admin/round_management_widget.dart';
 import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
 import 'package:bbnaf/screens/admin/edit_tourny_info_widget.dart';
-// import 'package:bbnaf/screens/admin/edit_tournament_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -110,19 +109,4 @@ class _AdminScreenState extends State<AdminScreen> {
         return null;
     }
   }
-
-  // Widget _generateView() {
-  //   return Column(
-  //     children: [
-  //       EditTournamentWidget(
-  //         tournament: _tournament,
-  //         tournyBloc: _tournyBloc,
-  //       ),
-  //       AdvanceRoundWidget(
-  //         tournament: _tournament,
-  //         tournyBloc: _tournyBloc,
-  //       ),
-  //     ],
-  //   );
-  // }
 }

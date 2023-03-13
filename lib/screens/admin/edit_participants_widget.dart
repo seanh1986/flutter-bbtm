@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:collection/collection.dart';
 
 class EditParticipantsWidget extends StatefulWidget {
   final Tournament tournament;
@@ -42,7 +43,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   late CoachesDataSource _coachSource;
 
-  late PaginatedDataTable _coachDataTable;
+  late DataTable _coachDataTable;
 
   late FToast fToast;
 
@@ -77,29 +78,9 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: _viewCoaches(context))
     ]);
-
-    // List<Widget> _widgets = [
-    //   TitleBar(title: "Edit Tournament Participants"),
-    //   SizedBox(height: 20),
-    // ];
-
-    // _widgets.addAll(_viewCoaches(context));
-
-    // return Container(
-    //     child: SingleChildScrollView(child: Column(children: _widgets)));
-
-    // return Column(children: [
-    //   TitleBar(title: "Edit Tournament Participants"),
-    //   SizedBox(height: 20),
-    //   Container(
-    //       child: SingleChildScrollView(
-    //           child: Column(
-    //               mainAxisAlignment: MainAxisAlignment.center,
-    //               children: _viewCoaches(context))))
-    // ]);
   }
 
-  Widget _createCoachTable() {
+  Widget _createCoachTableHeadline() {
     return Container(
         padding: const EdgeInsets.all(15),
         child: Column(children: [
@@ -123,12 +104,72 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
                 _addNewCoach();
               },
               child: const Text('Add Coach'),
+            ),
+            SizedBox(width: 20),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _coaches = List.from(widget.tournament.getCoaches());
+                });
+              },
+              child: const Text('Discard'),
+            ),
+            SizedBox(width: 20),
+            ElevatedButton(
+              onPressed: () {
+                VoidCallback callback = () async {
+                  // Remove empty rows
+                  _coaches.removeWhere((element) =>
+                      element.coachName.trim().isEmpty &&
+                      element.nafName.trim().isEmpty);
+
+                  List<RenameNafName> renames =
+                      _coachSource.coachIdxNafRenames.values.toList();
+
+                  bool success = await _tournyBloc.overwriteCoaches(
+                      widget.tournament.info.id, _coaches, renames);
+
+                  _showSuccessFailToast(success);
+                };
+
+                _showDialogToConfirmOverwrite(context, callback);
+              },
+              child: const Text('Update'),
             )
           ]),
-          SizedBox(height: 10),
-          _coachDataTable
         ]));
   }
+
+  // Widget _createCoachTable() {
+  //   return Container(
+  //       padding: const EdgeInsets.all(15),
+  //       child: Column(children: [
+  //         SizedBox(height: 10),
+  //         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+  //           Column(children: [
+  //             Text("Coaches", style: TextStyle(fontSize: 18)),
+  //             Text(
+  //                 "[Active/Total]: " +
+  //                     _coaches
+  //                         .where((element) => element.active)
+  //                         .length
+  //                         .toString() +
+  //                     " / " +
+  //                     _coaches.length.toString(),
+  //                 style: TextStyle(fontSize: 14))
+  //           ]),
+  //           SizedBox(width: 20),
+  //           ElevatedButton(
+  //             onPressed: () {
+  //               _addNewCoach();
+  //             },
+  //             child: const Text('Add Coach'),
+  //           )
+  //         ]),
+  //         SizedBox(height: 10),
+  //         _coachDataTable
+  //       ]));
+  // }
 
   void _addNewCoach() {
     setState(() {
@@ -140,44 +181,15 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
     _initCoaches();
 
     return [
-      _createCoachTable(),
       SizedBox(height: 10),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _coaches = List.from(widget.tournament.getCoaches());
-              });
-            },
-            child: const Text('Discard'),
-          ),
-          SizedBox(width: 20),
-          ElevatedButton(
-            onPressed: () {
-              VoidCallback callback = () async {
-                // Remove empty rows
-                _coaches.removeWhere((element) =>
-                    element.coachName.trim().isEmpty &&
-                    element.nafName.trim().isEmpty);
-
-                List<RenameNafName> renames =
-                    _coachSource.coachIdxNafRenames.values.toList();
-
-                bool success = await _tournyBloc.overwriteCoaches(
-                    widget.tournament.info.id, _coaches, renames);
-
-                _showSuccessFailToast(success);
-              };
-
-              _showDialogToConfirmOverwrite(context, callback);
-            },
-            child: const Text('Update'),
-          )
-        ],
-      ),
-      SizedBox(height: 10)
+      _createCoachTableHeadline(),
+      SizedBox(height: 10),
+      Container(
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: _coachDataTable,
+          ))
     ];
   }
 
@@ -200,9 +212,9 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
           });
         });
 
-    _coachDataTable = PaginatedDataTable(
+    _coachDataTable = DataTable(
       columns: _coachCols,
-      source: _coachSource,
+      rows: _getCoachRows(),
     );
   }
 
@@ -237,6 +249,19 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
     } else {
       ToastUtils.show(fToast, "Update failed.");
     }
+  }
+
+  List<DataRow> _getCoachRows() {
+    List<DataRow> rows = [];
+
+    _coachSource.coaches.forEachIndexed((index, element) {
+      DataRow? row = _coachSource.getRow(index);
+      if (row != null) {
+        rows.add(row);
+      }
+    });
+
+    return rows;
   }
 }
 
