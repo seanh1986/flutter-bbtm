@@ -1,7 +1,7 @@
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
-import 'package:bbnaf/widgets/matchup_coach_widget.dart';
+import 'package:bbnaf/screens/matchups/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -54,7 +54,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     }
 
     List<Widget> matchupWidgets = [
-      SizedBox(height: 10),
+      SizedBox(height: 2),
       _getRoundTitle(),
       SizedBox(height: 10)
     ];
@@ -65,20 +65,11 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
           matchup: m,
         )));
 
-    return Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(
-              './assets/images/background/background_football_field.png'),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: ListView(
+    return Expanded(
+        child: ListView(
             children: matchupWidgets,
-          )),
-    );
+            shrinkWrap: true,
+            scrollDirection: Axis.vertical));
   }
 
   Widget _getRoundTitle() {
@@ -94,19 +85,19 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
       ))
     ]);
   }
-}
 
-Widget _noMatchUpsYet() {
-  return Container(
-      margin: EdgeInsets.fromLTRB(20, 2, 20, 2), // EdgeInsets.all(20),
-      width: double.infinity,
-      child: Card(
-        margin: EdgeInsets.all(10),
-        child: Container(
-            padding: EdgeInsets.all(2),
-            child: Text(
-              'Matchups not available yet',
-              style: TextStyle(fontSize: 20),
-            )),
-      ));
+  Widget _noMatchUpsYet() {
+    return Container(
+        margin: EdgeInsets.fromLTRB(20, 2, 20, 2), // EdgeInsets.all(20),
+        width: double.infinity,
+        child: Card(
+          margin: EdgeInsets.all(10),
+          child: Container(
+              padding: EdgeInsets.all(2),
+              child: Text(
+                'Matchups not available yet',
+                style: TextStyle(fontSize: 20),
+              )),
+        ));
+  }
 }

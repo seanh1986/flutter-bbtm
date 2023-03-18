@@ -5,7 +5,6 @@ import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
-import 'package:bbnaf/screens/login/widget_login_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +13,7 @@ import 'package:flutter_login/flutter_login.dart';
 import 'login_screen.dart';
 
 class LoginOrganizerPage extends StatefulWidget {
-  TournamentInfo tournamentInfo;
+  final TournamentInfo tournamentInfo;
 
   LoginOrganizerPage(this.tournamentInfo);
 

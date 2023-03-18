@@ -1,18 +1,13 @@
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:flutter/material.dart';
 
 class MatchupSquadWidget extends StatefulWidget {
   final Tournament tournament;
   final SquadMatchup matchup;
-  final MatchupClickListener? listener;
 
   MatchupSquadWidget(
-      {Key? key,
-      required this.tournament,
-      required this.matchup,
-      this.listener})
+      {Key? key, required this.tournament, required this.matchup})
       : super(key: key);
 
   @override
@@ -24,7 +19,6 @@ class MatchupSquadWidget extends StatefulWidget {
 class _MatchupSquadWidget extends State<MatchupSquadWidget> {
   late Tournament _tournament;
   late SquadMatchup _matchup;
-  MatchupClickListener? _listener;
   final double titleFontSize = 20.0;
   final double subTitleFontSize = 14.0;
 
@@ -33,7 +27,6 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
     super.initState();
     _tournament = widget.tournament;
     _matchup = widget.matchup;
-    _listener = widget.listener;
   }
 
   @override
@@ -47,7 +40,6 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
         child: ListTile(
-            onTap: () => {_listener!.onItemClicked(_matchup)},
             title: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Row(

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
@@ -10,8 +9,8 @@ import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+// ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
-import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:xml/xml.dart';
 

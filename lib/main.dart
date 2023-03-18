@@ -97,7 +97,7 @@ class _AppState extends State<App> {
       } on PlatformException {
         // Platform messages may fail but we ignore the exception
         print('falied to get initial uri');
-      } on FormatException catch (err) {
+      } on FormatException catch (_) {
         if (!mounted) return;
         print('malformed initial uri');
         // setState(() => _err = err);

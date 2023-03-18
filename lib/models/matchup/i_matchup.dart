@@ -1,4 +1,3 @@
-import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 
 // Identifies if the object is of type squad or coach

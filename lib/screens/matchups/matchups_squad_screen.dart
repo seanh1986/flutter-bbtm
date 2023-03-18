@@ -1,25 +1,19 @@
-import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/widgets/matchup_squad_widget.dart';
+import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:bbnaf/screens/matchups/matchup_coach_widget.dart';
+import 'package:bbnaf/screens/matchups/matchup_squad_widget.dart';
+import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:grouped_list/grouped_list.dart';
-import 'package:bbnaf/utils/item_click_listener.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SquadMatchupsPage extends StatefulWidget {
   final Tournament tournament;
-  final List<SquadMatchup> matchups;
-  final CoachMatchupListClickListener? coachMatchupListeners;
-  final Squad? curSquad;
+  final AuthUser authUser;
 
   SquadMatchupsPage(
-      {Key? key,
-      required this.tournament,
-      required this.matchups,
-      this.coachMatchupListeners,
-      this.curSquad})
+      {Key? key, required this.tournament, required this.authUser})
       : super(key: key);
 
   @override
@@ -30,67 +24,154 @@ class SquadMatchupsPage extends StatefulWidget {
 
 class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   late Tournament _tournament;
+  late AuthUser _authUser;
   List<SquadMatchup> _matchups = [];
-  MatchupClickListener? _listener;
-  Squad? _curSquad;
+
+  SquadMatchup? selectedMatchup;
+
+  FToast? fToast;
 
   @override
   void initState() {
-    _tournament = widget.tournament;
-    _matchups = widget.matchups;
-    _listener = new _MatchupClickListener(widget.coachMatchupListeners);
-    _curSquad = widget.curSquad;
     super.initState();
+
+    fToast = FToast();
+    fToast!.init(context);
   }
 
-  // TODO: Add CurSquad widget at top if non-null
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  // TODO: Add CurCoach widget at top if non-null
   @override
   Widget build(BuildContext context) {
-    return GroupedListView(
-      elements: _matchups,
-      groupBy: (IMatchup matchup) => _groupBy(matchup),
-      groupSeparatorBuilder: _buildGroupSeparator,
-      itemBuilder: (BuildContext context, SquadMatchup matchup) =>
-          MatchupSquadWidget(
-        tournament: _tournament,
-        matchup: matchup,
-        listener: _listener,
-      ),
-      order: GroupedListOrder.ASC,
-    );
-  }
+    _tournament = widget.tournament;
+    _authUser = widget.authUser;
 
-  String _groupBy(IMatchup matchup) {
-    return matchup.groupByName(_tournament);
-  }
-
-  Widget _buildGroupSeparator(String matchupName) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(
-        matchupName,
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-class _MatchupClickListener implements MatchupClickListener {
-  final CoachMatchupListClickListener? coachMatchupListeners;
-
-  _MatchupClickListener(this.coachMatchupListeners);
-
-  @override
-  void onItemClicked(IMatchup matchup) {
-    List<IMatchup> matchups = [];
-
-    if (coachMatchupListeners != null && matchup is SquadMatchup) {
-      for (CoachMatchup cm in matchup.coachMatchups) {
-        matchups.add(cm);
-      }
-
-      coachMatchupListeners!.onItemClicked(matchup.coachMatchups);
+    if (_tournament.squadRounds.isNotEmpty) {
+      _matchups = List.from(_tournament.squadRounds.last.matches);
     }
+
+    if (_matchups.isEmpty) {
+      return _noMatchUpsYet();
+    }
+
+    return selectedMatchup != null
+        ? _selectedSquadMatchupUi(selectedMatchup!)
+        : _squadMatchupListUi();
+  }
+
+  Widget _selectedSquadMatchupUi(SquadMatchup m) {
+    List<Widget> matchupWidgets = [
+      SizedBox(height: 10),
+      _getSquadVsSquadTitle(m),
+      SizedBox(height: 10),
+    ];
+
+    m.coachMatchups.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
+          tournament: _tournament,
+          authUser: _authUser,
+          matchup: m,
+        )));
+
+    return ListView(children: matchupWidgets);
+  }
+
+  Widget _squadMatchupListUi() {
+    List<Widget> matchupWidgets = [
+      SizedBox(height: 10),
+      _getSquadListRoundTitle(),
+      SizedBox(height: 10),
+    ];
+
+    _matchups.forEach((m) {
+      InkWell inkWell = InkWell(
+          child: MatchupSquadWidget(
+            tournament: _tournament,
+            matchup: m,
+          ),
+          onTap: () {
+            setState(() {
+              selectedMatchup = m;
+            });
+          });
+      matchupWidgets.add(inkWell);
+    });
+
+    return ListView(children: matchupWidgets);
+  }
+
+  Widget _getSquadListRoundTitle() {
+    return Wrap(alignment: WrapAlignment.center, children: [
+      Card(
+          child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text("Round #" + _tournament.curRoundNumber().toString(),
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+        ]),
+      ))
+    ]);
+  }
+
+  Widget _getSquadVsSquadTitle(SquadMatchup m) {
+    StringBuffer sb = StringBuffer();
+    sb.writeln("Round #" + _tournament.curRoundNumber().toString() + ":");
+
+    Squad? homeSquad = _tournament.getSquad(m.homeSquadName);
+    Squad? awaySquad = _tournament.getSquad(m.awaySquadName);
+
+    sb.write(m.homeSquadName + " ");
+    if (homeSquad != null) {
+      sb.write("(" +
+          homeSquad.wins().toString() +
+          "/" +
+          homeSquad.ties().toString() +
+          "/" +
+          homeSquad.losses().toString() +
+          ")");
+    }
+    sb.writeln("");
+
+    sb.write(m.awaySquadName + " ");
+    if (awaySquad != null) {
+      sb.write("(" +
+          awaySquad.wins().toString() +
+          "/" +
+          awaySquad.ties().toString() +
+          "/" +
+          awaySquad.losses().toString() +
+          ")");
+    }
+
+    return Column(children: [
+      IconButton(
+          onPressed: () {
+            setState(() {
+              selectedMatchup = null;
+            });
+          },
+          icon: Icon(Icons.arrow_back_rounded)),
+      SizedBox(height: 10),
+      TitleBar(title: sb.toString())
+    ]);
+  }
+
+  Widget _noMatchUpsYet() {
+    return Container(
+        margin: EdgeInsets.fromLTRB(20, 2, 20, 2), // EdgeInsets.all(20),
+        width: double.infinity,
+        child: Card(
+          margin: EdgeInsets.all(10),
+          child: Container(
+              padding: EdgeInsets.all(2),
+              child: Text(
+                'Matchups not available yet',
+                style: TextStyle(fontSize: 20),
+              )),
+        ));
   }
 }

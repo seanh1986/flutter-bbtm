@@ -1,4 +1,3 @@
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
@@ -6,7 +5,6 @@ import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/matchups/matchup_report_widget.dart';
-import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/screens/matchups/best_sport_widget.dart';
 import 'package:flutter/foundation.dart';
@@ -18,14 +16,12 @@ class MatchupCoachWidget extends StatefulWidget {
   final Tournament tournament;
   final AuthUser authUser;
   final CoachMatchup matchup;
-  final MatchupClickListener? listener;
 
   MatchupCoachWidget(
       {Key? key,
       required this.tournament,
       required this.authUser,
-      required this.matchup,
-      this.listener})
+      required this.matchup})
       : super(key: key);
 
   @override

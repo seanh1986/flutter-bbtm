@@ -1,15 +1,12 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
-import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:collection/collection.dart';
 
 class EditSquadsWidget extends StatefulWidget {
   final Tournament tournament;
@@ -246,7 +243,7 @@ class _EditSquadsWidget extends State<EditSquadsWidget> {
     );
     _flyingCount++;
 
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       // Find the starting position of the moving item, which is exactly the
       // gap its leaving behind, in the original list.
       final box1 = globalKey.currentContext!.findRenderObject() as RenderBox;

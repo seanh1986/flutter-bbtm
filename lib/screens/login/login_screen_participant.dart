@@ -83,7 +83,7 @@ class _LoginParticipantPage extends State<LoginParticipantPage> {
                     padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.blue,
+                        backgroundColor: Colors.blue,
                         textStyle: TextStyle(color: Colors.white),
                       ),
                       child: Text('Sign in'),

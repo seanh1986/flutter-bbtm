@@ -1,22 +1,18 @@
 import 'dart:async';
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/admin/admin_screen.dart';
+import 'package:bbnaf/screens/matchups/matchups_screen.dart';
 import 'package:bbnaf/screens/overview_screen.dart';
-import 'package:bbnaf/screens/rankings_screen.dart';
+import 'package:bbnaf/screens/rankings/rankings_screen.dart';
 import 'package:bbnaf/screens/tournament_list/tournament_selection.dart';
-import 'package:bbnaf/utils/item_click_listener.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'matchups/matchups_coaches_screen.dart';
-import 'matchups/matchups_squad_screen.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -36,8 +32,6 @@ class _HomePageState extends State<HomePage> {
   int _parentIndex = 0;
   int _childIndex = 0;
 
-  _CoachMatchupListClickListener? _coachMatchupListener;
-
   late TournamentBloc _tournyBloc;
   late AuthBloc _authBloc;
 
@@ -48,8 +42,6 @@ class _HomePageState extends State<HomePage> {
 
   Tournament _tournament = Tournament.empty();
   AuthUser _authUser = AuthUser();
-
-  List<SquadMatchup> _squadMatchups = [];
 
   List<_WidgetFamily> _children = [];
 
@@ -193,25 +185,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _init() {
-    if (_tournament.squadRounds.isNotEmpty) {
-      _squadMatchups = _tournament.squadRounds.last.matches;
-    }
-
-    _coachMatchupListener = new _CoachMatchupListClickListener(this);
-
-    List<Widget> matchupWidgets = [];
-    if (_tournament.useSquads) {
-      matchupWidgets.add(SquadMatchupsPage(
-        tournament: _tournament,
-        matchups: _squadMatchups,
-        coachMatchupListeners: _coachMatchupListener,
-      ));
-    }
-    matchupWidgets.add(CoachMatchupsPage(
-      tournament: _tournament,
-      authUser: _authUser,
-    ));
-
     _children = [
       new _WidgetFamily([
         OverviewScreen(
@@ -219,7 +192,8 @@ class _HomePageState extends State<HomePage> {
           authUser: _authUser,
         )
       ]),
-      new _WidgetFamily(matchupWidgets),
+      new _WidgetFamily(
+          [MatchupsPage(tournament: _tournament, authUser: _authUser)]),
       new _WidgetFamily(
           [RankingsPage(tournament: _tournament, authUser: _authUser)]),
       new _WidgetFamily([
@@ -273,33 +247,5 @@ class _HomePageState extends State<HomePage> {
       _parentIndex = index;
       _childIndex = 0;
     });
-  }
-
-  void updateMatchupList(List<CoachMatchup> coachMatchups) {
-    setState(() {
-      _parentIndex = 1;
-      _childIndex = 1;
-
-      _WidgetFamily wFamily = _children[_parentIndex];
-
-      if (wFamily.widgets.length > _childIndex) {
-        Widget w = new CoachMatchupsPage(
-          tournament: _tournament,
-          authUser: _authUser,
-        );
-        wFamily.widgets[_childIndex] = w;
-      }
-    });
-  }
-}
-
-class _CoachMatchupListClickListener implements CoachMatchupListClickListener {
-  final _HomePageState _state;
-
-  _CoachMatchupListClickListener(this._state);
-
-  @override
-  void onItemClicked(List<CoachMatchup> matchups) {
-    _state.updateMatchupList(matchups);
   }
 }

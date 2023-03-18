@@ -21,7 +21,7 @@ class ReportedMatchResultWithStatus extends ReportedMatchResult {
 }
 
 class CoachMatchup extends IMatchup {
-  static final String Bye = "bye";
+  static const String Bye = "bye";
 
   late int _tableNum;
 

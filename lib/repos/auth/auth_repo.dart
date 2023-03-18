@@ -1,5 +1,4 @@
 import 'package:bbnaf/repos/auth/auth_user.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class AuthRepository {
   Future<AuthUser> signInWithCredentials(String email, String password);
