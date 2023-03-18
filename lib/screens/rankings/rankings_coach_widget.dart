@@ -34,7 +34,7 @@ class RankingCoachPage extends StatefulWidget {
 }
 
 class _RankingCoachPage extends State<RankingCoachPage> {
-  late int _sortColumnIndex = widget.tournament.useSquads ? 4 : 3;
+  late int _sortColumnIndex = widget.tournament.useSquads() ? 4 : 3;
   bool _sortAscending = false;
 
   List<Coach> _items = [];
@@ -77,7 +77,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       DataColumn(label: Text('Naf Name')),
     );
 
-    if (widget.tournament.useSquads) {
+    if (widget.tournament.useSquads()) {
       columns.add(DataColumn(
         label: Text('Squad'),
       ));
@@ -136,7 +136,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
       cells.add(DataCell(Text('${coach.nafName}')));
 
-      if (widget.tournament.useSquads) {
+      if (widget.tournament.useSquads()) {
         cells.add(DataCell(Text('${coach.squadName}')));
       }
 

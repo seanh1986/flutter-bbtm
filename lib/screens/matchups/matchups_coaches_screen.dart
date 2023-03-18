@@ -1,16 +1,24 @@
+import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/matchups/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:collection/collection.dart';
 
 class CoachMatchupsPage extends StatefulWidget {
   final Tournament tournament;
   final AuthUser authUser;
+  final bool autoSelectAuthUserMatchup;
+  final bool refreshState;
 
   CoachMatchupsPage(
-      {Key? key, required this.tournament, required this.authUser})
+      {Key? key,
+      required this.tournament,
+      required this.authUser,
+      required this.autoSelectAuthUserMatchup,
+      required this.refreshState})
       : super(key: key);
 
   @override
@@ -23,6 +31,9 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   late Tournament _tournament;
   late AuthUser _authUser;
   List<CoachMatchup> _matchups = [];
+
+  late bool _autoSelectAuthUserMatchup;
+  CoachMatchup? selectedMatchup;
 
   FToast? fToast;
 
@@ -39,11 +50,17 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     super.dispose();
   }
 
+  void _refreshState() {
+    _tournament = widget.tournament;
+    _authUser = widget.authUser;
+  }
+
   // TODO: Add CurCoach widget at top if non-null
   @override
   Widget build(BuildContext context) {
-    _tournament = widget.tournament;
-    _authUser = widget.authUser;
+    if (widget.refreshState) {
+      _refreshState();
+    }
 
     if (_tournament.coachRounds.isNotEmpty) {
       _matchups = List.from(_tournament.coachRounds.last.matches);
@@ -53,6 +70,61 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
       return _noMatchUpsYet();
     }
 
+    if (widget.refreshState) {
+      initSelectedMatchupState();
+    }
+
+    // Allow for auto selection if not already selected
+    if (selectedMatchup == null && _autoSelectAuthUserMatchup) {
+      selectedMatchup = findAutoSelectedMatchup();
+    }
+
+    return selectedMatchup != null
+        ? _selectedCoachMatchupUi(selectedMatchup!)
+        : _coachMatchupListUi();
+  }
+
+  void initSelectedMatchupState() {
+    _autoSelectAuthUserMatchup = widget.autoSelectAuthUserMatchup;
+    selectedMatchup = null;
+  }
+
+  CoachMatchup? findAutoSelectedMatchup() {
+    if (!widget.autoSelectAuthUserMatchup || _authUser.nafName == null) {
+      return null;
+    }
+
+    Coach? coach = _tournament.getCoach(_authUser.nafName!);
+    if (coach == null) {
+      return null;
+    }
+
+    return _matchups.firstWhereOrNull(
+        (element) => element.hasParticipantName(coach.name()));
+  }
+
+  Widget _selectedCoachMatchupUi(CoachMatchup m) {
+    List<Widget> matchupWidgets = [
+      SizedBox(height: 2),
+      _getRoundTitle(),
+      SizedBox(height: 10),
+    ];
+
+    matchupWidgets.add(MatchupCoachWidget(
+      tournament: _tournament,
+      authUser: _authUser,
+      matchup: m,
+      refreshState: widget.refreshState,
+    ));
+
+    return Expanded(
+        child: ListView(
+            children: matchupWidgets,
+            shrinkWrap: true,
+            scrollDirection: Axis.vertical));
+  }
+
+  Widget _coachMatchupListUi() {
     List<Widget> matchupWidgets = [
       SizedBox(height: 2),
       _getRoundTitle(),
@@ -63,6 +135,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
           tournament: _tournament,
           authUser: _authUser,
           matchup: m,
+          refreshState: widget.refreshState,
         )));
 
     return Expanded(

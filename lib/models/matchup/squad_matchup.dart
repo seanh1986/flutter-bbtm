@@ -52,7 +52,8 @@ class SquadMatchup extends IMatchup {
   }
 
   bool hasSquad(String squadName) {
-    return homeSquadName == squadName || awaySquadName == squadName;
+    return homeSquadName.toLowerCase() == squadName.toLowerCase() ||
+        awaySquadName.toLowerCase() == squadName.toLowerCase();
   }
 
   SquadMatchup.fromJson(Map<String, dynamic> json) {

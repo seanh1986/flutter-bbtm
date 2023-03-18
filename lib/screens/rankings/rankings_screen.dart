@@ -39,7 +39,7 @@ class _RankingsPage extends State<RankingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_tournament.useSquads) {
+    if (_tournament.useSquads()) {
       return _squadAndCoachTabs();
     }
 
@@ -131,6 +131,7 @@ class _RankingsPage extends State<RankingsPage> {
         length: 2,
         child: Scaffold(
             appBar: AppBar(
+              automaticallyImplyLeading: false,
               flexibleSpace: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [

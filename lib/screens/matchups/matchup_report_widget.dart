@@ -25,13 +25,16 @@ class MatchupReportWidget extends StatefulWidget {
   final String _tdName = "Tds";
   final String _casName = "Cas";
 
-  MatchupReportWidget({
-    Key? key,
-    required this.reportedMatch,
-    required this.participant,
-    required this.showHome,
-    required this.state,
-  }) : super(key: key) {
+  final bool refreshState;
+
+  MatchupReportWidget(
+      {Key? key,
+      required this.reportedMatch,
+      required this.participant,
+      required this.showHome,
+      required this.state,
+      required this.refreshState})
+      : super(key: key) {
     if (reportedMatch != null) {
       counts.putIfAbsent(_tdName,
           () => showHome ? reportedMatch!.homeTds : reportedMatch!.awayTds);
@@ -77,11 +80,10 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   void initState() {
     super.initState();
 
-    _participant = widget.participant;
-    _state = widget.state;
-
     fToast = FToast();
     fToast.init(context);
+
+    _refreshState();
   }
 
   @override
@@ -90,9 +92,18 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     super.dispose();
   }
 
+  void _refreshState() {
+    _participant = widget.participant;
+    _state = widget.state;
+  }
+
   @override
   Widget build(BuildContext context) {
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
+
+    if (widget.refreshState) {
+      _refreshState();
+    }
 
     return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,

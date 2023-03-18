@@ -7,13 +7,20 @@ import 'package:bbnaf/screens/matchups/matchup_squad_widget.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:collection/collection.dart';
 
 class SquadMatchupsPage extends StatefulWidget {
   final Tournament tournament;
   final AuthUser authUser;
+  final bool autoSelectAuthUserMatchup;
+  final bool refreshState;
 
   SquadMatchupsPage(
-      {Key? key, required this.tournament, required this.authUser})
+      {Key? key,
+      required this.tournament,
+      required this.authUser,
+      required this.autoSelectAuthUserMatchup,
+      required this.refreshState})
       : super(key: key);
 
   @override
@@ -27,6 +34,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   late AuthUser _authUser;
   List<SquadMatchup> _matchups = [];
 
+  late bool _autoSelectAuthUserMatchup;
   SquadMatchup? selectedMatchup;
 
   FToast? fToast;
@@ -37,6 +45,9 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
     fToast = FToast();
     fToast!.init(context);
+
+    _autoSelectAuthUserMatchup = widget.autoSelectAuthUserMatchup;
+    selectedMatchup = null;
   }
 
   @override
@@ -44,7 +55,6 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     super.dispose();
   }
 
-  // TODO: Add CurCoach widget at top if non-null
   @override
   Widget build(BuildContext context) {
     _tournament = widget.tournament;
@@ -58,9 +68,28 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
       return _noMatchUpsYet();
     }
 
+    // Allow for auto selection if not already selected
+    if (selectedMatchup == null && _autoSelectAuthUserMatchup) {
+      selectedMatchup = findAutoSelectedMatchup();
+    }
+
     return selectedMatchup != null
         ? _selectedSquadMatchupUi(selectedMatchup!)
         : _squadMatchupListUi();
+  }
+
+  SquadMatchup? findAutoSelectedMatchup() {
+    if (!widget.autoSelectAuthUserMatchup || _authUser.nafName == null) {
+      return null;
+    }
+
+    Squad? squad = _tournament.getCoachSquad(_authUser.nafName!);
+    if (squad == null) {
+      return null;
+    }
+
+    return _matchups
+        .firstWhereOrNull((element) => element.hasSquad(squad.name()));
   }
 
   Widget _selectedSquadMatchupUi(SquadMatchup m) {
@@ -74,9 +103,14 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
           tournament: _tournament,
           authUser: _authUser,
           matchup: m,
+          refreshState: widget.refreshState,
         )));
 
-    return ListView(children: matchupWidgets);
+    return Expanded(
+        child: ListView(
+            children: matchupWidgets,
+            shrinkWrap: true,
+            scrollDirection: Axis.vertical));
   }
 
   Widget _squadMatchupListUi() {
@@ -100,7 +134,11 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
       matchupWidgets.add(inkWell);
     });
 
-    return ListView(children: matchupWidgets);
+    return Expanded(
+        child: ListView(
+            children: matchupWidgets,
+            shrinkWrap: true,
+            scrollDirection: Axis.vertical));
   }
 
   Widget _getSquadListRoundTitle() {

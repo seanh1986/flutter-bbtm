@@ -37,7 +37,7 @@ class SwissPairings {
     if (round == 1) {
       matching = _getFirstRoundMatching(tournament.firstRoundMatchingRule);
     } else if (verifyAllResultsEntered()) {
-      if (tournament.useSquads) {
+      if (tournament.useSquads()) {
         matching = _applySwiss(round, tournament.getSquads());
         // TODO: Match coaches too
       } else {
@@ -74,7 +74,7 @@ class SwissPairings {
   SwissRound? _firstRoundRandom() {
     List<IMatchupParticipant> notYetPaired = [];
 
-    if (tournament.useSquads) {
+    if (tournament.useSquads()) {
       notYetPaired = new List.from(tournament.getSquads());
     } else {
       notYetPaired = new List.from(tournament.getCoaches());
@@ -110,7 +110,7 @@ class SwissPairings {
 
       notYetPaired.removeAt(idx_2);
 
-      if (tournament.useSquads) {
+      if (tournament.useSquads()) {
         matchings.matches
             .add(SquadMatchup(tableNum, player_1.name(), player_2.name()));
       } else {

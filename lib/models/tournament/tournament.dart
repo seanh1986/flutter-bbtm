@@ -34,7 +34,7 @@ class Tournament {
   late final TournamentInfo info;
 
   late final FirstRoundMatchingRule firstRoundMatchingRule;
-  late final bool useSquads;
+  // late final bool useSquads;
 
   // Key: squad name, Value: Idx in squad list
   HashMap<String, int> _squadIdxMap = new HashMap<String, int>();
@@ -105,7 +105,7 @@ class Tournament {
   }
 
   Squad? getCoachSquad(String nafName) {
-    if (!useSquads) {
+    if (!useSquads() && !useSquadsForInitOnly()) {
       return null;
     }
 
@@ -119,6 +119,14 @@ class Tournament {
 
   int curRoundNumber() {
     return coachRounds.length;
+  }
+
+  bool useSquads() {
+    return info.squadDetails.type == SquadUsage.SQUADS;
+  }
+
+  bool useSquadsForInitOnly() {
+    return info.squadDetails.type == SquadUsage.INDIVIDUAL_USE_SQUADS_FOR_INIT;
   }
 
   // Try to process round (i.e., populate coaches with results)
@@ -202,7 +210,7 @@ class Tournament {
       return false;
     }
 
-    if (useSquads) {
+    if (useSquads()) {
       SquadRound squadRound = SquadRound.fromRoundMatching(matchups);
       if (squadRound.getMatches().isEmpty) {
         debugPrint('Failed to update round: Matches list is empty');
@@ -256,9 +264,6 @@ class Tournament {
   Tournament.fromJson(TournamentInfo info, Map<String, dynamic> json) {
     this.info = info;
 
-    final tUseSquads = json['use_squads'] as bool?;
-    this.useSquads = tUseSquads != null ? tUseSquads : false;
-
     final tFirstRoundMatching = json['first_round_matching'] as String?;
     this.firstRoundMatchingRule = SwissPairings.parseFirstRoundMatchingName(
         tFirstRoundMatching != null ? tFirstRoundMatching : "");
@@ -290,7 +295,6 @@ class Tournament {
   }
 
   Map<String, dynamic> toJson() => {
-        'use_squads': useSquads,
         'first_round_matching':
             SwissPairings.getFirstRoundMatchingName(firstRoundMatchingRule),
         'coaches': _coaches.map((e) => e.toJson()).toList(),
@@ -318,236 +322,6 @@ class Tournament {
         c.rosterFileName = info.id + "/" + c.nafName.toLowerCase() + ".pdf";
       }
     });
-  }
-
-  Tournament.fromIceBowl() {
-    info = TournamentInfo(
-        id: "JxUszJ2tZ3Pw7M7mMgHB",
-        name: "Ice Bowl",
-        location: "Waterloo, Ontario",
-        dateTimeStart: DateTime.utc(2023, 2, 12),
-        dateTimeEnd: DateTime.utc(2023, 2, 12));
-
-    info.scoringDetails.winPts = 5;
-    info.scoringDetails.tiePts = 3;
-    info.scoringDetails.lossPts = 1;
-
-    const htmlDetailsWeather = r"""
-<p><u><strong>2. Wind Chill</strong></u><br />
-The cold wind is enough to force some players off the pitch seeking shelter from the cold. At the end of step 1 of the start of drive sequence,<br />
-both coaches roll a d6. Who ever rolls lowest (In the event of a tie both coaches) Randomly select a player on the pitch.<br />
-Remove that player and set them in the reserves box.</p>
-
-<p><u><strong>3. Freezing Fog</strong></u><br />
-The cold makes hands and fingers numb. - 1 to all Catch, Pick Up, Passing and Interference and Interception rolls.</p>
-
-<p><u><strong>4-10. Nice</strong></u><br />
-Perfect Blood Bowl Weather.</p>
-
-<p><u><strong>11. Hail Shower</strong></u><br />
-At the start of each team's turn randomly select one player. They are struck with a giant ball of hail. Make an immediate armour roll.<br />
-If the armour roll is successful, do not make a injury roll. The player is instead placed stunned.<br />
-This will not cause a turn over, even if the player was holding the ball.</p>
-
-<p><u><strong>12. White Out</strong></u><br />
-The snow is blowing and pass actions can NOT be attempted.<br />
-Additionally a blitz action can not be performed against an opposing player if they are more than 3 squares away.</p>
-    """;
-    info.detailsWeather = htmlDetailsWeather.toString();
-
-    const htmlDetailsKickOff = r"""
-<p><u><strong>2. Pitch Side Brawl</strong></u><br />
-A fight has broken out in the stands and has spilled onto the pitch. Each coach randomly selects d3 players who are placed stunned.</p>
-
-<p><u><strong>3. Icicles!</strong></u><br />
-Icicles have formed around the stadium. Each coach randomly selects a player on their team.<br />
-That player may perform the special STAB action once before the end of the drive.</p>
-
-<p><u><strong>4. Snowballs!</strong></u><br />
-Fans have been hurling snowballs onto the pitch. Each coach randomly selects a player on their team.<br />
-Upon the first activation of that player, the activation immediately ends as the player is scanning the crowd looking for the perpetrator.</p>
-
-<p><u><strong>5. High Kick</strong></u><br />
-As per normal kick off chart.</p>
-
-<p><u><strong>6. Cheering Fans</strong></u><br />
-As per normal kick off chart.</p>
-
-<p><u><strong>7. Brilliant Coaching</strong></u><br />
-As per normal kick off chart.</p>
-
-<p><u><strong>8. Changing Weather</strong></u><br />
-As per normal kick off chart.</p>
-
-<p><u><strong>9. Quick Snap</strong></u><br />
-As per normal kick off chart.</p>
-
-<p><u><strong>10. Snow Drifts</strong></u><br />
-Snow has drifted onto the pitch. If a player if knocked down apply a -1 to the armour roll until the end of this drive.</p>
-
-<p><u><strong>11. Reckless Rookies</strong></u><br />
-Blood bowl is to alluring for the fans. Each coach immediately gains a Norse Raider linemen.<br />
-Place this new team mate any where in their half, except the wide zones. This may increase the players on the pitch beyond the normal 11.<br />
-At the end of the drive, the referee will eject them from the game.</p>
-
-<p><u><strong>12. Feast and Revelry</strong></u><br />
-Both teams have enjoyed a pre-match party. All players on both teams gain the Drunkard Trait, if they don't have it already.</p>
-    """;
-    info.detailsKickOff = htmlDetailsKickOff.toString();
-
-    const htmlDetailSpecialRules = r"""
-<div dir="ltr" align="left">
-<table><colgroup><col width="85" /><col width="26" /><col width="26" /><col width="34" /><col width="23" /><col width="34" /><col width="285" /></colgroup>
-<tbody>
-<tr>
-<td>
-<p dir="ltr">Beer Boar</p>
-</td>
-<td>
-<p dir="ltr">5&nbsp;</p>
-</td>
-<td>
-<p dir="ltr">1&nbsp;</p>
-</td>
-<td>
-<p dir="ltr">3+&nbsp;</p>
-</td>
-<td>
-<p dir="ltr">-&nbsp;</p>
-</td>
-<td>
-<p dir="ltr">6+&nbsp;</p>
-</td>
-<td>
-<p dir="ltr">Dodge, No Hands, Stunty, Titchy, Pick Me Up! Loner(3+) {no loner on Norse teams}</p>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<p dir="ltr">Pick Me Up! - At the end of the opposition&rsquo;s team turn, roll a D6 for each Prone, non-Stunned team-mate within three squares of a Standing player with this Trait. On a 5+, the Prone player may immediately stand up.<br /><br /></p>
-<p dir="ltr"><strong>Norse Balls</strong></p>
-<p dir="ltr">Pre Game roll to determine what type of ball your game will have for the entire match:</p>
-<ul>
-<li>1-2 Normal blood bowl ball, regular and covered in blood</li>
-<li>3-4 Hammer of Legend Ball</li>
-<li>5-6 The Runestone Ball</li>
-</ul>
-<p>Hammer of Legend Ball<br /><br />When ever a player attempts to pick up this ball roll a d6 before the agility roll. On a 1 the player is not worthy to pick up the ball. Place the player in the square they occupied before entering the square with the ball. That player's activation ends immediately</p>
-<p dir="ltr">The Runestone Ball</p>
-<p dir="ltr">Whenever a player carrying the Runestone ball declares a Pass action, that player applies an additional -1 modifier when making a Passing Ability test. Additionally, whenever a player carrying the Runestone ball makes an Armour roll against an opposition player, they apply a +1 modifier to the result.</p>
-<p>&nbsp;</p>
-<p><strong>Frozen Lake Blood Bowl Pitch</strong></p>
-<p dir="ltr">Frozen Surface: At the start of the game, the waters of the lake are as solid as astrogranite. The surfaces difficult to find traction on but, once a player does, coming to a stop can be a problem! Players may attempt to Rush one additional time. However, players must apply a -1 modifier to the roll on each Rush attempt after the first.</p>
-<p dir="ltr">Additionally, as the end of each drive, before removing any models, count up the total number of Prone players on the pitch. If the total between both teams is five or more, the Fragmented Surface pitch rules will apply for the remainder of the game.</p>
-<p dir="ltr">Fragmented Surface: All those players hitting the deck have caused a chain reaction of cracks and fissures. The players are going to need to keep their balance to ensure they dont fall over on the uneven surface! Players suffer an additional -1 modifier on Agility tests when they attempt to Dodge, Leap, Jump or land after being thrown.</p>
-<p>&nbsp;</p>
-
-<p><strong>Norse</strong> teams get <u>+1 dedicated fans</u> at no cost as this is their turf.</p>
-
-<p>Teams MUST be painted to <u>3 colour minimum</u>. There will be penalties for unpainted figures or teams at TO discretion.</p>
-
-<p>After building your roster, <u>pick a player to be Captain</u>, they get PRO for FREE if you have same Captain in both the Canadian Open AND Icebowl (UNLESS you bring the same race to both tournaments - in that instance they get Bone Head)</p>
-
-<p>In general if they cost the same, and have the same stats, minor skill or skill access differences are inconsequential.</p>
-
-<ul>
-	<li>Goblin or Troll from Orc, Goblin, Chaos Pact or Underworld, Snotling</li>
-	<li>Skaven Lineman from Skaven, Chaos Pact or Underworld</li>
-	<li>Minotaur from Chaos, Chaos Dwarf, Chaos Pact</li>
-	<li>Treeman from Halfling, Wood Elf.</li>
-	<li>Ogre from Human, Chaos Pact, Ogres</li>
-</ul>
-
-<p>There are <u>three exceptions</u> that are not allowed. This is for fluff reasons:</p>
-
-<ul>
-	<li>Dwarf &amp; Chaos Dwarf blocker</li>
-	<li>High &amp; Dark Elf blitzer</li>
-	<li>High &amp; Dark Elf lineman</li>
-</ul>
-
-<p><u>Hobby Bonus</u>:</p>
-
-<ul>
-	<li>You may <u>NOT</u> purchase assistant coaches or cheerleaders.</li>
-	<li>If you have a coach model painted +1 assistant coach</li>
-	<li>You MUST have a coach model to argue the call!!!</li>
-	<li>If you have a cheerleader model painted +1 cheerleader (doesnt need to be female/pom poms)<br />
-	A mascot can replace one or other @ TO discretion</li>
-	<li>Max of 1 each, except stunties can have 2 each</li>
-	<li>These do&nbsp;not cost any gold.</li>
-</ul>
-    """;
-    info.detailsSpecialRules = htmlDetailSpecialRules.toString();
-
-    info.organizers
-        .add(OrganizerInfo("thecanadianopen@gmail.com", "grant85", true));
-
-    info.organizers
-        .add(OrganizerInfo("huberman.sean@gmail.com", "seanh1986", false));
-
-    firstRoundMatchingRule = FirstRoundMatchingRule.MatchRandom;
-    useSquads = false;
-
-    addCoach(Coach(
-        "Hammer16", "", "Chris Hamm", Race.BlackOrc, "Hammer16's team", 20377));
-    addCoach(Coach("seanh1986", "", "Sean Huberman", Race.UnderworldDenizens,
-        "seanh1986's team", 23461));
-    addCoach(Coach("Duke_of_Edmund", "", "Andrew Witmer", Race.Unknown,
-        "Duke_of_Edmund's team", 27220));
-    addCoach(Coach("codered", "", "Cody Clerke", Race.ChaosDwarf,
-        "codered's team", 26601));
-    addCoach(Coach("KidRichard", "", "Derek Thompson", Race.Skaven,
-        "KidRichard's team", 24415));
-    addCoach(Coach("sgtsaunders", "", "Paul Saunders", Race.Norse,
-        "sgtsaunders's team", 29936));
-    addCoach(Coach("spazzfist", "", "Craig Thompson-Wood", Race.Norse,
-        "spazzfist's team", 5675));
-    addCoach(Coach("HouseBlackfyre", "", "Sean Cowley", Race.ShamblingUndead,
-        "HouseBlackfyre's team", 28534));
-    addCoach(Coach("resolutespore", "", "Scotty Milne", Race.Goblin,
-        "resolutespore's team", 30637));
-    addCoach(Coach("coachMcGirt", "", "Tanner  Durnin", Race.UnderworldDenizens,
-        "coachMcGirt's team", 28337));
-    addCoach(Coach("drakenspear", "", "Stephen Jarrett", Race.Human,
-        "drakenspear's team", 28841));
-    addCoach(Coach("Frozenflame", "", "Mike Coon", Race.Norse,
-        "Frozenflame's team", 4789));
-    addCoach(Coach("delevus", "", "Matt Vanderby", Race.ImperialNobility,
-        "delevus's team", 9884));
-    addCoach(Coach("TrevCraig", "", "Trevor Craig", Race.ChaosRenegade,
-        "TrevCraig's team", 23648));
-    addCoach(Coach("NotThePornGuy", "", "Ian McKinley", Race.Halfling,
-        "NotThePornGuy's team", 28320));
-    addCoach(Coach("ItsEnZe", "", "Connor Melville", Race.Snotling,
-        "ItsEnZe's team", 31366));
-    addCoach(Coach("Wraithrwinkle", "", "Michael Singerling", Race.Norse,
-        "Wraithrwinkle's team", 34302));
-    addCoach(Coach(
-        "BrainSap", "", "Kent Chapman", Race.Human, "BrainSap's team", 32041));
-    addCoach(Coach("flyingdingle        ", "", "Sol Knicely", Race.Unknown,
-        "flyingdingle        's team", 4244));
-    addCoach(
-        Coach("iniq", "", "Derek Hall", Race.Lizardmen, "iniq's team", 24413));
-    addCoach(Coach("azmodi", "", "Mike Patriarca", Race.ChaosChosen,
-        "azmodi's team", 28531));
-    addCoach(Coach("coachcooper", "", "Mark Cooper", Race.Slann,
-        "coachcooper's team", 28338));
-    addCoach(Coach(
-        "tlawson", "", "Tim Lawson", Race.Nurgle, "tlawson's team", 19205));
-    addCoach(Coach(
-        "mlamont", "", "Mitch Lamont", Race.BlackOrc, "mlamont's team", 33427));
-    addCoach(Coach("lionel_hutz", "", "Christopher Thibert", Race.ChaosDwarf,
-        "lionel_hutz's team", 27461));
-    addCoach(Coach(
-        "Da5id", "", "Chris Poynter", Race.BlackOrc, "Da5id's team", 11292));
-    addCoach(Coach("wererat", "", "Michael  Damecour", Race.Goblin,
-        "wererat's team", 22400));
-    addCoach(Coach("catleesi", "", "Cat Demone", Race.ShamblingUndead,
-        "catleesi's team", 26640));
-    addCoach(Coach("clockwerks77", "", "Adam(D.Hall friend) Stephens",
-        Race.Lizardmen, "clockwerks77's team", 34310));
   }
 
   XmlDocument generateNafUploadFile() {
@@ -660,6 +434,236 @@ Both teams have enjoyed a pre-match party. All players on both teams gain the Dr
     XmlDocument xml = builder.buildDocument();
     return xml;
   }
+
+// Tournament.fromIceBowl() {
+//     info = TournamentInfo(
+//         id: "JxUszJ2tZ3Pw7M7mMgHB",
+//         name: "Ice Bowl",
+//         location: "Waterloo, Ontario",
+//         dateTimeStart: DateTime.utc(2023, 2, 12),
+//         dateTimeEnd: DateTime.utc(2023, 2, 12));
+
+//     info.scoringDetails.winPts = 5;
+//     info.scoringDetails.tiePts = 3;
+//     info.scoringDetails.lossPts = 1;
+
+//     const htmlDetailsWeather = r"""
+// <p><u><strong>2. Wind Chill</strong></u><br />
+// The cold wind is enough to force some players off the pitch seeking shelter from the cold. At the end of step 1 of the start of drive sequence,<br />
+// both coaches roll a d6. Who ever rolls lowest (In the event of a tie both coaches) Randomly select a player on the pitch.<br />
+// Remove that player and set them in the reserves box.</p>
+
+// <p><u><strong>3. Freezing Fog</strong></u><br />
+// The cold makes hands and fingers numb. - 1 to all Catch, Pick Up, Passing and Interference and Interception rolls.</p>
+
+// <p><u><strong>4-10. Nice</strong></u><br />
+// Perfect Blood Bowl Weather.</p>
+
+// <p><u><strong>11. Hail Shower</strong></u><br />
+// At the start of each team's turn randomly select one player. They are struck with a giant ball of hail. Make an immediate armour roll.<br />
+// If the armour roll is successful, do not make a injury roll. The player is instead placed stunned.<br />
+// This will not cause a turn over, even if the player was holding the ball.</p>
+
+// <p><u><strong>12. White Out</strong></u><br />
+// The snow is blowing and pass actions can NOT be attempted.<br />
+// Additionally a blitz action can not be performed against an opposing player if they are more than 3 squares away.</p>
+//     """;
+//     info.detailsWeather = htmlDetailsWeather.toString();
+
+//     const htmlDetailsKickOff = r"""
+// <p><u><strong>2. Pitch Side Brawl</strong></u><br />
+// A fight has broken out in the stands and has spilled onto the pitch. Each coach randomly selects d3 players who are placed stunned.</p>
+
+// <p><u><strong>3. Icicles!</strong></u><br />
+// Icicles have formed around the stadium. Each coach randomly selects a player on their team.<br />
+// That player may perform the special STAB action once before the end of the drive.</p>
+
+// <p><u><strong>4. Snowballs!</strong></u><br />
+// Fans have been hurling snowballs onto the pitch. Each coach randomly selects a player on their team.<br />
+// Upon the first activation of that player, the activation immediately ends as the player is scanning the crowd looking for the perpetrator.</p>
+
+// <p><u><strong>5. High Kick</strong></u><br />
+// As per normal kick off chart.</p>
+
+// <p><u><strong>6. Cheering Fans</strong></u><br />
+// As per normal kick off chart.</p>
+
+// <p><u><strong>7. Brilliant Coaching</strong></u><br />
+// As per normal kick off chart.</p>
+
+// <p><u><strong>8. Changing Weather</strong></u><br />
+// As per normal kick off chart.</p>
+
+// <p><u><strong>9. Quick Snap</strong></u><br />
+// As per normal kick off chart.</p>
+
+// <p><u><strong>10. Snow Drifts</strong></u><br />
+// Snow has drifted onto the pitch. If a player if knocked down apply a -1 to the armour roll until the end of this drive.</p>
+
+// <p><u><strong>11. Reckless Rookies</strong></u><br />
+// Blood bowl is to alluring for the fans. Each coach immediately gains a Norse Raider linemen.<br />
+// Place this new team mate any where in their half, except the wide zones. This may increase the players on the pitch beyond the normal 11.<br />
+// At the end of the drive, the referee will eject them from the game.</p>
+
+// <p><u><strong>12. Feast and Revelry</strong></u><br />
+// Both teams have enjoyed a pre-match party. All players on both teams gain the Drunkard Trait, if they don't have it already.</p>
+//     """;
+//     info.detailsKickOff = htmlDetailsKickOff.toString();
+
+//     const htmlDetailSpecialRules = r"""
+// <div dir="ltr" align="left">
+// <table><colgroup><col width="85" /><col width="26" /><col width="26" /><col width="34" /><col width="23" /><col width="34" /><col width="285" /></colgroup>
+// <tbody>
+// <tr>
+// <td>
+// <p dir="ltr">Beer Boar</p>
+// </td>
+// <td>
+// <p dir="ltr">5&nbsp;</p>
+// </td>
+// <td>
+// <p dir="ltr">1&nbsp;</p>
+// </td>
+// <td>
+// <p dir="ltr">3+&nbsp;</p>
+// </td>
+// <td>
+// <p dir="ltr">-&nbsp;</p>
+// </td>
+// <td>
+// <p dir="ltr">6+&nbsp;</p>
+// </td>
+// <td>
+// <p dir="ltr">Dodge, No Hands, Stunty, Titchy, Pick Me Up! Loner(3+) {no loner on Norse teams}</p>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </div>
+// <p dir="ltr">Pick Me Up! - At the end of the opposition&rsquo;s team turn, roll a D6 for each Prone, non-Stunned team-mate within three squares of a Standing player with this Trait. On a 5+, the Prone player may immediately stand up.<br /><br /></p>
+// <p dir="ltr"><strong>Norse Balls</strong></p>
+// <p dir="ltr">Pre Game roll to determine what type of ball your game will have for the entire match:</p>
+// <ul>
+// <li>1-2 Normal blood bowl ball, regular and covered in blood</li>
+// <li>3-4 Hammer of Legend Ball</li>
+// <li>5-6 The Runestone Ball</li>
+// </ul>
+// <p>Hammer of Legend Ball<br /><br />When ever a player attempts to pick up this ball roll a d6 before the agility roll. On a 1 the player is not worthy to pick up the ball. Place the player in the square they occupied before entering the square with the ball. That player's activation ends immediately</p>
+// <p dir="ltr">The Runestone Ball</p>
+// <p dir="ltr">Whenever a player carrying the Runestone ball declares a Pass action, that player applies an additional -1 modifier when making a Passing Ability test. Additionally, whenever a player carrying the Runestone ball makes an Armour roll against an opposition player, they apply a +1 modifier to the result.</p>
+// <p>&nbsp;</p>
+// <p><strong>Frozen Lake Blood Bowl Pitch</strong></p>
+// <p dir="ltr">Frozen Surface: At the start of the game, the waters of the lake are as solid as astrogranite. The surfaces difficult to find traction on but, once a player does, coming to a stop can be a problem! Players may attempt to Rush one additional time. However, players must apply a -1 modifier to the roll on each Rush attempt after the first.</p>
+// <p dir="ltr">Additionally, as the end of each drive, before removing any models, count up the total number of Prone players on the pitch. If the total between both teams is five or more, the Fragmented Surface pitch rules will apply for the remainder of the game.</p>
+// <p dir="ltr">Fragmented Surface: All those players hitting the deck have caused a chain reaction of cracks and fissures. The players are going to need to keep their balance to ensure they dont fall over on the uneven surface! Players suffer an additional -1 modifier on Agility tests when they attempt to Dodge, Leap, Jump or land after being thrown.</p>
+// <p>&nbsp;</p>
+
+// <p><strong>Norse</strong> teams get <u>+1 dedicated fans</u> at no cost as this is their turf.</p>
+
+// <p>Teams MUST be painted to <u>3 colour minimum</u>. There will be penalties for unpainted figures or teams at TO discretion.</p>
+
+// <p>After building your roster, <u>pick a player to be Captain</u>, they get PRO for FREE if you have same Captain in both the Canadian Open AND Icebowl (UNLESS you bring the same race to both tournaments - in that instance they get Bone Head)</p>
+
+// <p>In general if they cost the same, and have the same stats, minor skill or skill access differences are inconsequential.</p>
+
+// <ul>
+// 	<li>Goblin or Troll from Orc, Goblin, Chaos Pact or Underworld, Snotling</li>
+// 	<li>Skaven Lineman from Skaven, Chaos Pact or Underworld</li>
+// 	<li>Minotaur from Chaos, Chaos Dwarf, Chaos Pact</li>
+// 	<li>Treeman from Halfling, Wood Elf.</li>
+// 	<li>Ogre from Human, Chaos Pact, Ogres</li>
+// </ul>
+
+// <p>There are <u>three exceptions</u> that are not allowed. This is for fluff reasons:</p>
+
+// <ul>
+// 	<li>Dwarf &amp; Chaos Dwarf blocker</li>
+// 	<li>High &amp; Dark Elf blitzer</li>
+// 	<li>High &amp; Dark Elf lineman</li>
+// </ul>
+
+// <p><u>Hobby Bonus</u>:</p>
+
+// <ul>
+// 	<li>You may <u>NOT</u> purchase assistant coaches or cheerleaders.</li>
+// 	<li>If you have a coach model painted +1 assistant coach</li>
+// 	<li>You MUST have a coach model to argue the call!!!</li>
+// 	<li>If you have a cheerleader model painted +1 cheerleader (doesnt need to be female/pom poms)<br />
+// 	A mascot can replace one or other @ TO discretion</li>
+// 	<li>Max of 1 each, except stunties can have 2 each</li>
+// 	<li>These do&nbsp;not cost any gold.</li>
+// </ul>
+//     """;
+//     info.detailsSpecialRules = htmlDetailSpecialRules.toString();
+
+//     info.organizers
+//         .add(OrganizerInfo("thecanadianopen@gmail.com", "grant85", true));
+
+//     info.organizers
+//         .add(OrganizerInfo("huberman.sean@gmail.com", "seanh1986", false));
+
+//     firstRoundMatchingRule = FirstRoundMatchingRule.MatchRandom;
+//     useSquads = false;
+
+//     addCoach(Coach(
+//         "Hammer16", "", "Chris Hamm", Race.BlackOrc, "Hammer16's team", 20377));
+//     addCoach(Coach("seanh1986", "", "Sean Huberman", Race.UnderworldDenizens,
+//         "seanh1986's team", 23461));
+//     addCoach(Coach("Duke_of_Edmund", "", "Andrew Witmer", Race.Unknown,
+//         "Duke_of_Edmund's team", 27220));
+//     addCoach(Coach("codered", "", "Cody Clerke", Race.ChaosDwarf,
+//         "codered's team", 26601));
+//     addCoach(Coach("KidRichard", "", "Derek Thompson", Race.Skaven,
+//         "KidRichard's team", 24415));
+//     addCoach(Coach("sgtsaunders", "", "Paul Saunders", Race.Norse,
+//         "sgtsaunders's team", 29936));
+//     addCoach(Coach("spazzfist", "", "Craig Thompson-Wood", Race.Norse,
+//         "spazzfist's team", 5675));
+//     addCoach(Coach("HouseBlackfyre", "", "Sean Cowley", Race.ShamblingUndead,
+//         "HouseBlackfyre's team", 28534));
+//     addCoach(Coach("resolutespore", "", "Scotty Milne", Race.Goblin,
+//         "resolutespore's team", 30637));
+//     addCoach(Coach("coachMcGirt", "", "Tanner  Durnin", Race.UnderworldDenizens,
+//         "coachMcGirt's team", 28337));
+//     addCoach(Coach("drakenspear", "", "Stephen Jarrett", Race.Human,
+//         "drakenspear's team", 28841));
+//     addCoach(Coach("Frozenflame", "", "Mike Coon", Race.Norse,
+//         "Frozenflame's team", 4789));
+//     addCoach(Coach("delevus", "", "Matt Vanderby", Race.ImperialNobility,
+//         "delevus's team", 9884));
+//     addCoach(Coach("TrevCraig", "", "Trevor Craig", Race.ChaosRenegade,
+//         "TrevCraig's team", 23648));
+//     addCoach(Coach("NotThePornGuy", "", "Ian McKinley", Race.Halfling,
+//         "NotThePornGuy's team", 28320));
+//     addCoach(Coach("ItsEnZe", "", "Connor Melville", Race.Snotling,
+//         "ItsEnZe's team", 31366));
+//     addCoach(Coach("Wraithrwinkle", "", "Michael Singerling", Race.Norse,
+//         "Wraithrwinkle's team", 34302));
+//     addCoach(Coach(
+//         "BrainSap", "", "Kent Chapman", Race.Human, "BrainSap's team", 32041));
+//     addCoach(Coach("flyingdingle        ", "", "Sol Knicely", Race.Unknown,
+//         "flyingdingle        's team", 4244));
+//     addCoach(
+//         Coach("iniq", "", "Derek Hall", Race.Lizardmen, "iniq's team", 24413));
+//     addCoach(Coach("azmodi", "", "Mike Patriarca", Race.ChaosChosen,
+//         "azmodi's team", 28531));
+//     addCoach(Coach("coachcooper", "", "Mark Cooper", Race.Slann,
+//         "coachcooper's team", 28338));
+//     addCoach(Coach(
+//         "tlawson", "", "Tim Lawson", Race.Nurgle, "tlawson's team", 19205));
+//     addCoach(Coach(
+//         "mlamont", "", "Mitch Lamont", Race.BlackOrc, "mlamont's team", 33427));
+//     addCoach(Coach("lionel_hutz", "", "Christopher Thibert", Race.ChaosDwarf,
+//         "lionel_hutz's team", 27461));
+//     addCoach(Coach(
+//         "Da5id", "", "Chris Poynter", Race.BlackOrc, "Da5id's team", 11292));
+//     addCoach(Coach("wererat", "", "Michael  Damecour", Race.Goblin,
+//         "wererat's team", 22400));
+//     addCoach(Coach("catleesi", "", "Cat Demone", Race.ShamblingUndead,
+//         "catleesi's team", 26640));
+//     addCoach(Coach("clockwerks77", "", "Adam(D.Hall friend) Stephens",
+//         Race.Lizardmen, "clockwerks77's team", 34310));
+//   }
 
   // factory Tournament.fromXml(XmlDocument xml, TournamentInfo info) {
   //   List<Squad> squads = [];

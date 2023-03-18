@@ -16,12 +16,14 @@ class MatchupCoachWidget extends StatefulWidget {
   final Tournament tournament;
   final AuthUser authUser;
   final CoachMatchup matchup;
+  final bool refreshState;
 
   MatchupCoachWidget(
       {Key? key,
       required this.tournament,
       required this.authUser,
-      required this.matchup})
+      required this.matchup,
+      required this.refreshState})
       : super(key: key);
 
   @override
@@ -70,9 +72,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   void initState() {
     super.initState();
 
-    _tournament = widget.tournament;
-    _authUser = widget.authUser;
-    _matchup = widget.matchup;
+    fToast = FToast();
+    fToast.init(context);
   }
 
   @override
@@ -81,39 +82,18 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     super.dispose();
   }
 
-  UploadState _getMatchUploadState(
-      ReportedMatchResultWithStatus reportWithStatus,
-      Authorization authorization) {
-    if (authorization == Authorization.Unauthorized) {
-      return UploadState.NotAuthorized;
-    }
-
-    switch (reportWithStatus.status) {
-      case ReportedMatchStatus.NoReportsYet:
-        return UploadState.Editing;
-      case ReportedMatchStatus.BothReportedAgree:
-        return UploadState.UploadedConfirmed;
-      case ReportedMatchStatus.BothReportedConflict:
-        return UploadState.Error;
-      case ReportedMatchStatus.HomeReported:
-        return authorization == Authorization.HomeCoach ||
-                authorization == Authorization.HomeCaptain ||
-                authorization == Authorization.Admin
-            ? UploadState.CanEdit
-            : UploadState.CanConfirm;
-      case ReportedMatchStatus.AwayReported:
-        return authorization == Authorization.AwayCoach ||
-                authorization == Authorization.AwayCaptain ||
-                authorization == Authorization.Admin
-            ? UploadState.CanEdit
-            : UploadState.CanConfirm;
-    }
+  void _refreshState() {
+    _tournament = widget.tournament;
+    _authUser = widget.authUser;
+    _matchup = widget.matchup;
   }
 
   @override
   Widget build(BuildContext context) {
-    fToast = FToast();
-    fToast.init(context);
+    if (widget.refreshState) {
+      _refreshState();
+    }
+
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
 
     _reportWithStatus = _matchup.getReportedMatchStatus();
@@ -134,13 +114,15 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
         reportedMatch: _reportWithStatus,
         participant: _matchup.home(_tournament),
         showHome: true,
-        state: _state);
+        state: _state,
+        refreshState: widget.refreshState);
 
     awayReportWidget = MatchupReportWidget(
         reportedMatch: _reportWithStatus,
         participant: _matchup.away(_tournament),
         showHome: false,
-        state: _state);
+        state: _state,
+        refreshState: widget.refreshState);
 
     return Container(
         alignment: FractionalOffset.center, child: _coachMatchupWidget());
@@ -415,8 +397,6 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
       ToastUtils.show(fToast, "Uploading Match Report!");
 
-      //_tournyBloc.add(event);
-
       bool updateSuccess = await _tournyBloc.updateMatchEvent(event);
       if (updateSuccess) {
         ToastUtils.showSuccess(fToast, "Uploaded Match Report!");
@@ -511,5 +491,34 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
   bool _hideItemUploadBtn() {
     return _state == UploadState.NotAuthorized;
+  }
+
+  UploadState _getMatchUploadState(
+      ReportedMatchResultWithStatus reportWithStatus,
+      Authorization authorization) {
+    if (authorization == Authorization.Unauthorized) {
+      return UploadState.NotAuthorized;
+    }
+
+    switch (reportWithStatus.status) {
+      case ReportedMatchStatus.NoReportsYet:
+        return UploadState.Editing;
+      case ReportedMatchStatus.BothReportedAgree:
+        return UploadState.UploadedConfirmed;
+      case ReportedMatchStatus.BothReportedConflict:
+        return UploadState.Error;
+      case ReportedMatchStatus.HomeReported:
+        return authorization == Authorization.HomeCoach ||
+                authorization == Authorization.HomeCaptain ||
+                authorization == Authorization.Admin
+            ? UploadState.CanEdit
+            : UploadState.CanConfirm;
+      case ReportedMatchStatus.AwayReported:
+        return authorization == Authorization.AwayCoach ||
+                authorization == Authorization.AwayCaptain ||
+                authorization == Authorization.Admin
+            ? UploadState.CanEdit
+            : UploadState.CanConfirm;
+    }
   }
 }

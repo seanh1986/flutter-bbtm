@@ -60,7 +60,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
       DataColumn(label: Text("Race")),
     ];
 
-    if (t.useSquads) {
+    if (t.useSquads() || t.useSquadsForInitOnly()) {
       _coachCols.add(DataColumn(label: Text("Squad")));
     }
 
@@ -208,7 +208,8 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
     // }
 
     _coachSource = CoachesDataSource(
-        useSquad: widget.tournament.useSquads,
+        useSquad: widget.tournament.useSquads() ||
+            widget.tournament.useSquadsForInitOnly(),
         coaches: _coaches,
         activeCallback: (cIdx, active) {
           setState(() {
