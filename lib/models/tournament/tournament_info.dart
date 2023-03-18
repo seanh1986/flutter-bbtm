@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'package:enum_to_string/enum_to_string.dart';
 
 class TournamentInfo {
   String id = "";
@@ -8,7 +9,11 @@ class TournamentInfo {
   DateTime dateTimeEnd = DateTime.now();
   List<OrganizerInfo> organizers = [];
 
-  ScoringDetails scoringDetails = ScoringDetails();
+  ScoringDetails scoringDetails = ScoringDetails.defaultForCoaches();
+
+  CasualtyDetails casualtyDetails = CasualtyDetails();
+
+  SquadDetails squadDetails = SquadDetails();
 
   String detailsWeather = "";
   String detailsKickOff = "";
@@ -58,6 +63,16 @@ class TournamentInfo {
       this.scoringDetails = ScoringDetails.fromJson(tScoringDetails);
     }
 
+    final tCasDetails = json['casualty_details'] as Map<String, dynamic>?;
+    if (tCasDetails != null) {
+      this.casualtyDetails = CasualtyDetails.fromJson(tCasDetails);
+    }
+
+    final tSquadDetails = json['squad_details'] as Map<String, dynamic>?;
+    if (tSquadDetails != null) {
+      this.squadDetails = SquadDetails.fromJson(tSquadDetails);
+    }
+
     final tDetailsWeather = json['details_weather'] as String?;
     if (tDetailsWeather != null) {
       this.detailsWeather = tDetailsWeather;
@@ -86,6 +101,7 @@ class TournamentInfo {
         'date_time_end': dateTimeEnd.toIso8601String(),
         'organizers': organizers.map((e) => e.toJson()).toList(),
         'scoring_details': scoringDetails.toJson(),
+        'casualty_details': casualtyDetails.toJson(),
         'details_weather': detailsWeather,
         'details_kickoff': detailsKickOff,
         'details_special_rules': detailsSpecialRules,
@@ -144,41 +160,41 @@ class CasualtyDetails {
 }
 
 class ScoringDetails {
-  double winPts = 5;
-  double tiePts = 3;
-  double lossPts = 1;
+  late double winPts;
+  late double tiePts;
+  late double lossPts;
 
-  CasualtyDetails casualtyDetails = CasualtyDetails();
+  ScoringDetails(this.winPts, this.tiePts, this.lossPts);
 
-  ScoringDetails();
+  // Default for coaches
+  ScoringDetails.defaultForCoaches() {
+    this.winPts = 5;
+    this.tiePts = 2;
+    this.lossPts = 0;
+  }
+
+  // Default for squad
+  ScoringDetails.defaultForSquad() {
+    this.winPts = 2;
+    this.tiePts = 1;
+    this.lossPts = 0;
+  }
 
   ScoringDetails.fromJson(Map<String, dynamic> json) {
     final tWinPts = json['win_pts'] as double?;
-    if (tWinPts != null) {
-      this.winPts = tWinPts;
-    }
+    this.winPts = tWinPts != null ? tWinPts : 5;
 
     final tTiePts = json['tie_pts'] as double?;
-    if (tTiePts != null) {
-      this.tiePts = tTiePts;
-    }
+    this.tiePts = tTiePts != null ? tTiePts : 2;
 
     final tLossPts = json['loss_pts'] as double?;
-    if (tLossPts != null) {
-      this.lossPts = tLossPts;
-    }
-
-    final tCasDetails = json['casualty_details'] as Map<String, dynamic>?;
-    if (tCasDetails != null) {
-      this.casualtyDetails = CasualtyDetails.fromJson(tCasDetails);
-    }
+    this.lossPts = tLossPts != null ? tLossPts : 0;
   }
 
   Map<String, dynamic> toJson() => {
         'win_pts': winPts,
         'tie_pts': tiePts,
         'loss_pts': lossPts,
-        'casualty_details': casualtyDetails.toJson(),
       };
 }
 
@@ -212,5 +228,69 @@ class OrganizerInfo {
         'email': email,
         'nafname': nafName,
         'primary': primary,
+      };
+}
+
+enum SquadUsage {
+  NO_SQUADS,
+  INDIVIDUAL_USE_SQUADS_FOR_INIT,
+  SQUADS,
+}
+
+enum SquadScoring {
+  SUM_COACH_SCORES,
+  SQUAD_POINTS,
+}
+
+class SquadDetails {
+  SquadUsage type = SquadUsage.NO_SQUADS;
+  int requiredNumCoachesPerSquad = 0; // Number of active coaches required
+  int maxNumCoachesPerSquad = 0; // Max number allowed on a squad
+
+  SquadScoring scoringType = SquadScoring.SUM_COACH_SCORES;
+  ScoringDetails scoringDetails = ScoringDetails.defaultForSquad();
+
+  SquadDetails();
+
+  SquadDetails.fromJson(Map<String, dynamic> json) {
+    final tType = json['type'] as String?;
+    if (tType != null) {
+      SquadUsage? pType = EnumToString.fromString(SquadUsage.values, tType);
+      if (pType != null) {
+        this.type = pType;
+      }
+    }
+
+    final tRequiredCoaches = json['required_coaches_per_squad'] as int?;
+    if (tRequiredCoaches != null) {
+      this.requiredNumCoachesPerSquad = tRequiredCoaches;
+    }
+
+    final tMaxCoaches = json['max_coaches_per_squad'] as int?;
+    if (tMaxCoaches != null) {
+      this.maxNumCoachesPerSquad = tMaxCoaches;
+    }
+
+    final tScoringType = json['scoring_type'] as String?;
+    if (tScoringType != null) {
+      SquadScoring? pScoringType =
+          EnumToString.fromString(SquadScoring.values, tScoringType);
+      if (pScoringType != null) {
+        this.scoringType = pScoringType;
+      }
+    }
+
+    final tScoringDetails = json['scoring_details'] as Map<String, dynamic>?;
+    if (tScoringDetails != null) {
+      this.scoringDetails = ScoringDetails.fromJson(tScoringDetails);
+    }
+  }
+
+  Map<String, dynamic> toJson() => {
+        'type': EnumToString.convertToString(type),
+        'required_coaches_per_squad': requiredNumCoachesPerSquad,
+        'max_coaches_per_squad': maxNumCoachesPerSquad,
+        'scoring_type': EnumToString.convertToString(scoringType),
+        'scoring_details': scoringDetails.toJson(),
       };
 }

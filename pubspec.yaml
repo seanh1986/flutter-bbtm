@@ -53,6 +53,7 @@ dependencies:
   flutter_native_splash: ^1.2.0
   fluttertoast: ^8.1.2
   file_picker: ^5.2.5
+  enum_to_string: ^2.0.1
 
 dev_dependencies:
   flutter_test:

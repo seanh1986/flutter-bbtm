@@ -30,16 +30,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   late TournamentBloc _tournyBloc;
 
-  List<DataColumn> _coachCols = [
-    DataColumn(label: Text("")), // For add/remove rows
-    // DataColumn(label: Text("Squad")),
-    DataColumn(label: Text("Name")),
-    DataColumn(label: Text("Naf Name")),
-    DataColumn(label: Text("Naf #")),
-    DataColumn(label: Text("Race")),
-    DataColumn(label: Text("Team")),
-    DataColumn(label: Text("Active")),
-  ];
+  List<DataColumn> _coachCols = [];
 
   late CoachesDataSource _coachSource;
 
@@ -61,6 +52,23 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   void _initFromTournament(Tournament t) {
     _coaches = List.from(t.getCoaches());
+
+    _coachCols = [
+      DataColumn(label: Text("Name")),
+      DataColumn(label: Text("Naf Name")),
+      DataColumn(label: Text("Naf #")),
+      DataColumn(label: Text("Race")),
+    ];
+
+    if (t.useSquads) {
+      _coachCols.add(DataColumn(label: Text("Squad")));
+    }
+
+    _coachCols.addAll([
+      DataColumn(label: Text("Team")),
+      DataColumn(label: Text("Active")),
+      DataColumn(label: Text("")), // For add/remove rows
+    ]);
   }
 
   @override
@@ -200,6 +208,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
     // }
 
     _coachSource = CoachesDataSource(
+        useSquad: widget.tournament.useSquads,
         coaches: _coaches,
         activeCallback: (cIdx, active) {
           setState(() {
@@ -272,6 +281,7 @@ class RenameNafName {
 }
 
 class CoachesDataSource extends DataTableSource {
+  bool useSquad;
   late List<Coach> coaches;
   Function(int, bool)? activeCallback;
   Function(int)? removeItemCallback;
@@ -279,7 +289,10 @@ class CoachesDataSource extends DataTableSource {
   Map<int, RenameNafName> coachIdxNafRenames = {};
 
   CoachesDataSource(
-      {required this.coaches, this.activeCallback, this.removeItemCallback});
+      {required this.useSquad,
+      required this.coaches,
+      this.activeCallback,
+      this.removeItemCallback});
 
   @override
   DataRow? getRow(int index) {
@@ -304,6 +317,12 @@ class CoachesDataSource extends DataTableSource {
         TextEditingController(text: c.nafName);
     TextFormField nafNameField = TextFormField(
         controller: nafNameController, onChanged: nafNameCallback);
+
+    TextEditingController squadController =
+        TextEditingController(text: c.squadName);
+    TextFormField squadField = TextFormField(
+        controller: squadController,
+        onChanged: (value) => {c.squadName = squadController.text});
 
     TextEditingController coachNameController =
         TextEditingController(text: c.coachName);
@@ -358,15 +377,24 @@ class CoachesDataSource extends DataTableSource {
       child: const Text('-'),
     );
 
-    return DataRow(cells: [
-      DataCell(removeBtn),
+    List<DataCell> cells = [
       DataCell(coachNameField),
       DataCell(nafNameField),
       DataCell(nafNumberField),
       DataCell(raceField),
+    ];
+
+    if (useSquad) {
+      cells.add(DataCell(squadField));
+    }
+
+    cells.addAll([
       DataCell(teamNameField),
       DataCell(activeCheckbox),
+      DataCell(removeBtn),
     ]);
+
+    return DataRow(cells: cells);
   }
 
   @override

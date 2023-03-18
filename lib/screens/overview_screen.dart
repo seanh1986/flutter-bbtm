@@ -147,16 +147,16 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
     List<String> casualtyTypes = [];
 
-    if (t.scoringDetails.casualtyDetails.spp) {
+    if (t.casualtyDetails.spp) {
       casualtyTypes.add("SPP");
     }
-    if (t.scoringDetails.casualtyDetails.foul) {
+    if (t.casualtyDetails.foul) {
       casualtyTypes.add("fouls");
     }
-    if (t.scoringDetails.casualtyDetails.surf) {
+    if (t.casualtyDetails.surf) {
       casualtyTypes.add("surfs");
     }
-    if (t.scoringDetails.casualtyDetails.dodge) {
+    if (t.casualtyDetails.dodge) {
       casualtyTypes.add("failed dodges");
     }
 
