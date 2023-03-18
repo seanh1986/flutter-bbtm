@@ -3,15 +3,9 @@ import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
-
-// Different options for how squads are used
-enum SquadScoreMode {
-  NO_SQUADS, // No squads at all
-  CUMULATIVE_PLAYER_SCORES, // Squad pts are sum of player pts
-  W_T_L_1_HALF_0, // 1 pt for W, 0.5 for tie, 0 for loss
-  COUNT_WINS_ONLY, // pts = num wins
-}
 
 class Squad extends IMatchupParticipant {
   late final String _name; // Key
@@ -75,12 +69,25 @@ class Squad extends IMatchupParticipant {
     return _opponents;
   }
 
-  List<String> getCoaches() {
-    return _coaches;
+  @override
+  bool isActive(Tournament t) {
+    int numActiveCoaches = getNumActiveCoaches(t);
+
+    int requiredNumCoachesPerSquad =
+        t.info.squadDetails.requiredNumCoachesPerSquad;
+
+    return numActiveCoaches == requiredNumCoachesPerSquad;
   }
 
-  void addCoach(Coach c) {
-    _coaches.add(c.nafName);
+  int getNumActiveCoaches(Tournament t) {
+    return _coaches.where((nafName) {
+      Coach? c = t.getCoach(nafName);
+      return c != null && c.active;
+    }).length;
+  }
+
+  List<String> getCoaches() {
+    return _coaches;
   }
 
   void calculateWinsTiesLosses(List<SquadRound> prevSquadRounds) {
@@ -134,16 +141,16 @@ class Squad extends IMatchupParticipant {
     }
   }
 
-  void calculatePoints(SquadScoreMode scoreMode, HashMap<String, int> coachMap,
+  void calculatePoints(SquadScoring scoreMode, HashMap<String, int> coachMap,
       List<Coach> coachList) {
     switch (scoreMode) {
-      case SquadScoreMode.CUMULATIVE_PLAYER_SCORES:
+      case SquadScoring.CUMULATIVE_PLAYER_SCORES:
         _calculatePointsCumulativePlayerScores(coachMap, coachList);
         break;
-      case SquadScoreMode.W_T_L_1_HALF_0:
+      case SquadScoring.W_T_L_1_HALF_0:
         _calculatePointsWinTieLossOneHalfZero();
         break;
-      case SquadScoreMode.COUNT_WINS_ONLY:
+      case SquadScoring.COUNT_WINS_ONLY:
         _calculatePointsWinsOnly();
         break;
       default:
@@ -181,16 +188,17 @@ class Squad extends IMatchupParticipant {
     _opponents.add(opponentName);
   }
 
-  static SquadScoreMode getSquadScoreMode(int groupScoreMode) {
+  // For parsing score .bbd files
+  static SquadScoring getSquadScoreModeFromScoreFile(int groupScoreMode) {
     switch (groupScoreMode) {
       case 0:
-        return SquadScoreMode.CUMULATIVE_PLAYER_SCORES;
+        return SquadScoring.CUMULATIVE_PLAYER_SCORES;
       case 1:
-        return SquadScoreMode.W_T_L_1_HALF_0;
+        return SquadScoring.W_T_L_1_HALF_0;
       case 2:
-        return SquadScoreMode.COUNT_WINS_ONLY;
+        return SquadScoring.COUNT_WINS_ONLY;
       default:
-        return SquadScoreMode.NO_SQUADS;
+        return SquadScoring.NO_SQUADS;
     }
   }
 
@@ -200,18 +208,6 @@ class Squad extends IMatchupParticipant {
 
     final tCoaches = json['coaches'] as List<String>?;
     this._coaches = tCoaches != null ? tCoaches : [];
-
-    final tWins = json['wins'] as int?;
-    this._wins = tWins != null ? tWins : 0;
-
-    final tTies = json['ties'] as int?;
-    this._ties = tTies != null ? tTies : 0;
-
-    final tLosses = json['losses'] as int?;
-    this._losses = tLosses != null ? tLosses : 0;
-
-    final tOpponents = json['opponents'] as List<String>?;
-    this._opponents = tOpponents != null ? tOpponents : [];
   }
 
   Map toJson() => {

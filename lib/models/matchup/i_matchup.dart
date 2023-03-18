@@ -123,6 +123,7 @@ abstract class IMatchupParticipant {
   int losses();
   List<double> tiebreakers();
   List<String> opponents();
+  bool isActive(Tournament t);
 
   String showRecord() {
     return wins().toString() +

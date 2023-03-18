@@ -1,8 +1,8 @@
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
-import 'package:bbnaf/widgets/rankings_coach_widget.dart';
-import 'package:bbnaf/widgets/rankings_squads_widget.dart';
+import 'package:bbnaf/screens/rankings/rankings_coach_widget.dart';
+import 'package:bbnaf/screens/rankings/rankings_squads_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

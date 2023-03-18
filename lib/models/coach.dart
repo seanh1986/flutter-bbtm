@@ -129,6 +129,11 @@ class Coach extends IMatchupParticipant {
     return _opponents;
   }
 
+  @override
+  bool isActive(Tournament t) {
+    return active;
+  }
+
   // Returns "" if not valid
   String raceName() {
     return RaceUtils.getName(race);

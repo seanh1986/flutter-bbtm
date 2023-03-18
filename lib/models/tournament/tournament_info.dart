@@ -238,8 +238,10 @@ enum SquadUsage {
 }
 
 enum SquadScoring {
-  SUM_COACH_SCORES,
-  SQUAD_POINTS,
+  NO_SQUADS, // No squads at all
+  CUMULATIVE_PLAYER_SCORES, // Squad pts are sum of player pts
+  W_T_L_1_HALF_0, // 1 pt for W, 0.5 for tie, 0 for loss
+  COUNT_WINS_ONLY, // pts = num wins
 }
 
 class SquadDetails {
@@ -247,7 +249,7 @@ class SquadDetails {
   int requiredNumCoachesPerSquad = 0; // Number of active coaches required
   int maxNumCoachesPerSquad = 0; // Max number allowed on a squad
 
-  SquadScoring scoringType = SquadScoring.SUM_COACH_SCORES;
+  SquadScoring scoringType = SquadScoring.CUMULATIVE_PLAYER_SCORES;
   ScoringDetails scoringDetails = ScoringDetails.defaultForSquad();
 
   SquadDetails();
