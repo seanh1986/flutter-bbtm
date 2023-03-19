@@ -3,27 +3,16 @@ import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 
 class SquadMatchup extends IMatchup {
-  late int _tableNum;
-
   late final String homeSquadName;
   late final String awaySquadName;
 
   List<CoachMatchup> coachMatchups = [];
 
-  SquadMatchup(this._tableNum, this.homeSquadName, this.awaySquadName);
+  SquadMatchup(this.homeSquadName, this.awaySquadName);
 
   @override
   OrgType type() {
     return OrgType.Squad;
-  }
-
-  @override
-  int tableNum() {
-    return _tableNum;
-  }
-
-  void updateTableNum(int tableNum) {
-    _tableNum = tableNum;
   }
 
   @override
@@ -56,22 +45,18 @@ class SquadMatchup extends IMatchup {
         awaySquadName.toLowerCase() == squadName.toLowerCase();
   }
 
-  SquadMatchup.fromJson(Map<String, dynamic> json) {
-    final tTable = json['table'] as int?;
-    this._tableNum = tTable != null ? tTable : -1;
+  // SquadMatchup.fromJson(Map<String, dynamic> json) {
+  //   final tHomeName = json['home_name'] as String?;
+  //   this.homeSquadName = tHomeName != null ? tHomeName : "";
 
-    final tHomeName = json['home_name'] as String?;
-    this.homeSquadName = tHomeName != null ? tHomeName : "";
+  //   final tAwayName = json['away_name'] as String?;
+  //   this.awaySquadName = tAwayName != null ? tAwayName : "";
 
-    final tAwayName = json['away_name'] as String?;
-    this.awaySquadName = tAwayName != null ? tAwayName : "";
+  //   // TODO: Coach Matchups! (maybe use index only?)
+  // }
 
-    // TODO: Coach Matchups! (maybe use index only?)
-  }
-
-  Map<String, dynamic> toJson() => {
-        'table': _tableNum,
-        'home_name': homeSquadName,
-        'away_name': awaySquadName,
-      };
+  // Map<String, dynamic> toJson() => {
+  //       'home_name': homeSquadName,
+  //       'away_name': awaySquadName,
+  //     };
 }

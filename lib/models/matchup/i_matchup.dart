@@ -16,7 +16,6 @@ enum MatchResult {
 
 abstract class IMatchup {
   OrgType type();
-  int tableNum();
 
   String homeName();
   String awayName();
@@ -24,21 +23,7 @@ abstract class IMatchup {
   IMatchupParticipant home(Tournament t);
   IMatchupParticipant away(Tournament t);
 
-  Map<String, dynamic> toJson();
-
-  // String groupByName(Tournament t) {
-  //   if (t.useSquads) {
-  //     switch (type()) {
-  //       case OrgType.Coach:
-  //         return home(t).parentName() + " vs. " + away(t).parentName();
-  //       case OrgType.Squad:
-  //       default:
-  //         return homeName() + " vs. " + awayName();
-  //     }
-  //   } else {
-  //     return "Round #" + t.curRoundNumber().toString();
-  //   }
-  // }
+  // Map<String, dynamic> toJson();
 
   bool hasResult() {
     return getResult() != MatchResult.NoResult;

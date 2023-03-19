@@ -4,14 +4,16 @@ import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
+import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:flutter/material.dart';
 
-enum FirstRoundMatchingRule {
-  MatchRandom, // Random matchups
-  MatchRandomAvoidGroup, // Random matchups but do not match up same groups
-}
+// enum FirstRoundMatchingRule {
+//   MatchRandom, // Random matchups
+//   MatchRandomAvoidGroup, // Random matchups but do not match up same groups
+// }
 
 enum RoundPairingError {
   NoError,
@@ -28,6 +30,32 @@ class SwissPairings {
 
   /// Return true if pairing successful, false if
   RoundPairingError pairNextRound() {
+    bool useSquads = tournament.info.squadDetails.type == SquadUsage.SQUADS;
+
+    if (useSquads) {
+      // TODO: Handle avoiding byes case eventually
+      bool pairAsIndividualsAvoidingSquad =
+          tournament.info.squadDetails.matchMaking ==
+                  SquadMatchMaking.INDIVIDUAL_SWISS_AVOIDING_SQUAD ||
+              tournament.info.squadDetails.matchMaking ==
+                  SquadMatchMaking.ATTEMPT_SQUAD_VS_SQUAD_AVOID_BYES;
+
+      if (pairAsIndividualsAvoidingSquad) {
+        // Squad tournament based on individual pairings
+        return _pairNextRoundAsIndividuals(true, true);
+      } else {
+        // True squad pairings
+        return _pairNextRoundAsSquads();
+      }
+    } else {
+      // Individual pairings (may or may not use groups for init)
+      bool avoidSquadsForInit = tournament.info.squadDetails.type ==
+          SquadUsage.INDIVIDUAL_USE_SQUADS_FOR_INIT;
+      return _pairNextRoundAsIndividuals(avoidSquadsForInit, false);
+    }
+  }
+
+  RoundPairingError _pairNextRoundAsSquads() {
     int round = tournament.curRoundNumber() + 1;
 
     RoundPairingError errorType = RoundPairingError.NoError;
@@ -35,16 +63,11 @@ class SwissPairings {
     RoundMatching? matching;
 
     if (round == 1) {
-      matching = _getFirstRoundMatching(tournament.firstRoundMatchingRule);
+      matching = _getFirstRoundMatching(true, true);
     } else if (verifyAllResultsEntered()) {
-      if (tournament.useSquads()) {
-        matching = _applySwiss(round, tournament.getSquads());
-        // TODO: Match coaches too
-      } else {
-        List<Coach> coaches =
-            tournament.getCoaches().where((c) => c.active).toList();
-        matching = _applySwiss(round, coaches);
-      }
+      List<Squad> squads =
+          tournament.getSquads().where((s) => s.isActive(tournament)).toList();
+      matching = _applySwiss(round, squads, true);
     } else {
       debugPrint('Not all results entered');
       errorType = RoundPairingError.MissingPreviousResults;
@@ -62,19 +85,47 @@ class SwissPairings {
     return errorType;
   }
 
-  RoundMatching? _getFirstRoundMatching(FirstRoundMatchingRule rule) {
-    switch (rule) {
-      case FirstRoundMatchingRule.MatchRandom:
-      case FirstRoundMatchingRule.MatchRandomAvoidGroup:
-      default:
-        return _firstRoundRandom();
+  RoundPairingError _pairNextRoundAsIndividuals(
+      bool avoidSquadsForInit, bool avoidSquadsAfterInit) {
+    int round = tournament.curRoundNumber() + 1;
+
+    RoundPairingError errorType = RoundPairingError.NoError;
+
+    RoundMatching? matching;
+
+    if (round == 1) {
+      matching = _getFirstRoundMatching(false, avoidSquadsForInit);
+    } else if (verifyAllResultsEntered()) {
+      List<Coach> coaches =
+          tournament.getCoaches().where((c) => c.active).toList();
+      matching = _applySwiss(round, coaches, avoidSquadsAfterInit);
+    } else {
+      debugPrint('Not all results entered');
+      errorType = RoundPairingError.MissingPreviousResults;
     }
+
+    if (matching != null) {
+      tournament.updateRound(matching);
+    } else {
+      debugPrint('Failed to find matchings');
+      if (errorType == RoundPairingError.NoError) {
+        errorType = RoundPairingError.UnableToFindValidMatches;
+      }
+    }
+
+    return errorType;
   }
 
-  SwissRound? _firstRoundRandom() {
+  RoundMatching? _getFirstRoundMatching(
+      bool matchSquads, bool avoidSquadsForInit) {
+    // TODO: Handle different types
+    return _firstRoundRandom(matchSquads, avoidSquadsForInit);
+  }
+
+  SwissRound? _firstRoundRandom(bool matchSquads, bool avoidWithinSquads) {
     List<IMatchupParticipant> notYetPaired = [];
 
-    if (tournament.useSquads()) {
+    if (matchSquads) {
       notYetPaired = new List.from(tournament.getSquads());
     } else {
       notYetPaired = new List.from(tournament.getCoaches());
@@ -108,17 +159,31 @@ class SwissPairings {
 
       IMatchupParticipant player_2 = notYetPaired[idx_2];
 
-      notYetPaired.removeAt(idx_2);
+      // If necessary, verify not same squad
+      if (avoidWithinSquads && player_1 is Coach && player_2 is Coach) {
+        Squad? squad_1 = tournament.getCoachSquad(player_1.nafName);
+        Squad? squad_2 = tournament.getCoachSquad(player_2.nafName);
 
-      if (tournament.useSquads()) {
-        matchings.matches
-            .add(SquadMatchup(tableNum, player_1.name(), player_2.name()));
-      } else {
-        matchings.matches
-            .add(CoachMatchup(tableNum, player_1.name(), player_2.name()));
+        if (squad_1 != null &&
+            squad_2 != null &&
+            squad_1.name() == squad_2.name()) {
+          // Add back player_1 and try again
+          notYetPaired.add(player_1);
+          continue;
+        }
       }
 
-      tableNum++;
+      notYetPaired.removeAt(idx_2);
+
+      if (matchSquads) {
+        SquadMatchup sm = SquadMatchup(player_1.name(), player_2.name());
+
+        _populateCoachMatchupsInsideSquadMatchup(sm);
+
+        matchings.matches.add(sm);
+      } else {
+        matchings.matches.add(CoachMatchup(player_1.name(), player_2.name()));
+      }
     }
 
     return matchings;
@@ -147,7 +212,8 @@ class SwissPairings {
     return allCoachesEntered && allSquadsEntered;
   }
 
-  SwissRound? _applySwiss(int roundNum, List<IMatchupParticipant> players) {
+  SwissRound? _applySwiss(
+      int roundNum, List<IMatchupParticipant> players, bool avoidWithinSquads) {
     // 1. Sort using tie breakers
     List<Coach> sortedPlayers = new List.from(players);
     sortedPlayers
@@ -176,25 +242,35 @@ class SwissPairings {
     int byePlayerIdx = _findByePlayerIndex(sortedPlayers);
 
     // 3. Find Swiss pairings
-    SwissRound? pairings = _findPairings(roundNum, sortedPlayers, byePlayerIdx);
+    SwissRound? pairings =
+        _findPairings(roundNum, sortedPlayers, byePlayerIdx, avoidWithinSquads);
 
     if (pairings != null) {
+      // Ensure correct table numbers
+      int tableNum = 1;
+
       for (int i = 0; i < pairings.matches.length; i++) {
         IMatchup matchup = pairings.matches[i];
         if (matchup is CoachMatchup) {
-          matchup.setTableNum(i + 1);
+          matchup.tableNum = tableNum;
+          tableNum++;
+        } else if (matchup is SquadMatchup) {
+          for (int j = 0; j < matchup.coachMatchups.length; j++) {
+            matchup.coachMatchups[j].tableNum = tableNum;
+            tableNum++;
+          }
         }
       }
 
       print("Results:");
       pairings.matches.forEach((m) {
         StringBuffer sb = new StringBuffer();
-        sb.write("T" +
-            m.tableNum().toString() +
-            ": " +
-            m.homeName() +
-            " vs. " +
-            m.awayName());
+
+        if (m is CoachMatchup) {
+          sb.write("T" + m.tableNum.toString() + ":");
+        }
+
+        sb.write(m.homeName() + " vs. " + m.awayName());
         print(sb.toString());
         i++;
       });
@@ -205,7 +281,10 @@ class SwissPairings {
   }
 
   SwissRound? _findPairings(
-      int roundNum, List<IMatchupParticipant> sortedPlayers, int byePlayerIdx) {
+      int roundNum,
+      List<IMatchupParticipant> sortedPlayers,
+      int byePlayerIdx,
+      bool avoidWithinSquads) {
     SwissRound newMatchups = SwissRound(roundNum);
 
     // Iterate over the players, find a matching for the top player
@@ -230,9 +309,13 @@ class SwissPairings {
         continue;
       }
 
-      IMatchup? matchup = _findMatchupForPlayer(
-          newMatchups, roundNum, sortedPlayers, i, byePlayerIdx);
+      IMatchup? matchup = _findMatchupForPlayer(newMatchups, roundNum,
+          sortedPlayers, i, byePlayerIdx, avoidWithinSquads);
       if (matchup != null) {
+        if (matchup is SquadMatchup) {
+          _populateCoachMatchupsInsideSquadMatchup(matchup);
+        }
+
         newMatchups.matches.add(matchup);
         continue; // Move on to next player
       }
@@ -298,7 +381,8 @@ class SwissPairings {
       int roundNum,
       List<IMatchupParticipant> sortedPlayers,
       int bestPlayerIdx,
-      int byePlayerIdx) {
+      int byePlayerIdx,
+      bool avoidWithinSquads) {
     IMatchupParticipant bestPlayer = sortedPlayers[bestPlayerIdx];
 
     for (int j = bestPlayerIdx + 1; j < sortedPlayers.length; j++) {
@@ -333,10 +417,27 @@ class SwissPairings {
         continue;
       }
 
+      // If necessary, verify not same squad
+      if (avoidWithinSquads && bestPlayer is Coach && nextPlayer is Coach) {
+        Squad? squad_1 = tournament.getCoachSquad(bestPlayer.nafName);
+        Squad? squad_2 = tournament.getCoachSquad(nextPlayer.nafName);
+
+        if (squad_1 != null &&
+            squad_2 != null &&
+            squad_1.name() == squad_2.name()) {
+          debugPrint("skip " +
+              bestPlayer.name() +
+              " vs. " +
+              nextPlayer.name() +
+              " -> same squad");
+          continue;
+        }
+      }
+
       if (bestPlayer.type() == OrgType.Coach) {
-        return CoachMatchup(-1, bestPlayer.name(), nextPlayer.name());
+        return CoachMatchup(bestPlayer.name(), nextPlayer.name());
       } else {
-        return SquadMatchup(-1, bestPlayer.name(), nextPlayer.name());
+        return SquadMatchup(bestPlayer.name(), nextPlayer.name());
       }
     }
 
@@ -448,14 +549,14 @@ class SwissPairings {
 
           if (bestPlayer.type() == OrgType.Coach) {
             newMatchups.matches
-                .add(CoachMatchup(-1, bestPlayer.name(), player_2.name()));
+                .add(CoachMatchup(bestPlayer.name(), player_2.name()));
             newMatchups.matches
-                .add(CoachMatchup(-1, player_1.name(), switchPlayer.name()));
+                .add(CoachMatchup(player_1.name(), switchPlayer.name()));
           } else {
             newMatchups.matches
-                .add(SquadMatchup(-1, bestPlayer.name(), player_2.name()));
+                .add(SquadMatchup(bestPlayer.name(), player_2.name()));
             newMatchups.matches
-                .add(SquadMatchup(-1, player_1.name(), switchPlayer.name()));
+                .add(SquadMatchup(player_1.name(), switchPlayer.name()));
           }
 
           return true;
@@ -480,14 +581,14 @@ class SwissPairings {
 
           if (bestPlayer.type() == OrgType.Coach) {
             newMatchups.matches
-                .add(CoachMatchup(-1, bestPlayer.name(), player_1.name()));
+                .add(CoachMatchup(bestPlayer.name(), player_1.name()));
             newMatchups.matches
-                .add(CoachMatchup(-1, player_2.name(), switchPlayer.name()));
+                .add(CoachMatchup(player_2.name(), switchPlayer.name()));
           } else {
             newMatchups.matches
-                .add(SquadMatchup(-1, bestPlayer.name(), player_1.name()));
+                .add(SquadMatchup(bestPlayer.name(), player_1.name()));
             newMatchups.matches
-                .add(SquadMatchup(-1, player_2.name(), switchPlayer.name()));
+                .add(SquadMatchup(player_2.name(), switchPlayer.name()));
           }
 
           return true;
@@ -498,23 +599,51 @@ class SwissPairings {
     return false;
   }
 
-  static String getFirstRoundMatchingName(FirstRoundMatchingRule rule) {
-    switch (rule) {
-      case FirstRoundMatchingRule.MatchRandomAvoidGroup:
-        return "MatchRandomAvoidGroup";
-      case FirstRoundMatchingRule.MatchRandom:
-      default:
-        return "MatchRandom";
-    }
-  }
+  /// Pair coaches within squads
+  void _populateCoachMatchupsInsideSquadMatchup(SquadMatchup sm) {
+    Squad? squad_1 = tournament.getSquad(sm.homeSquadName);
+    Squad? squad_2 = tournament.getSquad(sm.awaySquadName);
 
-  static FirstRoundMatchingRule parseFirstRoundMatchingName(String rule) {
-    switch (rule) {
-      case "MatchRandomAvoidGroup":
-        return FirstRoundMatchingRule.MatchRandomAvoidGroup;
-      case "MatchRandom":
-      default:
-        return FirstRoundMatchingRule.MatchRandom;
+    if (squad_1 == null || squad_2 == null) {
+      return; // Invalid
+    }
+
+    // Get coaches from Squad 1
+    List<Coach> coaches_1 = [];
+    squad_1.getCoaches().forEach((nafName) {
+      Coach? c = tournament.getCoach(nafName);
+      if (c != null && c.active) {
+        coaches_1.add(c);
+      }
+    });
+
+    // Get coaches from Squad 2
+    List<Coach> coaches_2 = [];
+    squad_2.getCoaches().forEach((nafName) {
+      Coach? c = tournament.getCoach(nafName);
+      if (c != null && c.active) {
+        coaches_2.add(c);
+      }
+    });
+
+    if (coaches_1.length != coaches_2.length ||
+        coaches_1.length !=
+            tournament.info.squadDetails.requiredNumCoachesPerSquad) {
+      return; // Invalid
+    }
+
+    // Sort coaches
+    coaches_1.sort((c1, c2) => c1
+        .pointsWithTieBreakersBuiltIn()
+        .compareTo(c2.pointsWithTieBreakersBuiltIn()));
+
+    coaches_2.sort((c1, c2) => c1
+        .pointsWithTieBreakersBuiltIn()
+        .compareTo(c2.pointsWithTieBreakersBuiltIn()));
+
+    for (int i = 0; i < coaches_1.length; i++) {
+      sm.coachMatchups
+          .add(CoachMatchup(coaches_1[i].name(), coaches_2[i].name()));
     }
   }
 }

@@ -23,7 +23,7 @@ class ReportedMatchResultWithStatus extends ReportedMatchResult {
 class CoachMatchup extends IMatchup {
   static const String Bye = "bye";
 
-  late int _tableNum;
+  int tableNum = -1;
 
   late final String homeNafName;
   ReportedMatchResult homeReportedResults = ReportedMatchResult();
@@ -31,21 +31,21 @@ class CoachMatchup extends IMatchup {
   late final String awayNafName;
   ReportedMatchResult awayReportedResults = ReportedMatchResult();
 
-  CoachMatchup(this._tableNum, this.homeNafName, this.awayNafName);
+  CoachMatchup(this.homeNafName, this.awayNafName);
 
   @override
   OrgType type() {
     return OrgType.Coach;
   }
 
-  @override
-  int tableNum() {
-    return _tableNum;
-  }
+  // @override
+  // int tableNum() {
+  //   return _tableNum;
+  // }
 
-  void setTableNum(int t) {
-    _tableNum = t;
-  }
+  // void setTableNum(int t) {
+  //   tableNum = t;
+  // }
 
   @override
   String homeName() {
@@ -146,7 +146,7 @@ class CoachMatchup extends IMatchup {
 
   CoachMatchup.fromJson(Map<String, dynamic> json) {
     final tTable = json['table'] as int?;
-    this._tableNum = tTable != null ? tTable : -1;
+    this.tableNum = tTable != null ? tTable : -1;
 
     final tHomeNafName = json['home_nafname'] as String?;
     this.homeNafName = tHomeNafName != null ? tHomeNafName : "";
@@ -168,7 +168,7 @@ class CoachMatchup extends IMatchup {
   }
 
   Map<String, dynamic> toJson() => {
-        'table': _tableNum,
+        'table': tableNum,
         'home_nafname': homeNafName,
         'away_nafname': awayNafName,
         'home_reported_results': homeReportedResults.toJson(),

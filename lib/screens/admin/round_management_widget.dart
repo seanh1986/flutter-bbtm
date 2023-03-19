@@ -484,7 +484,7 @@ class CoachRoundDataSource extends DataTableSource {
     //     " vs. " +
     //     m.awayNafName);
 
-    Text tableNum = Text(m.tableNum().toString());
+    Text tableNum = Text(m.tableNum.toString());
     Text homeNafName = Text(m.homeNafName);
     Text awayNafName = Text(m.awayNafName);
 

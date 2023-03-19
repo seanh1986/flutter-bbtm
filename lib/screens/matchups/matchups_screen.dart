@@ -73,14 +73,14 @@ class _MatchupsPage extends State<MatchupsPage> {
     if (allowMySquad) {
       _subScreensAllowed.add(MatchupSubScreens.MY_SQUAD);
     }
-    if (_tournament.useSquads()) {
+    if (_tournament.useSquads() && _tournament.squadRounds.isNotEmpty) {
       _subScreensAllowed.add(MatchupSubScreens.SQUAD_MATCHUPS);
     }
     _subScreensAllowed.add(MatchupSubScreens.COACH_MATCHUPS);
 
     if (allowMyMatchup) {
       _subScreen = MatchupSubScreens.MY_MATCHUP;
-    } else if (_tournament.useSquads()) {
+    } else if (_tournament.useSquads() && _tournament.squadRounds.isNotEmpty) {
       _subScreen = MatchupSubScreens.SQUAD_MATCHUPS;
     } else {
       _subScreen = MatchupSubScreens.COACH_MATCHUPS;
@@ -149,11 +149,19 @@ class _MatchupsPage extends State<MatchupsPage> {
   Widget? _getSubScreen() {
     switch (_subScreen) {
       case MatchupSubScreens.MY_SQUAD:
-        return SquadMatchupsPage(
-            tournament: _tournament,
-            authUser: _authUser,
-            autoSelectAuthUserMatchup: true,
-            refreshState: true);
+        if (_tournament.useSquads() && _tournament.squadRounds.isNotEmpty) {
+          return SquadMatchupsPage(
+              tournament: _tournament,
+              authUser: _authUser,
+              autoSelectAuthUserMatchup: true,
+              refreshState: true);
+        } else {
+          return CoachMatchupsPage(
+              tournament: _tournament,
+              authUser: _authUser,
+              autoSelectOption: AutoSelectOption.AUTH_USER_SQUAD,
+              refreshState: true);
+        }
       case MatchupSubScreens.SQUAD_MATCHUPS:
         return SquadMatchupsPage(
             tournament: _tournament,
@@ -164,14 +172,14 @@ class _MatchupsPage extends State<MatchupsPage> {
         return CoachMatchupsPage(
             tournament: _tournament,
             authUser: _authUser,
-            autoSelectAuthUserMatchup: false,
+            autoSelectOption: AutoSelectOption.NONE,
             refreshState: true);
       case MatchupSubScreens.MY_MATCHUP:
       default:
         return CoachMatchupsPage(
             tournament: _tournament,
             authUser: _authUser,
-            autoSelectAuthUserMatchup: true,
+            autoSelectOption: AutoSelectOption.AUTH_USER_MATCHUP,
             refreshState: true);
     }
   }

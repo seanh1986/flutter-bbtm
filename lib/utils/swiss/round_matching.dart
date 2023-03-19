@@ -34,10 +34,10 @@ class SquadRound extends RoundMatching {
     return matches.any((SquadMatchup match) => match.hasParticipant(s));
   }
 
-  Map<String, dynamic> toJson() => {
-        'round': _round,
-        'matches': matches.map((e) => e.toJson()).toList(),
-      };
+  // Map<String, dynamic> toJson() => {
+  //       'round': _round,
+  //       'matches': matches.map((e) => e.toJson()).toList(),
+  //     };
 }
 
 class CoachRound extends RoundMatching {

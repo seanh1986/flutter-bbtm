@@ -317,7 +317,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
     tableVsDetails
         .add(Text(' vs. ', style: TextStyle(fontSize: subTitleFontSize)));
-    tableVsDetails.add(Text('T#' + _matchup.tableNum().toString(),
+    tableVsDetails.add(Text('T#' + _matchup.tableNum.toString(),
         style: TextStyle(fontSize: subTitleFontSize)));
 
     return SizedBox(

@@ -2,7 +2,6 @@ import 'dart:collection';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
-import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/squad.dart';
@@ -23,9 +22,6 @@ enum Authorization {
 
 class Tournament {
   late TournamentInfo info;
-
-  late FirstRoundMatchingRule firstRoundMatchingRule;
-  // late final bool useSquads;
 
   // Key: squad name, Value: Idx in squad list
   HashMap<String, int> _squadIdxMap = new HashMap<String, int>();
@@ -176,7 +172,7 @@ class Tournament {
       // Check for byes
       _coaches.forEach((c) {
         if (!r.hasMatchForPlayer(c)) {
-          c.matches.add(CoachMatchup(-1, c.nafName, CoachMatchup.Bye));
+          c.matches.add(CoachMatchup(c.nafName, CoachMatchup.Bye));
         }
       });
     });
@@ -267,10 +263,6 @@ class Tournament {
   Tournament.fromJson(TournamentInfo info, Map<String, dynamic> json) {
     this.info = info;
 
-    final tFirstRoundMatching = json['first_round_matching'] as String?;
-    this.firstRoundMatchingRule = SwissPairings.parseFirstRoundMatchingName(
-        tFirstRoundMatching != null ? tFirstRoundMatching : "");
-
     final tCoaches = json['coaches'] as List<dynamic>?;
     if (tCoaches != null) {
       for (int i = 0; i < tCoaches.length; i++) {
@@ -298,11 +290,9 @@ class Tournament {
   }
 
   Map<String, dynamic> toJson() => {
-        'first_round_matching':
-            SwissPairings.getFirstRoundMatchingName(firstRoundMatchingRule),
         'coaches': _coaches.map((e) => e.toJson()).toList(),
         // 'squads': _squads.map((e) => e.toJson()).toList(),
-        'squad_rounds': squadRounds.map((e) => e.toJson()).toList(),
+        // 'squad_rounds': squadRounds.map((e) => e.toJson()).toList(),
         'coach_rounds': coachRounds.map((e) => e.toJson()).toList(),
       };
 
