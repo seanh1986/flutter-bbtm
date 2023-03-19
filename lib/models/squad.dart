@@ -1,11 +1,8 @@
 import 'dart:collection';
 import 'package:bbnaf/models/coach.dart';
-import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
-import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
-import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:collection/collection.dart';
 
 class Squad extends IMatchupParticipant {
@@ -25,7 +22,7 @@ class Squad extends IMatchupParticipant {
 
   List<SquadOpponent> _opponents = <SquadOpponent>[];
 
-  Squad(this._name);
+  Squad(this._name, this._coaches);
 
   @override
   OrgType type() {

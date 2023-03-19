@@ -278,12 +278,12 @@ class Tournament {
       }
     }
 
-    final tSquads = json['squads'] as List<dynamic>?;
-    if (tSquads != null) {
-      for (int i = 0; i < tSquads.length; i++) {
-        addSquad(Squad.fromJson(tSquads[i] as Map<String, dynamic>));
-      }
-    }
+    // final tSquads = json['squads'] as List<dynamic>?;
+    // if (tSquads != null) {
+    //   for (int i = 0; i < tSquads.length; i++) {
+    //     addSquad(Squad.fromJson(tSquads[i] as Map<String, dynamic>));
+    //   }
+    // }
 
     final tCoachRounds = json['coach_rounds'] as List<dynamic>?;
     if (tCoachRounds != null) {
@@ -293,26 +293,34 @@ class Tournament {
       }
     }
 
-    reProcessAllRounds();
     _syncSquadsAndCoaches();
+    reProcessAllRounds();
   }
 
   Map<String, dynamic> toJson() => {
         'first_round_matching':
             SwissPairings.getFirstRoundMatchingName(firstRoundMatchingRule),
         'coaches': _coaches.map((e) => e.toJson()).toList(),
-        'squads': _squads.map((e) => e.toJson()).toList(),
+        // 'squads': _squads.map((e) => e.toJson()).toList(),
         'squad_rounds': squadRounds.map((e) => e.toJson()).toList(),
         'coach_rounds': coachRounds.map((e) => e.toJson()).toList(),
       };
 
   void _syncSquadsAndCoaches() {
+    // Sync Squads
+    _squads.clear();
+    _coaches.groupListsBy((c) => c.squadName).forEach((key, value) {
+      _squads.add(Squad(key, value.map((e) => e.nafName).toList()));
+    });
+
+    // Update squad map
     _squadIdxMap.clear();
     for (int i = 0; i < _squads.length; i++) {
       Squad s = _squads[i];
       _squadIdxMap.putIfAbsent(s.name(), () => i);
     }
 
+    /// Update coach map
     _coachIdxMap.clear();
     for (int i = 0; i < _coaches.length; i++) {
       Coach c = _coaches[i];
@@ -320,6 +328,7 @@ class Tournament {
     }
 
     // TODO: Eventually logic can be moved elsewhere
+    // Update rosters
     _coaches.forEach((c) {
       if (c.rosterFileName.isEmpty) {
         c.rosterFileName = info.id + "/" + c.nafName.toLowerCase() + ".pdf";

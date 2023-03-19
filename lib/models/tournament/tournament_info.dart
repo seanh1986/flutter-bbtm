@@ -224,7 +224,7 @@ class IndividualScoringDetails extends ScoringDetails {
 
   IndividualScoringDetails.fromJson(Map<String, dynamic> json)
       : super.fromJson(json) {
-    final tTieBreakers = json['tie_breakers'] as List<String>?;
+    final tTieBreakers = json['tie_breakers'] as List<dynamic>?;
 
     List<TieBreaker> tParsedTieBrakers = [];
 
@@ -362,7 +362,7 @@ class SquadDetails {
       this.scoringDetails = ScoringDetails.fromJson(tScoringDetails);
     }
 
-    final tTieBreakers = json['squad_tie_breakers'] as List<String>?;
+    final tTieBreakers = json['squad_tie_breakers'] as List<dynamic>?;
 
     List<SquadTieBreakers> tParsedTieBrakers = [];
 
