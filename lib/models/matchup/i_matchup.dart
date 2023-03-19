@@ -144,6 +144,38 @@ abstract class IMatchupParticipant {
     return games > 0 ? 100.0 * (1.0 * wins() + 0.5 * ties()) / games : 0.0;
   }
 
+  // Approximate
+  double pointsWithTieBreakersBuiltIn() {
+    // Shift by mStep after each tiebreaker
+    int mStep = 100;
+    int m = 1;
+
+    double ptsWithT = 0.0;
+
+    List<double> tbPtsList = tiebreakers();
+
+    // Reverse order for tiebreakers
+    for (int i = tbPtsList.length - 1; i >= 0; i--) {
+      double tbPts = tbPtsList[i];
+      ptsWithT += tbPts * m;
+      m *= mStep;
+    }
+
+    m *= 10; // Extra Buffer
+    ptsWithT += points() * m;
+
+    // StringBuffer sb = new StringBuffer();
+    // sb.write(name() + ": " + points().toString() + " -> [");
+    // tiebreakers().forEach((tb) {
+    //   sb.write(tb.toString() + ",");
+    // });
+    // sb.write("] -> ");
+    // sb.write(ptsWithT.toDouble());
+    // print(sb.toString());
+
+    return ptsWithT;
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {

@@ -5,7 +5,6 @@ import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:flutter/widgets.dart';
@@ -20,14 +19,6 @@ enum Authorization {
   HomeCaptain,
   AwayCaptain,
   Admin,
-}
-
-enum TieBreaker {
-  OppScore,
-  Td,
-  Cas,
-  TdDiff,
-  CasDiff,
 }
 
 class Tournament {
@@ -46,12 +37,6 @@ class Tournament {
 
   List<SquadRound> squadRounds = [];
   List<CoachRound> coachRounds = [];
-
-  List<TieBreaker> tieBreakers = [
-    TieBreaker.OppScore,
-    TieBreaker.Td,
-    TieBreaker.Cas
-  ];
 
   void addSquad(Squad s) {
     int idx = _squads.length;
@@ -158,6 +143,12 @@ class Tournament {
       awayCoach?.overwriteRecord(info);
     });
 
+    if (useSquads()) {
+      _squads.forEach((squad) {
+        squad.overwriteRecord(this);
+      });
+    }
+
     return true;
   }
 
@@ -199,6 +190,18 @@ class Tournament {
     _coaches.forEach((c) {
       c.updateOppScoreAndTieBreakers(this);
     });
+
+    if (useSquads()) {
+      // Overwrite records
+      _squads.forEach((squad) {
+        squad.overwriteRecord(this);
+      });
+
+      // Update opponent score
+      _squads.forEach((squad) {
+        squad.updateOppScoreAndTieBreakers(this);
+      });
+    }
   }
 
   // Increment to next round by updating the coach/squad rounds

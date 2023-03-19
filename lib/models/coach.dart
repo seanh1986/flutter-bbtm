@@ -1,6 +1,7 @@
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
+import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 
@@ -72,36 +73,6 @@ class Coach extends IMatchupParticipant {
   @override
   double points() {
     return _points;
-  }
-
-  // Approximate
-  double pointsWithTieBreakersBuiltIn() {
-    // Shift by mStep after each tiebreaker
-    int mStep = 100;
-    int m = 1;
-
-    double ptsWithT = 0.0;
-
-    // Reverse order for tiebreakers
-    for (int i = _tieBreakers.length - 1; i >= 0; i--) {
-      double tbPts = _tieBreakers[i];
-      ptsWithT += tbPts * m;
-      m *= mStep;
-    }
-
-    m *= 10; // Extra Buffer
-    ptsWithT += _points * m;
-
-    // StringBuffer sb = new StringBuffer();
-    // sb.write(name() + ": " + points().toString() + " -> [");
-    // tiebreakers().forEach((tb) {
-    //   sb.write(tb.toString() + ",");
-    // });
-    // sb.write("] -> ");
-    // sb.write(ptsWithT.toDouble());
-    // print(sb.toString());
-
-    return ptsWithT;
   }
 
   @override
@@ -220,7 +191,7 @@ class Coach extends IMatchupParticipant {
       }
     });
 
-    t.tieBreakers.forEach((tb) {
+    t.info.scoringDetails.tieBreakers.forEach((tb) {
       switch (tb) {
         case TieBreaker.OppScore:
           _tieBreakers.add(oppPoints);
@@ -236,6 +207,10 @@ class Coach extends IMatchupParticipant {
           break;
         case TieBreaker.CasDiff:
           _tieBreakers.add((cas - oppCas).toDouble());
+          break;
+        case TieBreaker.SquadScore:
+          Squad? squad = t.getCoachSquad(nafName);
+          _tieBreakers.add(squad != null ? squad.points() : 0.0);
           break;
       }
     });

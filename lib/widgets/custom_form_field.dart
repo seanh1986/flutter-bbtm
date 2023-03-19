@@ -8,15 +8,17 @@ class CustomTextFormField extends StatelessWidget {
   final ValueChanged<String> callback;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
+  final TextInputType? keyboardType;
 
-  CustomTextFormField({
-    Key? key,
-    required this.title,
-    required this.callback,
-    this.initialValue,
-    this.inputFormatters,
-    this.validator,
-  }) : super(key: key);
+  CustomTextFormField(
+      {Key? key,
+      required this.title,
+      required this.callback,
+      this.initialValue,
+      this.inputFormatters,
+      this.validator,
+      this.keyboardType})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,12 +27,43 @@ class CustomTextFormField extends StatelessWidget {
         child: TextFormField(
           initialValue: initialValue,
           onChanged: callback,
+          keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           validator: validator,
           decoration: InputDecoration(labelText: title),
 //        decoration: InputDecoration(hintText: hintText),
         ));
   }
+}
+
+class CheckboxFormField extends FormField<bool> {
+  CheckboxFormField(
+      {Widget? title,
+      FormFieldSetter<bool>? onSaved,
+      FormFieldValidator<bool>? validator,
+      bool initialValue = false,
+      bool autovalidate = false})
+      : super(
+            onSaved: onSaved,
+            validator: validator,
+            initialValue: initialValue,
+            builder: (FormFieldState<bool> state) {
+              return CheckboxListTile(
+                dense: state.hasError,
+                title: title,
+                value: state.value,
+                onChanged: state.didChange,
+                subtitle: state.hasError && state.errorText != null
+                    ? Builder(
+                        builder: (BuildContext context) => Text(
+                          state.errorText!,
+                          style: TextStyle(color: Theme.of(context).errorColor),
+                        ),
+                      )
+                    : null,
+                controlAffinity: ListTileControlAffinity.leading,
+              );
+            });
 }
 
 // class CustomDateFormField extends StatelessWidget {

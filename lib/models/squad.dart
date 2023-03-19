@@ -6,6 +6,7 @@ import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
+import 'package:collection/collection.dart';
 
 class Squad extends IMatchupParticipant {
   late final String _name; // Key
@@ -18,9 +19,11 @@ class Squad extends IMatchupParticipant {
 
   double _points = 0.0;
 
+  double oppPoints = 0.0;
+
   List<double> _tieBreakers = <double>[];
 
-  List<String> _opponents = <String>[];
+  List<SquadOpponent> _opponents = <SquadOpponent>[];
 
   Squad(this._name);
 
@@ -66,7 +69,9 @@ class Squad extends IMatchupParticipant {
 
   @override
   List<String> opponents() {
-    return _opponents;
+    return _opponents.map((e) {
+      return e.squads.isNotEmpty ? e.squads.first : "";
+    }).toList();
   }
 
   @override
@@ -86,120 +91,161 @@ class Squad extends IMatchupParticipant {
     }).length;
   }
 
+  bool hasCoach(String nafName) {
+    String nafNameLc = nafName.toLowerCase();
+    return _coaches
+        .where((element) => element.toLowerCase() == nafNameLc)
+        .isNotEmpty;
+  }
+
   List<String> getCoaches() {
     return _coaches;
   }
 
-  void calculateWinsTiesLosses(List<SquadRound> prevSquadRounds) {
-    for (SquadRound sr in prevSquadRounds) {
-      for (SquadMatchup sm in sr.matches) {
-        bool isHome;
-        if (sm.homeSquadName == _name) {
-          isHome = true;
-        } else if (sm.awaySquadName == _name) {
-          isHome = false;
-        } else {
-          continue;
-        }
+  void overwriteRecord(Tournament t) {
+    _wins = 0;
+    _ties = 0;
+    _losses = 0;
+    _points = 0;
+    _opponents.clear();
 
-        int numWins = 0;
-        int numTies = 0;
-        int numLosses = 0;
-        for (CoachMatchup cm in sm.coachMatchups) {
-          ReportedMatchResultWithStatus r = cm.getReportedMatchStatus();
+    t.coachRounds.forEach((cr) {
+      int numCoachWins = 0;
+      int numCoachTies = 0;
+      int numCoachLosses = 0;
 
-          if (r.homeTds > r.awayTds) {
-            // home wins
-            if (isHome) {
-              numWins++;
-            } else {
-              numLosses++;
-            }
-          } else if (r.homeTds < r.awayTds) {
-            // away wins
-            if (isHome) {
-              numLosses++;
-            } else {
-              numWins++;
-            }
-          } else {
-            numTies++;
+      // In classic squad matchups this will be size 1
+      HashSet<String> roundOppSquads = HashSet();
+
+      cr.matches.forEach((m) {
+        if (hasCoach(m.homeNafName)) {
+          Squad? otherSquad = t.getCoachSquad(m.awayNafName);
+          if (otherSquad != null) {
+            roundOppSquads.add(otherSquad.name());
+          }
+
+          MatchResult matchResult = m.getResult();
+          switch (matchResult) {
+            case MatchResult.HomeWon:
+              numCoachWins++;
+              break;
+            case MatchResult.AwayWon:
+              numCoachLosses++;
+              break;
+            case MatchResult.Draw:
+              numCoachTies++;
+              break;
+            default:
+              break;
+          }
+        } else if (hasCoach(m.awayNafName)) {
+          Squad? otherSquad = t.getCoachSquad(m.homeNafName);
+          if (otherSquad != null) {
+            roundOppSquads.add(otherSquad.name());
+          }
+
+          MatchResult matchResult = m.getResult();
+          switch (matchResult) {
+            case MatchResult.HomeWon:
+              numCoachLosses++;
+              break;
+            case MatchResult.AwayWon:
+              numCoachWins++;
+              break;
+            case MatchResult.Draw:
+              numCoachTies++;
+              break;
+            default:
+              break;
           }
         }
+      });
 
-        double winPts = numWins + numTies * 0.5;
-        double lossPts = numLosses + numTies * 0.5;
+      // Update opponents
+      _opponents.add(SquadOpponent(roundOppSquads));
 
-        if (winPts > lossPts) {
-          _wins++;
-        } else if (winPts < lossPts) {
-          _losses++;
-        } else {
-          _ties++;
-        }
+      double roundWinRate =
+          (numCoachWins + numCoachTies * 0.5 + numCoachLosses) /
+              (numCoachWins + numCoachTies + numCoachLosses);
+
+      if (roundWinRate > 0.5) {
+        _wins++;
+      } else if (roundWinRate < 0.5) {
+        _losses++;
+      } else {
+        _ties++;
       }
-    }
+    });
+
+    _points = calcPoints(t);
   }
 
-  void calculatePoints(SquadScoring scoreMode, HashMap<String, int> coachMap,
-      List<Coach> coachList) {
-    switch (scoreMode) {
+  double calcPoints(Tournament t) {
+    switch (t.info.squadDetails.scoringType) {
+      case SquadScoring.SQUAD_RESULT_W_T_L:
+        return _calcPoints(t.info.scoringDetails);
       case SquadScoring.CUMULATIVE_PLAYER_SCORES:
-        _calculatePointsCumulativePlayerScores(coachMap, coachList);
-        break;
-      case SquadScoring.W_T_L_1_HALF_0:
-        _calculatePointsWinTieLossOneHalfZero();
-        break;
-      case SquadScoring.COUNT_WINS_ONLY:
-        _calculatePointsWinsOnly();
-        break;
       default:
-        break;
+        return _calcPointsCumulativePlayerScores(t);
     }
   }
 
-  void _calculatePointsCumulativePlayerScores(
-      HashMap<String, int> coachMap, List<Coach> coachList) {
-    _points = 0;
+  double _calcPointsCumulativePlayerScores(Tournament t) {
+    double pts = 0.0;
+
     for (String nafName in _coaches) {
-      int? cIdx = coachMap[nafName];
-      Coach? c = cIdx != null ? coachList[cIdx] : null;
-      if (c == null) {
-        continue;
+      Coach? c = t.getCoach(nafName);
+
+      pts += c != null ? c.points() : 0.0;
+    }
+
+    return pts;
+  }
+
+  double _calcPoints(ScoringDetails details) {
+    return _wins * details.winPts +
+        _ties * details.tiePts +
+        _losses * details.lossPts;
+  }
+
+  void updateOppScoreAndTieBreakers(Tournament t) {
+    oppPoints = 0.0;
+
+    _coaches.forEach((nafName) {
+      Coach? c = t.getCoach(nafName);
+      if (c != null) {
+        oppPoints += c.oppPoints;
       }
+    });
 
-      _points += c.points();
-    }
-  }
-
-  void _calculatePointsWinTieLossOneHalfZero() {
-    _points = _wins * 1 + _ties * 0.5 + _losses * 0;
-  }
-
-  void _calculatePointsWinsOnly() {
-    _points = _wins as double;
-  }
-
-  void updateTiebreakers(List<double> tieBreakers) {
-    _tieBreakers = tieBreakers;
-  }
-
-  void addNewOpponent(String opponentName) {
-    _opponents.add(opponentName);
-  }
-
-  // For parsing score .bbd files
-  static SquadScoring getSquadScoreModeFromScoreFile(int groupScoreMode) {
-    switch (groupScoreMode) {
-      case 0:
-        return SquadScoring.CUMULATIVE_PLAYER_SCORES;
-      case 1:
-        return SquadScoring.W_T_L_1_HALF_0;
-      case 2:
-        return SquadScoring.COUNT_WINS_ONLY;
-      default:
-        return SquadScoring.NO_SQUADS;
-    }
+    t.info.squadDetails.squadTieBreakers.forEach((tb) {
+      switch (tb) {
+        case SquadTieBreakers.OppScore:
+          _tieBreakers.add(oppPoints);
+          break;
+        case SquadTieBreakers.SquadWins:
+          _tieBreakers.add(_wins.toDouble());
+          break;
+        case SquadTieBreakers.SumSquadMemberScore:
+          _tieBreakers.add(_coaches.map((nafName) {
+            Coach? c = t.getCoach(nafName);
+            return c != null ? c.points() : 0.0;
+          }).sum);
+          break;
+        case SquadTieBreakers.SumTdDiff:
+          _tieBreakers.add(_coaches.map((nafName) {
+            Coach? c = t.getCoach(nafName);
+            return c != null ? (c.tds - c.oppTds).toDouble() : 0.0;
+          }).sum);
+          break;
+        case SquadTieBreakers.SumCasDiff:
+          _tieBreakers.add(_coaches.map((nafName) {
+            Coach? c = t.getCoach(nafName);
+            return c != null ? (c.cas - c.oppCas).toDouble() : 0.0;
+          }).sum);
+          break;
+      }
+    });
   }
 
   Squad.fromJson(Map<String, Object?> json) {
@@ -214,4 +260,21 @@ class Squad extends IMatchupParticipant {
         'name': _name,
         'coaches': _coaches,
       };
+}
+
+class SquadOpponent {
+  HashSet<String> squads;
+  SquadOpponent(this.squads);
+
+  bool isSingleSquad() {
+    return squads.length == 1;
+  }
+
+  bool isMixedSquad() {
+    return squads.length > 1;
+  }
+
+  String name() {
+    return isSingleSquad() ? squads.first : "Mixed Squad";
+  }
 }

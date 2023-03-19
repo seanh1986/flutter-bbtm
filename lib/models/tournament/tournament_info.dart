@@ -9,7 +9,7 @@ class TournamentInfo {
   DateTime dateTimeEnd = DateTime.now();
   List<OrganizerInfo> organizers = [];
 
-  ScoringDetails scoringDetails = ScoringDetails.defaultForCoaches();
+  IndividualScoringDetails scoringDetails = IndividualScoringDetails();
 
   CasualtyDetails casualtyDetails = CasualtyDetails();
 
@@ -60,7 +60,7 @@ class TournamentInfo {
 
     final tScoringDetails = json['scoring_details'] as Map<String, dynamic>?;
     if (tScoringDetails != null) {
-      this.scoringDetails = ScoringDetails.fromJson(tScoringDetails);
+      this.scoringDetails = IndividualScoringDetails.fromJson(tScoringDetails);
     }
 
     final tCasDetails = json['casualty_details'] as Map<String, dynamic>?;
@@ -102,17 +102,13 @@ class TournamentInfo {
         'organizers': organizers.map((e) => e.toJson()).toList(),
         'scoring_details': scoringDetails.toJson(),
         'casualty_details': casualtyDetails.toJson(),
+        'squad_details': squadDetails.toJson(),
         'details_weather': detailsWeather,
         'details_kickoff': detailsKickOff,
         'details_special_rules': detailsSpecialRules,
         'logo_file_name': logoFileName,
       };
 }
-
-// enum TieBreakers {
-//   OpponentStrength,
-//   TD,
-// }
 
 class CasualtyDetails {
   bool spp = true;
@@ -159,6 +155,23 @@ class CasualtyDetails {
       };
 }
 
+enum TieBreaker {
+  OppScore,
+  Td,
+  Cas,
+  TdDiff,
+  CasDiff,
+  SquadScore,
+}
+
+enum SquadTieBreakers {
+  OppScore,
+  SquadWins,
+  SumSquadMemberScore, // Across all squad members
+  SumTdDiff, // Across all squad members
+  SumCasDiff, // Across all squad members
+}
+
 class ScoringDetails {
   late double winPts;
   late double tiePts;
@@ -196,6 +209,54 @@ class ScoringDetails {
         'tie_pts': tiePts,
         'loss_pts': lossPts,
       };
+}
+
+class IndividualScoringDetails extends ScoringDetails {
+  List<TieBreaker> tieBreakers = [
+    TieBreaker.OppScore,
+    TieBreaker.Td,
+    TieBreaker.Cas,
+    TieBreaker.TdDiff,
+    TieBreaker.CasDiff,
+  ];
+
+  IndividualScoringDetails() : super.defaultForCoaches();
+
+  IndividualScoringDetails.fromJson(Map<String, dynamic> json)
+      : super.fromJson(json) {
+    final tTieBreakers = json['tie_breakers'] as List<String>?;
+
+    List<TieBreaker> tParsedTieBrakers = [];
+
+    if (tTieBreakers != null) {
+      tTieBreakers.forEach((tb) {
+        TieBreaker? tParsed = EnumToString.fromString(TieBreaker.values, tb);
+        if (tParsed != null) {
+          tParsedTieBrakers.add(tParsed);
+        }
+      });
+    }
+
+    this.tieBreakers = tParsedTieBrakers;
+
+    if (this.tieBreakers.isEmpty) {
+      this.tieBreakers = [
+        TieBreaker.OppScore,
+        TieBreaker.Td,
+        TieBreaker.Cas,
+        TieBreaker.TdDiff,
+        TieBreaker.CasDiff,
+      ];
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> data = super.toJson();
+
+    data['tie_breakers'] =
+        tieBreakers.map((e) => EnumToString.convertToString(e)).toList();
+    return data;
+  }
 }
 
 class OrganizerInfo {
@@ -237,11 +298,15 @@ enum SquadUsage {
   SQUADS,
 }
 
+enum SquadMatchMaking {
+  ATTEMPT_SQUAD_VS_SQUAD_AVOID_BYES, // attempt to match squad vs squad when possible but allow for mix matching to avoid byes
+  FORCE_SQUAD_VS_SQUAD_W_BYES, // force squad vs squad, may result in squad byes
+  INDIVIDUAL_SWISS_AVOIDING_SQUAD, // solo-swiss but can't play squad members
+}
+
 enum SquadScoring {
-  NO_SQUADS, // No squads at all
-  CUMULATIVE_PLAYER_SCORES, // Squad pts are sum of player pts
-  W_T_L_1_HALF_0, // 1 pt for W, 0.5 for tie, 0 for loss
-  COUNT_WINS_ONLY, // pts = num wins
+  CUMULATIVE_PLAYER_SCORES,
+  SQUAD_RESULT_W_T_L,
 }
 
 class SquadDetails {
@@ -249,8 +314,18 @@ class SquadDetails {
   int requiredNumCoachesPerSquad = 0; // Number of active coaches required
   int maxNumCoachesPerSquad = 0; // Max number allowed on a squad
 
+  SquadMatchMaking matchMaking =
+      SquadMatchMaking.ATTEMPT_SQUAD_VS_SQUAD_AVOID_BYES;
   SquadScoring scoringType = SquadScoring.CUMULATIVE_PLAYER_SCORES;
   ScoringDetails scoringDetails = ScoringDetails.defaultForSquad();
+
+  List<SquadTieBreakers> squadTieBreakers = [
+    SquadTieBreakers.OppScore,
+    SquadTieBreakers.SquadWins,
+    SquadTieBreakers.SumSquadMemberScore,
+    SquadTieBreakers.SumTdDiff,
+    SquadTieBreakers.SumCasDiff,
+  ];
 
   SquadDetails();
 
@@ -286,6 +361,32 @@ class SquadDetails {
     if (tScoringDetails != null) {
       this.scoringDetails = ScoringDetails.fromJson(tScoringDetails);
     }
+
+    final tTieBreakers = json['squad_tie_breakers'] as List<String>?;
+
+    List<SquadTieBreakers> tParsedTieBrakers = [];
+
+    if (tTieBreakers != null) {
+      tTieBreakers.forEach((tb) {
+        SquadTieBreakers? tParsed =
+            EnumToString.fromString(SquadTieBreakers.values, tb);
+        if (tParsed != null) {
+          tParsedTieBrakers.add(tParsed);
+        }
+      });
+    }
+
+    this.squadTieBreakers = tParsedTieBrakers;
+
+    if (this.squadTieBreakers.isEmpty) {
+      this.squadTieBreakers = [
+        SquadTieBreakers.OppScore,
+        SquadTieBreakers.SquadWins,
+        SquadTieBreakers.SumSquadMemberScore,
+        SquadTieBreakers.SumTdDiff,
+        SquadTieBreakers.SumCasDiff,
+      ];
+    }
   }
 
   Map<String, dynamic> toJson() => {
@@ -294,5 +395,8 @@ class SquadDetails {
         'max_coaches_per_squad': maxNumCoachesPerSquad,
         'scoring_type': EnumToString.convertToString(scoringType),
         'scoring_details': scoringDetails.toJson(),
+        'squad_tie_breakers': squadTieBreakers
+            .map((e) => EnumToString.convertToString(e))
+            .toList(),
       };
 }

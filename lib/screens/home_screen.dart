@@ -52,6 +52,20 @@ class _HomePageState extends State<HomePage> {
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
     _authBloc = BlocProvider.of<AuthBloc>(context);
 
+    _refreshState();
+  }
+
+  @override
+  void dispose() {
+    _tournyBloc.close();
+    _authBloc.close();
+
+    _tournySub.cancel();
+    _authSub.cancel();
+    super.dispose();
+  }
+
+  void _refreshState() {
     _tournySub = _tournyBloc.stream.listen((tournyState) {
       if (tournyState is NewTournamentState) {
         ToastUtils.showSuccess(fToast, "Tournament Data Loaded");
@@ -92,19 +106,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  void dispose() {
-    _tournyBloc.close();
-    _authBloc.close();
-
-    _tournySub.cancel();
-    _authSub.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     fToast = FToast();
     fToast.init(context);
+
+    _refreshState();
 
     bool isTournamentSelected = !(_tournyBloc.state is NoTournamentState);
     bool isUserLoggedIn = !(_authBloc.state is NotLoggedInAuthState);

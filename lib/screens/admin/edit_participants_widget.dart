@@ -79,13 +79,14 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
+    return Expanded(
+        child: Column(children: [
       TitleBar(title: "Edit Tournament Participants"),
       SizedBox(height: 20),
       Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: _viewCoaches(context))
-    ]);
+    ]));
   }
 
   Widget _createCoachTableHeadline() {
