@@ -22,9 +22,9 @@ enum Authorization {
 }
 
 class Tournament {
-  late final TournamentInfo info;
+  late TournamentInfo info;
 
-  late final FirstRoundMatchingRule firstRoundMatchingRule;
+  late FirstRoundMatchingRule firstRoundMatchingRule;
   // late final bool useSquads;
 
   // Key: squad name, Value: Idx in squad list

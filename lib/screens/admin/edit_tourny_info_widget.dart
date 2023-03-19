@@ -375,6 +375,11 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
               ? EnumToString.fromString(SquadUsage.values, value)
               : null;
           details.type = usage != null ? usage : SquadUsage.NO_SQUADS;
+
+          // Update UI based on toggle
+          setState(() {
+            _squadDetails = details;
+          });
         },
       ))
     ];
@@ -410,40 +415,100 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
     ];
 
     if (details.type == SquadUsage.SQUADS) {
-      List<String> squadScoringTypes = EnumToString.toList(SquadScoring.values);
-
-      List<DropdownMenuItem<String>> squadScoringTypesDropDown =
-          squadScoringTypes
-              .map((String r) =>
-                  DropdownMenuItem<String>(value: r, child: Text(r)))
-              .toList();
-
+      // Update Main Content w/ squad scoring type
       mainContent.addAll([
         SizedBox(height: 10),
-        DropdownButtonFormField<String>(
-          value: EnumToString.convertToString(details.scoringType),
-          items: squadScoringTypesDropDown,
-          onChanged: (value) {
-            SquadScoring? scoringTypes = value is String
-                ? EnumToString.fromString(SquadScoring.values, value)
-                : null;
-            details.scoringType = scoringTypes != null
-                ? scoringTypes
-                : SquadScoring.CUMULATIVE_PLAYER_SCORES;
-          },
-        )
+        _getSquadScoringSelection(details),
       ]);
 
       if (details.scoringType == SquadScoring.SQUAD_RESULT_W_T_L) {
+        // Update Main Content w/ squad scoring parameters
         mainContent.addAll([
           SizedBox(height: 10),
           _createScoringDetails("Squad Scoring:", _squadDetails.scoringDetails),
         ]);
       }
+
+      // Update Main Content w/ squad matching
+      mainContent.addAll([
+        SizedBox(height: 10),
+        _getSquadMatchingSelection(details),
+      ]);
     }
 
     return Column(
         mainAxisAlignment: MainAxisAlignment.center, children: mainContent);
+  }
+
+  Row _getSquadScoringSelection(SquadDetails details) {
+    // Create Row for Squad Scoring
+    List<String> squadScoringTypes = EnumToString.toList(SquadScoring.values);
+
+    List<DropdownMenuItem<String>> squadScoringTypesDropDown = squadScoringTypes
+        .map((String r) => DropdownMenuItem<String>(value: r, child: Text(r)))
+        .toList();
+
+    List<Widget> squadScoringRow = [
+      SizedBox(width: 10.0),
+      Text("Squad Scoring Type:"),
+      SizedBox(width: 10.0),
+      Expanded(
+          child: DropdownButtonFormField<String>(
+        value: EnumToString.convertToString(details.scoringType),
+        items: squadScoringTypesDropDown,
+        onChanged: (value) {
+          SquadScoring? scoringTypes = value is String
+              ? EnumToString.fromString(SquadScoring.values, value)
+              : null;
+          details.scoringType = scoringTypes != null
+              ? scoringTypes
+              : SquadScoring.CUMULATIVE_PLAYER_SCORES;
+
+          setState(() {
+            _squadDetails = details;
+          });
+        },
+      ))
+    ];
+
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: squadScoringRow);
+  }
+
+  Row _getSquadMatchingSelection(SquadDetails details) {
+    // Create Row for Squad Scoring
+    List<String> squadMatchMakingTypes =
+        EnumToString.toList(SquadMatchMaking.values);
+
+    List<DropdownMenuItem<String>> squadMatchMakingTypesDropDown =
+        squadMatchMakingTypes
+            .map((String r) =>
+                DropdownMenuItem<String>(value: r, child: Text(r)))
+            .toList();
+
+    List<Widget> squadMatchMakingRow = [
+      SizedBox(width: 10.0),
+      Text("Squad Match Making:"),
+      SizedBox(width: 10.0),
+      Expanded(
+          child: DropdownButtonFormField<String>(
+        value: EnumToString.convertToString(details.matchMaking),
+        items: squadMatchMakingTypesDropDown,
+        onChanged: (value) {
+          SquadMatchMaking? matchMakingType = value is String
+              ? EnumToString.fromString(SquadMatchMaking.values, value)
+              : null;
+          details.matchMaking = matchMakingType != null
+              ? matchMakingType
+              : SquadMatchMaking.ATTEMPT_SQUAD_VS_SQUAD_AVOID_BYES;
+        },
+      ))
+    ];
+
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: squadMatchMakingRow);
   }
 
   void _showDialogToConfirmOverwrite(
