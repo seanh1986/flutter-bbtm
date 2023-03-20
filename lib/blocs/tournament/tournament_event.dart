@@ -40,6 +40,18 @@ class SelectTournamentEvent extends TournamentEvent {
   String toString() => 'SelectTournamentEvent';
 }
 
+class RefreshTournamentEvent extends TournamentEvent {
+  final Tournament tournament;
+
+  const RefreshTournamentEvent(this.tournament);
+
+  @override
+  List<Object> get props => [tournament];
+
+  @override
+  String toString() => 'RefreshTournamentEvent';
+}
+
 /// Download tournament backup file
 class DownloadTournamentBackup {
   final Tournament tournament;

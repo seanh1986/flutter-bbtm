@@ -3,6 +3,7 @@ import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:collection/collection.dart';
 
 class Squad extends IMatchupParticipant {
@@ -106,6 +107,8 @@ class Squad extends IMatchupParticipant {
     _points = 0;
     _opponents.clear();
 
+    int numExpectedMatches = t.info.squadDetails.requiredNumCoachesPerSquad;
+
     t.coachRounds.forEach((cr) {
       int numCoachWins = 0;
       int numCoachTies = 0;
@@ -161,16 +164,20 @@ class Squad extends IMatchupParticipant {
       // Update opponents
       _opponents.add(SquadOpponent(roundOppSquads));
 
-      double roundWinRate =
-          (numCoachWins + numCoachTies * 0.5 + numCoachLosses) /
-              (numCoachWins + numCoachTies + numCoachLosses);
+      int numMatchesPlayed = numCoachWins + numCoachTies + numCoachLosses;
 
-      if (roundWinRate > 0.5) {
-        _wins++;
-      } else if (roundWinRate < 0.5) {
-        _losses++;
-      } else {
-        _ties++;
+      // Don't count uncompleted rounds
+      if (numMatchesPlayed >= numExpectedMatches) {
+        double roundWinRate = (numCoachWins + numCoachTies * 0.5) /
+            (numCoachWins + numCoachTies + numCoachLosses);
+
+        if (roundWinRate > 0.5) {
+          _wins++;
+        } else if (roundWinRate < 0.5) {
+          _losses++;
+        } else {
+          _ties++;
+        }
       }
     });
 
@@ -180,7 +187,7 @@ class Squad extends IMatchupParticipant {
   double calcPoints(Tournament t) {
     switch (t.info.squadDetails.scoringType) {
       case SquadScoring.SQUAD_RESULT_W_T_L:
-        return _calcPoints(t.info.scoringDetails);
+        return _calcPoints(t.info.squadDetails.scoringDetails);
       case SquadScoring.CUMULATIVE_PLAYER_SCORES:
       default:
         return _calcPointsCumulativePlayerScores(t);

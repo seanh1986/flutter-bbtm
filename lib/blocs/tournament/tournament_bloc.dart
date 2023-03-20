@@ -23,7 +23,9 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
     } else if (event is LoadTournamentEvent) {
       yield* _mapToLoadTournamentState(event);
     } else if (event is SelectTournamentEvent) {
-      yield* _mapToNewTournamentState(event);
+      yield* _mapToNewTournamentState(event.tournament);
+    } else if (event is RefreshTournamentEvent) {
+      yield* _mapToNewTournamentState(event.tournament);
     }
   }
 
@@ -45,57 +47,116 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
   }
 
   Stream<TournamentState> _mapToNewTournamentState(
-      SelectTournamentEvent event) async* {
-    yield NewTournamentState(event.tournament);
+      Tournament tournament) async* {
+    yield NewTournamentState(tournament);
   }
 
-  Future<Tournament?> getRefreshedTournamentData(String tournamentId) async {
-    print("TournamentBloc: getRefreshedTournamentData");
+  Future<bool> refreshTournamentData(String tournamentId) async {
+    print("TournamentBloc: refreshTournamentData");
 
     try {
       Tournament? tournament = await _repo.getTournamentDataAsync(tournamentId);
-
-      return tournament;
+      if (tournament == null) {
+        return false;
+      } else {
+        _processLoadedTournament(tournament, true);
+        return true;
+      }
     } catch (e) {
       print(e.toString());
-      return null;
+      return false;
     }
   }
+
+  // Future<Tournament?> getRefreshedTournamentData(String tournamentId) async {
+  //   print("TournamentBloc: getRefreshedTournamentData");
+
+  //   try {
+  //     Tournament? tournament = await _repo.getTournamentDataAsync(tournamentId);
+
+  //     return tournament;
+  //   } catch (e) {
+  //     print(e.toString());
+  //     return null;
+  //   }
+  // }
 
   // ---------------
   // Update DB
   // ---------------
 
-  Future<bool> updateMatchEvent(UpdateMatchReportEvent event) async {
+  Future<bool> updateMatchEvent(UpdateMatchReportEvent event) {
     print("TournamentBloc: updateMatchEvent");
-    return _repo.updateCoachMatchReport(event);
+    return _repo.updateCoachMatchReport(event).then((value) async {
+      if (value) {
+        return await refreshTournamentData(event.tournament.info.id);
+      }
+
+      return value;
+    });
   }
 
-  Future<bool> updateMatchEvents(List<UpdateMatchReportEvent> events) async {
+  Future<bool> updateMatchEvents(List<UpdateMatchReportEvent> events) {
     print("TournamentBloc: updateMatchEvents");
-    return _repo.updateCoachMatchReports(events);
+    return _repo.updateCoachMatchReports(events).then((value) async {
+      if (value && events.isNotEmpty) {
+        return await refreshTournamentData(events.first.tournament.info.id);
+      }
+
+      return value;
+    });
   }
 
   Future<bool> overwriteTournamentInfo(TournamentInfo info) {
-    return _repo.overwriteTournamentInfo(info);
+    return _repo.overwriteTournamentInfo(info).then((value) async {
+      if (value) {
+        return await refreshTournamentData(info.id);
+      }
+
+      return value;
+    });
   }
 
   Future<bool> overwriteCoaches(
       String tId, List<Coach> newCoaches, List<RenameNafName> renames) {
-    return _repo.overwriteCoaches(tId, newCoaches, renames);
+    return _repo.overwriteCoaches(tId, newCoaches, renames).then((value) async {
+      if (value) {
+        return await refreshTournamentData(tId);
+      }
+
+      return value;
+    });
   }
 
   // Recovering backup
   Future<bool> recoverTournamentBackup(Tournament tournament) {
-    return _repo.recoverTournamentBackup(tournament);
+    return _repo.recoverTournamentBackup(tournament).then((value) async {
+      if (value) {
+        return await refreshTournamentData(tournament.info.id);
+      }
+
+      return value;
+    });
   }
 
   Future<bool> advanceRound(Tournament tournament) {
-    return _repo.advanceRound(tournament);
+    return _repo.advanceRound(tournament).then((value) async {
+      if (value) {
+        return await refreshTournamentData(tournament.info.id);
+      }
+
+      return value;
+    });
   }
 
   Future<bool> discardCurrentRound(Tournament tournament) {
-    return _repo.discardCurrentRound(tournament);
+    return _repo.discardCurrentRound(tournament).then((value) async {
+      if (value) {
+        return await refreshTournamentData(tournament.info.id);
+      }
+
+      return value;
+    });
   }
 
   // ---------------
@@ -140,16 +201,22 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
         info.id.toString() +
         ")");
 
-    _repo.getTournamentData(info.id).listen((t) => _processLoadedTournament(t));
+    _repo
+        .getTournamentData(info.id)
+        .listen((t) => _processLoadedTournament(t, false));
   }
 
-  void _processLoadedTournament(Tournament t) {
+  void _processLoadedTournament(Tournament t, bool refresh) {
     print("TournamentBloc: _processLoadedTournament: " +
         t.info.name +
         " (" +
         t.info.id.toString() +
         ")");
 
-    add(SelectTournamentEvent(t));
+    if (refresh) {
+      add(RefreshTournamentEvent(t));
+    } else {
+      add(SelectTournamentEvent(t));
+    }
   }
 }

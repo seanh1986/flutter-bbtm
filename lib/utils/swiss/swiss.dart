@@ -9,6 +9,7 @@ import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 
 // enum FirstRoundMatchingRule {
 //   MatchRandom, // Random matchups
@@ -74,6 +75,8 @@ class SwissPairings {
     }
 
     if (matching != null) {
+      _populateTableNumbers(matching.getMatches());
+
       tournament.updateRound(matching);
     } else {
       debugPrint('Failed to find matchings');
@@ -105,6 +108,8 @@ class SwissPairings {
     }
 
     if (matching != null) {
+      _populateTableNumbers(matching.getMatches());
+
       tournament.updateRound(matching);
     } else {
       debugPrint('Failed to find matchings');
@@ -143,8 +148,6 @@ class SwissPairings {
 
     SwissRound matchings = SwissRound(1);
 
-    int tableNum = 1;
-
     while (notYetPaired.length > 1) {
       int idx_1 = _random.nextInt(notYetPaired.length - 1);
 
@@ -169,6 +172,14 @@ class SwissPairings {
             squad_1.name() == squad_2.name()) {
           // Add back player_1 and try again
           notYetPaired.add(player_1);
+
+          Map<String, List<IMatchupParticipant>> grpBySquad = notYetPaired
+              .groupListsBy((element) => (element as Coach).squadName);
+          if (grpBySquad.length == 1) {
+            // For now, just retry... Bad quick fix...
+            return _firstRoundRandom(matchSquads, avoidWithinSquads);
+          }
+
           continue;
         }
       }
@@ -245,39 +256,38 @@ class SwissPairings {
     SwissRound? pairings =
         _findPairings(roundNum, sortedPlayers, byePlayerIdx, avoidWithinSquads);
 
-    if (pairings != null) {
-      // Ensure correct table numbers
-      int tableNum = 1;
+    return pairings;
+  }
 
-      for (int i = 0; i < pairings.matches.length; i++) {
-        IMatchup matchup = pairings.matches[i];
-        if (matchup is CoachMatchup) {
-          matchup.tableNum = tableNum;
+  void _populateTableNumbers(List<IMatchup> matches) {
+    // Ensure correct table numbers
+    int tableNum = 1;
+
+    for (int i = 0; i < matches.length; i++) {
+      IMatchup matchup = matches[i];
+      if (matchup is CoachMatchup) {
+        matchup.tableNum = tableNum;
+        tableNum++;
+      } else if (matchup is SquadMatchup) {
+        for (int j = 0; j < matchup.coachMatchups.length; j++) {
+          matchup.coachMatchups[j].tableNum = tableNum;
           tableNum++;
-        } else if (matchup is SquadMatchup) {
-          for (int j = 0; j < matchup.coachMatchups.length; j++) {
-            matchup.coachMatchups[j].tableNum = tableNum;
-            tableNum++;
-          }
         }
       }
-
-      print("Results:");
-      pairings.matches.forEach((m) {
-        StringBuffer sb = new StringBuffer();
-
-        if (m is CoachMatchup) {
-          sb.write("T" + m.tableNum.toString() + ":");
-        }
-
-        sb.write(m.homeName() + " vs. " + m.awayName());
-        print(sb.toString());
-        i++;
-      });
-      print("");
     }
 
-    return pairings;
+    print("Results:");
+    matches.forEach((m) {
+      StringBuffer sb = new StringBuffer();
+
+      if (m is CoachMatchup) {
+        sb.write("T" + m.tableNum.toString() + ":");
+      }
+
+      sb.write(m.homeName() + " vs. " + m.awayName());
+      print(sb.toString());
+    });
+    print("");
   }
 
   SwissRound? _findPairings(

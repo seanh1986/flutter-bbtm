@@ -56,8 +56,6 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     fToast.init(context);
 
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-
-    _coachRounds = widget.tournament.coachRounds;
   }
 
   @override
@@ -68,6 +66,8 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
 
   @override
   Widget build(BuildContext context) {
+    _refreshState();
+
     List<Widget> _widgets = [
       TitleBar(title: "Round Management"),
       _advanceDiscardBackupBtns(context),
@@ -98,6 +98,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     //   //             mainAxisAlignment: MainAxisAlignment.center,
     //   //             children: _viewRounds(context))))
     // ]);
+  }
+
+  void _refreshState() {
+    _coachRounds = widget.tournament.coachRounds;
   }
 
   Widget _advanceDiscardBackupBtns(BuildContext context) {
@@ -260,18 +264,19 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                 if (success) {
                   ToastUtils.showSuccess(
                       fToast, "Tournament data successfully updated.");
-                  Tournament? refreshedTournament = await _tournyBloc
-                      .getRefreshedTournamentData(widget.tournament.info.id);
-                  if (refreshedTournament != null) {
-                    _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
 
-                    if (mounted) {
-                      setState(() {});
-                    }
-                  } else {
-                    ToastUtils.showFailed(
-                        fToast, "Failed to refresh tournament.");
-                  }
+                  // Tournament? refreshedTournament = await _tournyBloc
+                  //     .getRefreshedTournamentData(widget.tournament.info.id);
+                  // if (refreshedTournament != null) {
+                  //   _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
+
+                  //   if (mounted) {
+                  //     setState(() {});
+                  //   }
+                  // } else {
+                  //   ToastUtils.showFailed(
+                  //       fToast, "Failed to refresh tournament.");
+                  // }
                 } else {
                   ToastUtils.showFailed(
                       fToast, "Tournament data failed to update.");
@@ -312,7 +317,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                     ")?");
 
             VoidCallback discardCallback = () async {
-              widget.tournament.coachRounds.removeLast();
+              //widget.tournament.coachRounds.removeLast();
               bool success =
                   await _tournyBloc.discardCurrentRound(widget.tournament);
               if (success) {
@@ -392,19 +397,19 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                         ToastUtils.showSuccess(
                             fToast, "Recovering Backup successful.");
 
-                        Tournament? refreshedTournament =
-                            await _tournyBloc.getRefreshedTournamentData(
-                                widget.tournament.info.id);
+                        // Tournament? refreshedTournament =
+                        //     await _tournyBloc.getRefreshedTournamentData(
+                        //         widget.tournament.info.id);
 
-                        if (refreshedTournament != null) {
-                          ToastUtils.showSuccess(
-                              fToast, "Tournament refreshed");
-                          _tournyBloc
-                              .add(SelectTournamentEvent(refreshedTournament));
-                        } else {
-                          ToastUtils.showFailed(fToast,
-                              "Automatic tournament refresh failed. Please refresh the page.");
-                        }
+                        // if (refreshedTournament != null) {
+                        //   ToastUtils.showSuccess(
+                        //       fToast, "Tournament refreshed");
+                        //   _tournyBloc
+                        //       .add(SelectTournamentEvent(refreshedTournament));
+                        // } else {
+                        //   ToastUtils.showFailed(fToast,
+                        //       "Automatic tournament refresh failed. Please refresh the page.");
+                        // }
                       } else {
                         ToastUtils.showFailed(
                             fToast, "Recovering Backup failed.");

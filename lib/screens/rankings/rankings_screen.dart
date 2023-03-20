@@ -37,8 +37,14 @@ class _RankingsPage extends State<RankingsPage> {
     super.dispose();
   }
 
+  void _refreshState() {
+    _tournament.reProcessAllRounds();
+  }
+
   @override
   Widget build(BuildContext context) {
+    _refreshState();
+
     if (_tournament.useSquads()) {
       return _squadAndCoachTabs();
     }

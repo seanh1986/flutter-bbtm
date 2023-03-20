@@ -42,9 +42,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   @override
   void initState() {
     super.initState();
+    _refreshState();
+  }
 
-    widget.tournament.reProcessAllRounds();
-
+  void _refreshState() {
     _items = List.from(widget.tournament.getCoaches());
   }
 
@@ -160,6 +161,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
   @override
   Widget build(BuildContext context) {
+    _refreshState();
+
     return Scaffold(
       body: SafeArea(
         child: Column(

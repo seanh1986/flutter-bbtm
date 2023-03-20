@@ -33,6 +33,12 @@ class _AdminScreenState extends State<AdminScreen> {
   late Tournament _tournament;
   late TournamentBloc _tournyBloc;
 
+  List<AdminSubScreens> adminSubScreens = [
+    AdminSubScreens.EDIT_INFO,
+    AdminSubScreens.EDIT_PARTICIPANTS,
+    AdminSubScreens.ROUND_MANAGEMENT,
+    AdminSubScreens.DOWNLOAD_FILES,
+  ];
   AdminSubScreens subScreen = AdminSubScreens.EDIT_INFO;
 
   @override
@@ -68,7 +74,7 @@ class _AdminScreenState extends State<AdminScreen> {
   Widget _toggleButtonsList(BuildContext context) {
     List<Widget> toggleWidgets = [];
 
-    AdminSubScreens.values.forEach((element) {
+    adminSubScreens.forEach((element) {
       toggleWidgets.add(ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: Theme.of(context).primaryColor,

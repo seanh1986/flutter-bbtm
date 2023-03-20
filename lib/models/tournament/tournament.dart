@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
@@ -156,11 +157,11 @@ class Tournament {
 
     // Update matches for each coach
     coachRounds.forEach((r) {
-      if (r.matches.any((m) => !m.hasResult())) {
-        return;
-      }
-
       r.matches.forEach((m) {
+        if (!m.hasResult()) {
+          return;
+        }
+
         Coach? homeCoach = getCoach(m.homeNafName);
         Coach? awayCoach = getCoach(m.awayNafName);
 
@@ -209,7 +210,9 @@ class Tournament {
       return false;
     }
 
-    if (useSquads()) {
+    if (useSquads() &&
+        matchups.getMatches().isNotEmpty &&
+        matchups.getMatches().first is SquadMatchup) {
       SquadRound squadRound = SquadRound.fromRoundMatching(matchups);
       if (squadRound.getMatches().isEmpty) {
         debugPrint('Failed to update round: Matches list is empty');

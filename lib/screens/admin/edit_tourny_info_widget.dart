@@ -54,8 +54,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
     fToast.init(context);
 
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-
-    _initFromTournament(widget.tournament);
   }
 
   void _initFromTournament(Tournament t) {
@@ -75,6 +73,8 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
+    _initFromTournament(widget.tournament);
+
     return Column(children: [
       TitleBar(title: "Edit Tournament Info"),
       SizedBox(height: 20),

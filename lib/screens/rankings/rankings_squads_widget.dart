@@ -24,8 +24,12 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
   @override
   void initState() {
-    _items = widget.tournament.getSquads();
     super.initState();
+    _refreshState();
+  }
+
+  void _refreshState() {
+    _items = widget.tournament.getSquads();
   }
 
   void _sort<T>(
@@ -105,6 +109,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
   @override
   Widget build(BuildContext context) {
+    _refreshState();
+
     return Scaffold(
       body: SafeArea(
         child: Column(
