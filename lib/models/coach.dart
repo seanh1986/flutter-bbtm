@@ -216,6 +216,14 @@ class Coach extends IMatchupParticipant {
     });
   }
 
+  int deltaTd() {
+    return tds - oppTds;
+  }
+
+  int deltaCas() {
+    return cas - oppCas;
+  }
+
   Coach.fromJson(int id, Map<String, Object?> json) {
     final tNafName = json['naf_name'] as String?;
     this.nafName = tNafName != null ? tNafName : "";

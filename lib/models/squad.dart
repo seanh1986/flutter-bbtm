@@ -252,6 +252,83 @@ class Squad extends IMatchupParticipant {
     });
   }
 
+  double sumIndividualScores(Tournament t) {
+    double sumScore = 0.0;
+
+    _coaches.forEach((nafName) {
+      Coach? c = t.getCoach(nafName);
+      sumScore += c != null ? c.points() : 0.0;
+    });
+
+    return sumScore;
+  }
+
+  int sumTds(Tournament t) {
+    int sumTds = 0;
+
+    _coaches.forEach((nafName) {
+      Coach? c = t.getCoach(nafName);
+      sumTds += c != null ? c.tds : 0;
+    });
+
+    return sumTds;
+  }
+
+  int sumCas(Tournament t) {
+    int sumCas = 0;
+
+    _coaches.forEach((nafName) {
+      Coach? c = t.getCoach(nafName);
+      sumCas += c != null ? c.cas : 0;
+    });
+
+    return sumCas;
+  }
+
+  int sumOppTds(Tournament t) {
+    int sumOppTds = 0;
+
+    _coaches.forEach((nafName) {
+      Coach? c = t.getCoach(nafName);
+      sumOppTds += c != null ? c.oppTds : 0;
+    });
+
+    return sumOppTds;
+  }
+
+  int sumOppCas(Tournament t) {
+    int sumOppCas = 0;
+
+    _coaches.forEach((nafName) {
+      Coach? c = t.getCoach(nafName);
+      sumOppCas += c != null ? c.oppCas : 0;
+    });
+
+    return sumOppCas;
+  }
+
+  int sumDeltaTds(Tournament t) {
+    int sumDeltaTds = 0;
+
+    _coaches.forEach((nafName) {
+      Coach? c = t.getCoach(nafName);
+      sumDeltaTds += c != null ? c.deltaTd() : 0;
+    });
+
+    return sumDeltaTds;
+  }
+
+  int sumDeltaCas(Tournament t) {
+    int sumDeltaCas = 0;
+
+    _coaches.forEach((nafName) {
+      Coach? c = t.getCoach(nafName);
+      sumDeltaCas += c != null ? c.deltaCas() : 0;
+    });
+
+    return sumDeltaCas;
+  }
+
   Squad.fromJson(Map<String, Object?> json) {
     final tName = json['name'] as String?;
     this._name = tName != null ? tName : "";

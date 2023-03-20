@@ -2,7 +2,7 @@ import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/coach.dart';
 
-enum Fields {
+enum CoachRankingFields {
   Pts,
   W,
   T,
@@ -22,7 +22,7 @@ enum Fields {
 class RankingCoachPage extends StatefulWidget {
   final Tournament tournament;
 
-  final List<Fields> fields;
+  final List<CoachRankingFields> fields;
 
   RankingCoachPage({Key? key, required this.tournament, required this.fields})
       : super(key: key);
@@ -94,14 +94,14 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       if (name.isNotEmpty) {
         DataColumnSortCallback? sorter;
         switch (f) {
-          case Fields.Pts:
+          case CoachRankingFields.Pts:
             // Take into account tie breakers
             sorter = (columnIndex, ascending) => _sort<num>(
                 (Coach c) => c.pointsWithTieBreakersBuiltIn(),
                 columnIndex,
                 ascending);
             break;
-          case Fields.W_T_L:
+          case CoachRankingFields.W_T_L:
             sorter = null;
             break;
           default:
@@ -125,7 +125,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     List<DataRow> rows = [];
 
     // sort by field
-    Fields field = widget.fields.first;
+    CoachRankingFields field = widget.fields.first;
     _sort<num>((Coach c) => _getSortingValue(c, field), _sortColumnIndex,
         _sortAscending);
 
@@ -208,44 +208,44 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         ));
   }
 
-  String _getColumnName(Fields f) {
+  String _getColumnName(CoachRankingFields f) {
     switch (f) {
-      case Fields.Pts:
+      case CoachRankingFields.Pts:
         return "Pts";
-      case Fields.W:
+      case CoachRankingFields.W:
         return "W";
-      case Fields.T:
+      case CoachRankingFields.T:
         return "T";
-      case Fields.L:
+      case CoachRankingFields.L:
         return "L";
-      case Fields.W_T_L:
+      case CoachRankingFields.W_T_L:
         return "W/T/L";
-      case Fields.W_Percent:
+      case CoachRankingFields.W_Percent:
         return "%";
-      case Fields.Td:
+      case CoachRankingFields.Td:
         return "Td+";
-      case Fields.Cas:
+      case CoachRankingFields.Cas:
         return "Cas+";
-      case Fields.OppTd:
+      case CoachRankingFields.OppTd:
         return "Td-";
-      case Fields.OppCas:
+      case CoachRankingFields.OppCas:
         return "Cas-";
-      case Fields.DeltaTd:
+      case CoachRankingFields.DeltaTd:
         return "Td\u0394";
-      case Fields.DeltaCas:
+      case CoachRankingFields.DeltaCas:
         return "Cas\u0394";
-      case Fields.OppScore:
+      case CoachRankingFields.OppScore:
         return "OppScore";
-      case Fields.BestSport:
+      case CoachRankingFields.BestSport:
         return "Sport";
       default:
         return "";
     }
   }
 
-  Text _getCellValue(Coach c, Fields f) {
+  Text _getCellValue(Coach c, CoachRankingFields f) {
     switch (f) {
-      case Fields.W_T_L:
+      case CoachRankingFields.W_T_L:
         return Text(c.wins().toString() +
             "/" +
             c.ties().toString() +
@@ -256,42 +256,42 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     }
   }
 
-  double _getSortingValue(Coach c, Fields f) {
+  double _getSortingValue(Coach c, CoachRankingFields f) {
     switch (f) {
-      case Fields.Pts:
+      case CoachRankingFields.Pts:
         return c.pointsWithTieBreakersBuiltIn();
       default:
         return _getViewValue(c, f);
     }
   }
 
-  double _getViewValue(Coach c, Fields f) {
+  double _getViewValue(Coach c, CoachRankingFields f) {
     switch (f) {
-      case Fields.Pts:
+      case CoachRankingFields.Pts:
         return c.points();
-      case Fields.W:
+      case CoachRankingFields.W:
         return c.wins().toDouble();
-      case Fields.T:
+      case CoachRankingFields.T:
         return c.ties().toDouble();
-      case Fields.L:
+      case CoachRankingFields.L:
         return c.losses().toDouble();
-      case Fields.W_Percent:
+      case CoachRankingFields.W_Percent:
         return c.winPercent();
-      case Fields.Td:
+      case CoachRankingFields.Td:
         return c.tds.toDouble();
-      case Fields.Cas:
+      case CoachRankingFields.Cas:
         return c.cas.toDouble();
-      case Fields.OppTd:
+      case CoachRankingFields.OppTd:
         return c.oppTds.toDouble();
-      case Fields.OppCas:
+      case CoachRankingFields.OppCas:
         return c.oppCas.toDouble();
-      case Fields.DeltaTd:
-        return (c.tds - c.oppTds).toDouble();
-      case Fields.DeltaCas:
-        return c.cas - c.oppCas.toDouble();
-      case Fields.OppScore:
+      case CoachRankingFields.DeltaTd:
+        return c.deltaTd().toDouble();
+      case CoachRankingFields.DeltaCas:
+        return c.deltaCas().toDouble();
+      case CoachRankingFields.OppScore:
         return c.oppPoints.toDouble();
-      case Fields.BestSport:
+      case CoachRankingFields.BestSport:
         return c.bestSportPoints.toDouble();
       default:
         return 0.0;

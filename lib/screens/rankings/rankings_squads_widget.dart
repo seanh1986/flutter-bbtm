@@ -3,10 +3,30 @@ import 'package:flutter/material.dart';
 import 'package:bbnaf/models/squad.dart';
 // import 'package:flutter/paginated_data_table.dart';
 
+enum SquadRankingFields {
+  Pts,
+  W,
+  T,
+  L,
+  W_T_L,
+  W_Percent,
+  SumIndividualScore,
+  SumTd,
+  SumCas,
+  SumOppTd,
+  SumOppCas,
+  SumDeltaTd,
+  SumDeltaCas,
+  OppScore,
+}
+
 class RankingSquadsPage extends StatefulWidget {
   final Tournament tournament;
 
-  RankingSquadsPage({Key? key, required this.tournament}) : super(key: key);
+  final List<SquadRankingFields> fields;
+
+  RankingSquadsPage({Key? key, required this.tournament, required this.fields})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -15,12 +35,10 @@ class RankingSquadsPage extends StatefulWidget {
 }
 
 class _RankingSquadsPage extends State<RankingSquadsPage> {
-  // int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
-  int _sortColumnIndex = 2;
+  int _sortColumnIndex = 3;
   bool _sortAscending = false;
 
   List<Squad> _items = [];
-  // int _rowsOffset = 0;
 
   @override
   void initState() {
@@ -33,7 +51,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   }
 
   void _sort<T>(
-      Comparable<T> getField(Squad d), int columnIndex, bool ascending) {
+      Comparable<T> getField(Squad s), int columnIndex, bool ascending) {
     _items.sort((Squad a, Squad b) {
       if (!ascending) {
         final Squad c = a;
@@ -51,57 +69,82 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   }
 
   List<DataColumn> _getColumns() {
-    return [
-      DataColumn(
-        label: Text('Squad'),
-        onSort: (columnIndex, ascending) =>
-            _sort<String>((Squad s) => s.name(), columnIndex, ascending),
-      ),
-      DataColumn(
-        label: Text('Coaches'),
-      ),
-      DataColumn(
-        label: Text('Points'),
-        numeric: true,
-        onSort: (columnIndex, ascending) =>
-            _sort<num>((Squad s) => s.points(), columnIndex, ascending),
-      ),
-      DataColumn(
-        label: Text('Wins'),
-        numeric: true,
-        onSort: (columnIndex, ascending) =>
-            _sort<num>((Squad s) => s.wins(), columnIndex, ascending),
-      ),
-      DataColumn(
-        label: Text('Ties'),
-        numeric: true,
-        onSort: (columnIndex, ascending) =>
-            _sort<num>((Squad s) => s.ties(), columnIndex, ascending),
-      ),
-      DataColumn(
-        label: Text('Losses'),
-        numeric: true,
-        onSort: (columnIndex, ascending) =>
-            _sort<num>((Squad s) => s.losses(), columnIndex, ascending),
-      ),
-    ];
+    List<DataColumn> columns = [];
+
+    columns.add(
+      DataColumn(label: Text('#')),
+    );
+
+    columns.add(
+      DataColumn(label: Text('Squad')),
+    );
+
+    columns.add(DataColumn(
+      label: Text('Coaches'),
+    ));
+
+    widget.fields.forEach((f) {
+      String name = _getColumnName(f);
+
+      if (name.isNotEmpty) {
+        DataColumnSortCallback? sorter;
+        switch (f) {
+          case SquadRankingFields.Pts:
+            // Take into account tie breakers
+            sorter = (columnIndex, ascending) => _sort<num>(
+                (Squad s) => s.pointsWithTieBreakersBuiltIn(),
+                columnIndex,
+                ascending);
+            break;
+          case SquadRankingFields.W_T_L:
+            sorter = null;
+            break;
+          default:
+            sorter = (columnIndex, ascending) => _sort<num>(
+                (Squad s) => _getSortingValue(s, f), columnIndex, ascending);
+            break;
+        }
+
+        columns.add(DataColumn(
+          label: Text(name),
+          numeric: true,
+          onSort: sorter,
+        ));
+      }
+    });
+
+    return columns;
   }
 
   List<DataRow> _getRows() {
     List<DataRow> rows = [];
 
-    // sort by points ascending
-    _sort<num>((Squad c) => c.points(), _sortColumnIndex, _sortAscending);
+    // sort by field
+    SquadRankingFields field = widget.fields.first;
+    _sort<num>((Squad s) => _getSortingValue(s, field), _sortColumnIndex,
+        _sortAscending);
 
-    _items.forEach((s) {
-      rows.add(DataRow(cells: <DataCell>[
-        DataCell(Text('${s.name()}')),
-        DataCell(Text('${s.getCoaches().toString()}')), // TODO...
-        DataCell(Text('${s.points().toString()}')),
-        DataCell(Text('${s.wins().toString()}')),
-        DataCell(Text('${s.ties().toString()}')),
-        DataCell(Text('${s.losses().toString()}')),
-      ]));
+    int rank = 1;
+    _items.forEach((squad) {
+      List<DataCell> cells = [];
+
+      cells.add(DataCell(Text(rank.toString())));
+
+      cells.add(DataCell(Text('${squad.name()}')));
+
+      cells.add(DataCell(Text('${squad.getCoaches().toString()}')));
+
+      widget.fields.forEach((f) {
+        String name = _getColumnName(f);
+
+        if (name.isNotEmpty) {
+          cells.add(DataCell(_getCellValue(squad, f)));
+        }
+      });
+
+      rows.add(DataRow(cells: cells));
+
+      rank++;
     });
 
     return rows;
@@ -156,5 +199,95 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         ),
       ),
     );
+  }
+
+  String _getColumnName(SquadRankingFields f) {
+    switch (f) {
+      case SquadRankingFields.Pts:
+        return "Pts";
+      case SquadRankingFields.W:
+        return "W";
+      case SquadRankingFields.T:
+        return "T";
+      case SquadRankingFields.L:
+        return "L";
+      case SquadRankingFields.W_T_L:
+        return "W/T/L";
+      case SquadRankingFields.W_Percent:
+        return "%";
+      case SquadRankingFields.SumIndividualScore:
+        return "\u03A3 Solo";
+      case SquadRankingFields.SumTd:
+        return "Td+";
+      case SquadRankingFields.SumCas:
+        return "Cas+";
+      case SquadRankingFields.SumOppTd:
+        return "Td-";
+      case SquadRankingFields.SumOppCas:
+        return "Cas-";
+      case SquadRankingFields.SumDeltaTd:
+        return "Td\u0394";
+      case SquadRankingFields.SumDeltaCas:
+        return "Cas\u0394";
+      case SquadRankingFields.OppScore:
+        return "OppScore";
+      default:
+        return "";
+    }
+  }
+
+  Text _getCellValue(Squad s, SquadRankingFields f) {
+    switch (f) {
+      case SquadRankingFields.W_T_L:
+        return Text(s.wins().toString() +
+            "/" +
+            s.ties().toString() +
+            "/" +
+            s.losses().toString());
+      default:
+        return Text(_getViewValue(s, f).toString());
+    }
+  }
+
+  double _getSortingValue(Squad s, SquadRankingFields f) {
+    switch (f) {
+      case SquadRankingFields.Pts:
+        return s.pointsWithTieBreakersBuiltIn();
+      default:
+        return _getViewValue(s, f);
+    }
+  }
+
+  double _getViewValue(Squad s, SquadRankingFields f) {
+    switch (f) {
+      case SquadRankingFields.Pts:
+        return s.points();
+      case SquadRankingFields.W:
+        return s.wins().toDouble();
+      case SquadRankingFields.T:
+        return s.ties().toDouble();
+      case SquadRankingFields.L:
+        return s.losses().toDouble();
+      case SquadRankingFields.SumIndividualScore:
+        return s.sumIndividualScores(widget.tournament);
+      case SquadRankingFields.W_Percent:
+        return s.winPercent();
+      case SquadRankingFields.SumTd:
+        return s.sumTds(widget.tournament).toDouble();
+      case SquadRankingFields.SumCas:
+        return s.sumCas(widget.tournament).toDouble();
+      case SquadRankingFields.SumOppTd:
+        return s.sumOppTds(widget.tournament).toDouble();
+      case SquadRankingFields.SumOppCas:
+        return s.sumOppCas(widget.tournament).toDouble();
+      case SquadRankingFields.SumDeltaTd:
+        return s.sumDeltaTds(widget.tournament).toDouble();
+      case SquadRankingFields.SumDeltaCas:
+        return s.sumDeltaCas(widget.tournament).toDouble();
+      case SquadRankingFields.OppScore:
+        return s.oppPoints.toDouble();
+      default:
+        return 0.0;
+    }
   }
 }

@@ -52,24 +52,33 @@ class _RankingsPage extends State<RankingsPage> {
     return _coachRankingsWithToggles();
   }
 
-  List<Fields> _getFieldsCombined() {
+  List<SquadRankingFields> _getSquadRankingFieldsCombined() {
     return [
-      Fields.Pts,
-      Fields.W_T_L,
-      Fields.OppScore,
-      Fields.Td,
-      Fields.Cas,
+      SquadRankingFields.Pts,
+      SquadRankingFields.W_T_L,
+      SquadRankingFields.SumIndividualScore,
+      SquadRankingFields.OppScore,
     ];
   }
 
-  List<Fields> _getFieldsCombinedAdmin() {
+  List<CoachRankingFields> _getCoachRankingFieldsCombined() {
     return [
-      Fields.Pts,
-      Fields.W_T_L,
-      Fields.OppScore,
-      Fields.Td,
-      Fields.Cas,
-      Fields.BestSport
+      CoachRankingFields.Pts,
+      CoachRankingFields.W_T_L,
+      CoachRankingFields.OppScore,
+      CoachRankingFields.Td,
+      CoachRankingFields.Cas,
+    ];
+  }
+
+  List<CoachRankingFields> _getCoachRankingFieldsCombinedAdmin() {
+    return [
+      CoachRankingFields.Pts,
+      CoachRankingFields.W_T_L,
+      CoachRankingFields.OppScore,
+      CoachRankingFields.Td,
+      CoachRankingFields.Cas,
+      CoachRankingFields.BestSport
     ];
   }
 
@@ -88,26 +97,37 @@ class _RankingsPage extends State<RankingsPage> {
       ];
       views = [
         RankingCoachPage(
-            tournament: _tournament, fields: _getFieldsCombinedAdmin()),
-        RankingCoachPage(
             tournament: _tournament,
-            fields: [Fields.Td, Fields.OppTd, Fields.DeltaTd]),
+            fields: _getCoachRankingFieldsCombinedAdmin()),
+        RankingCoachPage(tournament: _tournament, fields: [
+          CoachRankingFields.Td,
+          CoachRankingFields.OppTd,
+          CoachRankingFields.DeltaTd
+        ]),
+        RankingCoachPage(tournament: _tournament, fields: [
+          CoachRankingFields.Cas,
+          CoachRankingFields.OppCas,
+          CoachRankingFields.DeltaCas
+        ]),
         RankingCoachPage(
-            tournament: _tournament,
-            fields: [Fields.Cas, Fields.OppCas, Fields.DeltaCas]),
-        RankingCoachPage(tournament: _tournament, fields: [Fields.BestSport])
+            tournament: _tournament, fields: [CoachRankingFields.BestSport])
       ];
     } else {
       tabLength = 3;
       topBar = [Tab(text: "Combined"), Tab(text: "Td"), Tab(text: "Cas")];
       views = [
-        RankingCoachPage(tournament: _tournament, fields: _getFieldsCombined()),
         RankingCoachPage(
-            tournament: _tournament,
-            fields: [Fields.Td, Fields.OppTd, Fields.DeltaTd]),
-        RankingCoachPage(
-            tournament: _tournament,
-            fields: [Fields.Cas, Fields.OppCas, Fields.DeltaCas])
+            tournament: _tournament, fields: _getCoachRankingFieldsCombined()),
+        RankingCoachPage(tournament: _tournament, fields: [
+          CoachRankingFields.Td,
+          CoachRankingFields.OppTd,
+          CoachRankingFields.DeltaTd
+        ]),
+        RankingCoachPage(tournament: _tournament, fields: [
+          CoachRankingFields.Cas,
+          CoachRankingFields.OppCas,
+          CoachRankingFields.DeltaCas
+        ])
       ];
     }
 
@@ -131,7 +151,6 @@ class _RankingsPage extends State<RankingsPage> {
             )));
   }
 
-  // Deprecated
   Widget _squadAndCoachTabs() {
     return DefaultTabController(
         length: 2,
@@ -156,7 +175,9 @@ class _RankingsPage extends State<RankingsPage> {
             ),
             body: TabBarView(
               children: <Widget>[
-                RankingSquadsPage(tournament: _tournament),
+                RankingSquadsPage(
+                    tournament: _tournament,
+                    fields: _getSquadRankingFieldsCombined()),
                 _coachRankingsWithToggles(),
               ],
             )));

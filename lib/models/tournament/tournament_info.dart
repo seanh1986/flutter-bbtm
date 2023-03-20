@@ -165,9 +165,9 @@ enum TieBreaker {
 }
 
 enum SquadTieBreakers {
-  OppScore,
   SquadWins,
   SumSquadMemberScore, // Across all squad members
+  OppScore,
   SumTdDiff, // Across all squad members
   SumCasDiff, // Across all squad members
 }
