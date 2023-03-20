@@ -214,6 +214,7 @@ class Squad extends IMatchupParticipant {
 
   void updateOppScoreAndTieBreakers(Tournament t) {
     oppPoints = 0.0;
+    _tieBreakers.clear();
 
     _coaches.forEach((nafName) {
       Coach? c = t.getCoach(nafName);

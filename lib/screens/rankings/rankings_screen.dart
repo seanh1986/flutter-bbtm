@@ -98,36 +98,53 @@ class _RankingsPage extends State<RankingsPage> {
       views = [
         RankingCoachPage(
             tournament: _tournament,
+            authUser: widget.authUser,
             fields: _getCoachRankingFieldsCombinedAdmin()),
-        RankingCoachPage(tournament: _tournament, fields: [
-          CoachRankingFields.Td,
-          CoachRankingFields.OppTd,
-          CoachRankingFields.DeltaTd
-        ]),
-        RankingCoachPage(tournament: _tournament, fields: [
-          CoachRankingFields.Cas,
-          CoachRankingFields.OppCas,
-          CoachRankingFields.DeltaCas
-        ]),
         RankingCoachPage(
-            tournament: _tournament, fields: [CoachRankingFields.BestSport])
+            tournament: _tournament,
+            authUser: widget.authUser,
+            fields: [
+              CoachRankingFields.Td,
+              CoachRankingFields.OppTd,
+              CoachRankingFields.DeltaTd
+            ]),
+        RankingCoachPage(
+            tournament: _tournament,
+            authUser: widget.authUser,
+            fields: [
+              CoachRankingFields.Cas,
+              CoachRankingFields.OppCas,
+              CoachRankingFields.DeltaCas
+            ]),
+        RankingCoachPage(
+            tournament: _tournament,
+            authUser: widget.authUser,
+            fields: [CoachRankingFields.BestSport])
       ];
     } else {
       tabLength = 3;
       topBar = [Tab(text: "Combined"), Tab(text: "Td"), Tab(text: "Cas")];
       views = [
         RankingCoachPage(
-            tournament: _tournament, fields: _getCoachRankingFieldsCombined()),
-        RankingCoachPage(tournament: _tournament, fields: [
-          CoachRankingFields.Td,
-          CoachRankingFields.OppTd,
-          CoachRankingFields.DeltaTd
-        ]),
-        RankingCoachPage(tournament: _tournament, fields: [
-          CoachRankingFields.Cas,
-          CoachRankingFields.OppCas,
-          CoachRankingFields.DeltaCas
-        ])
+            tournament: _tournament,
+            authUser: widget.authUser,
+            fields: _getCoachRankingFieldsCombined()),
+        RankingCoachPage(
+            tournament: _tournament,
+            authUser: widget.authUser,
+            fields: [
+              CoachRankingFields.Td,
+              CoachRankingFields.OppTd,
+              CoachRankingFields.DeltaTd
+            ]),
+        RankingCoachPage(
+            tournament: _tournament,
+            authUser: widget.authUser,
+            fields: [
+              CoachRankingFields.Cas,
+              CoachRankingFields.OppCas,
+              CoachRankingFields.DeltaCas
+            ])
       ];
     }
 
@@ -177,6 +194,7 @@ class _RankingsPage extends State<RankingsPage> {
               children: <Widget>[
                 RankingSquadsPage(
                     tournament: _tournament,
+                    authUser: widget.authUser,
                     fields: _getSquadRankingFieldsCombined()),
                 _coachRankingsWithToggles(),
               ],

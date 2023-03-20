@@ -1,4 +1,6 @@
+import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/coach.dart';
 
@@ -21,10 +23,14 @@ enum CoachRankingFields {
 
 class RankingCoachPage extends StatefulWidget {
   final Tournament tournament;
-
+  final AuthUser authUser;
   final List<CoachRankingFields> fields;
 
-  RankingCoachPage({Key? key, required this.tournament, required this.fields})
+  RankingCoachPage(
+      {Key? key,
+      required this.tournament,
+      required this.authUser,
+      required this.fields})
       : super(key: key);
 
   @override
@@ -131,23 +137,38 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
     int rank = 1;
     _items.forEach((coach) {
+      bool primaryHighlight = widget.authUser.nafName != null &&
+          coach.nafName.toLowerCase() == widget.authUser.nafName!.toLowerCase();
+
+      // Check if coach is on squad of the logged-in user
+      Squad? squad = !primaryHighlight &&
+              widget.tournament.useSquads() &&
+              widget.authUser.nafName != null
+          ? widget.tournament.getCoachSquad(widget.authUser.nafName!)
+          : null;
+      bool secondaryHighlight = squad != null && squad.hasCoach(coach.nafName);
+
+      TextStyle? textStyle = primaryHighlight
+          ? TextStyle(color: Colors.red)
+          : (secondaryHighlight ? TextStyle(color: Colors.lightBlue) : null);
+
       List<DataCell> cells = [];
 
-      cells.add(DataCell(Text(rank.toString())));
+      cells.add(DataCell(Text(rank.toString(), style: textStyle)));
 
-      cells.add(DataCell(Text('${coach.nafName}')));
+      cells.add(DataCell(Text('${coach.nafName}', style: textStyle)));
 
       if (widget.tournament.useSquads()) {
-        cells.add(DataCell(Text('${coach.squadName}')));
+        cells.add(DataCell(Text('${coach.squadName}', style: textStyle)));
       }
 
-      cells.add(DataCell(Text('${coach.raceName()}')));
+      cells.add(DataCell(Text('${coach.raceName()}', style: textStyle)));
 
       widget.fields.forEach((f) {
         String name = _getColumnName(f);
 
         if (name.isNotEmpty) {
-          cells.add(DataCell(_getCellValue(coach, f)));
+          cells.add(DataCell(_getCellValue(coach, f, textStyle)));
         }
       });
 
@@ -243,16 +264,18 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     }
   }
 
-  Text _getCellValue(Coach c, CoachRankingFields f) {
+  Text _getCellValue(Coach c, CoachRankingFields f, TextStyle? textStyle) {
     switch (f) {
       case CoachRankingFields.W_T_L:
-        return Text(c.wins().toString() +
-            "/" +
-            c.ties().toString() +
-            "/" +
-            c.losses().toString());
+        return Text(
+            c.wins().toString() +
+                "/" +
+                c.ties().toString() +
+                "/" +
+                c.losses().toString(),
+            style: textStyle);
       default:
-        return Text(_getViewValue(c, f).toString());
+        return Text(_getViewValue(c, f).toString(), style: textStyle);
     }
   }
 

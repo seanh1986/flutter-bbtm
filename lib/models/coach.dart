@@ -184,6 +184,8 @@ class Coach extends IMatchupParticipant {
 
   void updateOppScoreAndTieBreakers(Tournament t) {
     oppPoints = 0.0;
+    _tieBreakers.clear();
+
     _opponents.forEach((opp) {
       Coach? oppCoach = t.getCoach(opp);
       if (oppCoach != null) {

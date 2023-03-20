@@ -1,4 +1,5 @@
 import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/squad.dart';
 // import 'package:flutter/paginated_data_table.dart';
@@ -22,10 +23,14 @@ enum SquadRankingFields {
 
 class RankingSquadsPage extends StatefulWidget {
   final Tournament tournament;
-
+  final AuthUser authUser;
   final List<SquadRankingFields> fields;
 
-  RankingSquadsPage({Key? key, required this.tournament, required this.fields})
+  RankingSquadsPage(
+      {Key? key,
+      required this.tournament,
+      required this.authUser,
+      required this.fields})
       : super(key: key);
 
   @override
@@ -47,7 +52,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   }
 
   void _refreshState() {
-    _items = widget.tournament.getSquads();
+    _items = List.from(widget.tournament.getSquads());
   }
 
   void _sort<T>(
@@ -126,19 +131,25 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
     int rank = 1;
     _items.forEach((squad) {
+      bool highlight = widget.authUser.nafName != null &&
+          squad.hasCoach(widget.authUser.nafName!);
+
+      TextStyle? textStyle = highlight ? TextStyle(color: Colors.red) : null;
+
       List<DataCell> cells = [];
 
-      cells.add(DataCell(Text(rank.toString())));
+      cells.add(DataCell(Text(rank.toString(), style: textStyle)));
 
-      cells.add(DataCell(Text('${squad.name()}')));
+      cells.add(DataCell(Text('${squad.name()}', style: textStyle)));
 
-      cells.add(DataCell(Text('${squad.getCoaches().toString()}')));
+      cells.add(
+          DataCell(Text('${squad.getCoaches().toString()}', style: textStyle)));
 
       widget.fields.forEach((f) {
         String name = _getColumnName(f);
 
         if (name.isNotEmpty) {
-          cells.add(DataCell(_getCellValue(squad, f)));
+          cells.add(DataCell(_getCellValue(squad, f, textStyle)));
         }
       });
 
@@ -216,7 +227,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
       case SquadRankingFields.W_Percent:
         return "%";
       case SquadRankingFields.SumIndividualScore:
-        return "\u03A3 Solo";
+        return "SumCoachPts";
       case SquadRankingFields.SumTd:
         return "Td+";
       case SquadRankingFields.SumCas:
@@ -236,16 +247,18 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     }
   }
 
-  Text _getCellValue(Squad s, SquadRankingFields f) {
+  Text _getCellValue(Squad s, SquadRankingFields f, TextStyle? textStyle) {
     switch (f) {
       case SquadRankingFields.W_T_L:
-        return Text(s.wins().toString() +
-            "/" +
-            s.ties().toString() +
-            "/" +
-            s.losses().toString());
+        return Text(
+            s.wins().toString() +
+                "/" +
+                s.ties().toString() +
+                "/" +
+                s.losses().toString(),
+            style: textStyle);
       default:
-        return Text(_getViewValue(s, f).toString());
+        return Text(_getViewValue(s, f).toString(), style: textStyle);
     }
   }
 
