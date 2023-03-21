@@ -48,8 +48,19 @@ class CoachRound extends RoundMatching {
   CoachRound(this._round, this.matches);
   CoachRound.fromRoundMatching(RoundMatching rm) {
     _round = rm.round();
-    rm.getMatches().forEach((r) {
-      matches.add(r as CoachMatchup);
+
+    if (rm.getMatches().isEmpty) {
+      return;
+    }
+
+    rm.getMatches().forEach((match) {
+      if (match is CoachMatchup) {
+        matches.add(match);
+      } else if (match is SquadMatchup) {
+        match.coachMatchups.forEach((m) {
+          matches.add(m);
+        });
+      }
     });
   }
 

@@ -56,6 +56,8 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     fToast.init(context);
 
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
+
+    _refreshState();
   }
 
   @override
@@ -66,8 +68,6 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
 
   @override
   Widget build(BuildContext context) {
-    _refreshState();
-
     List<Widget> _widgets = [
       TitleBar(title: "Round Management"),
       _advanceDiscardBackupBtns(context),

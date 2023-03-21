@@ -31,22 +31,17 @@ class SwissPairings {
 
   /// Return true if pairing successful, false if
   RoundPairingError pairNextRound() {
-    bool useSquads = tournament.info.squadDetails.type == SquadUsage.SQUADS;
+    bool useSquads = tournament.useSquads();
 
     if (useSquads) {
-      // TODO: Handle avoiding byes case eventually
-      bool pairAsIndividualsAvoidingSquad =
-          tournament.info.squadDetails.matchMaking ==
-                  SquadMatchMaking.INDIVIDUAL_SWISS_AVOIDING_SQUAD ||
-              tournament.info.squadDetails.matchMaking ==
-                  SquadMatchMaking.ATTEMPT_SQUAD_VS_SQUAD_AVOID_BYES;
+      bool useSquadVsSquad = tournament.useSquadVsSquad();
 
-      if (pairAsIndividualsAvoidingSquad) {
-        // Squad tournament based on individual pairings
-        return _pairNextRoundAsIndividuals(true, true);
-      } else {
+      if (useSquadVsSquad) {
         // True squad pairings
         return _pairNextRoundAsSquads();
+      } else {
+        // Squad tournament based on individual pairings
+        return _pairNextRoundAsIndividuals(true, true);
       }
     } else {
       // Individual pairings (may or may not use groups for init)
@@ -226,7 +221,7 @@ class SwissPairings {
   SwissRound? _applySwiss(
       int roundNum, List<IMatchupParticipant> players, bool avoidWithinSquads) {
     // 1. Sort using tie breakers
-    List<Coach> sortedPlayers = new List.from(players);
+    List<IMatchupParticipant> sortedPlayers = new List.from(players);
     sortedPlayers
         .sort((a, b) => IMatchupParticipant.sortDescendingOperator(a, b));
 
@@ -642,14 +637,15 @@ class SwissPairings {
       return; // Invalid
     }
 
-    // Sort coaches
-    coaches_1.sort((c1, c2) => c1
+    // Sort coaches (descending)
+    coaches_1.sort((c1, c2) => c2
         .pointsWithTieBreakersBuiltIn()
-        .compareTo(c2.pointsWithTieBreakersBuiltIn()));
+        .compareTo(c1.pointsWithTieBreakersBuiltIn()));
 
-    coaches_2.sort((c1, c2) => c1
+    // Sort coaches (descending)
+    coaches_2.sort((c1, c2) => c2
         .pointsWithTieBreakersBuiltIn()
-        .compareTo(c2.pointsWithTieBreakersBuiltIn()));
+        .compareTo(c1.pointsWithTieBreakersBuiltIn()));
 
     for (int i = 0; i < coaches_1.length; i++) {
       sm.coachMatchups

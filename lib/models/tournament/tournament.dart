@@ -111,6 +111,23 @@ class Tournament {
     return info.squadDetails.type == SquadUsage.INDIVIDUAL_USE_SQUADS_FOR_INIT;
   }
 
+  bool useSquadVsSquad() {
+    if (!useSquads()) {
+      return false;
+    }
+
+    if (info.squadDetails.matchMaking ==
+        SquadMatchMaking.FORCE_SQUAD_VS_SQUAD_W_BYES) {
+      return true;
+    } else if (info.squadDetails.matchMaking ==
+        SquadMatchMaking.ATTEMPT_SQUAD_VS_SQUAD_AVOID_BYES) {
+      // If # squads is divisble by 2, then valid
+      return _squads.length % 2 == 0;
+    }
+
+    return false;
+  }
+
   // Try to process round (i.e., populate coaches with results)
   bool processRound() {
     if (coachRounds.isEmpty) {
@@ -221,16 +238,18 @@ class Tournament {
 
       squadRounds.add(squadRound);
 
-      // TODO: Update coaches too
-    } else {
-      CoachRound round = CoachRound.fromRoundMatching(matchups);
-      if (round.getMatches().isEmpty) {
-        debugPrint('Failed to update round: Matches list is empty');
-        return false;
-      }
-
-      coachRounds.add(round);
+      squadRound.matches.forEach((squadMatch) {
+        squadMatch.coachMatchups.forEach((coachMatch) {});
+      });
     }
+
+    CoachRound round = CoachRound.fromRoundMatching(matchups);
+    if (round.getMatches().isEmpty) {
+      debugPrint('Failed to update round: Matches list is empty');
+      return false;
+    }
+
+    coachRounds.add(round);
 
     return true;
   }

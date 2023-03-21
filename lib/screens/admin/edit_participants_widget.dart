@@ -46,6 +46,8 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
     fToast.init(context);
 
     _tournyBloc = BlocProvider.of<TournamentBloc>(context);
+
+    _initFromTournament(widget.tournament);
   }
 
   void _initFromTournament(Tournament t) {
@@ -77,8 +79,6 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    _initFromTournament(widget.tournament);
-
     return Expanded(
         child: Column(children: [
       TitleBar(title: "Edit Tournament Participants"),

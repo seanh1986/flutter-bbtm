@@ -73,14 +73,14 @@ class _MatchupsPage extends State<MatchupsPage> {
     if (allowMySquad) {
       _subScreensAllowed.add(MatchupSubScreens.MY_SQUAD);
     }
-    if (_tournament.useSquads() && _tournament.squadRounds.isNotEmpty) {
+    if (_tournament.useSquadVsSquad()) {
       _subScreensAllowed.add(MatchupSubScreens.SQUAD_MATCHUPS);
     }
     _subScreensAllowed.add(MatchupSubScreens.COACH_MATCHUPS);
 
     if (allowMyMatchup) {
       _subScreen = MatchupSubScreens.MY_MATCHUP;
-    } else if (_tournament.useSquads() && _tournament.squadRounds.isNotEmpty) {
+    } else if (_tournament.useSquadVsSquad()) {
       _subScreen = MatchupSubScreens.SQUAD_MATCHUPS;
     } else {
       _subScreen = MatchupSubScreens.COACH_MATCHUPS;
@@ -149,7 +149,7 @@ class _MatchupsPage extends State<MatchupsPage> {
   Widget? _getSubScreen() {
     switch (_subScreen) {
       case MatchupSubScreens.MY_SQUAD:
-        if (_tournament.useSquads() && _tournament.squadRounds.isNotEmpty) {
+        if (_tournament.useSquadVsSquad()) {
           return SquadMatchupsPage(
               tournament: _tournament,
               authUser: _authUser,
