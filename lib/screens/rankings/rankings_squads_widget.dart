@@ -207,6 +207,13 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
           rows: _getRows(),
           sortAscending: _sortAscending,
           sortColumnIndex: _sortColumnIndex,
+          headingRowColor: MaterialStateProperty.resolveWith<Color?>(
+              (Set<MaterialState> states) {
+            if (states.contains(MaterialState.hovered)) {
+              return Colors.greenAccent.withOpacity(0.75);
+            }
+            return Colors.greenAccent.withOpacity(0.6);
+          }),
         ),
       ),
     );
