@@ -292,13 +292,6 @@ class Tournament {
       }
     }
 
-    // final tSquads = json['squads'] as List<dynamic>?;
-    // if (tSquads != null) {
-    //   for (int i = 0; i < tSquads.length; i++) {
-    //     addSquad(Squad.fromJson(tSquads[i] as Map<String, dynamic>));
-    //   }
-    // }
-
     final tCoachRounds = json['coach_rounds'] as List<dynamic>?;
     if (tCoachRounds != null) {
       for (int i = 0; i < tCoachRounds.length; i++) {
@@ -313,8 +306,6 @@ class Tournament {
 
   Map<String, dynamic> toJson() => {
         'coaches': _coaches.map((e) => e.toJson()).toList(),
-        // 'squads': _squads.map((e) => e.toJson()).toList(),
-        // 'squad_rounds': squadRounds.map((e) => e.toJson()).toList(),
         'coach_rounds': coachRounds.map((e) => e.toJson()).toList(),
       };
 

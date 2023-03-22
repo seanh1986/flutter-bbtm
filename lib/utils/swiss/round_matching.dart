@@ -34,6 +34,18 @@ class SquadRound extends RoundMatching {
     return matches.any((SquadMatchup match) => match.hasParticipant(s));
   }
 
+  // SquadRound.fromJson(Map<String, dynamic> json) {
+  //   final tRound = json['round'] as int?;
+  //   this._round = tRound != null ? tRound : 0;
+
+  //   final tMatches = json['matches'] as List<dynamic>?;
+  //   if (tMatches != null) {
+  //     for (int i = 0; i < tMatches.length; i++) {
+  //       matches.add(SquadMatchup.fromJson(tMatches[i] as Map<String, dynamic>));
+  //     }
+  //   }
+  // }
+
   // Map<String, dynamic> toJson() => {
   //       'round': _round,
   //       'matches': matches.map((e) => e.toJson()).toList(),
