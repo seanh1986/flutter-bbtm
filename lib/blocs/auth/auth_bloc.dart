@@ -10,15 +10,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   AuthBloc({required AuthRepository aRepo})
       : _authRepository = aRepo,
-        super(NotLoggedInAuthState());
+        super(AuthStateUninitializd());
 
   @override
   Stream<AuthState> mapEventToState(AuthEvent event) async* {
     if (event is AppStartedAuthEvent) {
       yield* _mapAppStartedToState();
-    } else if (event is LoggedInAuthEvent) {
+    } else if (event is LogInAuthEvent) {
       yield* _mapLoggedInToState(event);
-    } else if (event is LoggedOutAuthEvent) {
+    } else if (event is LogOutAuthEvent) {
       yield* _mapLoggedOutToState();
     }
   }
@@ -28,26 +28,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final isSignedIn = await _authRepository.isSignedIn();
       if (isSignedIn) {
         AuthUser authUser = _authRepository.getAuthUser();
-        yield LoggedInAuthState(authUser);
+        yield AuthStateLoggedIn(authUser);
       } else {
-        yield NotLoggedInAuthState();
+        yield AuthStateLoggedOut();
       }
     } catch (_) {
-      yield NotLoggedInAuthState();
+      yield AuthStateLoggedOut();
     }
   }
 
-  Stream<AuthState> _mapLoggedInToState(LoggedInAuthEvent event) async* {
+  Stream<AuthState> _mapLoggedInToState(LogInAuthEvent event) async* {
     print("AuthBloc: _mapLoggedInToState: Logged In");
-    yield LoggedInAuthState(event.authUser);
+    yield AuthStateLoggedIn(event.authUser);
   }
 
   Stream<AuthState> _mapLoggedOutToState() async* {
     print("AuthBloc: _mapLoggedOutToState");
 
+    yield AuthStateLoggingOut();
+
     await _authRepository.signOut();
 
-    yield NotLoggedInAuthState();
+    yield AuthStateLoggedOut();
   }
 
   @override

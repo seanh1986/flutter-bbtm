@@ -45,19 +45,18 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPage extends State<LoginPage> {
-  // late AuthBloc _authBloc;
-
   @override
   void initState() {
-    // _authBloc = BlocProvider.of<AuthBloc>(context);
-
     super.initState();
   }
 
   @override
-  Widget build(BuildContext context) {
-    // _authBloc.add(new LoggedOutAuthEvent());
+  void dispose() {
+    super.dispose();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
         Scaffold(

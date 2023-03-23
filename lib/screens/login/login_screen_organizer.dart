@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/auth/auth_repo.dart';
@@ -5,6 +7,7 @@ import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
 import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
+import 'package:bbnaf/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,6 +29,7 @@ class _LoginOrganizerPage extends State<LoginOrganizerPage> {
   TournamentRepository _tournyRepo = FirebaseTournamentRepository();
 
   late AuthBloc _authBloc;
+  late StreamSubscription _authSub;
 
   final String keyNafName = "nafName";
 
@@ -49,11 +53,24 @@ class _LoginOrganizerPage extends State<LoginOrganizerPage> {
 
   @override
   void dispose() {
+    _authBloc.close();
+    _authSub.cancel();
     super.dispose();
+  }
+
+  void _init() {
+    _authSub = _authBloc.stream.listen((authState) {
+      if (authState is AuthStateLoggedIn) {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => HomePage()));
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    _init();
+
     return Stack(children: [
       //LoginScreenHeader(showBackButton: true),
       FlutterLogin(
@@ -82,7 +99,7 @@ class _LoginOrganizerPage extends State<LoginOrganizerPage> {
         onRecoverPassword: _recoverPassword,
         onSubmitAnimationCompleted: () {
           debugPrint('onSubmitAnimationCompleted');
-          _authBloc.add(new LoggedInAuthEvent(authUser: _authUser));
+          _authBloc.add(new LogInAuthEvent(authUser: _authUser));
         },
       )
     ]);

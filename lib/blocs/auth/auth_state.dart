@@ -9,12 +9,13 @@ abstract class AuthState extends Equatable {
 }
 
 // Initial state (non-authorized)
-class NotLoggedInAuthState extends AuthState {}
+class AuthStateUninitializd extends AuthState {}
 
-class LoggedInAuthState extends AuthState {
+// User is logged in
+class AuthStateLoggedIn extends AuthState {
   final AuthUser authUser;
 
-  LoggedInAuthState(this.authUser);
+  AuthStateLoggedIn(this.authUser);
 
   @override
   List<Object> get props => [AuthState];
@@ -22,3 +23,12 @@ class LoggedInAuthState extends AuthState {
   @override
   String toString() => 'LoggedInAuthState { $authUser }';
 }
+
+// User is logged out
+class AuthStateLoggedOut extends AuthState {}
+
+// Login in progress
+class AuthStateLoggingIn extends AuthState {}
+
+// Logout in progress
+class AuthStateLoggingOut extends AuthState {}

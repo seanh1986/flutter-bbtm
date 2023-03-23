@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:bbnaf/screens/home_screen.dart';
 import 'package:bbnaf/screens/login/widget_login_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +14,7 @@ class LoginParticipantPage extends StatefulWidget {
 
 class _LoginParticipantPage extends State<LoginParticipantPage> {
   late AuthBloc _authBloc;
+  late StreamSubscription _authSub;
 
   bool _enableEditing = true;
 
@@ -26,11 +30,22 @@ class _LoginParticipantPage extends State<LoginParticipantPage> {
   @override
   void dispose() {
     _authBloc.close();
+    _authSub.cancel();
     super.dispose();
+  }
+
+  void _init() {
+    _authSub = _authBloc.stream.listen((authState) {
+      if (authState is AuthStateLoggedIn) {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => HomePage()));
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    _init();
     return Scaffold(
         body: Container(
       // decoration: BoxDecoration(
@@ -97,7 +112,7 @@ class _LoginParticipantPage extends State<LoginParticipantPage> {
                           authUser = new AuthUser.nafNameOnly(nafName: nafName);
                         }
 
-                        _authBloc.add(LoggedInAuthEvent(authUser: authUser));
+                        _authBloc.add(LogInAuthEvent(authUser: authUser));
 
                         setState(() {
                           _enableEditing = false;

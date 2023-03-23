@@ -80,11 +80,11 @@ class _HomePageState extends State<HomePage> {
     });
 
     _authSub = _authBloc.stream.listen((authState) {
-      if (authState is LoggedInAuthState) {
+      if (authState is AuthStateLoggedIn) {
         setState(() {
           _authUser = authState.authUser;
         });
-      } else {
+      } else if (authState is AuthStateLoggedOut) {
         ToastUtils.showSuccess(fToast, "Logged Out");
         setState(() {
           _authUser = AuthUser();
@@ -98,8 +98,8 @@ class _HomePageState extends State<HomePage> {
       _tournament = Tournament.empty();
     }
 
-    if (_authBloc.state is LoggedInAuthState) {
-      _authUser = (_authBloc.state as LoggedInAuthState).authUser;
+    if (_authBloc.state is AuthStateLoggedIn) {
+      _authUser = (_authBloc.state as AuthStateLoggedIn).authUser;
     } else {
       _authUser = AuthUser();
     }
@@ -113,13 +113,13 @@ class _HomePageState extends State<HomePage> {
     _refreshState();
 
     bool isTournamentSelected = !(_tournyBloc.state is NoTournamentState);
-    bool isUserLoggedIn = !(_authBloc.state is NotLoggedInAuthState);
+    bool isUserLoggedIn = _authBloc.state is AuthStateLoggedIn;
     bool shouldLogout = !isTournamentSelected && !isUserLoggedIn;
 
     if (shouldLogout) {
       // Try to go back
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacement(context,
+        Navigator.push(context,
             MaterialPageRoute(builder: (context) => TournamentSelectionPage()));
       });
     }
@@ -130,7 +130,7 @@ class _HomePageState extends State<HomePage> {
   void _handleLogoutPressed() {
     print("Logout Pressed");
     ToastUtils.show(fToast, "Logging out");
-    _authBloc.add(LoggedOutAuthEvent());
+    _authBloc.add(LogOutAuthEvent());
     _tournyBloc.add(NoTournamentEvent());
   }
 

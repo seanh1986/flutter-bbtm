@@ -13,10 +13,10 @@ class AppStartedAuthEvent extends AuthEvent {
   String toString() => 'AppStarted';
 }
 
-class LoggedInAuthEvent extends AuthEvent {
+class LogInAuthEvent extends AuthEvent {
   final AuthUser authUser;
 
-  LoggedInAuthEvent({required this.authUser});
+  LogInAuthEvent({required this.authUser});
 
   @override
   String toString() =>
@@ -26,7 +26,7 @@ class LoggedInAuthEvent extends AuthEvent {
       authUser.nafName!.toString();
 }
 
-class LoggedOutAuthEvent extends AuthEvent {
+class LogOutAuthEvent extends AuthEvent {
   @override
   String toString() => 'LoggedOut';
 }
