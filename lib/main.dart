@@ -41,8 +41,8 @@ void main() async {
         create: (context) => TournamentListsBloc(tRepo: _tournamentRepo)
           ..add(RequestLoadTournamentListEvent())),
     BlocProvider<TournamentBloc>(
-        create: (context) =>
-            TournamentBloc(tRepo: _tournamentRepo)..add(NoTournamentEvent())),
+        create: (context) => TournamentBloc(tRepo: _tournamentRepo)
+          ..add(TournamentEventUninitialized())),
   ], child: App()));
 
   // _tournamentRepo.updateTournamentData(Tournament.fromIceBowl());

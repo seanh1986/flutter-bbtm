@@ -136,7 +136,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
                       _coachSource.coachIdxNafRenames.values.toList();
 
                   bool success = await _tournyBloc.overwriteCoaches(
-                      widget.tournament.info.id, _coaches, renames);
+                      widget.tournament.info, _coaches, renames);
 
                   _showSuccessFailToast(success);
                 };

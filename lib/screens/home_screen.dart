@@ -48,11 +48,17 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-    _authBloc = BlocProvider.of<AuthBloc>(context);
-
     _refreshState();
+
+    if (_tournyBloc.state is TournamentStateLoaded) {
+      _tournament = (_tournyBloc.state as TournamentStateLoaded).tournament;
+    }
+
+    if (_authBloc.state is AuthStateLoggedIn) {
+      _authUser = (_authBloc.state as AuthStateLoggedIn).authUser;
+    } else {
+      _authUser = AuthUser();
+    }
   }
 
   @override
@@ -66,13 +72,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _refreshState() {
+    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
+    _authBloc = BlocProvider.of<AuthBloc>(context);
+
+    fToast = FToast();
+    fToast.init(context);
+
     _tournySub = _tournyBloc.stream.listen((tournyState) {
-      if (tournyState is NewTournamentState) {
+      if (tournyState is TournamentStateLoaded) {
         ToastUtils.showSuccess(fToast, "Tournament Data Loaded");
         setState(() {
           _tournament = tournyState.tournament;
         });
-      } else {
+      } else if (tournyState is TournamentStateUninitialized) {
         setState(() {
           _tournament = Tournament.empty();
         });
@@ -81,38 +93,28 @@ class _HomePageState extends State<HomePage> {
 
     _authSub = _authBloc.stream.listen((authState) {
       if (authState is AuthStateLoggedIn) {
-        setState(() {
-          _authUser = authState.authUser;
-        });
+        if (_authUser.nafName != authState.authUser.nafName) {
+          setState(() {
+            _authUser = authState.authUser;
+          });
+        }
       } else if (authState is AuthStateLoggedOut) {
         ToastUtils.showSuccess(fToast, "Logged Out");
-        setState(() {
-          _authUser = AuthUser();
-        });
+
+        if (_authUser.nafName != null) {
+          setState(() {
+            _authUser = AuthUser();
+          });
+        }
       }
     });
-
-    if (_tournyBloc.state is NewTournamentState) {
-      _tournament = (_tournyBloc.state as NewTournamentState).tournament;
-    } else {
-      _tournament = Tournament.empty();
-    }
-
-    if (_authBloc.state is AuthStateLoggedIn) {
-      _authUser = (_authBloc.state as AuthStateLoggedIn).authUser;
-    } else {
-      _authUser = AuthUser();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    fToast = FToast();
-    fToast.init(context);
-
     _refreshState();
 
-    bool isTournamentSelected = !(_tournyBloc.state is NoTournamentState);
+    bool isTournamentSelected = (_tournyBloc.state is TournamentStateLoaded);
     bool isUserLoggedIn = _authBloc.state is AuthStateLoggedIn;
     bool shouldLogout = !isTournamentSelected && !isUserLoggedIn;
 
@@ -131,36 +133,14 @@ class _HomePageState extends State<HomePage> {
     print("Logout Pressed");
     ToastUtils.show(fToast, "Logging out");
     _authBloc.add(LogOutAuthEvent());
-    _tournyBloc.add(NoTournamentEvent());
+    _tournyBloc.add(TournamentEventUninitialized());
   }
 
   void _handleRefreshTournamentPressed() async {
     print("Refresh Tournament Pressed");
     ToastUtils.show(fToast, "Refreshing Tournament Data");
 
-    bool success = await _tournyBloc.refreshTournamentData(_tournament.info.id);
-    if (success) {
-      ToastUtils.showSuccess(fToast, "Tournament refreshed");
-    } else {
-      ToastUtils.showFailed(fToast,
-          "Automatic tournament refresh failed. Please refresh the page.");
-    }
-
-    // Tournament? refreshedTournament =
-    //     await _tournyBloc.getRefreshedTournamentData(_tournament.info.id);
-
-    // if (refreshedTournament != null) {
-    //   ToastUtils.showSuccess(fToast, "Tournament refreshed");
-    //   _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
-    //   if (mounted) {
-    //     setState(() {
-    //       _tournament = refreshedTournament;
-    //     });
-    //   }
-    // } else {
-    //   ToastUtils.showFailed(fToast,
-    //       "Automatic tournament refresh failed. Please refresh the page.");
-    // }
+    _tournyBloc.add(TournamentEventRefreshData(_tournament.info.id));
   }
 
   Widget _generateUi() {

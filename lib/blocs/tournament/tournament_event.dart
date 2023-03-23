@@ -1,7 +1,6 @@
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class TournamentEvent extends Equatable {
@@ -12,44 +11,46 @@ abstract class TournamentEvent extends Equatable {
 }
 
 /// No tournament selected
-class NoTournamentEvent extends TournamentEvent {}
+class TournamentEventUninitialized extends TournamentEvent {}
 
 /// Trigger load of tournament
-class LoadTournamentEvent extends TournamentEvent {
-  final TournamentInfo info;
+class TournamentEventFetchData extends TournamentEvent {
+  final String tournamentId;
 
-  const LoadTournamentEvent(this.info);
-
-  @override
-  List<Object> get props => [info];
+  const TournamentEventFetchData(this.tournamentId);
 
   @override
-  String toString() => 'LoadTournamentEvent';
+  List<Object> get props => [tournamentId];
+
+  @override
+  String toString() => 'TournamentEventFetchData: tId: $tournamentId';
 }
 
 /// Select tournament & refresh UI
-class SelectTournamentEvent extends TournamentEvent {
+class TournamentEventSelectedTourny extends TournamentEvent {
   final Tournament tournament;
 
-  const SelectTournamentEvent(this.tournament);
+  const TournamentEventSelectedTourny(this.tournament);
 
   @override
   List<Object> get props => [tournament];
 
   @override
-  String toString() => 'SelectTournamentEvent';
+  String toString() =>
+      'TournamentEventSelectedTourny tId: ${tournament.info.id}';
 }
 
-class RefreshTournamentEvent extends TournamentEvent {
-  final Tournament tournament;
+/// Re-fetch tournament data & refresh UI
+class TournamentEventRefreshData extends TournamentEvent {
+  final String tournamentId;
 
-  const RefreshTournamentEvent(this.tournament);
-
-  @override
-  List<Object> get props => [tournament];
+  const TournamentEventRefreshData(this.tournamentId);
 
   @override
-  String toString() => 'RefreshTournamentEvent';
+  List<Object> get props => [tournamentId];
+
+  @override
+  String toString() => 'TournamentEventRefreshData: tId: $tournamentId';
 }
 
 /// Download tournament backup file
@@ -72,6 +73,7 @@ class DownloadFile {
   String toString() => 'DownloadFile';
 }
 
+/// Upload match reports
 class UpdateMatchReportEvent {
   final Tournament tournament;
   final CoachMatchup matchup;
@@ -91,6 +93,7 @@ class UpdateMatchReportEvent {
   String toString() => 'UpdateMatchReportEvent';
 }
 
+/// Rename coach
 class UpdateCoachEvent {
   final String? oldNafName;
   final Coach newCoach;

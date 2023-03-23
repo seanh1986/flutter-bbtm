@@ -334,15 +334,17 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       case UploadState.Editing:
       case UploadState.CanConfirm:
       case UploadState.CanEdit:
-      case UploadState.Error:
         _uploadToServer();
         break;
-      // case UploadState.CanEdit:
       // case UploadState.Error:
-      //   setState(() {
-      //     _state = UploadState.Editing;
-      //   });
+      //   _uploadToServer();
       //   break;
+      case UploadState.CanEdit:
+      case UploadState.Error:
+        setState(() {
+          _state = UploadState.Editing;
+        });
+        break;
       case UploadState.UploadedConfirmed:
       // case UploadState.UploadedAwaiting:
       case UploadState.NotAuthorized:
@@ -400,6 +402,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       bool updateSuccess = await _tournyBloc.updateMatchEvent(event);
       if (updateSuccess) {
         ToastUtils.showSuccess(fToast, "Uploaded Match Report!");
+        setState(() {});
 
         // Tournament? refreshedTournament =
         //     await _tournyBloc.getRefreshedTournamentData(_tournament.info.id);

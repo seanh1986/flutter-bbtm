@@ -80,7 +80,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
     });
 
     _tournySelectSub = _tournyBloc.stream.listen((tournyState) {
-      if (tournyState is NewTournamentState) {
+      if (tournyState is TournamentStateLoaded) {
         if (_authState is AuthStateLoggedIn) {
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => HomePage()));
@@ -150,7 +150,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   }
 
   void _processTournamentSelection(TournamentInfo tournamentInfo) {
-    _tournyBloc.add(LoadTournamentEvent(tournamentInfo));
+    _tournyBloc.add(TournamentEventFetchData(tournamentInfo.id));
   }
 
   Widget _showTournamentList(BuildContext context, TournamentListLoaded state) {
