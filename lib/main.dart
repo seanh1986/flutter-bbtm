@@ -66,7 +66,7 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
 
-    _setupFirebaseMessaging();
+    // _setupFirebaseMessaging();
 
     _handleInitialUri();
   }
