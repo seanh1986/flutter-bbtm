@@ -1,6 +1,7 @@
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 
@@ -50,7 +51,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       widgets.add(specialRules);
     }
 
-    widgets.add(_scoringDetails(_tournament.info));
+    widgets.add(_getScoringPointsTiebreakerDetails(_tournament.info));
 
     return Container(
       // decoration: BoxDecoration(
@@ -142,58 +143,188 @@ class _OverviewScreenState extends State<OverviewScreen> {
     ]);
   }
 
-  Widget _scoringDetails(TournamentInfo t) {
+  Widget _getScoringPointsTiebreakerDetails(TournamentInfo t) {
+    bool useSquads = t.squadDetails.type == SquadUsage.SQUADS;
+
+    String individualScoringDetailsTitle =
+        useSquads ? "Individual Scoring Details" : "Scoring Details";
+
+    String individualTiebreakersTitle =
+        useSquads ? "Individual Tiebreakers" : "Tiebreakers";
+
+    List<Widget> views = [
+      _getWinTieLossWidget(t.scoringDetails, individualScoringDetailsTitle),
+      Text(""),
+      _getIndividualTieBreakers(individualTiebreakersTitle, t.scoringDetails),
+    ];
+
+    List<Widget> squadDetailsWidgets = _generateSquadDetails(t.squadDetails);
+
+    if (squadDetailsWidgets.isNotEmpty) {
+      views.add(Text(""));
+      views.addAll(squadDetailsWidgets);
+    }
+
+    views.addAll([
+      Text(""),
+      _getCasultyDetailsWidget(t.casualtyDetails),
+    ]);
+
+    return _generateCardWidget(views);
+  }
+
+  Widget _getWinTieLossWidget(ScoringDetails scoringDetails, String? label) {
+    return _getUnderlinedEntry(
+        label != null ? label : "W/T/L",
+        scoringDetails.winPts.toString() +
+            "/" +
+            scoringDetails.tiePts.toString() +
+            "/" +
+            scoringDetails.lossPts.toString(),
+        false);
+  }
+
+  Widget _getIndividualTieBreakers(
+      String label, IndividualScoringDetails scoringDetails) {
+    StringBuffer sb = StringBuffer();
+    for (int i = 0; i < scoringDetails.tieBreakers.length; i++) {
+      String tieBreakerName =
+          EnumToString.convertToString(scoringDetails.tieBreakers[i]);
+      sb.write(tieBreakerName);
+      if (i + 1 < scoringDetails.tieBreakers.length) {
+        sb.write("\n");
+      }
+    }
+    return _getUnderlinedEntry(label, sb.toString(), true);
+  }
+
+  Widget _getCasultyDetailsWidget(CasualtyDetails casualtyDetails) {
     String countAsCasualtyTitle = "Casualties included";
 
     List<String> casualtyTypes = [];
 
-    if (t.casualtyDetails.spp) {
+    if (casualtyDetails.spp) {
       casualtyTypes.add("SPP");
     }
-    if (t.casualtyDetails.foul) {
+    if (casualtyDetails.foul) {
       casualtyTypes.add("fouls");
     }
-    if (t.casualtyDetails.surf) {
+    if (casualtyDetails.surf) {
       casualtyTypes.add("surfs");
     }
-    if (t.casualtyDetails.dodge) {
+    if (casualtyDetails.dodge) {
       casualtyTypes.add("failed dodges");
     }
 
     String countAsCasualtyDetails = casualtyTypes.join(", ");
 
-    return _generateCardWidget([
-      Text(
-        "Scoring Details",
-        style: TextStyle(fontSize: 16, decoration: TextDecoration.underline),
-      ),
+    return Row(
+      children: [
+        Text(
+          countAsCasualtyTitle,
+          style: TextStyle(decoration: TextDecoration.underline),
+        ),
+        Text(": "),
+        Text(countAsCasualtyDetails)
+      ],
+    );
+  }
+
+  List<Widget> _generateSquadDetails(SquadDetails squadDetails) {
+    if (squadDetails.type == SquadUsage.NO_SQUADS ||
+        squadDetails.type == SquadUsage.INDIVIDUAL_USE_SQUADS_FOR_INIT) {
+      return [];
+    }
+
+    List<Widget> views = [
+      _getSquadNumMembers(squadDetails),
       Text(""),
-      Row(
-        children: [
-          Text(
-            "W/T/L",
-            style: TextStyle(decoration: TextDecoration.underline),
-          ),
-          Text(": "),
-          Text(t.scoringDetails.winPts.toString() +
-              "/" +
-              t.scoringDetails.tiePts.toString() +
-              "/" +
-              t.scoringDetails.lossPts.toString())
-        ],
-      ),
+      _getSquadScoringType(squadDetails.scoringType),
+    ];
+
+    if (squadDetails.scoringType == SquadScoring.SQUAD_RESULT_W_T_L) {
+      views.addAll([
+        Text(""),
+        _getWinTieLossWidget(squadDetails.scoringDetails, "Squad W/T/L")
+      ]);
+    }
+
+    views.addAll([
       Text(""),
-      Row(
-        children: [
-          Text(
-            countAsCasualtyTitle,
-            style: TextStyle(decoration: TextDecoration.underline),
-          ),
-          Text(": "),
-          Text(countAsCasualtyDetails)
-        ],
-      )
+      _getSquadTieBreakers(squadDetails),
     ]);
+
+    return views;
+  }
+
+  Widget _getSquadScoringType(SquadScoring scoring) {
+    String scoringType = "";
+
+    switch (scoring) {
+      case SquadScoring.CUMULATIVE_PLAYER_SCORES:
+        scoringType = "Cumulative Player Scores";
+        break;
+      case SquadScoring.SQUAD_RESULT_W_T_L:
+        scoringType = "Squad Record";
+        break;
+    }
+
+    return _getUnderlinedEntry("Squad Scoring Type", scoringType, false);
+  }
+
+  Widget _getSquadNumMembers(SquadDetails squadDetails) {
+    if (squadDetails.requiredNumCoachesPerSquad ==
+        squadDetails.maxNumCoachesPerSquad) {
+      return _getUnderlinedEntry("Num Coaches / Squad",
+          squadDetails.requiredNumCoachesPerSquad.toString(), false);
+    } else {
+      return Column(children: [
+        _getUnderlinedEntry("Num Active Coaches / Squad",
+            squadDetails.requiredNumCoachesPerSquad.toString(), false),
+        Text(""),
+        _getUnderlinedEntry("Max Coaches / Squad",
+            squadDetails.maxNumCoachesPerSquad.toString(), false),
+      ]);
+    }
+  }
+
+  Widget _getSquadTieBreakers(SquadDetails squadDetails) {
+    StringBuffer sb = StringBuffer();
+    for (int i = 0; i < squadDetails.squadTieBreakers.length; i++) {
+      String tieBreakerName =
+          EnumToString.convertToString(squadDetails.squadTieBreakers[i]);
+      sb.write(tieBreakerName);
+      if (i + 1 < squadDetails.squadTieBreakers.length) {
+        sb.write("\n");
+      }
+    }
+    return _getUnderlinedEntry("Squad Tiebreakers", sb.toString(), true);
+  }
+
+  Widget _getUnderlinedEntry(String label, String value, bool valueOnNewLine) {
+    if (valueOnNewLine) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Text(
+            label,
+            style: TextStyle(decoration: TextDecoration.underline),
+          ),
+          Text(": ")
+        ]),
+        Text(value)
+      ]);
+    } else {
+      return Row(
+        children: [
+          Text(
+            label,
+            style: TextStyle(decoration: TextDecoration.underline),
+          ),
+          Text(": "),
+          Text(value)
+        ],
+      );
+    }
   }
 
   Widget _generateCardWidget(List<Widget> children) {
