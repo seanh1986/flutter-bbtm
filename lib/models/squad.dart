@@ -100,6 +100,20 @@ class Squad extends IMatchupParticipant {
     return _coaches;
   }
 
+  String getCoachesLabel() {
+    StringBuffer sb = StringBuffer();
+
+    for (int i = 0; i < _coaches.length; i++) {
+      sb.write(_coaches[i]);
+
+      if (i + 1 < _coaches.length) {
+        sb.write("\n");
+      }
+    }
+
+    return sb.toString();
+  }
+
   void overwriteRecord(Tournament t) {
     _wins = 0;
     _ties = 0;

@@ -1,6 +1,7 @@
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/coach.dart';
 
@@ -154,21 +155,21 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
       List<DataCell> cells = [];
 
-      cells.add(DataCell(Text(rank.toString(), style: textStyle)));
+      cells.add(_createDataCell(rank.toString(), textStyle));
 
-      cells.add(DataCell(Text('${coach.nafName}', style: textStyle)));
+      cells.add(_createDataCell(coach.nafName, textStyle));
 
       if (widget.tournament.useSquads()) {
-        cells.add(DataCell(Text('${coach.squadName}', style: textStyle)));
+        cells.add(_createDataCell(coach.squadName, textStyle));
       }
 
-      cells.add(DataCell(Text('${coach.raceName()}', style: textStyle)));
+      cells.add(_createDataCell(coach.raceName(), textStyle));
 
       widget.fields.forEach((f) {
         String name = _getColumnName(f);
 
         if (name.isNotEmpty) {
-          cells.add(DataCell(_getCellValue(coach, f, textStyle)));
+          cells.add(_createDataCell(_getCellValue(coach, f), textStyle));
         }
       });
 
@@ -194,7 +195,13 @@ class _RankingCoachPage extends State<RankingCoachPage> {
           children: <Widget>[
             Expanded(
               child: Container(
-                child: dataBody(),
+                child: ScrollConfiguration(
+                    behavior:
+                        ScrollConfiguration.of(context).copyWith(dragDevices: {
+                      PointerDeviceKind.touch,
+                      PointerDeviceKind.mouse,
+                    }),
+                    child: dataBody()),
               ),
             ),
             Row(
@@ -271,18 +278,16 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     }
   }
 
-  Text _getCellValue(Coach c, CoachRankingFields f, TextStyle? textStyle) {
+  String _getCellValue(Coach c, CoachRankingFields f) {
     switch (f) {
       case CoachRankingFields.W_T_L:
-        return Text(
-            c.wins().toString() +
-                "/" +
-                c.ties().toString() +
-                "/" +
-                c.losses().toString(),
-            style: textStyle);
+        return c.wins().toString() +
+            "/" +
+            c.ties().toString() +
+            "/" +
+            c.losses().toString();
       default:
-        return Text(_getViewValue(c, f).toString(), style: textStyle);
+        return _getViewValue(c, f).toString();
     }
   }
 
@@ -326,5 +331,11 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       default:
         return 0.0;
     }
+  }
+
+  DataCell _createDataCell(String text, TextStyle? textStyle) {
+    return DataCell(ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 200),
+        child: Text(text, overflow: TextOverflow.ellipsis, style: textStyle)));
   }
 }

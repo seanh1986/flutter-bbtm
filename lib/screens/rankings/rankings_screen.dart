@@ -164,7 +164,8 @@ class _RankingsPage extends State<RankingsPage> {
             ),
             body: TabBarView(
               children: views,
-              physics: AlwaysScrollableScrollPhysics(),
+              // physics: AlwaysScrollableScrollPhysics(),
+              physics: NeverScrollableScrollPhysics(),
             )));
   }
 
@@ -191,6 +192,7 @@ class _RankingsPage extends State<RankingsPage> {
               ),
             ),
             body: TabBarView(
+              physics: NeverScrollableScrollPhysics(),
               children: <Widget>[
                 RankingSquadsPage(
                     tournament: _tournament,

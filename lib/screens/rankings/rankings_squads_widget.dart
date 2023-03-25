@@ -1,5 +1,6 @@
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/squad.dart';
 // import 'package:flutter/paginated_data_table.dart';
@@ -138,18 +139,17 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
       List<DataCell> cells = [];
 
-      cells.add(DataCell(Text(rank.toString(), style: textStyle)));
+      cells.add(_createDataCell(rank.toString(), textStyle));
 
-      cells.add(DataCell(Text('${squad.name()}', style: textStyle)));
+      cells.add(_createDataCell(squad.name(), textStyle));
 
-      cells.add(
-          DataCell(Text('${squad.getCoaches().toString()}', style: textStyle)));
+      cells.add(_createDataCell(squad.getCoachesLabel(), textStyle));
 
       widget.fields.forEach((f) {
         String name = _getColumnName(f);
 
         if (name.isNotEmpty) {
-          cells.add(DataCell(_getCellValue(squad, f, textStyle)));
+          cells.add(_createDataCell(_getCellValue(squad, f), textStyle));
         }
       });
 
@@ -159,6 +159,12 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     });
 
     return rows;
+  }
+
+  DataCell _createDataCell(String text, TextStyle? textStyle) {
+    return DataCell(ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 200),
+        child: Text(text, overflow: TextOverflow.ellipsis, style: textStyle)));
   }
 
   @override
@@ -175,7 +181,13 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
           children: <Widget>[
             Expanded(
               child: Container(
-                child: dataBody(),
+                child: ScrollConfiguration(
+                    behavior:
+                        ScrollConfiguration.of(context).copyWith(dragDevices: {
+                      PointerDeviceKind.touch,
+                      PointerDeviceKind.mouse,
+                    }),
+                    child: dataBody()),
               ),
             ),
             Row(
@@ -198,25 +210,24 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
   SingleChildScrollView dataBody() {
     return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: ConstrainedBox(
-        constraints:
-            BoxConstraints.expand(width: MediaQuery.of(context).size.width),
-        child: DataTable(
-          columns: _getColumns(),
-          rows: _getRows(),
-          sortAscending: _sortAscending,
-          sortColumnIndex: _sortColumnIndex,
-          headingRowColor: MaterialStateProperty.resolveWith<Color?>(
-              (Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
-              return Colors.greenAccent.withOpacity(0.75);
-            }
-            return Colors.greenAccent.withOpacity(0.6);
-          }),
-        ),
-      ),
-    );
+        scrollDirection: Axis.vertical,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            columnSpacing: 30,
+            columns: _getColumns(),
+            rows: _getRows(),
+            sortAscending: _sortAscending,
+            sortColumnIndex: _sortColumnIndex,
+            headingRowColor: MaterialStateProperty.resolveWith<Color?>(
+                (Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return Colors.greenAccent.withOpacity(0.75);
+              }
+              return Colors.greenAccent.withOpacity(0.6);
+            }),
+          ),
+        ));
   }
 
   String _getColumnName(SquadRankingFields f) {
@@ -234,7 +245,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
       case SquadRankingFields.W_Percent:
         return "%";
       case SquadRankingFields.SumIndividualScore:
-        return "SumCoachPts";
+        return "CoachPts";
       case SquadRankingFields.SumTd:
         return "Td+";
       case SquadRankingFields.SumCas:
@@ -254,18 +265,16 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     }
   }
 
-  Text _getCellValue(Squad s, SquadRankingFields f, TextStyle? textStyle) {
+  String _getCellValue(Squad s, SquadRankingFields f) {
     switch (f) {
       case SquadRankingFields.W_T_L:
-        return Text(
-            s.wins().toString() +
-                "/" +
-                s.ties().toString() +
-                "/" +
-                s.losses().toString(),
-            style: textStyle);
+        return s.wins().toString() +
+            "/" +
+            s.ties().toString() +
+            "/" +
+            s.losses().toString();
       default:
-        return Text(_getViewValue(s, f).toString(), style: textStyle);
+        return _getViewValue(s, f).toString();
     }
   }
 
