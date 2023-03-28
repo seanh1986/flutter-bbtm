@@ -245,6 +245,9 @@ class Squad extends IMatchupParticipant {
         case SquadTieBreakers.SquadWins:
           _tieBreakers.add(_wins.toDouble());
           break;
+        case SquadTieBreakers.SquadTies:
+          _tieBreakers.add(_ties.toDouble());
+          break;
         case SquadTieBreakers.SumSquadMemberScore:
           _tieBreakers.add(_coaches.map((nafName) {
             Coach? c = t.getCoach(nafName);
@@ -252,19 +255,30 @@ class Squad extends IMatchupParticipant {
           }).sum);
           break;
         case SquadTieBreakers.SumTdDiff:
-          _tieBreakers.add(_coaches.map((nafName) {
-            Coach? c = t.getCoach(nafName);
-            return c != null ? (c.tds - c.oppTds).toDouble() : 0.0;
-          }).sum);
+          _tieBreakers.add(_sumTdDiff(t).toDouble());
           break;
         case SquadTieBreakers.SumCasDiff:
-          _tieBreakers.add(_coaches.map((nafName) {
-            Coach? c = t.getCoach(nafName);
-            return c != null ? (c.cas - c.oppCas).toDouble() : 0.0;
-          }).sum);
+          _tieBreakers.add(_sumCasDiff(t).toDouble());
+          break;
+        case SquadTieBreakers.SumTdDiffPlusCasDiff:
+          _tieBreakers.add((_sumTdDiff(t) + _sumCasDiff(t)).toDouble());
           break;
       }
     });
+  }
+
+  int _sumTdDiff(Tournament t) {
+    return _coaches.map((nafName) {
+      Coach? c = t.getCoach(nafName);
+      return c != null ? c.tds - c.oppTds : 0;
+    }).sum;
+  }
+
+  int _sumCasDiff(Tournament t) {
+    return _coaches.map((nafName) {
+      Coach? c = t.getCoach(nafName);
+      return c != null ? c.cas - c.oppCas : 0;
+    }).sum;
   }
 
   double sumIndividualScores(Tournament t) {

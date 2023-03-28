@@ -204,15 +204,27 @@ class Coach extends IMatchupParticipant {
         case TieBreaker.Cas:
           _tieBreakers.add(cas.toDouble());
           break;
+        case TieBreaker.SumTdAndCas:
+          _tieBreakers.add(tds.toDouble() + cas.toDouble());
+          break;
         case TieBreaker.TdDiff:
-          _tieBreakers.add((tds - oppTds).toDouble());
+          _tieBreakers.add(deltaTd().toDouble());
           break;
         case TieBreaker.CasDiff:
-          _tieBreakers.add((cas - oppCas).toDouble());
+          _tieBreakers.add(deltaCas().toDouble());
+          break;
+        case TieBreaker.SumTdDiffAndCasDiff:
+          _tieBreakers.add((deltaTd() + deltaCas()).toDouble());
           break;
         case TieBreaker.SquadScore:
           Squad? squad = t.getCoachSquad(nafName);
           _tieBreakers.add(squad != null ? squad.points() : 0.0);
+          break;
+        case TieBreaker.NumWins:
+          _tieBreakers.add(wins().toDouble());
+          break;
+        case TieBreaker.NumTies:
+          _tieBreakers.add(ties().toDouble());
           break;
       }
     });

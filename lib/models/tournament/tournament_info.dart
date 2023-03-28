@@ -159,17 +159,23 @@ enum TieBreaker {
   OppScore,
   Td,
   Cas,
+  SumTdAndCas,
   TdDiff,
   CasDiff,
+  SumTdDiffAndCasDiff,
   SquadScore,
+  NumWins,
+  NumTies,
 }
 
 enum SquadTieBreakers {
   SquadWins,
+  SquadTies,
   SumSquadMemberScore, // Across all squad members
   OppScore,
   SumTdDiff, // Across all squad members
   SumCasDiff, // Across all squad members
+  SumTdDiffPlusCasDiff, // Across all squad members
 }
 
 class ScoringDetails {
