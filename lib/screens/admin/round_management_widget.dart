@@ -153,8 +153,6 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     return ExpansionTile(
         title: Text("Round " + coachRound.round().toString()),
         children: [
-          roundDataTable,
-          SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -185,6 +183,8 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
               )
             ],
           ),
+          SizedBox(height: 10),
+          roundDataTable,
           SizedBox(height: 10),
         ]);
   }
