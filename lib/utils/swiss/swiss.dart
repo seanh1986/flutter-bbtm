@@ -158,6 +158,7 @@ class SwissPairings {
       IMatchupParticipant player_2 = notYetPaired[idx_2];
 
       // If necessary, verify not same squad
+      // Else, find a new match for Player1
       if (avoidWithinSquads && player_1 is Coach && player_2 is Coach) {
         Squad? squad_1 = tournament.getCoachSquad(player_1.nafName);
         Squad? squad_2 = tournament.getCoachSquad(player_2.nafName);
@@ -165,17 +166,17 @@ class SwissPairings {
         if (squad_1 != null &&
             squad_2 != null &&
             squad_1.name() == squad_2.name()) {
-          // Add back player_1 and try again
-          notYetPaired.add(player_1);
-
           Map<String, List<IMatchupParticipant>> grpBySquad = notYetPaired
+              .where(
+                  (element) => (element as Coach).squadName != squad_1.name())
               .groupListsBy((element) => (element as Coach).squadName);
-          if (grpBySquad.length == 1) {
+
+          if (grpBySquad.length == 0) {
             // For now, just retry... Bad quick fix...
             return _firstRoundRandom(matchSquads, avoidWithinSquads);
+          } else {
+            idx_2 = notYetPaired.indexOf(grpBySquad.entries.first.value.first);
           }
-
-          continue;
         }
       }
 
