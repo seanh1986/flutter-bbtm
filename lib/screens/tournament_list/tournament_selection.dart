@@ -6,6 +6,7 @@ import 'package:bbnaf/blocs/tournament_list/tournament_list.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/screens/home_screen.dart';
 import 'package:bbnaf/screens/login/login_screen.dart';
+import 'package:bbnaf/screens/login/login_screen_organizer.dart';
 import 'package:bbnaf/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,6 +29,7 @@ enum DateType {
   Past_Tournaments,
   Recent_or_Upcoming_Tournaments,
   Future_Tournaments,
+  // Create_Tournament,
 }
 
 class _TournamentSelectionPage extends State<TournamentSelectionPage> {
@@ -189,6 +191,19 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
       toggleWidgets.add(SizedBox(width: 10));
     });
 
+    // // Create tournament
+    // toggleWidgets.add(SizedBox(width: 10));
+    // toggleWidgets.add(ElevatedButton(
+    //   style: ElevatedButton.styleFrom(
+    //     backgroundColor: Theme.of(context).primaryColor,
+    //     textStyle: TextStyle(color: Colors.white),
+    //   ),
+    //   child: Text("Create Tournament"),
+    //   onPressed: () {
+    //     _processCreateTournament();
+    //   },
+    // ));
+
     return Container(
         height: 60,
         alignment: Alignment.center,
@@ -223,6 +238,8 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
         return _createTournamentListView(_pastTournaments);
       case DateType.Future_Tournaments:
         return _createTournamentListView(_futureTournaments);
+      // case DateType.Create_Tournament:
+      //   return _createNewTournament();
       case DateType.Recent_or_Upcoming_Tournaments:
       default:
         return _createTournamentListView(_recentAndUpcomingTournaments);
@@ -286,5 +303,14 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
                     ],
                   ),
                 ))));
+  }
+
+  Widget _createNewTournament() {
+    if (_authState is AuthStateLoggedIn &&
+        (_authState as AuthStateLoggedIn).authUser.user != null) {
+      return Text("TODO");
+    } else {
+      return LoginOrganizerPage();
+    }
   }
 }

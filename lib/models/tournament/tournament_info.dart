@@ -43,12 +43,18 @@ class TournamentInfo {
 
     final String? tStart = json['date_time_start'] as String?;
     if (tStart != null) {
-      this.dateTimeStart = DateTime.parse(tStart);
+      try {
+        this.dateTimeStart = DateTime.parse(tStart);
+      } catch (_) {
+        //ignore
+      }
     }
 
     final String? tEnd = json['date_time_end'] as String?;
     if (tEnd != null) {
-      this.dateTimeEnd = DateTime.parse(tEnd);
+      try {
+        this.dateTimeEnd = DateTime.parse(tEnd);
+      } catch (_) {}
     }
 
     final tOrganizers = json['organizers'] as List<dynamic>?;

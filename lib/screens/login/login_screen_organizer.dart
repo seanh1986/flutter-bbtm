@@ -16,9 +16,9 @@ import 'package:flutter_login/flutter_login.dart';
 import 'login_screen.dart';
 
 class LoginOrganizerPage extends StatefulWidget {
-  final TournamentInfo tournamentInfo;
+  final TournamentInfo? tournamentInfo;
 
-  LoginOrganizerPage(this.tournamentInfo);
+  LoginOrganizerPage({this.tournamentInfo});
 
   @override
   _LoginOrganizerPage createState() => _LoginOrganizerPage();

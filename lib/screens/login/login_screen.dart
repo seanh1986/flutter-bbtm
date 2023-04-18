@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'login_screen_organizer.dart';
 
 class LoginPage extends StatefulWidget {
-  final TournamentInfo tournamentInfo;
+  final TournamentInfo? tournamentInfo;
 
   LoginPage(this.tournamentInfo);
 
@@ -16,7 +16,7 @@ class LoginPage extends StatefulWidget {
   }
 
   static dynamic getLogo(
-      TournamentInfo tournamentInfo, TournamentRepository tournyRepo) {
+      TournamentInfo? tournamentInfo, TournamentRepository tournyRepo) {
     //if (tournamentInfo.logoFileName.isEmpty) {
     return AssetImage('assets/images/logos/amorical_logo.png');
     //}
@@ -57,6 +57,14 @@ class _LoginPage extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.tournamentInfo != null) {
+      return _tournamentLogin(widget.tournamentInfo!);
+    } else {
+      return _createTournament();
+    }
+  }
+
+  Widget _tournamentLogin(TournamentInfo tournamentInfo) {
     return Stack(
       children: <Widget>[
         Scaffold(
@@ -90,7 +98,7 @@ class _LoginPage extends State<LoginPage> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => LoginOrganizerPage(
-                                        widget.tournamentInfo)));
+                                        tournamentInfo: tournamentInfo)));
                           },
                         )),
                     SizedBox(height: 20),
@@ -118,5 +126,9 @@ class _LoginPage extends State<LoginPage> {
         ))
       ],
     );
+  }
+
+  Widget _createTournament() {
+    return LoginOrganizerPage();
   }
 }

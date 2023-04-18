@@ -29,9 +29,18 @@ class FirebaseTournamentRepository extends TournamentRepository {
   Stream<List<TournamentInfo>> getTournamentInfos() {
     print("FirebaseTournamentRepository: getTournamentInfos");
     return _tournyRef.snapshots().map((snapshot) {
-      return snapshot.docs
-          .map((doc) => TournamentInfo.fromJson(doc.id, doc.data()))
-          .toList();
+      List<TournamentInfo> tournies = [];
+
+      snapshot.docs.forEach((doc) {
+        try {
+          TournamentInfo info = TournamentInfo.fromJson(doc.id, doc.data());
+          tournies.add(info);
+        } catch (_) {
+          print("failed to parse tournamentId: " + doc.id.toString());
+        }
+      });
+
+      return tournies;
     });
   }
 
