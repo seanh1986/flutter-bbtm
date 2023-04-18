@@ -30,6 +30,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   late String _location;
   late List<OrganizerInfo> _organizers = [];
   late IndividualScoringDetails _scoringDetails;
+
   late CasualtyDetails _casualtyDetails;
   late SquadDetails _squadDetails;
 
@@ -271,6 +272,56 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   //     widget.tournament.info.dateTimeStart = arg.value;
   //     widget.tournament.info.dateTimeEnd = arg.value;
   //   }
+  // }
+
+  Widget _createIndividualScoringDetails(
+      String title, IndividualScoringDetails details) {
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      _createScoringDetails(title, details),
+      SizedBox(height: 10),
+    ]);
+  }
+
+  // Widget _createIndividualTieBreakers(
+  //     String title, IndividualScoringDetails details) {
+  //   List<String> allTiebreakers = EnumToString.toList(TieBreaker.values);
+
+  //   List<DropdownMenuItem<String>> squadUsageTypesDropDown = squadUsageTypes
+  //       .map((String r) => DropdownMenuItem<String>(value: r, child: Text(r)))
+  //       .toList();
+
+  //   return Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //       children: <Widget>[
+  //         SizedBox(width: 10.0),
+  //         Text(title),
+  //         SizedBox(width: 10.0),
+  //         Expanded(
+  //           child: Column(children: [],),
+  //         )
+  //       ]);
+
+  //   ReorderableListView(
+  //     padding: const EdgeInsets.symmetric(horizontal: 40),
+  //     proxyDecorator: proxyDecorator,
+  //     children: <Widget>[
+  //       for (int index = 0; index < _items.length; index += 1)
+  //         ListTile(
+  //           key: Key('$index'),
+  //           tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
+  //           title: Text('Item ${_items[index]}'),
+  //         ),
+  //     ],
+  //     onReorder: (int oldIndex, int newIndex) {
+  //       setState(() {
+  //         if (oldIndex < newIndex) {
+  //           newIndex -= 1;
+  //         }
+  //         final String item = _items.removeAt(oldIndex);
+  //         _items.insert(newIndex, item);
+  //       });
+  //     },
+  //   );
   // }
 
   Widget _createScoringDetails(String title, ScoringDetails details) {
