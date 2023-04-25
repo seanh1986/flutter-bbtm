@@ -1,3 +1,4 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
@@ -125,10 +126,11 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
         refreshState: widget.refreshState);
 
     return Container(
-        alignment: FractionalOffset.center, child: _coachMatchupWidget());
+        alignment: FractionalOffset.center,
+        child: _coachMatchupWidget(context));
   }
 
-  Widget _coachMatchupWidget() {
+  Widget _coachMatchupWidget(BuildContext context) {
     Widget rowItemWidget = Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
@@ -137,7 +139,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 1.0, vertical: 10.0),
                   child: homeReportWidget)),
-          _getVsAndTableWidget(),
+          _getVsAndTableWidget(context),
           Expanded(
               child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -292,23 +294,35 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     return bestSportWidget;
   }
 
-  Widget _getVsAndTableWidget() {
+  Widget _getVsAndTableWidget(BuildContext context) {
     List<Widget> tableVsDetails = [];
 
     if (!_hideItemUploadBtn()) {
+      Widget? uploadIcon = _itemUploadIcon();
+      Widget? statusIcon = _itemStatusIcon();
+
+      List<Widget> widgets = [];
+
+      if (statusIcon != null) {
+        widgets.add(_createButton(
+            statusIcon,
+            () => {
+                  if (!_hideItemUploadBtn()) {_showStatusDialog()}
+                }));
+        widgets.add(SizedBox(height: 10));
+      }
+
+      if (uploadIcon != null) {
+        widgets.add(_createButton(
+            uploadIcon,
+            () => {
+                  if (!_hideItemUploadBtn()) {_checkIfUploadToServer(context)}
+                }));
+      }
+
       tableVsDetails.add(Container(
           child: Wrap(
-        children: [
-          RawMaterialButton(
-            shape: CircleBorder(),
-            fillColor: Theme.of(context).primaryColorLight,
-            elevation: 0.0,
-            child: _itemUploadStatus(),
-            onPressed: () => {
-              if (!_hideItemUploadBtn()) {_handleUploadOrEditPressEvent()}
-            },
-          )
-        ],
+        children: widgets,
       )));
     } else {
       tableVsDetails
@@ -329,27 +343,133 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
         ));
   }
 
-  void _handleUploadOrEditPressEvent() {
-    switch (_state) {
-      case UploadState.Editing:
-      case UploadState.CanConfirm:
-      case UploadState.CanEdit:
-        _uploadToServer();
-        break;
-      // case UploadState.Error:
-      //   _uploadToServer();
-      //   break;
-      case UploadState.CanEdit:
-      case UploadState.Error:
-        setState(() {
-          _state = UploadState.Editing;
-        });
-        break;
-      case UploadState.UploadedConfirmed:
-      // case UploadState.UploadedAwaiting:
-      case UploadState.NotAuthorized:
-      default:
-        return;
+  RawMaterialButton _createButton(Widget iconWidget, VoidCallback? onPressed) {
+    return RawMaterialButton(
+      shape: CircleBorder(),
+      fillColor: Theme.of(context).primaryColorLight,
+      elevation: 0.0,
+      child: iconWidget,
+      onPressed: () => {
+        if (onPressed != null) {onPressed()}
+      },
+    );
+  }
+
+  Future<void> _showStatusDialog() async {
+    String homeVsAway = _matchup.homeNafName + " vs. " + _matchup.awayNafName;
+
+    ReportedMatchResult homeResult = _matchup.homeReportedResults;
+    ReportedMatchResult awayResult = _matchup.awayReportedResults;
+
+    Widget homeTds = _getReportedResultItemWidget(
+        "Home Tds",
+        homeResult.reported ? homeResult.homeTds : null,
+        awayResult.reported ? awayResult.homeTds : null);
+
+    Widget awayTds = _getReportedResultItemWidget(
+        "Away Tds",
+        homeResult.reported ? homeResult.awayTds : null,
+        awayResult.reported ? awayResult.awayTds : null);
+
+    Widget homeCas = _getReportedResultItemWidget(
+        "Home Cas",
+        homeResult.reported ? homeResult.homeCas : null,
+        awayResult.reported ? awayResult.homeCas : null);
+
+    Widget awayCas = _getReportedResultItemWidget(
+        "Away Cas",
+        homeResult.reported ? homeResult.awayCas : null,
+        awayResult.reported ? awayResult.awayCas : null);
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            homeVsAway,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                homeTds,
+                awayTds,
+                SizedBox(height: 10),
+                homeCas,
+                awayCas,
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Dismiss'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _getReportedResultItemWidget(
+      String resultItem, int? homeReportedValue, int? awayReportedValue) {
+    List<Widget> children = [
+      Text(resultItem,
+          style: TextStyle(
+            decoration: TextDecoration.underline,
+          )),
+      Text(": "),
+      SizedBox(width: 10)
+    ];
+
+    if (homeReportedValue != null && awayReportedValue != null) {
+      if (homeReportedValue == awayReportedValue) {
+        children.add(Text(homeReportedValue.toString(),
+            style: TextStyle(color: Colors.green)));
+      } else {
+        children.add(Text(
+            homeReportedValue.toString() + " / " + awayReportedValue.toString(),
+            style: TextStyle(color: Colors.red)));
+      }
+    } else if (homeReportedValue == null && awayReportedValue == null) {
+      children.add(Text("? / ?", style: TextStyle(color: Colors.orange)));
+    } else if (homeReportedValue != null) {
+      children.add(Text(homeReportedValue.toString() + " / ?",
+          style: TextStyle(color: Colors.orange)));
+    } else if (awayReportedValue != null) {
+      children.add(Text("? / " + awayReportedValue.toString(),
+          style: TextStyle(color: Colors.orange)));
+    }
+
+    return Row(children: children);
+  }
+
+  void _checkIfUploadToServer(BuildContext context) async {
+    int homeTds = homeReportWidget.getTds();
+    int homeCas = homeReportWidget.getCas();
+
+    int awayTds = awayReportWidget.getTds();
+    int awayCas = awayReportWidget.getCas();
+
+    StringBuffer sb = StringBuffer();
+    sb.writeln("home: " + _matchup.homeNafName);
+    sb.writeln("away: " + _matchup.awayNafName);
+    sb.writeln("");
+    sb.writeln("homeTds: " + homeTds.toString());
+    sb.writeln("awayTds: " + awayTds.toString());
+    sb.writeln("");
+    sb.writeln("homeCas: " + homeCas.toString());
+    sb.writeln("awayCas: " + awayCas.toString());
+
+    String msg = sb.toString();
+
+    OkCancelResult result =
+        await showOkCancelAlertDialog(context: context, message: msg);
+    if (result == OkCancelResult.ok) {
+      _uploadToServer();
     }
   }
 
@@ -432,32 +552,24 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     // });
   }
 
-  Widget? _itemUploadStatus() {
+  Widget? _itemUploadIcon() {
+    if (_state == UploadState.NotAuthorized) {
+      return Icon(
+        Icons.question_mark,
+        color: Colors.transparent,
+        size: uploadIconSize,
+      );
+    } else {
+      return Icon(
+        Icons.cloud_upload_rounded,
+        color: Colors.white,
+        size: uploadIconSize,
+      );
+    }
+  }
+
+  Widget? _itemStatusIcon() {
     switch (_state) {
-      case UploadState.NotAuthorized:
-        return Icon(
-          Icons.question_mark,
-          color: Colors.transparent,
-          size: uploadIconSize,
-        );
-      case UploadState.Editing:
-        return Icon(
-          Icons.cloud_upload_rounded,
-          color: Colors.white,
-          size: uploadIconSize,
-        );
-      // case UploadState.UploadedAwaiting:
-      //   return Icon(
-      //     Icons.query_builder,
-      //     color: Colors.orange,
-      //     size: uploadIconSize,
-      //   );
-      case UploadState.CanEdit:
-        return Icon(
-          Icons.create_outlined,
-          color: Colors.orange,
-          size: uploadIconSize,
-        );
       case UploadState.CanConfirm:
         return Icon(
           Icons.done,
@@ -471,24 +583,12 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           size: uploadIconSize,
         );
       case UploadState.Error:
+        return Icon(Icons.report, color: Colors.red, size: uploadIconSize);
+      case UploadState.NotAuthorized:
+      case UploadState.Editing:
+      case UploadState.CanEdit:
       case UploadState.NotYetSet:
-        double shift = 0.5 * uploadIconSize;
-
-        return Container(
-            width: uploadIconSize + shift,
-            height: uploadIconSize + shift,
-            child: Stack(children: [
-              Icon(
-                Icons.cloud_upload_rounded,
-                color: Colors.white,
-                size: uploadIconSize,
-              ),
-              Positioned(
-                  left: shift,
-                  top: shift,
-                  child: Icon(Icons.report,
-                      color: Colors.red, size: errUploadIconSize))
-            ]));
+        return null;
     }
   }
 
