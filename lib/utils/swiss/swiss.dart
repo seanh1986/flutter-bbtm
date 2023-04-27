@@ -119,10 +119,11 @@ class SwissPairings {
   RoundMatching? _getFirstRoundMatching(
       bool matchSquads, bool avoidSquadsForInit) {
     // TODO: Handle different types
-    return _firstRoundRandom(matchSquads, avoidSquadsForInit);
+    return _firstRoundRandom(matchSquads, avoidSquadsForInit, 0);
   }
 
-  SwissRound? _firstRoundRandom(bool matchSquads, bool avoidWithinSquads) {
+  SwissRound? _firstRoundRandom(
+      bool matchSquads, bool avoidWithinSquads, int numTries) {
     List<IMatchupParticipant> notYetPaired = [];
 
     if (matchSquads) {
@@ -150,35 +151,45 @@ class SwissPairings {
 
       notYetPaired.removeAt(idx_1);
 
-      // Last player will be when length is = 1
-      int idx_2 = notYetPaired.length > 1
-          ? _random.nextInt(notYetPaired.length - 1)
-          : 0;
+      int idx_2 = -1;
+
+      if (avoidWithinSquads && player_1 is Coach && numTries < 20) {
+        Squad? squad_1 = tournament.getCoachSquad(player_1.nafName);
+
+        try {
+          Map<String, List<IMatchupParticipant>> grpBySquad = notYetPaired
+              .where(
+                  (element) => !squad_1!.hasCoach((element as Coach).nafName))
+              .groupListsBy((element) => (element as Coach).squadName);
+
+          // Find random group
+          int rndGrp = _random.nextInt(grpBySquad.length - 1);
+
+          MapEntry<String, List<IMatchupParticipant>> grp =
+              grpBySquad.entries.toList()[rndGrp];
+
+          List<IMatchupParticipant> grpMembers = grp.value;
+
+          int rndPlayer = _random.nextInt(grpMembers.length - 1);
+
+          idx_2 = notYetPaired.indexOf(grpMembers[rndPlayer]);
+        } catch (_) {
+          return _firstRoundRandom(
+              matchSquads, avoidWithinSquads, numTries + 1);
+        }
+      }
+
+      if (idx_2 < 0) {
+        // Last player will be when length is = 1
+        idx_2 = notYetPaired.length > 1
+            ? _random.nextInt(notYetPaired.length - 1)
+            : 0;
+      }
 
       IMatchupParticipant player_2 = notYetPaired[idx_2];
 
       // If necessary, verify not same squad
       // Else, find a new match for Player1
-      if (avoidWithinSquads && player_1 is Coach && player_2 is Coach) {
-        Squad? squad_1 = tournament.getCoachSquad(player_1.nafName);
-        Squad? squad_2 = tournament.getCoachSquad(player_2.nafName);
-
-        if (squad_1 != null &&
-            squad_2 != null &&
-            squad_1.name() == squad_2.name()) {
-          Map<String, List<IMatchupParticipant>> grpBySquad = notYetPaired
-              .where(
-                  (element) => (element as Coach).squadName != squad_1.name())
-              .groupListsBy((element) => (element as Coach).squadName);
-
-          if (grpBySquad.length == 0) {
-            // For now, just retry... Bad quick fix...
-            return _firstRoundRandom(matchSquads, avoidWithinSquads);
-          } else {
-            idx_2 = notYetPaired.indexOf(grpBySquad.entries.first.value.first);
-          }
-        }
-      }
 
       notYetPaired.removeAt(idx_2);
 
