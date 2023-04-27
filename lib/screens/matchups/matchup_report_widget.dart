@@ -257,10 +257,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
         children: [
           RawMaterialButton(
             shape: CircleBorder(),
-            fillColor: // set color to identify editable or not
-                _editableState()
-                    ? Theme.of(context).primaryColorLight
-                    : Colors.grey,
+            fillColor: _getFillColor(),
             elevation: 0.0,
             child: Icon(
               Icons.add,
@@ -290,9 +287,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
         children: [
           RawMaterialButton(
             shape: CircleBorder(),
-            fillColor: _editableState() // set color to identify editable or not
-                ? Theme.of(context).primaryColorLight
-                : Colors.grey,
+            fillColor: _getFillColor(),
             elevation: 0.0,
             child: Icon(
               Icons.remove,
@@ -325,11 +320,32 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   }
 
   bool _editableState() {
-    return _state == UploadState.Editing || _state == UploadState.Error;
+    // return _state == UploadState.Editing || _state == UploadState.Error;
+    return _state != UploadState.NotAuthorized &&
+        _state != UploadState.NotYetSet;
   }
 
   bool _hideFabs() {
+    // return _state == UploadState.NotAuthorized ||
+    //     _state == UploadState.UploadedConfirmed;
     return _state == UploadState.NotAuthorized ||
-        _state == UploadState.UploadedConfirmed;
+        _state == UploadState.NotYetSet;
+  }
+
+  Color? _getFillColor() {
+    switch (_state) {
+      case UploadState.Error:
+        return Colors.redAccent;
+      case UploadState.UploadedConfirmed:
+        return Colors.greenAccent;
+      case UploadState.CanEdit:
+        return Colors.orangeAccent;
+      case UploadState.NotAuthorized:
+      case UploadState.NotYetSet:
+      case UploadState.Editing:
+      case UploadState.CanConfirm:
+      default:
+        return Theme.of(context).primaryColorLight;
+    }
   }
 }

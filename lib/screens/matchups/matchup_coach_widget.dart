@@ -356,10 +356,16 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   Future<void> _showStatusDialog() async {
-    String homeVsAway = _matchup.homeNafName + " vs. " + _matchup.awayNafName;
+    String title = "Match Report Status";
+
+    StringBuffer sb = StringBuffer();
+    sb.writeln("home: " + _matchup.homeNafName);
+    sb.writeln("away: " + _matchup.awayNafName);
 
     ReportedMatchResult homeResult = _matchup.homeReportedResults;
     ReportedMatchResult awayResult = _matchup.awayReportedResults;
+
+    Text homeVsAway = Text(sb.toString());
 
     Widget homeTds = _getReportedResultItemWidget(
         "Home Tds",
@@ -387,12 +393,14 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-            homeVsAway,
+            title,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
+                homeVsAway,
+                SizedBox(height: 10),
                 homeTds,
                 awayTds,
                 SizedBox(height: 10),
@@ -455,6 +463,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     int awayCas = awayReportWidget.getCas();
 
     StringBuffer sb = StringBuffer();
+    sb.writeln("Match Report");
+    sb.writeln("");
     sb.writeln("home: " + _matchup.homeNafName);
     sb.writeln("away: " + _matchup.awayNafName);
     sb.writeln("");
@@ -553,7 +563,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   Widget? _itemUploadIcon() {
-    if (_state == UploadState.NotAuthorized) {
+    if (_state == UploadState.NotAuthorized ||
+        _state == UploadState.NotYetSet) {
       return Icon(
         Icons.question_mark,
         color: Colors.transparent,
@@ -572,6 +583,12 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     switch (_state) {
       case UploadState.CanConfirm:
         return Icon(
+          Icons.question_mark,
+          color: Colors.orange,
+          size: uploadIconSize,
+        );
+      case UploadState.CanEdit:
+        return Icon(
           Icons.done,
           color: Colors.orange,
           size: uploadIconSize,
@@ -586,7 +603,6 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
         return Icon(Icons.report, color: Colors.red, size: uploadIconSize);
       case UploadState.NotAuthorized:
       case UploadState.Editing:
-      case UploadState.CanEdit:
       case UploadState.NotYetSet:
         return null;
     }
