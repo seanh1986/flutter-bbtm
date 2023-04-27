@@ -261,20 +261,87 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
       SizedBox(height: 10)
     ];
 
-    widget.tounamentInfo.scoringDetails.bonusPts.forEach((element) {
-      widgets.add(_itemCounter(element.key));
+    Widget? bonusPtsWidget = _getBonusPtsWidget(participant.name());
+    if (bonusPtsWidget != null) {
+      widgets.add(bonusPtsWidget);
       widgets.add(SizedBox(height: 10));
-    });
+    }
 
     return Card(
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 2.0, vertical: 6.0),
         child: Wrap(
+          alignment: WrapAlignment.center,
           children: widgets,
         ));
   }
 
+  Widget? _getBonusPtsWidget(String nafName) {
+    if (widget.tounamentInfo.scoringDetails.bonusPts.isEmpty) {
+      return null;
+    }
+
+    VoidCallback callback = () {
+      _showBonusDialog(nafName);
+    };
+
+    return ElevatedButton(
+        onPressed: () {
+          callback();
+        },
+        child: Text('Bonus Pts'));
+  }
+
+  Future<void> _showBonusDialog(String nafName) async {
+    String title = "Bonus Points: " + nafName;
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return StatefulBuilder(builder: (context, setState) {
+          List<Widget> widgets = [];
+
+          VoidCallback callback = (() {
+            setState(() {});
+          });
+
+          widget.tounamentInfo.scoringDetails.bonusPts.forEach((element) {
+            widgets.add(_itemCounterCallback(element.key, () {
+              callback();
+            }));
+            widgets.add(SizedBox(height: 10));
+          });
+
+          return AlertDialog(
+            title: Text(
+              title,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: widgets,
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
+
   Widget _itemCounter(String name) {
+    return _itemCounterCallback(name, null);
+  }
+
+  Widget _itemCounterCallback(String name, VoidCallback? callback) {
     int? num = widget.counts[name];
     String numStr = num != null ? num.toString() : "?";
 
@@ -304,6 +371,10 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
                           widget.counts.update(name, (value) => value + 1);
                         });
                       }
+                    }
+
+                    if (callback != null) {
+                      callback();
                     }
                   }
                 : null,
@@ -335,6 +406,10 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
                           widget.counts.update(name, (value) => value - 1);
                         });
                       }
+                    }
+
+                    if (callback != null) {
+                      callback();
                     }
                   }
                 : null,
