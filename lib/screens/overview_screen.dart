@@ -155,8 +155,16 @@ class _OverviewScreenState extends State<OverviewScreen> {
     List<Widget> views = [
       _getWinTieLossWidget(t.scoringDetails, individualScoringDetailsTitle),
       Text(""),
-      _getIndividualTieBreakers(individualTiebreakersTitle, t.scoringDetails),
     ];
+
+    Widget? bonusPts = _getBonusPts(t.scoringDetails);
+    if (bonusPts != null) {
+      views.add(bonusPts);
+      views.add(Text(""));
+    }
+
+    views.add(_getIndividualTieBreakers(
+        individualTiebreakersTitle, t.scoringDetails));
 
     List<Widget> squadDetailsWidgets = _generateSquadDetails(t.squadDetails);
 
@@ -182,6 +190,20 @@ class _OverviewScreenState extends State<OverviewScreen> {
             "/" +
             scoringDetails.lossPts.toString(),
         false);
+  }
+
+  Widget? _getBonusPts(ScoringDetails scoringDetails) {
+    if (scoringDetails.bonusPts.isEmpty) {
+      return null;
+    }
+
+    StringBuffer sb = StringBuffer();
+
+    scoringDetails.bonusPts.forEach((a) {
+      sb.writeln(a.key + ": " + a.value.toString());
+    });
+
+    return _getUnderlinedEntry("Bonus Pts", sb.toString(), true);
   }
 
   Widget _getIndividualTieBreakers(

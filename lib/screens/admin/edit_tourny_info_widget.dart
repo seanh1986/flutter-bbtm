@@ -325,40 +325,95 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   // }
 
   Widget _createScoringDetails(String title, ScoringDetails details) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        SizedBox(width: 10.0),
-        Text(title),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CustomTextFormField(
-          initialValue: details.winPts.toString(),
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          keyboardType: TextInputType.number,
-          title: 'Wins',
-          callback: (value) => details.winPts = double.parse(value),
-        )),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CustomTextFormField(
-          initialValue: details.tiePts.toString(),
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          keyboardType: TextInputType.number,
-          title: 'Ties',
-          callback: (value) => details.tiePts = double.parse(value),
-        )),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CustomTextFormField(
-          initialValue: details.lossPts.toString(),
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          keyboardType: TextInputType.number,
-          title: 'Losses',
-          callback: (value) => details.tiePts = double.parse(value),
-        )),
-      ],
-    );
+    Row winTieLossPts = Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          SizedBox(width: 10.0),
+          Text(title),
+          SizedBox(width: 10.0),
+          Expanded(
+              child: CustomTextFormField(
+            initialValue: details.winPts.toString(),
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            keyboardType: TextInputType.number,
+            title: 'Wins',
+            callback: (value) => details.winPts = double.parse(value),
+          )),
+          SizedBox(width: 10.0),
+          Expanded(
+              child: CustomTextFormField(
+            initialValue: details.tiePts.toString(),
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            keyboardType: TextInputType.number,
+            title: 'Ties',
+            callback: (value) => details.tiePts = double.parse(value),
+          )),
+          SizedBox(width: 10.0),
+          Expanded(
+              child: CustomTextFormField(
+            initialValue: details.lossPts.toString(),
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            keyboardType: TextInputType.number,
+            title: 'Losses',
+            callback: (value) => details.tiePts = double.parse(value),
+          ))
+        ]);
+
+    List<Widget> bonusPtsWidgets = [
+      ElevatedButton(
+        onPressed: () {
+          setState(() {
+            String bonusPtsIdx =
+                (_scoringDetails.bonusPts.length + 1).toString();
+            _scoringDetails.bonusPts.add(MapEntry("Bonus_" + bonusPtsIdx, 1));
+          });
+        },
+        child: const Text('Add Bonus'),
+      )
+    ];
+
+    for (int i = 0; i < details.bonusPts.length; i++) {
+      String bonusKey = details.bonusPts[i].key;
+      double bonusVal = details.bonusPts[i].value;
+
+      ValueChanged<String> bonusNameCallback = ((value) {
+        details.bonusPts[i] = MapEntry(value, bonusVal);
+      });
+
+      ValueChanged<String> bonusPtsCallback = ((value) {
+        details.bonusPts[i] = MapEntry(bonusKey, double.parse(value));
+      });
+
+      bonusPtsWidgets.add(Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            SizedBox(width: 10.0),
+            Expanded(
+                child: CustomTextFormField(
+                    initialValue: bonusKey.toString(),
+                    // inputFormatters: [
+                    //   FilteringTextInputFormatter.singleLineFormatter
+                    // ],
+                    keyboardType: TextInputType.number,
+                    title: 'Bonus Name',
+                    callback: (value) => bonusNameCallback(value))),
+            SizedBox(width: 10.0),
+            Expanded(
+                child: CustomTextFormField(
+                    initialValue: bonusVal.toString(),
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    keyboardType: TextInputType.number,
+                    title: 'Bonus Value',
+                    callback: (value) => bonusPtsCallback(value)))
+          ]));
+    }
+
+    List<Widget> children = [winTieLossPts, SizedBox(height: 5)];
+
+    children.addAll(bonusPtsWidgets);
+
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.center, children: children);
   }
 
   Widget _createCasulatyDetails(CasualtyDetails details) {

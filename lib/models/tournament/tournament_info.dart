@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:core';
 import 'package:enum_to_string/enum_to_string.dart';
 
@@ -189,6 +190,9 @@ class ScoringDetails {
   late double tiePts;
   late double lossPts;
 
+  // Optional list of bonus points and weights
+  List<MapEntry<String, double>> bonusPts = [];
+
   ScoringDetails(this.winPts, this.tiePts, this.lossPts);
 
   // Default for coaches
@@ -214,12 +218,23 @@ class ScoringDetails {
 
     final tLossPts = json['loss_pts'] as double?;
     this.lossPts = tLossPts != null ? tLossPts : 0;
+
+    final tBonusPts = json['bonus_pts'] as Map<String, dynamic>?;
+    if (tBonusPts != null) {
+      bonusPts.clear();
+      tBonusPts.forEach((key, value) {
+        if (value is double) {
+          bonusPts.add(MapEntry(key, value));
+        }
+      });
+    }
   }
 
   Map<String, dynamic> toJson() => {
         'win_pts': winPts,
         'tie_pts': tiePts,
         'loss_pts': lossPts,
+        'bonus_pts': bonusPts,
       };
 }
 
