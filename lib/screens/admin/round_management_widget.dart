@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
@@ -33,6 +34,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
 
   late FToast fToast;
 
+  int _selectedRoundIdx = -1;
   List<CoachRound> _coachRounds = [];
 
   List<DataColumn> _roundSummaryCols = [
@@ -72,32 +74,18 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
       TitleBar(title: "Round Management"),
       _advanceDiscardBackupBtns(context),
       SizedBox(height: 20),
+      _generateViewRounds(context)
     ];
 
-    List<Widget> _rounds = _viewRounds(context);
+    // List<Widget> _rounds = _viewRounds(context);
 
-    if (_rounds.isNotEmpty) {
-      _widgets.add(Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: _viewRounds(context)));
-    }
+    // if (_rounds.isNotEmpty) {
+    //   _widgets.add(Column(
+    //       mainAxisAlignment: MainAxisAlignment.center,
+    //       children: _viewRounds(context)));
+    // }
 
     return Column(children: _widgets);
-
-    // return Column(children: [
-    //   Row(children: [
-    //     TitleBar(title: "Round Management"),
-    //     _advanceDiscardBackupBtns(context),
-    //   ]),
-    //   SizedBox(height: 20),
-    //   _roundWidget
-    //   // Column(children: _viewRounds(context))
-    //   // Container(
-    //   //     child: SingleChildScrollView(
-    //   //         child: Column(
-    //   //             mainAxisAlignment: MainAxisAlignment.center,
-    //   //             children: _viewRounds(context))))
-    // ]);
   }
 
   void _refreshState() {
@@ -122,25 +110,76 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
             ]));
   }
 
-  List<Widget> _viewRounds(BuildContext context) {
-    List<Widget> widgets = [];
+  Widget _generateViewRounds(BuildContext context) {
+    Widget? subScreenWidget = _getRoundSummaryByIdx(_selectedRoundIdx);
 
-    for (int i = 0; i < widget.tournament.coachRounds.length; i++) {
-      Widget? widget = _generateRoundSummary(i);
-      if (widget != null) {
-        widgets.add(widget);
-      }
+    List<Widget> children = [
+      _viewRoundsToggleButtonsList(context),
+      SizedBox(height: 20)
+    ];
+
+    if (subScreenWidget != null) {
+      children.add(subScreenWidget);
     }
 
-    return widgets;
+    return Column(children: children);
   }
 
-  Widget? _generateRoundSummary(int round) {
-    if (round >= _coachRounds.length) {
+  Widget _viewRoundsToggleButtonsList(BuildContext context) {
+    List<Widget> toggleWidgets = [];
+
+    for (int i = 0; i < _coachRounds.length; i++) {
+      CoachRound r = _coachRounds[i];
+
+      bool isSelected = _selectedRoundIdx == i;
+
+      toggleWidgets.add(ElevatedButton(
+          style: ElevatedButton.styleFrom(
+              backgroundColor: isSelected
+                  ? Colors.redAccent
+                  : Theme.of(context).primaryColor),
+          child: Text(
+            "Round " + r.round().toString(),
+            style: TextStyle(color: Colors.white),
+          ),
+          onPressed: () {
+            setState(() {
+              _selectedRoundIdx = i;
+            });
+          }));
+
+      toggleWidgets.add(SizedBox(width: 10));
+    }
+
+    return Container(
+        height: 60,
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(10),
+        child: ListView(
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            children: toggleWidgets));
+  }
+
+  // List<Widget> _viewRounds(BuildContext context) {
+  //   List<Widget> widgets = [];
+
+  //   for (int i = 0; i < widget.tournament.coachRounds.length; i++) {
+  //     Widget? widget = _generateRoundSummary(i);
+  //     if (widget != null) {
+  //       widgets.add(widget);
+  //     }
+  //   }
+
+  //   return widgets;
+  // }
+
+  Widget? _getRoundSummaryByIdx(int roundIdx) {
+    if (roundIdx < 0 || roundIdx >= _coachRounds.length) {
       return null;
     }
 
-    CoachRound coachRound = _coachRounds[round];
+    CoachRound coachRound = _coachRounds[roundIdx];
 
     CoachRoundDataSource dataSource =
         CoachRoundDataSource(coachRound: coachRound);
@@ -150,44 +189,127 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
       source: dataSource,
     );
 
-    return ExpansionTile(
-        title: Text("Round " + coachRound.round().toString()),
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _coachRounds = widget.tournament.coachRounds;
-                  });
-                },
-                child: const Text('Discard'),
-              ),
-              SizedBox(width: 20),
-              ElevatedButton(
-                onPressed: () {
-                  VoidCallback callback = () {
-                    List<UpdateMatchReportEvent> matchesToUpdate = dataSource
-                        .editedMatchIndices
-                        .map((mIdx) => UpdateMatchReportEvent.admin(
-                            widget.tournament, coachRound.matches[mIdx]))
-                        .toList();
+    return Column(children: [
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              _coachRounds = widget.tournament.coachRounds;
+            });
+          },
+          child: const Text('Discard'),
+        ),
+        SizedBox(width: 20),
+        ElevatedButton(
+          onPressed: () {
+            VoidCallback callback = () {
+              List<UpdateMatchReportEvent> matchesToUpdate = dataSource
+                  .editedMatchIndices
+                  .map((mIdx) => UpdateMatchReportEvent.admin(
+                      widget.tournament, coachRound.matches[mIdx]))
+                  .toList();
 
-                    _tournyBloc.updateMatchEvents(matchesToUpdate);
-                  };
+              _tournyBloc.updateMatchEvents(matchesToUpdate);
+              _tournyBloc
+                  .add(TournamentEventRefreshData(widget.tournament.info.id));
+            };
 
-                  _showDialogToConfirmOverwrite(context, callback);
-                },
-                child: const Text('Update'),
-              )
-            ],
-          ),
-          SizedBox(height: 10),
-          roundDataTable,
-          SizedBox(height: 10),
-        ]);
+            _showDialogToConfirmOverwrite(context, callback);
+          },
+          child: const Text('Update'),
+        )
+      ]),
+      Container(
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: roundDataTable,
+          ))
+    ]);
+
+    // return Column(
+    //   mainAxisSize: MainAxisSize.max,
+    //   mainAxisAlignment: MainAxisAlignment.start,
+    //   crossAxisAlignment: CrossAxisAlignment.stretch,
+    //   children: <Widget>[
+    //     Text("Round " + coachRound.round().toString(),
+    //         style: TextStyle(fontWeight: FontWeight.bold)),
+    //     SizedBox(height: 10),
+    //     Expanded(
+    //       child: Container(
+    //         child: ScrollConfiguration(
+    //             behavior:
+    //                 ScrollConfiguration.of(context).copyWith(dragDevices: {
+    //               PointerDeviceKind.touch,
+    //               PointerDeviceKind.mouse,
+    //             }),
+    //             child: _roundDataBody(coachRound)),
+    //       ),
+    //     ),
+    //     Row(
+    //       mainAxisAlignment: MainAxisAlignment.center,
+    //       mainAxisSize: MainAxisSize.min,
+    //       children: <Widget>[
+    //         Padding(
+    //           padding: EdgeInsets.all(20.0),
+    //         ),
+    //         Padding(
+    //           padding: EdgeInsets.all(20.0),
+    //         ),
+    //       ],
+    //     ),
+    //   ],
+    // );
   }
+
+  // Widget _roundDataBody(CoachRound coachRound) {
+  //   CoachRoundDataSource dataSource =
+  //       CoachRoundDataSource(coachRound: coachRound);
+
+  //   PaginatedDataTable roundDataTable = PaginatedDataTable(
+  //     columns: _roundSummaryCols,
+  //     source: dataSource,
+  //   );
+
+  //   return Expanded(
+  //       child: Column(
+  //     children: [
+  //       Row(
+  //         mainAxisAlignment: MainAxisAlignment.center,
+  //         children: [
+  // ElevatedButton(
+  //   onPressed: () {
+  //     setState(() {
+  //       _coachRounds = widget.tournament.coachRounds;
+  //     });
+  //   },
+  //   child: const Text('Discard'),
+  // ),
+  // SizedBox(width: 20),
+  // ElevatedButton(
+  //   onPressed: () {
+  //     VoidCallback callback = () {
+  //       List<UpdateMatchReportEvent> matchesToUpdate = dataSource
+  //           .editedMatchIndices
+  //           .map((mIdx) => UpdateMatchReportEvent.admin(
+  //               widget.tournament, coachRound.matches[mIdx]))
+  //           .toList();
+
+  //       _tournyBloc.updateMatchEvents(matchesToUpdate);
+  //     };
+
+  //     _showDialogToConfirmOverwrite(context, callback);
+  //   },
+  //   child: const Text('Update'),
+  // )
+  //         ],
+  //       ),
+  //       SizedBox(height: 10),
+  //       roundDataTable,
+  //       SizedBox(height: 10),
+  //     ],
+  //   ));
+  // }
 
   void _showDialogToConfirmOverwrite(
       BuildContext context, VoidCallback confirmedUpdateCallback) {
@@ -322,6 +444,8 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                   await _tournyBloc.discardCurrentRound(widget.tournament);
               if (success) {
                 ToastUtils.showSuccess(fToast, "Removed current round");
+                _tournyBloc
+                    .add(TournamentEventRefreshData(widget.tournament.info.id));
               } else {
                 ToastUtils.showFailed(fToast, "Failed to remove current round");
               }

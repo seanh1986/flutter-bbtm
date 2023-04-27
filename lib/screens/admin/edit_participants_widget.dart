@@ -149,37 +149,6 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
         ]));
   }
 
-  // Widget _createCoachTable() {
-  //   return Container(
-  //       padding: const EdgeInsets.all(15),
-  //       child: Column(children: [
-  //         SizedBox(height: 10),
-  //         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-  //           Column(children: [
-  //             Text("Coaches", style: TextStyle(fontSize: 18)),
-  //             Text(
-  //                 "[Active/Total]: " +
-  //                     _coaches
-  //                         .where((element) => element.active)
-  //                         .length
-  //                         .toString() +
-  //                     " / " +
-  //                     _coaches.length.toString(),
-  //                 style: TextStyle(fontSize: 14))
-  //           ]),
-  //           SizedBox(width: 20),
-  //           ElevatedButton(
-  //             onPressed: () {
-  //               _addNewCoach();
-  //             },
-  //             child: const Text('Add Coach'),
-  //           )
-  //         ]),
-  //         SizedBox(height: 10),
-  //         _coachDataTable
-  //       ]));
-  // }
-
   void _addNewCoach() {
     setState(() {
       _coaches.add(Coach("", "", "", Race.Unknown, "", 0));
@@ -203,11 +172,6 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   }
 
   void _initCoaches() {
-    // print("Coach List:");
-    // for (int i = 0; i < _coaches.length; i++) {
-    //   print("[" + i.toString() + "]: " + _coaches[i].coachName);
-    // }
-
     _coachSource = CoachesDataSource(
         useSquad: widget.tournament.useSquads() ||
             widget.tournament.useSquadsForInitOnly(),
