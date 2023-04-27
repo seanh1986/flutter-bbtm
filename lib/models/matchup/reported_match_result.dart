@@ -7,7 +7,7 @@ class ReportedMatchResult {
   int homeCas = 0;
   int awayCas = 0;
 
-  List<double> bonusPts = [];
+  List<int> bonusPts = [];
 
   // What they ranked their opponent, from 1 to 5
   int bestSportOppRank = 3;

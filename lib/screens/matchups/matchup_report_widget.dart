@@ -4,6 +4,7 @@ import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/races.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/screens/matchups/matchup_coach_widget.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:flutter/foundation.dart';
@@ -13,6 +14,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 // ignore: must_be_immutable
 class MatchupReportWidget extends StatefulWidget {
+  final TournamentInfo tounamentInfo;
+
   final IMatchupParticipant participant;
   final bool showHome;
 
@@ -29,6 +32,7 @@ class MatchupReportWidget extends StatefulWidget {
 
   MatchupReportWidget(
       {Key? key,
+      required this.tounamentInfo,
       required this.reportedMatch,
       required this.participant,
       required this.showHome,
@@ -40,6 +44,18 @@ class MatchupReportWidget extends StatefulWidget {
           () => showHome ? reportedMatch!.homeTds : reportedMatch!.awayTds);
       counts.putIfAbsent(_casName,
           () => showHome ? reportedMatch!.homeCas : reportedMatch!.awayCas);
+
+      int numBonus = tounamentInfo.scoringDetails.bonusPts.length;
+      for (int i = 0; i < numBonus; i++) {
+        MapEntry<String, double> bonusPts =
+            tounamentInfo.scoringDetails.bonusPts[i];
+
+        int cnt = reportedMatch!.bonusPts.length == numBonus
+            ? reportedMatch!.bonusPts[i]
+            : 0;
+
+        counts.putIfAbsent(bonusPts.key, () => cnt);
+      }
     }
   }
 
@@ -56,6 +72,18 @@ class MatchupReportWidget extends StatefulWidget {
   int getCas() {
     int? cas = counts[_casName];
     return cas != null ? cas : 0;
+  }
+
+  // Ensure correct order
+  List<int> getBonusPts() {
+    List<int> bonusPts = [];
+
+    tounamentInfo.scoringDetails.bonusPts.forEach((element) {
+      int? bonus = counts[element];
+      bonusPts.add(bonus != null ? bonus : 0);
+    });
+
+    return bonusPts;
   }
 }
 
@@ -141,8 +169,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     RawMaterialButton? roster;
 
     if (participant is Coach) {
-      // && participant) {
-
       raceLogo = Image.asset(
         RaceUtils.getLogo(participant.race),
         fit: BoxFit.cover,
@@ -227,17 +253,24 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   }
 
   Widget _itemEditMatchDetails(IMatchupParticipant participant) {
+    List<Widget> widgets = [
+      SizedBox(height: 10),
+      _itemCounter(widget._tdName),
+      SizedBox(height: 10),
+      _itemCounter(widget._casName),
+      SizedBox(height: 10)
+    ];
+
+    widget.tounamentInfo.scoringDetails.bonusPts.forEach((element) {
+      widgets.add(_itemCounter(element.key));
+      widgets.add(SizedBox(height: 10));
+    });
+
     return Card(
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 2.0, vertical: 6.0),
         child: Wrap(
-          children: [
-            SizedBox(height: 10),
-            _itemCounter(widget._tdName),
-            SizedBox(height: 10),
-            _itemCounter(widget._casName),
-            SizedBox(height: 10),
-          ],
+          children: widgets,
         ));
   }
 

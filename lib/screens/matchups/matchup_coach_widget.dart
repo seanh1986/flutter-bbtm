@@ -112,6 +112,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
         _state.toString());
 
     homeReportWidget = MatchupReportWidget(
+        tounamentInfo: _tournament.info,
         reportedMatch: _reportWithStatus,
         participant: _matchup.home(_tournament),
         showHome: true,
@@ -119,6 +120,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
         refreshState: widget.refreshState);
 
     awayReportWidget = MatchupReportWidget(
+        tounamentInfo: _tournament.info,
         reportedMatch: _reportWithStatus,
         participant: _matchup.away(_tournament),
         showHome: false,
