@@ -501,6 +501,9 @@ class CoachRoundDataSource extends DataTableSource {
         text: _getValue(report.status, m.homeReportedResults.homeTds,
             m.awayReportedResults.homeTds));
 
+    TextStyle? homeTdStyle = _getTextStyle(report.status,
+        m.homeReportedResults.homeTds, m.awayReportedResults.homeTds);
+
     ValueChanged<String> homeTdCallback = (value) {
       int td = int.parse(homeTdController.text);
       m.homeReportedResults.homeTds = td;
@@ -512,6 +515,7 @@ class CoachRoundDataSource extends DataTableSource {
 
     TextFormField homeTdField = TextFormField(
         controller: homeTdController,
+        style: homeTdStyle,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: homeTdCallback);
@@ -519,6 +523,9 @@ class CoachRoundDataSource extends DataTableSource {
     TextEditingController awayTdController = TextEditingController(
         text: _getValue(report.status, m.homeReportedResults.awayTds,
             m.awayReportedResults.awayTds));
+
+    TextStyle? awayTdStyle = _getTextStyle(report.status,
+        m.homeReportedResults.awayTds, m.awayReportedResults.awayTds);
 
     ValueChanged<String> awayTdCallback = (value) {
       int td = int.parse(awayTdController.text);
@@ -531,6 +538,7 @@ class CoachRoundDataSource extends DataTableSource {
 
     TextFormField awayTdField = TextFormField(
         controller: awayTdController,
+        style: awayTdStyle,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: awayTdCallback);
@@ -538,6 +546,9 @@ class CoachRoundDataSource extends DataTableSource {
     TextEditingController homeCasController = TextEditingController(
         text: _getValue(report.status, m.homeReportedResults.homeCas,
             m.awayReportedResults.homeCas));
+
+    TextStyle? homeCasStyle = _getTextStyle(report.status,
+        m.homeReportedResults.homeCas, m.awayReportedResults.homeCas);
 
     ValueChanged<String> homeCasCallback = (value) {
       int cas = int.parse(homeCasController.text);
@@ -550,6 +561,7 @@ class CoachRoundDataSource extends DataTableSource {
 
     TextFormField homeCasField = TextFormField(
         controller: homeCasController,
+        style: homeCasStyle,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: homeCasCallback);
@@ -557,6 +569,9 @@ class CoachRoundDataSource extends DataTableSource {
     TextEditingController awayCasController = TextEditingController(
         text: _getValue(report.status, m.homeReportedResults.awayCas,
             m.awayReportedResults.awayCas));
+
+    TextStyle? awayCasStyle = _getTextStyle(report.status,
+        m.homeReportedResults.awayCas, m.awayReportedResults.awayCas);
 
     ValueChanged<String> awayCasCallback = (value) {
       int cas = int.parse(awayCasController.text);
@@ -569,14 +584,21 @@ class CoachRoundDataSource extends DataTableSource {
 
     TextFormField awayCasField = TextFormField(
         controller: awayCasController,
+        style: awayCasStyle,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: awayCasCallback);
 
+    bool reportedHomeSport = _hasReported(report.status, false);
+
     TextEditingController homeSportController = TextEditingController(
-        text: _hasReported(report.status, false)
+        text: reportedHomeSport
             ? m.awayReportedResults.bestSportOppRank.toString()
             : "");
+
+    TextStyle? homeSportStyle = reportedHomeSport
+        ? TextStyle(color: Colors.greenAccent)
+        : TextStyle(color: Colors.redAccent);
 
     ValueChanged<String> homeSportCallback = (value) {
       int sport = int.parse(homeSportController.text);
@@ -587,14 +609,21 @@ class CoachRoundDataSource extends DataTableSource {
 
     TextFormField homeSportField = TextFormField(
         controller: homeSportController,
+        style: homeSportStyle,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: homeSportCallback);
 
+    bool reportedAwaySport = _hasReported(report.status, true);
+
     TextEditingController awaySportController = TextEditingController(
-        text: _hasReported(report.status, true)
+        text: reportedAwaySport
             ? m.homeReportedResults.bestSportOppRank.toString()
             : "");
+
+    TextStyle? awaySportStyle = reportedAwaySport
+        ? TextStyle(color: Colors.greenAccent)
+        : TextStyle(color: Colors.redAccent);
 
     ValueChanged<String> awaySportCallback = (value) {
       int sport = int.parse(awaySportController.text);
@@ -605,6 +634,7 @@ class CoachRoundDataSource extends DataTableSource {
 
     TextFormField awaySportField = TextFormField(
         controller: awaySportController,
+        style: awaySportStyle,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: awaySportCallback);
@@ -647,7 +677,9 @@ class CoachRoundDataSource extends DataTableSource {
   String _getValue(ReportedMatchStatus status, int homeVal, int awayVal) {
     switch (status) {
       case ReportedMatchStatus.BothReportedConflict:
-        return homeVal == awayVal ? homeVal.toString() : "";
+        return homeVal == awayVal
+            ? homeVal.toString()
+            : homeVal.toString() + " / " + awayVal.toString();
       case ReportedMatchStatus.AwayReported:
         return awayVal.toString();
       case ReportedMatchStatus.HomeReported:
@@ -656,6 +688,22 @@ class CoachRoundDataSource extends DataTableSource {
       case ReportedMatchStatus.NoReportsYet:
       default:
         return "";
+    }
+  }
+
+  TextStyle? _getTextStyle(
+      ReportedMatchStatus status, int homeVal, int awayVal) {
+    switch (status) {
+      case ReportedMatchStatus.BothReportedConflict:
+      case ReportedMatchStatus.BothReportedAgree:
+        return homeVal == awayVal
+            ? TextStyle(color: Colors.greenAccent)
+            : TextStyle(color: Colors.redAccent);
+      case ReportedMatchStatus.AwayReported:
+      case ReportedMatchStatus.HomeReported:
+      case ReportedMatchStatus.NoReportsYet:
+      default:
+        return null;
     }
   }
 }
