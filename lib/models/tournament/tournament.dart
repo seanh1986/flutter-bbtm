@@ -24,11 +24,11 @@ enum Authorization {
 class Tournament {
   late TournamentInfo info;
 
-  // Key: squad name, Value: Idx in squad list
+  // Key: squad name (lowercase), Value: Idx in squad list
   HashMap<String, int> _squadIdxMap = new HashMap<String, int>();
   List<Squad> _squads = [];
 
-  // Key: nafName, Value: Idx in coach list
+  // Key: nafName (lowercase), Value: Idx in coach list
   HashMap<String, int> _coachIdxMap = new HashMap<String, int>();
   List<Coach> _coaches = [];
 
@@ -38,11 +38,11 @@ class Tournament {
   void addSquad(Squad s) {
     int idx = _squads.length;
     _squads.add(s);
-    _squadIdxMap.putIfAbsent(s.name(), () => idx);
+    _squadIdxMap.putIfAbsent(s.name().toLowerCase(), () => idx);
   }
 
   Squad? getSquad(String squadName) {
-    int? idx = _squadIdxMap[squadName];
+    int? idx = _squadIdxMap[squadName.toLowerCase()];
     return idx != null ? _squads[idx] : null;
   }
 
@@ -53,7 +53,7 @@ class Tournament {
   void addCoach(Coach c) {
     int idx = _coaches.length;
     _coaches.add(c);
-    _coachIdxMap.putIfAbsent(c.name(), () => idx);
+    _coachIdxMap.putIfAbsent(c.name().toLowerCase(), () => idx);
   }
 
   void updateCoaches(List<Coach> newCoaches, List<RenameNafName> renames) {
@@ -82,7 +82,7 @@ class Tournament {
   }
 
   Coach? getCoach(String nafName) {
-    int? idx = _coachIdxMap[nafName];
+    int? idx = _coachIdxMap[nafName.toLowerCase()];
     return idx != null ? _coaches[idx] : null;
   }
 
@@ -320,14 +320,14 @@ class Tournament {
     _squadIdxMap.clear();
     for (int i = 0; i < _squads.length; i++) {
       Squad s = _squads[i];
-      _squadIdxMap.putIfAbsent(s.name(), () => i);
+      _squadIdxMap.putIfAbsent(s.name().toLowerCase(), () => i);
     }
 
     /// Update coach map
     _coachIdxMap.clear();
     for (int i = 0; i < _coaches.length; i++) {
       Coach c = _coaches[i];
-      _coachIdxMap.putIfAbsent(c.name(), () => i);
+      _coachIdxMap.putIfAbsent(c.name().toLowerCase(), () => i);
     }
 
     // TODO: Eventually logic can be moved elsewhere
