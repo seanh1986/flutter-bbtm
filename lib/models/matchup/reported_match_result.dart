@@ -7,6 +7,8 @@ class ReportedMatchResult {
   int homeCas = 0;
   int awayCas = 0;
 
+  List<double> bonusPts = [];
+
   // What they ranked their opponent, from 1 to 5
   int bestSportOppRank = 3;
 
@@ -36,6 +38,14 @@ class ReportedMatchResult {
     final tAwayCas = json['away_cas'] as int?;
     this.awayCas = tAwayCas != null ? tAwayCas : 0;
 
+    final tBonusPts = json['bonus_pts'] as List<dynamic>?;
+    if (tBonusPts != null) {
+      bonusPts.clear();
+      tBonusPts.forEach((element) {
+        bonusPts.add(element);
+      });
+    }
+
     final tOppBestSport = json['opp_best_sport_rank'] as int?;
     this.bestSportOppRank = tOppBestSport != null ? tOppBestSport : 3;
   }
@@ -46,6 +56,7 @@ class ReportedMatchResult {
         'home_cas': homeCas,
         'away_td': awayTds,
         'away_cas': awayCas,
+        'bonus_pts': bonusPts,
         'opp_best_sport_rank': bestSportOppRank,
       };
 }

@@ -38,6 +38,8 @@ class Coach extends IMatchupParticipant {
 
   int bestSportPoints = 0;
 
+  List<double> _bonusPts = <double>[];
+
   List<double> _tieBreakers = <double>[];
 
   List<String> _opponents = <String>[];
@@ -122,6 +124,11 @@ class Coach extends IMatchupParticipant {
     bestSportPoints = 0;
     _opponents.clear();
 
+    _bonusPts.clear();
+    t.scoringDetails.bonusPts.forEach((element) {
+      _bonusPts.add(0);
+    });
+
     matches.forEach((m) {
       ReportedMatchResultWithStatus matchStats = m.getReportedMatchStatus();
       MatchResult matchResult = m.getResult();
@@ -145,6 +152,10 @@ class Coach extends IMatchupParticipant {
         cas += matchStats.homeCas;
         oppTds += matchStats.awayTds;
         oppCas += matchStats.awayCas;
+
+        for (int i = 0; i < matchStats.bonusPts.length; i++) {
+          _bonusPts[i] += matchStats.bonusPts[i];
+        }
 
         // Based on opponent's vote
         bestSportPoints += m.awayReportedResults.bestSportOppRank;
@@ -170,6 +181,10 @@ class Coach extends IMatchupParticipant {
         oppTds += matchStats.homeTds;
         oppCas += matchStats.homeCas;
 
+        for (int i = 0; i < matchStats.bonusPts.length; i++) {
+          _bonusPts[i] += matchStats.bonusPts[i];
+        }
+
         // Based on opponent's vote
         bestSportPoints += m.homeReportedResults.bestSportOppRank;
 
@@ -180,6 +195,10 @@ class Coach extends IMatchupParticipant {
     _points = _wins * t.scoringDetails.winPts +
         _ties * t.scoringDetails.tiePts +
         _losses * t.scoringDetails.lossPts;
+
+    for (int i = 0; i < _bonusPts.length; i++) {
+      _points += _bonusPts[i] * t.scoringDetails.bonusPts[i].value;
+    }
   }
 
   void updateOppScoreAndTieBreakers(Tournament t) {
