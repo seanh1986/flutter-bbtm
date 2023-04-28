@@ -160,9 +160,9 @@ class _HomePageState extends State<HomePage> {
             // ),
             title: Text(_tournament.info.name),
             actions: [
-              IconButton(
-                  icon: Icon(Icons.refresh),
-                  onPressed: () => _handleRefreshTournamentPressed()),
+              // IconButton(
+              //     icon: Icon(Icons.refresh),
+              //     onPressed: () => _handleRefreshTournamentPressed()),
               IconButton(
                   icon: Icon(Icons.logout),
                   onPressed: () => _handleLogoutPressed())
