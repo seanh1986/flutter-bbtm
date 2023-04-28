@@ -4,9 +4,11 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament_backup.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:bbnaf/utils/toast.dart';
+import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
@@ -46,8 +48,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     DataColumn(label: Text("A TD")),
     DataColumn(label: Text("H Cas")),
     DataColumn(label: Text("A Cas")),
-    DataColumn(label: Text("Sport (for H)")),
-    DataColumn(label: Text("Sport (for A)")),
+    DataColumn(label: Text("Sport")),
   ];
 
   @override
@@ -77,14 +78,6 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
       _generateViewRounds(context)
     ];
 
-    // List<Widget> _rounds = _viewRounds(context);
-
-    // if (_rounds.isNotEmpty) {
-    //   _widgets.add(Column(
-    //       mainAxisAlignment: MainAxisAlignment.center,
-    //       children: _viewRounds(context)));
-    // }
-
     return Column(children: _widgets);
   }
 
@@ -111,7 +104,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   }
 
   Widget _generateViewRounds(BuildContext context) {
-    Widget? subScreenWidget = _getRoundSummaryByIdx(_selectedRoundIdx);
+    Widget? subScreenWidget = _getRoundSummaryByIdx(context, _selectedRoundIdx);
 
     List<Widget> children = [
       _viewRoundsToggleButtonsList(context),
@@ -161,20 +154,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
             children: toggleWidgets));
   }
 
-  // List<Widget> _viewRounds(BuildContext context) {
-  //   List<Widget> widgets = [];
-
-  //   for (int i = 0; i < widget.tournament.coachRounds.length; i++) {
-  //     Widget? widget = _generateRoundSummary(i);
-  //     if (widget != null) {
-  //       widgets.add(widget);
-  //     }
-  //   }
-
-  //   return widgets;
-  // }
-
-  Widget? _getRoundSummaryByIdx(int roundIdx) {
+  Widget? _getRoundSummaryByIdx(BuildContext context, int roundIdx) {
     if (roundIdx < 0 || roundIdx >= _coachRounds.length) {
       return null;
     }
@@ -182,7 +162,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     CoachRound coachRound = _coachRounds[roundIdx];
 
     CoachRoundDataSource dataSource =
-        CoachRoundDataSource(coachRound: coachRound);
+        CoachRoundDataSource(context: context, coachRound: coachRound);
 
     PaginatedDataTable roundDataTable = PaginatedDataTable(
       columns: _roundSummaryCols,
@@ -226,90 +206,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
             child: roundDataTable,
           ))
     ]);
-
-    // return Column(
-    //   mainAxisSize: MainAxisSize.max,
-    //   mainAxisAlignment: MainAxisAlignment.start,
-    //   crossAxisAlignment: CrossAxisAlignment.stretch,
-    //   children: <Widget>[
-    //     Text("Round " + coachRound.round().toString(),
-    //         style: TextStyle(fontWeight: FontWeight.bold)),
-    //     SizedBox(height: 10),
-    //     Expanded(
-    //       child: Container(
-    //         child: ScrollConfiguration(
-    //             behavior:
-    //                 ScrollConfiguration.of(context).copyWith(dragDevices: {
-    //               PointerDeviceKind.touch,
-    //               PointerDeviceKind.mouse,
-    //             }),
-    //             child: _roundDataBody(coachRound)),
-    //       ),
-    //     ),
-    //     Row(
-    //       mainAxisAlignment: MainAxisAlignment.center,
-    //       mainAxisSize: MainAxisSize.min,
-    //       children: <Widget>[
-    //         Padding(
-    //           padding: EdgeInsets.all(20.0),
-    //         ),
-    //         Padding(
-    //           padding: EdgeInsets.all(20.0),
-    //         ),
-    //       ],
-    //     ),
-    //   ],
-    // );
   }
-
-  // Widget _roundDataBody(CoachRound coachRound) {
-  //   CoachRoundDataSource dataSource =
-  //       CoachRoundDataSource(coachRound: coachRound);
-
-  //   PaginatedDataTable roundDataTable = PaginatedDataTable(
-  //     columns: _roundSummaryCols,
-  //     source: dataSource,
-  //   );
-
-  //   return Expanded(
-  //       child: Column(
-  //     children: [
-  //       Row(
-  //         mainAxisAlignment: MainAxisAlignment.center,
-  //         children: [
-  // ElevatedButton(
-  //   onPressed: () {
-  //     setState(() {
-  //       _coachRounds = widget.tournament.coachRounds;
-  //     });
-  //   },
-  //   child: const Text('Discard'),
-  // ),
-  // SizedBox(width: 20),
-  // ElevatedButton(
-  //   onPressed: () {
-  //     VoidCallback callback = () {
-  //       List<UpdateMatchReportEvent> matchesToUpdate = dataSource
-  //           .editedMatchIndices
-  //           .map((mIdx) => UpdateMatchReportEvent.admin(
-  //               widget.tournament, coachRound.matches[mIdx]))
-  //           .toList();
-
-  //       _tournyBloc.updateMatchEvents(matchesToUpdate);
-  //     };
-
-  //     _showDialogToConfirmOverwrite(context, callback);
-  //   },
-  //   child: const Text('Update'),
-  // )
-  //         ],
-  //       ),
-  //       SizedBox(height: 10),
-  //       roundDataTable,
-  //       SizedBox(height: 10),
-  //     ],
-  //   ));
-  // }
 
   void _showDialogToConfirmOverwrite(
       BuildContext context, VoidCallback confirmedUpdateCallback) {
@@ -580,10 +477,11 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
 
 class CoachRoundDataSource extends DataTableSource {
   late CoachRound coachRound;
+  BuildContext context;
 
   Set<int> editedMatchIndices = {};
 
-  CoachRoundDataSource({required this.coachRound});
+  CoachRoundDataSource({required this.context, required this.coachRound});
 
   String _convertToString(ReportedMatchResultWithStatus r) {
     switch (r.status) {
@@ -713,56 +611,6 @@ class CoachRoundDataSource extends DataTableSource {
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: awayCasCallback);
 
-    bool reportedHomeSport = _hasReported(report.status, false);
-
-    TextEditingController homeSportController = TextEditingController(
-        text: reportedHomeSport
-            ? m.awayReportedResults.bestSportOppRank.toString()
-            : "");
-
-    TextStyle? homeSportStyle = reportedHomeSport
-        ? TextStyle(color: Colors.greenAccent)
-        : TextStyle(color: Colors.redAccent);
-
-    ValueChanged<String> homeSportCallback = (value) {
-      int sport = int.parse(homeSportController.text);
-      m.awayReportedResults.bestSportOppRank = sport;
-      m.awayReportedResults.reported = true;
-      editedMatchIndices.add(index);
-    };
-
-    TextFormField homeSportField = TextFormField(
-        controller: homeSportController,
-        style: homeSportStyle,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onChanged: homeSportCallback);
-
-    bool reportedAwaySport = _hasReported(report.status, true);
-
-    TextEditingController awaySportController = TextEditingController(
-        text: reportedAwaySport
-            ? m.homeReportedResults.bestSportOppRank.toString()
-            : "");
-
-    TextStyle? awaySportStyle = reportedAwaySport
-        ? TextStyle(color: Colors.greenAccent)
-        : TextStyle(color: Colors.redAccent);
-
-    ValueChanged<String> awaySportCallback = (value) {
-      int sport = int.parse(awaySportController.text);
-      m.homeReportedResults.bestSportOppRank = sport;
-      m.homeReportedResults.reported = true;
-      editedMatchIndices.add(index);
-    };
-
-    TextFormField awaySportField = TextFormField(
-        controller: awaySportController,
-        style: awaySportStyle,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onChanged: awaySportCallback);
-
     return DataRow(cells: [
       DataCell(tableNum),
       DataCell(homeNafName),
@@ -772,8 +620,7 @@ class CoachRoundDataSource extends DataTableSource {
       DataCell(awayTdField),
       DataCell(homeCasField),
       DataCell(awayCasField),
-      DataCell(homeSportField),
-      DataCell(awaySportField),
+      DataCell(_btnBestSport(report, index)),
     ]);
   }
 
@@ -830,4 +677,163 @@ class CoachRoundDataSource extends DataTableSource {
         return null;
     }
   }
+
+  Widget _btnBestSport(ReportedMatchResultWithStatus report, int index) {
+    return ElevatedButton(
+      onPressed: () {
+        _showBestSportDialog(report, index);
+      },
+      child: Text("Sport"),
+    );
+  }
+
+  Future<void> _showBestSportDialog(
+      ReportedMatchResultWithStatus report, int index) async {
+    CoachMatchup m = coachRound.matches[index];
+
+    String title = "Best Sport";
+
+    bool reportedHomeSport = _hasReported(report.status, false);
+
+    TextStyle? homeSportStyle = reportedHomeSport
+        ? TextStyle(color: Colors.greenAccent)
+        : TextStyle(color: Colors.redAccent);
+
+    ValueChanged<String> homeSportCallback = (value) {
+      int sport = int.parse(value);
+      m.awayReportedResults.bestSportOppRank = sport;
+      m.awayReportedResults.reported = true;
+      editedMatchIndices.add(index);
+    };
+
+    bool reportedAwaySport = _hasReported(report.status, true);
+
+    TextStyle? awaySportStyle = reportedAwaySport
+        ? TextStyle(color: Colors.greenAccent)
+        : TextStyle(color: Colors.redAccent);
+
+    ValueChanged<String> awaySportCallback = (value) {
+      int sport = int.parse(value);
+      m.homeReportedResults.bestSportOppRank = sport;
+      m.homeReportedResults.reported = true;
+      editedMatchIndices.add(index);
+    };
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      SizedBox(width: 10.0),
+                      Expanded(
+                          child: CustomTextFormField(
+                              title: 'Home Sport (1-5)',
+                              initialValue: m
+                                  .awayReportedResults.bestSportOppRank
+                                  .toString(),
+                              textStyle: homeSportStyle,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              keyboardType: TextInputType.number,
+                              callback: (value) {
+                                homeSportCallback(value);
+                              })),
+                    ]),
+                SizedBox(width: 10.0),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Expanded(
+                          child: CustomTextFormField(
+                              initialValue: m
+                                  .homeReportedResults.bestSportOppRank
+                                  .toString(),
+                              textStyle: awaySportStyle,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              keyboardType: TextInputType.number,
+                              title: 'Away Sport (1-5)',
+                              callback: (value) {
+                                awaySportCallback(value);
+                              }))
+                    ]),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Future<void> _showBonusDialog(
+  //     BuildContext context, TournamentInfo info, CoachMatchup m) async {
+  //   String title = "Bonus Points: " + m.homeNafName + " vs. " + m.awayNafName;
+
+  //   return showDialog<void>(
+  //     context: context,
+  //     barrierDismissible: false, // user must tap button!
+  //     builder: (BuildContext context) {
+  //       return StatefulBuilder(builder: (context, setState) {
+  //         List<Widget> widgets = [];
+
+  //         VoidCallback callback = (() {
+  //           setState(() {});
+  //         });
+
+  //         info.scoringDetails.bonusPts.forEach((element) {
+  //           widgets.add(_itemCounterCallback(element.key, () {
+  //             callback();
+  //           }));
+  //           widgets.add(SizedBox(height: 10));
+  //         });
+
+  //         return AlertDialog(
+  //           title: Text(
+  //             title,
+  //             style: TextStyle(fontWeight: FontWeight.bold),
+  //           ),
+  //           content: SingleChildScrollView(
+  //             child: ListBody(
+  //               children: widgets,
+  //             ),
+  //           ),
+  //           actions: <Widget>[
+  //             TextButton(
+  //               child: const Text('Ok'),
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //               },
+  //             ),
+  //           ],
+  //         );
+  //       });
+  //     },
+  //   );
+  // }
 }
