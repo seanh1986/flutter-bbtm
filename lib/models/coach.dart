@@ -153,8 +153,8 @@ class Coach extends IMatchupParticipant {
         oppTds += matchStats.awayTds;
         oppCas += matchStats.awayCas;
 
-        for (int i = 0; i < matchStats.bonusPts.length; i++) {
-          _bonusPts[i] += matchStats.bonusPts[i];
+        for (int i = 0; i < matchStats.homeBonusPts.length; i++) {
+          _bonusPts[i] += matchStats.homeBonusPts[i];
         }
 
         // Based on opponent's vote
@@ -181,8 +181,8 @@ class Coach extends IMatchupParticipant {
         oppTds += matchStats.homeTds;
         oppCas += matchStats.homeCas;
 
-        for (int i = 0; i < matchStats.bonusPts.length; i++) {
-          _bonusPts[i] += matchStats.bonusPts[i];
+        for (int i = 0; i < matchStats.awayBonusPts.length; i++) {
+          _bonusPts[i] += matchStats.awayBonusPts[i];
         }
 
         // Based on opponent's vote
@@ -197,7 +197,7 @@ class Coach extends IMatchupParticipant {
         _losses * t.scoringDetails.lossPts;
 
     for (int i = 0; i < _bonusPts.length; i++) {
-      _points += _bonusPts[i] * t.scoringDetails.bonusPts[i].value;
+      _points += _bonusPts[i] * t.scoringDetails.bonusPts[i].weight;
     }
   }
 

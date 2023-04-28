@@ -1,3 +1,5 @@
+import 'package:bbnaf/models/tournament/tournament_info.dart';
+
 class ReportedMatchResult {
   bool reported = false;
 
@@ -7,7 +9,8 @@ class ReportedMatchResult {
   int homeCas = 0;
   int awayCas = 0;
 
-  List<int> bonusPts = [];
+  List<int> homeBonusPts = [];
+  List<int> awayBonusPts = [];
 
   // What they ranked their opponent, from 1 to 5
   int bestSportOppRank = 3;
@@ -19,10 +22,12 @@ class ReportedMatchResult {
     this.homeCas = r.homeCas;
     this.awayTds = r.awayTds;
     this.awayCas = r.awayCas;
+    this.homeBonusPts = r.homeBonusPts;
+    this.awayBonusPts = r.awayBonusPts;
     this.bestSportOppRank = r.bestSportOppRank;
   }
 
-  ReportedMatchResult.fromJson(Map<String, dynamic> json) {
+  ReportedMatchResult.fromJson(Map<String, dynamic> json, TournamentInfo info) {
     final tReported = json['reported'] as bool?;
     this.reported = tReported != null ? tReported : false;
 
@@ -38,11 +43,27 @@ class ReportedMatchResult {
     final tAwayCas = json['away_cas'] as int?;
     this.awayCas = tAwayCas != null ? tAwayCas : 0;
 
-    final tBonusPts = json['bonus_pts'] as List<dynamic>?;
-    if (tBonusPts != null) {
-      bonusPts.clear();
-      tBonusPts.forEach((element) {
-        bonusPts.add(element);
+    int numBonuses = info.scoringDetails.bonusPts.length;
+
+    final tHomeBonusPts = json['home_bonus_pts'] as List<dynamic>?;
+    if (tHomeBonusPts != null && numBonuses == tHomeBonusPts.length) {
+      tHomeBonusPts.forEach((element) {
+        homeBonusPts.add(element as int);
+      });
+    } else {
+      info.scoringDetails.bonusPts.forEach((element) {
+        homeBonusPts.add(0);
+      });
+    }
+
+    final tAwayBonusPts = json['away_bonus_pts'] as List<dynamic>?;
+    if (tAwayBonusPts != null && numBonuses == tAwayBonusPts.length) {
+      tAwayBonusPts.forEach((element) {
+        awayBonusPts.add(element as int);
+      });
+    } else {
+      info.scoringDetails.bonusPts.forEach((element) {
+        awayBonusPts.add(0);
       });
     }
 
@@ -56,7 +77,8 @@ class ReportedMatchResult {
         'home_cas': homeCas,
         'away_td': awayTds,
         'away_cas': awayCas,
-        'bonus_pts': bonusPts,
+        'home_bonus_pts': homeBonusPts,
+        'away_bonus_pts': awayBonusPts,
         'opp_best_sport_rank': bestSportOppRank,
       };
 }

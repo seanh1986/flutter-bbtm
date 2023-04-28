@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/tournament/tournament_backup.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
@@ -39,17 +40,8 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   int _selectedRoundIdx = -1;
   List<CoachRound> _coachRounds = [];
 
-  List<DataColumn> _roundSummaryCols = [
-    DataColumn(label: Text("Table")),
-    DataColumn(label: Text("Home")),
-    DataColumn(label: Text("Away")),
-    DataColumn(label: Text("Status")),
-    DataColumn(label: Text("H TD")),
-    DataColumn(label: Text("A TD")),
-    DataColumn(label: Text("H Cas")),
-    DataColumn(label: Text("A Cas")),
-    DataColumn(label: Text("Sport")),
-  ];
+  late List<DataColumn> _roundSummaryCols;
+  bool useBonus = false;
 
   @override
   void initState() {
@@ -69,8 +61,32 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     super.dispose();
   }
 
+  List<DataColumn> _getRoundSummaryCols() {
+    List<DataColumn> cols = [
+      DataColumn(label: Text("Table")),
+      DataColumn(label: Text("Home")),
+      DataColumn(label: Text("Away")),
+      DataColumn(label: Text("Status")),
+      DataColumn(label: Text("H TD")),
+      DataColumn(label: Text("A TD")),
+      DataColumn(label: Text("H Cas")),
+      DataColumn(label: Text("A Cas")),
+    ];
+
+    if (widget.tournament.info.scoringDetails.bonusPts.isNotEmpty) {
+      useBonus = true;
+      cols.add(DataColumn(label: Text("Bonus")));
+    }
+
+    cols.add(DataColumn(label: Text("Sport")));
+
+    return cols;
+  }
+
   @override
   Widget build(BuildContext context) {
+    _roundSummaryCols = _getRoundSummaryCols();
+
     List<Widget> _widgets = [
       TitleBar(title: "Round Management"),
       _advanceDiscardBackupBtns(context),
@@ -161,8 +177,8 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
 
     CoachRound coachRound = _coachRounds[roundIdx];
 
-    CoachRoundDataSource dataSource =
-        CoachRoundDataSource(context: context, coachRound: coachRound);
+    CoachRoundDataSource dataSource = CoachRoundDataSource(
+        context: context, info: widget.tournament.info, coachRound: coachRound);
 
     PaginatedDataTable roundDataTable = PaginatedDataTable(
       columns: _roundSummaryCols,
@@ -476,12 +492,14 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
 }
 
 class CoachRoundDataSource extends DataTableSource {
-  late CoachRound coachRound;
   BuildContext context;
+  TournamentInfo info;
+  CoachRound coachRound;
 
   Set<int> editedMatchIndices = {};
 
-  CoachRoundDataSource({required this.context, required this.coachRound});
+  CoachRoundDataSource(
+      {required this.context, required this.info, required this.coachRound});
 
   String _convertToString(ReportedMatchResultWithStatus r) {
     switch (r.status) {
@@ -611,7 +629,7 @@ class CoachRoundDataSource extends DataTableSource {
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: awayCasCallback);
 
-    return DataRow(cells: [
+    List<DataCell> cellRows = [
       DataCell(tableNum),
       DataCell(homeNafName),
       DataCell(awayNafName),
@@ -620,8 +638,15 @@ class CoachRoundDataSource extends DataTableSource {
       DataCell(awayTdField),
       DataCell(homeCasField),
       DataCell(awayCasField),
-      DataCell(_btnBestSport(report, index)),
-    ]);
+    ];
+
+    if (info.scoringDetails.bonusPts.isNotEmpty) {
+      cellRows.add(DataCell(_btnBonus(report, index)));
+    }
+
+    cellRows.add(DataCell(_btnBestSport(report, index)));
+
+    return DataRow(cells: cellRows);
   }
 
   @override
@@ -646,6 +671,11 @@ class CoachRoundDataSource extends DataTableSource {
   }
 
   String _getValue(ReportedMatchStatus status, int homeVal, int awayVal) {
+    return _getValueWithDefault(status, homeVal, awayVal, null);
+  }
+
+  String _getValueWithDefault(
+      ReportedMatchStatus status, int homeVal, int awayVal, int? defaultVal) {
     switch (status) {
       case ReportedMatchStatus.BothReportedConflict:
         return homeVal == awayVal
@@ -658,7 +688,7 @@ class CoachRoundDataSource extends DataTableSource {
         return homeVal.toString();
       case ReportedMatchStatus.NoReportsYet:
       default:
-        return "";
+        return defaultVal != null ? defaultVal.toString() : "";
     }
   }
 
@@ -791,49 +821,159 @@ class CoachRoundDataSource extends DataTableSource {
     );
   }
 
-  // Future<void> _showBonusDialog(
-  //     BuildContext context, TournamentInfo info, CoachMatchup m) async {
-  //   String title = "Bonus Points: " + m.homeNafName + " vs. " + m.awayNafName;
+  Widget _btnBonus(ReportedMatchResultWithStatus report, int index) {
+    return ElevatedButton(
+      onPressed: () {
+        _showBonusDialog(info, index);
+      },
+      child: Text("Bonus"),
+    );
+  }
 
-  //   return showDialog<void>(
-  //     context: context,
-  //     barrierDismissible: false, // user must tap button!
-  //     builder: (BuildContext context) {
-  //       return StatefulBuilder(builder: (context, setState) {
-  //         List<Widget> widgets = [];
+  Future<void> _showBonusDialog(TournamentInfo info, int index) async {
+    CoachMatchup m = coachRound.matches[index];
 
-  //         VoidCallback callback = (() {
-  //           setState(() {});
-  //         });
+    String title = "Bonus Points: " + m.homeNafName + " vs. " + m.awayNafName;
 
-  //         info.scoringDetails.bonusPts.forEach((element) {
-  //           widgets.add(_itemCounterCallback(element.key, () {
-  //             callback();
-  //           }));
-  //           widgets.add(SizedBox(height: 10));
-  //         });
+    if (m.homeReportedResults.homeBonusPts.isEmpty) {
+      for (int i = 0; i < info.scoringDetails.bonusPts.length; i++) {
+        m.homeReportedResults.homeBonusPts.add(0);
+      }
+    }
+    if (m.homeReportedResults.awayBonusPts.isEmpty) {
+      for (int i = 0; i < info.scoringDetails.bonusPts.length; i++) {
+        m.homeReportedResults.awayBonusPts.add(0);
+      }
+    }
+    if (m.awayReportedResults.homeBonusPts.isEmpty) {
+      for (int i = 0; i < info.scoringDetails.bonusPts.length; i++) {
+        m.awayReportedResults.homeBonusPts.add(0);
+      }
+    }
+    if (m.awayReportedResults.awayBonusPts.isEmpty) {
+      for (int i = 0; i < info.scoringDetails.bonusPts.length; i++) {
+        m.awayReportedResults.awayBonusPts.add(0);
+      }
+    }
 
-  //         return AlertDialog(
-  //           title: Text(
-  //             title,
-  //             style: TextStyle(fontWeight: FontWeight.bold),
-  //           ),
-  //           content: SingleChildScrollView(
-  //             child: ListBody(
-  //               children: widgets,
-  //             ),
-  //           ),
-  //           actions: <Widget>[
-  //             TextButton(
-  //               child: const Text('Ok'),
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //             ),
-  //           ],
-  //         );
-  //       });
-  //     },
-  //   );
-  // }
+    List<Widget> homeWidgets = [
+      SizedBox(width: 10.0),
+      Text(m.homeNafName, style: TextStyle(fontWeight: FontWeight.bold)),
+      SizedBox(width: 10.0),
+    ];
+
+    List<Widget> awayWidgets = [
+      SizedBox(width: 10.0),
+      Text(m.awayNafName, style: TextStyle(fontWeight: FontWeight.bold)),
+      SizedBox(width: 10.0),
+    ];
+
+    ReportedMatchResultWithStatus report = m.getReportedMatchStatus();
+
+    for (int i = 0; i < info.scoringDetails.bonusPts.length; i++) {
+      String bonusName = info.scoringDetails.bonusPts[i].name;
+      double bonusWeight = info.scoringDetails.bonusPts[i].weight;
+
+      String bonusTitle = bonusName + " (w: " + bonusWeight.toString() + ")";
+
+      int homeBonusHomeReported = m.homeReportedResults.homeBonusPts[i];
+
+      int homeBonusAwayReported = m.awayReportedResults.homeBonusPts[i];
+
+      String homeBonus = _getValueWithDefault(
+          report.status, homeBonusHomeReported, homeBonusAwayReported, 0);
+      TextStyle? homeBonusStyle = _getTextStyle(
+          report.status, homeBonusHomeReported, homeBonusAwayReported);
+
+      ValueChanged<String> homeBonusCallback = (value) {
+        int numPts = int.parse(value);
+        m.homeReportedResults.homeBonusPts[i] = numPts;
+        m.awayReportedResults.homeBonusPts[i] = numPts;
+        m.homeReportedResults.reported = true;
+        m.awayReportedResults.reported = true;
+        editedMatchIndices.add(index);
+      };
+
+      homeWidgets.add(Expanded(
+          child: CustomTextFormField(
+              title: m.homeNafName.toString() + " -> " + bonusTitle,
+              initialValue: homeBonus.toString(),
+              textStyle: homeBonusStyle,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              keyboardType: TextInputType.number,
+              callback: (value) {
+                homeBonusCallback(value);
+              })));
+
+      int awayBonusHomeReported = m.homeReportedResults.awayBonusPts[i];
+
+      int awayBonusAwayReported = m.awayReportedResults.awayBonusPts[i];
+
+      String awayBonus = _getValueWithDefault(
+          report.status, awayBonusHomeReported, awayBonusAwayReported, 0);
+      TextStyle? awayBonusStyle = _getTextStyle(
+          report.status, awayBonusHomeReported, awayBonusAwayReported);
+
+      ValueChanged<String> awayBonusCallback = (value) {
+        int numPts = int.parse(value);
+        m.homeReportedResults.awayBonusPts[i] = numPts;
+        m.awayReportedResults.awayBonusPts[i] = numPts;
+        m.homeReportedResults.reported = true;
+        m.awayReportedResults.reported = true;
+        editedMatchIndices.add(index);
+      };
+
+      awayWidgets.add(Expanded(
+          child: CustomTextFormField(
+              title: m.awayNafName.toString() + " -> " + bonusTitle,
+              initialValue: awayBonus.toString(),
+              textStyle: awayBonusStyle,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              keyboardType: TextInputType.number,
+              callback: (value) {
+                awayBonusCallback(value);
+              })));
+    }
+
+    List<Widget> widgets = [];
+    widgets.add(SizedBox(height: 10));
+    widgets.addAll(homeWidgets);
+    widgets.add(SizedBox(height: 10));
+    widgets.add(Divider());
+    widgets.add(SizedBox(height: 10));
+    widgets.addAll(awayWidgets);
+    widgets.add(SizedBox(height: 10));
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: widgets,
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

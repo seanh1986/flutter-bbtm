@@ -365,7 +365,8 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
           setState(() {
             String bonusPtsIdx =
                 (_scoringDetails.bonusPts.length + 1).toString();
-            _scoringDetails.bonusPts.add(MapEntry("Bonus_" + bonusPtsIdx, 1));
+            _scoringDetails.bonusPts
+                .add(BonusDetails("Bonus_" + bonusPtsIdx, 1));
           });
         },
         child: const Text('Add Bonus'),
@@ -373,15 +374,15 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
     ];
 
     for (int i = 0; i < details.bonusPts.length; i++) {
-      String bonusKey = details.bonusPts[i].key;
-      double bonusVal = details.bonusPts[i].value;
+      String bonusKey = details.bonusPts[i].name;
+      double bonusVal = details.bonusPts[i].weight;
 
       ValueChanged<String> bonusNameCallback = ((value) {
-        details.bonusPts[i] = MapEntry(value, bonusVal);
+        details.bonusPts[i] = BonusDetails(value, bonusVal);
       });
 
       ValueChanged<String> bonusPtsCallback = ((value) {
-        details.bonusPts[i] = MapEntry(bonusKey, double.parse(value));
+        details.bonusPts[i] = BonusDetails(bonusKey, double.parse(value));
       });
 
       bonusPtsWidgets.add(Row(

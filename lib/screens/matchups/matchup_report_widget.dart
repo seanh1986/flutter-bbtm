@@ -47,14 +47,15 @@ class MatchupReportWidget extends StatefulWidget {
 
       int numBonus = tounamentInfo.scoringDetails.bonusPts.length;
       for (int i = 0; i < numBonus; i++) {
-        MapEntry<String, double> bonusPts =
-            tounamentInfo.scoringDetails.bonusPts[i];
+        BonusDetails infoBonusPts = tounamentInfo.scoringDetails.bonusPts[i];
 
-        int cnt = reportedMatch!.bonusPts.length == numBonus
-            ? reportedMatch!.bonusPts[i]
-            : 0;
+        List<int> matchBonusPts = showHome
+            ? reportedMatch!.homeBonusPts
+            : reportedMatch!.awayBonusPts;
 
-        counts.putIfAbsent(bonusPts.key, () => cnt);
+        int cnt = matchBonusPts.length == numBonus ? matchBonusPts[i] : 0;
+
+        counts.putIfAbsent(infoBonusPts.name, () => cnt);
       }
     }
   }
@@ -307,7 +308,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
           });
 
           widget.tounamentInfo.scoringDetails.bonusPts.forEach((element) {
-            widgets.add(_itemCounterCallback(element.key, () {
+            widgets.add(_itemCounterCallback(element.name, () {
               callback();
             }));
             widgets.add(SizedBox(height: 10));

@@ -1,6 +1,7 @@
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 
 enum ReportedMatchStatus {
   NoReportsYet,
@@ -69,10 +70,7 @@ class CoachMatchup extends IMatchup {
 
   MatchResult getResult() {
     if (homeReportedResults.reported && awayReportedResults.reported) {
-      if (homeReportedResults.homeTds == awayReportedResults.homeTds &&
-          homeReportedResults.awayTds == awayReportedResults.awayTds &&
-          homeReportedResults.homeCas == awayReportedResults.homeCas &&
-          homeReportedResults.awayCas == awayReportedResults.awayCas) {
+      if (_areResultsSame()) {
         return _getMatchResult(homeReportedResults);
       } else {
         return MatchResult.Conflict;
@@ -103,16 +101,7 @@ class CoachMatchup extends IMatchup {
     if (!homeReported && !awayReported) {
       return ReportedMatchResultWithStatus();
     } else if (homeReported && awayReported) {
-      bool sameHomeTds =
-          homeReportedResults.homeTds == awayReportedResults.homeTds;
-      bool sameAwayTds =
-          homeReportedResults.awayTds == awayReportedResults.awayTds;
-      bool sameHomeCas =
-          homeReportedResults.homeCas == awayReportedResults.homeCas;
-      bool sameAwayCas =
-          homeReportedResults.awayCas == awayReportedResults.awayCas;
-
-      if (sameHomeTds && sameAwayTds && sameHomeCas && sameAwayCas) {
+      if (_areResultsSame()) {
         return ReportedMatchResultWithStatus.from(
             ReportedMatchStatus.BothReportedAgree, homeReportedResults);
       } else {
@@ -130,6 +119,44 @@ class CoachMatchup extends IMatchup {
     }
   }
 
+  bool _areResultsSame() {
+    bool sameHomeTds =
+        homeReportedResults.homeTds == awayReportedResults.homeTds;
+    bool sameAwayTds =
+        homeReportedResults.awayTds == awayReportedResults.awayTds;
+    bool sameHomeCas =
+        homeReportedResults.homeCas == awayReportedResults.homeCas;
+    bool sameAwayCas =
+        homeReportedResults.awayCas == awayReportedResults.awayCas;
+
+    bool sameHomeBonus = homeReportedResults.homeBonusPts.length ==
+        awayReportedResults.homeBonusPts.length;
+    if (sameHomeBonus) {
+      for (int i = 0; i < homeReportedResults.homeBonusPts.length; i++) {
+        sameHomeBonus &= homeReportedResults.homeBonusPts[i] ==
+            awayReportedResults.homeBonusPts[i];
+      }
+    }
+
+    bool sameAwayBonus = homeReportedResults.awayBonusPts.length ==
+        awayReportedResults.awayBonusPts.length;
+    if (sameAwayBonus) {
+      for (int i = 0; i < homeReportedResults.awayBonusPts.length; i++) {
+        sameAwayBonus &= homeReportedResults.awayBonusPts[i] ==
+            awayReportedResults.awayBonusPts[i];
+      }
+    }
+
+    bool allSame = sameHomeTds &&
+        sameAwayTds &&
+        sameHomeCas &&
+        sameAwayCas &&
+        sameHomeBonus &&
+        sameAwayBonus;
+
+    return allSame;
+  }
+
   bool isHome(String? nafName) {
     return nafName != null &&
         homeNafName.toLowerCase() == nafName.toLowerCase();
@@ -144,7 +171,7 @@ class CoachMatchup extends IMatchup {
     return isHome(nafName) || isAway(nafName);
   }
 
-  CoachMatchup.fromJson(Map<String, dynamic> json) {
+  CoachMatchup.fromJson(Map<String, dynamic> json, TournamentInfo info) {
     final tTable = json['table'] as int?;
     this.tableNum = tTable != null ? tTable : -1;
 
@@ -157,13 +184,15 @@ class CoachMatchup extends IMatchup {
     final tHomeReportedResults =
         json['home_reported_results'] as Map<String, dynamic>?;
     if (tHomeReportedResults != null) {
-      homeReportedResults = ReportedMatchResult.fromJson(tHomeReportedResults);
+      homeReportedResults =
+          ReportedMatchResult.fromJson(tHomeReportedResults, info);
     }
 
     final tAwayReportedResults =
         json['away_reported_results'] as Map<String, dynamic>?;
     if (tAwayReportedResults != null) {
-      awayReportedResults = ReportedMatchResult.fromJson(tAwayReportedResults);
+      awayReportedResults =
+          ReportedMatchResult.fromJson(tAwayReportedResults, info);
     }
   }
 

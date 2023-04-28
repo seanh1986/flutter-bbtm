@@ -200,7 +200,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
     StringBuffer sb = StringBuffer();
 
     scoringDetails.bonusPts.forEach((a) {
-      sb.writeln(a.key + ": " + a.value.toString());
+      sb.writeln(a.name + ": " + a.weight.toString());
     });
 
     return _getUnderlinedEntry("Bonus Pts", sb.toString(), true);

@@ -185,13 +185,39 @@ enum SquadTieBreakers {
   SumTdDiffPlusCasDiff, // Across all squad members
 }
 
+class BonusDetails {
+  late String name;
+  late double weight;
+
+  BonusDetails(this.name, this.weight);
+
+  BonusDetails.fromJsonWithDefault(
+      Map<String, dynamic> json, String? defaultName) {
+    final tName = json['name'] as String?;
+    this.name =
+        tName != null ? tName : (defaultName != null ? defaultName : "");
+
+    final tWeight = json['weight'] as double?;
+    this.weight = tWeight != null ? tWeight : 1;
+  }
+
+  BonusDetails.fromJson(Map<String, dynamic> json) {
+    BonusDetails.fromJsonWithDefault(json, null);
+  }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'weight': weight,
+      };
+}
+
 class ScoringDetails {
   late double winPts;
   late double tiePts;
   late double lossPts;
 
   // Optional list of bonus points and weights
-  List<MapEntry<String, double>> bonusPts = [];
+  List<BonusDetails> bonusPts = [];
 
   ScoringDetails(this.winPts, this.tiePts, this.lossPts);
 
@@ -219,14 +245,12 @@ class ScoringDetails {
     final tLossPts = json['loss_pts'] as double?;
     this.lossPts = tLossPts != null ? tLossPts : 0;
 
-    final tBonusPts = json['bonus_pts'] as Map<String, dynamic>?;
+    final tBonusPts = json['bonus_pts'] as List<dynamic>?;
     if (tBonusPts != null) {
-      bonusPts.clear();
-      tBonusPts.forEach((key, value) {
-        if (value is double) {
-          bonusPts.add(MapEntry(key, value));
-        }
-      });
+      for (int i = 0; i < tBonusPts.length; i++) {
+        bonusPts.add(BonusDetails.fromJsonWithDefault(
+            tBonusPts[i] as Map<String, dynamic>, "Bonus_" + i.toString()));
+      }
     }
   }
 
@@ -234,7 +258,7 @@ class ScoringDetails {
         'win_pts': winPts,
         'tie_pts': tiePts,
         'loss_pts': lossPts,
-        'bonus_pts': bonusPts,
+        'bonus_pts': bonusPts.map((e) => e.toJson()).toList(),
       };
 }
 

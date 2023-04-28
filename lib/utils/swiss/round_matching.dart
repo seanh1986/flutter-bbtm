@@ -3,6 +3,7 @@ import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 
 abstract class RoundMatching {
   int round();
@@ -88,14 +89,15 @@ class CoachRound extends RoundMatching {
     return matches.any((CoachMatchup match) => match.hasParticipant(c));
   }
 
-  CoachRound.fromJson(Map<String, dynamic> json) {
+  CoachRound.fromJson(Map<String, dynamic> json, TournamentInfo info) {
     final tRound = json['round'] as int?;
     this._round = tRound != null ? tRound : 0;
 
     final tMatches = json['matches'] as List<dynamic>?;
     if (tMatches != null) {
       for (int i = 0; i < tMatches.length; i++) {
-        matches.add(CoachMatchup.fromJson(tMatches[i] as Map<String, dynamic>));
+        matches.add(
+            CoachMatchup.fromJson(tMatches[i] as Map<String, dynamic>, info));
       }
     }
   }

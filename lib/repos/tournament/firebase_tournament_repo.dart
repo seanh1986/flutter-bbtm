@@ -117,6 +117,7 @@ class FirebaseTournamentRepository extends TournamentRepository {
     }).then((value) {
       return true;
     }).catchError((e) {
+      print(e.toString());
       return false;
     });
   }
