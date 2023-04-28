@@ -4,6 +4,7 @@ import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/matchups/matchup_report_widget.dart';
 import 'package:bbnaf/utils/toast.dart';
@@ -389,6 +390,51 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
         homeResult.reported ? homeResult.awayCas : null,
         awayResult.reported ? awayResult.awayCas : null);
 
+    List<Widget> widgets = [
+      homeVsAway,
+      SizedBox(height: 5),
+      Divider(),
+      SizedBox(height: 5),
+      homeTds,
+      awayTds,
+      SizedBox(height: 5),
+      Divider(),
+      SizedBox(height: 5),
+      homeCas,
+      awayCas,
+    ];
+
+    List<BonusDetails> bonuses = widget.tournament.info.scoringDetails.bonusPts;
+    if (bonuses.isNotEmpty) {
+      for (int i = 0; i < bonuses.length; i++) {
+        BonusDetails bonusDetails = bonuses[i];
+
+        Widget homeBonus = _getReportedResultItemWidget(
+            "Home Bonus: " +
+                bonusDetails.name +
+                "(w:" +
+                bonusDetails.weight.toString() +
+                ")",
+            homeResult.reported ? homeResult.homeBonusPts[i] : null,
+            awayResult.reported ? awayResult.homeBonusPts[i] : null);
+
+        Widget awayBonus = _getReportedResultItemWidget(
+            "Away Bonus: " +
+                bonusDetails.name +
+                "(w:" +
+                bonusDetails.weight.toString() +
+                ")",
+            homeResult.reported ? homeResult.awayBonusPts[i] : null,
+            awayResult.reported ? awayResult.awayBonusPts[i] : null);
+
+        widgets.add(SizedBox(height: 5));
+        widgets.add(Divider());
+        widgets.add(SizedBox(height: 5));
+        widgets.add(homeBonus);
+        widgets.add(awayBonus);
+      }
+    }
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -400,15 +446,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           ),
           content: SingleChildScrollView(
             child: ListBody(
-              children: <Widget>[
-                homeVsAway,
-                SizedBox(height: 10),
-                homeTds,
-                awayTds,
-                SizedBox(height: 10),
-                homeCas,
-                awayCas,
-              ],
+              children: widgets,
             ),
           ),
           actions: <Widget>[
@@ -476,6 +514,35 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     sb.writeln("homeCas: " + homeCas.toString());
     sb.writeln("awayCas: " + awayCas.toString());
 
+    List<BonusDetails> bonuses = widget.tournament.info.scoringDetails.bonusPts;
+    if (bonuses.isNotEmpty) {
+      List<int> homeBonuses = homeReportWidget.getBonusPts();
+      List<int> awayBonuses = awayReportWidget.getBonusPts();
+
+      sb.writeln("");
+      sb.writeln("Bonuses:");
+
+      for (int i = 0; i < bonuses.length; i++) {
+        BonusDetails bonusDetails = bonuses[i];
+
+        sb.writeln("");
+
+        sb.writeln("home -> " +
+            bonusDetails.name +
+            "(w: " +
+            bonusDetails.weight.toString() +
+            "): " +
+            homeBonuses[i].toString());
+
+        sb.writeln("away -> " +
+            bonusDetails.name +
+            "(w: " +
+            bonusDetails.weight.toString() +
+            "): " +
+            awayBonuses[i].toString());
+      }
+    }
+
     String msg = sb.toString();
 
     OkCancelResult result =
@@ -491,17 +558,27 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       isHome = true;
       _matchup.homeReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.homeReportedResults.homeCas = homeReportWidget.getCas();
+      _matchup.homeReportedResults.homeBonusPts =
+          homeReportWidget.getBonusPts();
 
       _matchup.homeReportedResults.awayTds = awayReportWidget.getTds();
       _matchup.homeReportedResults.awayCas = awayReportWidget.getCas();
+      _matchup.homeReportedResults.awayBonusPts =
+          awayReportWidget.getBonusPts();
+
       _matchup.homeReportedResults.reported = true;
     } else if (_matchup.isAway(_authUser.nafName)) {
       isHome = false;
       _matchup.awayReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.awayReportedResults.homeCas = homeReportWidget.getCas();
+      _matchup.awayReportedResults.homeBonusPts =
+          homeReportWidget.getBonusPts();
 
       _matchup.awayReportedResults.awayTds = awayReportWidget.getTds();
       _matchup.awayReportedResults.awayCas = awayReportWidget.getCas();
+      _matchup.awayReportedResults.awayBonusPts =
+          awayReportWidget.getBonusPts();
+
       _matchup.awayReportedResults.reported = true;
     }
     // TODO: check if squad captain
@@ -511,16 +588,26 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     else {
       _matchup.homeReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.homeReportedResults.homeCas = homeReportWidget.getCas();
+      _matchup.homeReportedResults.homeBonusPts =
+          homeReportWidget.getBonusPts();
 
       _matchup.homeReportedResults.awayTds = awayReportWidget.getTds();
       _matchup.homeReportedResults.awayCas = awayReportWidget.getCas();
+      _matchup.homeReportedResults.awayBonusPts =
+          awayReportWidget.getBonusPts();
+
       _matchup.homeReportedResults.reported = true;
 
       _matchup.awayReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.awayReportedResults.homeCas = homeReportWidget.getCas();
+      _matchup.awayReportedResults.homeBonusPts =
+          homeReportWidget.getBonusPts();
 
       _matchup.awayReportedResults.awayTds = awayReportWidget.getTds();
       _matchup.awayReportedResults.awayCas = awayReportWidget.getCas();
+      _matchup.awayReportedResults.awayBonusPts =
+          awayReportWidget.getBonusPts();
+
       _matchup.awayReportedResults.reported = true;
     }
 

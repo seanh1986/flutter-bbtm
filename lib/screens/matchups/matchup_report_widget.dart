@@ -79,8 +79,8 @@ class MatchupReportWidget extends StatefulWidget {
   List<int> getBonusPts() {
     List<int> bonusPts = [];
 
-    tounamentInfo.scoringDetails.bonusPts.forEach((element) {
-      int? bonus = counts[element];
+    tounamentInfo.scoringDetails.bonusPts.forEach((bonusDetails) {
+      int? bonus = counts[bonusDetails.name];
       bonusPts.add(bonus != null ? bonus : 0);
     });
 
