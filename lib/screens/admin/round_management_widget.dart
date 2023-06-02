@@ -99,6 +99,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
 
   void _refreshState() {
     _coachRounds = widget.tournament.coachRounds;
+
+    if (_coachRounds.isNotEmpty) {
+      _selectedRoundIdx = _coachRounds.length - 1;
+    }
   }
 
   Widget _advanceDiscardBackupBtns(BuildContext context) {
@@ -198,16 +202,26 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
         SizedBox(width: 20),
         ElevatedButton(
           onPressed: () {
-            VoidCallback callback = () {
+            VoidCallback callback = () async {
               List<UpdateMatchReportEvent> matchesToUpdate = dataSource
                   .editedMatchIndices
                   .map((mIdx) => UpdateMatchReportEvent.admin(
                       widget.tournament, coachRound.matches[mIdx]))
                   .toList();
 
-              _tournyBloc.updateMatchEvents(matchesToUpdate);
-              _tournyBloc
-                  .add(TournamentEventRefreshData(widget.tournament.info.id));
+              bool success =
+                  await _tournyBloc.updateMatchEvents(matchesToUpdate);
+
+              if (success) {
+                ToastUtils.showSuccess(
+                    fToast, "Tournament data successfully updated.");
+
+                _tournyBloc
+                    .add(TournamentEventRefreshData(widget.tournament.info.id));
+              } else {
+                ToastUtils.showFailed(
+                    fToast, "Tournament data failed to update.");
+              }
             };
 
             _showDialogToConfirmOverwrite(context, callback);

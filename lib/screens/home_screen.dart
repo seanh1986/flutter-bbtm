@@ -48,7 +48,14 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _refreshState();
+
+    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
+    _authBloc = BlocProvider.of<AuthBloc>(context);
+
+    fToast = FToast();
+    fToast.init(context);
+
+    //_refreshState();
 
     if (_tournyBloc.state is TournamentStateLoaded) {
       _tournament = (_tournyBloc.state as TournamentStateLoaded).tournament;
@@ -72,12 +79,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _refreshState() {
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-    _authBloc = BlocProvider.of<AuthBloc>(context);
-
-    fToast = FToast();
-    fToast.init(context);
-
     _tournySub = _tournyBloc.stream.listen((tournyState) {
       if (tournyState is TournamentStateLoaded) {
         ToastUtils.showSuccess(fToast, "Tournament Data Loaded");

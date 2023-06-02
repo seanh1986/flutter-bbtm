@@ -191,7 +191,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-//          verticalDirection: VerticalDirection.down,
+          verticalDirection: VerticalDirection.down,
           children: <Widget>[
             Expanded(
               child: Container(
