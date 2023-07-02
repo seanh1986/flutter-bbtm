@@ -42,6 +42,7 @@ class RankingCoachPage extends StatefulWidget {
 
 class _RankingCoachPage extends State<RankingCoachPage> {
   late int _sortColumnIndex = widget.tournament.useSquads() ? 4 : 3;
+  late CoachRankingFields _sortField = widget.fields.first;
   bool _sortAscending = false;
 
   List<Coach> _items = [];
@@ -56,22 +57,21 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     _items = List.from(widget.tournament
         .getCoaches()
         .where((a) => a.isActive(widget.tournament) || a.gamesPlayed() > 0));
+
+    _items.sort((Coach a, Coach b) {
+      final double aValue = _getSortingValue(a, _sortField);
+      final double bValue = _getSortingValue(b, _sortField);
+
+      int multiplier = _sortAscending ? 1 : -1;
+
+      return multiplier * Comparable.compare(aValue, bValue);
+    });
   }
 
-  void _sort<T>(
-      Comparable<T> getField(Coach d), int columnIndex, bool ascending) {
-    _items.sort((Coach a, Coach b) {
-      if (!ascending) {
-        final Coach c = a;
-        a = b;
-        b = c;
-      }
-      final Comparable<T> aValue = getField(a);
-      final Comparable<T> bValue = getField(b);
-      return Comparable.compare(aValue, bValue);
-    });
+  void _sort<T>(CoachRankingFields field, int columnIndex, bool ascending) {
     setState(() {
       _sortColumnIndex = columnIndex;
+      _sortField = field;
       _sortAscending = ascending;
     });
   }
@@ -103,19 +103,12 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       if (name.isNotEmpty) {
         DataColumnSortCallback? sorter;
         switch (f) {
-          case CoachRankingFields.Pts:
-            // Take into account tie breakers
-            sorter = (columnIndex, ascending) => _sort<num>(
-                (Coach c) => c.pointsWithTieBreakersBuiltIn(),
-                columnIndex,
-                ascending);
-            break;
           case CoachRankingFields.W_T_L:
             sorter = null;
             break;
           default:
-            sorter = (columnIndex, ascending) => _sort<num>(
-                (Coach c) => _getSortingValue(c, f), columnIndex, ascending);
+            sorter = (columnIndex, ascending) =>
+                _sort<num>(f, columnIndex, ascending);
             break;
         }
 
@@ -132,11 +125,6 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
   List<DataRow> _getRows() {
     List<DataRow> rows = [];
-
-    // sort by field
-    CoachRankingFields field = widget.fields.first;
-    _sort<num>((Coach c) => _getSortingValue(c, field), _sortColumnIndex,
-        _sortAscending);
 
     int rank = 1;
     _items.forEach((coach) {
