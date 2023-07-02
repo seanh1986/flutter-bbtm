@@ -11,6 +11,8 @@ import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
+import 'package:file_picker/_internal/file_picker_web.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:flutter/services.dart';
@@ -403,8 +405,13 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
           child: Text('Recover Backup'),
           onPressed: () {
             VoidCallback recoveryCallback = () async {
-              var picked =
-                  await FilePicker.platform.pickFiles(allowMultiple: false);
+              FilePickerResult? picked;
+
+              if (kIsWeb) {
+                picked = await FilePickerWeb.platform.pickFiles();
+              } else {
+                picked = await FilePicker.platform.pickFiles();
+              }
 
               if (picked != null) {
                 print(picked.files.first.name);
