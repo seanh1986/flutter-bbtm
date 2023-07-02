@@ -53,7 +53,9 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   }
 
   void _refreshState() {
-    _items = List.from(widget.tournament.getCoaches());
+    _items = List.from(widget.tournament
+        .getCoaches()
+        .where((a) => a.isActive(widget.tournament) || a.gamesPlayed() > 0));
   }
 
   void _sort<T>(

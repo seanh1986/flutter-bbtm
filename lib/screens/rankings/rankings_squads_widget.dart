@@ -53,7 +53,9 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   }
 
   void _refreshState() {
-    _items = List.from(widget.tournament.getSquads());
+    _items = List.from(widget.tournament
+        .getSquads()
+        .where((a) => a.isActive(widget.tournament) || a.gamesPlayed() > 0));
   }
 
   void _sort<T>(
