@@ -96,8 +96,8 @@ class CoachRound extends RoundMatching {
     final tMatches = json['matches'] as List<dynamic>?;
     if (tMatches != null) {
       for (int i = 0; i < tMatches.length; i++) {
-        matches.add(
-            CoachMatchup.fromJson(tMatches[i] as Map<String, dynamic>, info));
+        var matchJson = tMatches[i] as Map<String, dynamic>;
+        matches.add(CoachMatchup.fromJson(matchJson, info));
       }
     }
   }

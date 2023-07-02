@@ -46,9 +46,7 @@ class TournamentInfo {
     if (tStart != null) {
       try {
         this.dateTimeStart = DateTime.parse(tStart);
-      } catch (_) {
-        //ignore
-      }
+      } catch (_) {}
     }
 
     final String? tEnd = json['date_time_end'] as String?;
@@ -61,7 +59,8 @@ class TournamentInfo {
     final tOrganizers = json['organizers'] as List<dynamic>?;
     if (tOrganizers != null) {
       tOrganizers.forEach((tOrga) {
-        organizers.add(OrganizerInfo.fromJson(tOrga as Map<String, dynamic>));
+        var orgaJson = tOrga as Map<String, dynamic>;
+        organizers.add(OrganizerInfo.fromJson(orgaJson));
       });
     }
 

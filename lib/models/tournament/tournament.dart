@@ -288,15 +288,16 @@ class Tournament {
     final tCoaches = json['coaches'] as List<dynamic>?;
     if (tCoaches != null) {
       for (int i = 0; i < tCoaches.length; i++) {
-        addCoach(Coach.fromJson(i, tCoaches[i] as Map<String, dynamic>));
+        var coachJson = tCoaches[i] as Map<String, dynamic>;
+        addCoach(Coach.fromJson(i, coachJson));
       }
     }
 
     final tCoachRounds = json['coach_rounds'] as List<dynamic>?;
     if (tCoachRounds != null) {
       for (int i = 0; i < tCoachRounds.length; i++) {
-        coachRounds.add(
-            CoachRound.fromJson(tCoachRounds[i] as Map<String, dynamic>, info));
+        var coachRoundJson = tCoachRounds[i] as Map<String, dynamic>;
+        coachRounds.add(CoachRound.fromJson(coachRoundJson, info));
       }
     }
 
