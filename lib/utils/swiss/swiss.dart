@@ -61,9 +61,7 @@ class SwissPairings {
     if (round == 1) {
       matching = _getFirstRoundMatching(true, true);
     } else if (verifyAllResultsEntered()) {
-      List<Squad> squads =
-          tournament.getSquads().where((s) => s.isActive(tournament)).toList();
-      matching = _applySwiss(round, squads, true);
+      matching = _applySwiss(round, tournament.getSquads(), true);
     } else {
       debugPrint('Not all results entered');
       errorType = RoundPairingError.MissingPreviousResults;
@@ -94,9 +92,8 @@ class SwissPairings {
     if (round == 1) {
       matching = _getFirstRoundMatching(false, avoidSquadsForInit);
     } else if (verifyAllResultsEntered()) {
-      List<Coach> coaches =
-          tournament.getCoaches().where((c) => c.active).toList();
-      matching = _applySwiss(round, coaches, avoidSquadsAfterInit);
+      matching =
+          _applySwiss(round, tournament.getCoaches(), avoidSquadsAfterInit);
     } else {
       debugPrint('Not all results entered');
       errorType = RoundPairingError.MissingPreviousResults;
@@ -127,9 +124,11 @@ class SwissPairings {
     List<IMatchupParticipant> notYetPaired = [];
 
     if (matchSquads) {
-      notYetPaired = new List.from(tournament.getSquads());
+      notYetPaired = new List.from(
+          tournament.getSquads().where((a) => a.isActive(tournament)));
     } else {
-      notYetPaired = new List.from(tournament.getCoaches());
+      notYetPaired = new List.from(
+          tournament.getCoaches().where((a) => a.isActive(tournament)));
     }
 
     // Handle case with odd number of coaches
@@ -233,7 +232,8 @@ class SwissPairings {
   SwissRound? _applySwiss(
       int roundNum, List<IMatchupParticipant> players, bool avoidWithinSquads) {
     // 1. Sort using tie breakers
-    List<IMatchupParticipant> sortedPlayers = new List.from(players);
+    List<IMatchupParticipant> sortedPlayers =
+        new List.from(players.where((a) => a.isActive(tournament)));
     sortedPlayers
         .sort((a, b) => IMatchupParticipant.sortDescendingOperator(a, b));
 
