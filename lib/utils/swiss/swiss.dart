@@ -162,19 +162,41 @@ class SwissPairings {
               .groupListsBy((element) => (element as Coach).squadName);
 
           // Find random group
-          int rndGrp = _random.nextInt(grpBySquad.length - 1);
+          int rndGrp = grpBySquad.length > 1
+              ? _random.nextInt(grpBySquad.length - 1)
+              : 0;
 
           MapEntry<String, List<IMatchupParticipant>> grp =
               grpBySquad.entries.toList()[rndGrp];
 
           List<IMatchupParticipant> grpMembers = grp.value;
 
-          int rndPlayer = _random.nextInt(grpMembers.length - 1);
+          int rndPlayer = grpMembers.length > 1
+              ? _random.nextInt(grpMembers.length - 1)
+              : 0;
 
           idx_2 = notYetPaired.indexOf(grpMembers[rndPlayer]);
+
+          IMatchupParticipant player_2 = notYetPaired[idx_2];
+          Squad? squad_2 = tournament.getCoachSquad(player_2.name());
+
+          print("Matched" +
+              player_1.nafName +
+              " (" +
+              player_1.squadName +
+              ") vs. " +
+              player_2.name() +
+              " (" +
+              (squad_2 != null ? squad_2.name() : "NO_SQUAD") +
+              ")");
         } catch (_) {
-          return _firstRoundRandom(
-              matchSquads, avoidWithinSquads, numTries + 1);
+          print("Could not find match for " +
+              player_1.nafName +
+              " (" +
+              player_1.squadName +
+              ")");
+          // return _firstRoundRandom(
+          //     matchSquads, avoidWithinSquads, numTries + 1);
         }
       }
 
