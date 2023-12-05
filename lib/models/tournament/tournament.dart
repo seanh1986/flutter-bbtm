@@ -161,6 +161,11 @@ class Tournament {
       _squads.forEach((squad) {
         squad.overwriteRecord(this);
       });
+
+      // TODO - check!
+      if (useSquadVsSquad()) {
+        squadRounds.add(SquadRound.fromCoachRound(this, round));
+      }
     }
 
     return true;
@@ -215,6 +220,12 @@ class Tournament {
       _squads.forEach((squad) {
         squad.updateOppScoreAndTieBreakers(this);
       });
+
+      if (useSquadVsSquad()) {
+        coachRounds.forEach((r) {
+          squadRounds.add(SquadRound.fromCoachRound(this, r));
+        });
+      }
     }
   }
 
@@ -263,10 +274,11 @@ class Tournament {
     // TODO: Check if squad captain
 
     // User is in matchup
-    if (matchup.awayNafName.toLowerCase() == authUser.nafName?.toLowerCase()) {
+    String nafName = authUser.getNafName();
+
+    if (matchup.awayNafName.toLowerCase() == nafName.toLowerCase()) {
       return Authorization.AwayCoach;
-    } else if (matchup.homeNafName.toLowerCase() ==
-        authUser.nafName?.toLowerCase()) {
+    } else if (matchup.homeNafName.toLowerCase() == nafName.toLowerCase()) {
       return Authorization.HomeCoach;
     }
 

@@ -23,7 +23,7 @@ class LogInAuthEvent extends AuthEvent {
       'LoggedIn: ' +
       authUser.user!.email.toString() +
       " - " +
-      authUser.nafName!.toString();
+      authUser.getNafName().toString();
 }
 
 class LogOutAuthEvent extends AuthEvent {

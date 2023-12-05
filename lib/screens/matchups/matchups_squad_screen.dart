@@ -79,11 +79,13 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   }
 
   SquadMatchup? findAutoSelectedMatchup() {
-    if (!widget.autoSelectAuthUserMatchup || _authUser.nafName == null) {
+    String nafName = _authUser.getNafName();
+
+    if (!widget.autoSelectAuthUserMatchup || nafName.isEmpty) {
       return null;
     }
 
-    Squad? squad = _tournament.getCoachSquad(_authUser.nafName!);
+    Squad? squad = _tournament.getCoachSquad(nafName);
     if (squad == null) {
       return null;
     }

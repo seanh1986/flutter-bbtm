@@ -128,15 +128,16 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
     int rank = 1;
     _items.forEach((coach) {
-      bool primaryHighlight = widget.authUser.nafName != null &&
-          coach.nafName.toLowerCase() == widget.authUser.nafName!.toLowerCase();
+      String nafname = widget.authUser.getNafName();
+
+      bool primaryHighlight =
+          coach.nafName.toLowerCase() == nafname.toLowerCase();
 
       // Check if coach is on squad of the logged-in user
-      Squad? squad = !primaryHighlight &&
-              widget.tournament.useSquads() &&
-              widget.authUser.nafName != null
-          ? widget.tournament.getCoachSquad(widget.authUser.nafName!)
-          : null;
+      Squad? squad =
+          !primaryHighlight && widget.tournament.useSquads() && nafname != null
+              ? widget.tournament.getCoachSquad(nafname)
+              : null;
       bool secondaryHighlight = squad != null && squad.hasCoach(coach.nafName);
 
       TextStyle? textStyle = primaryHighlight

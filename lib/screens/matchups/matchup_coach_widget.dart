@@ -179,12 +179,14 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     Color? color;
     Alignment alignment = Alignment.center;
 
-    if (_matchup.isHome(_authUser.nafName)) {
+    String nafName = _authUser.getNafName();
+
+    if (_matchup.isHome(nafName)) {
       result = _matchup.homeReportedResults;
       opponent = _tournament.getCoach(_matchup.awayNafName);
       color = Theme.of(context).colorScheme.primary;
       alignment = Alignment.centerLeft;
-    } else if (_matchup.isAway(_authUser.nafName)) {
+    } else if (_matchup.isAway(nafName)) {
       result = _matchup.awayReportedResults;
       opponent = _tournament.getCoach(_matchup.homeNafName);
       color = Theme.of(context).colorScheme.secondary;
@@ -256,13 +258,15 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                           print("bestSportOppRank: " +
                               widget.result.bestSportOppRank.toString());
 
+                          String nafName = _authUser.getNafName();
+
                           ReportedMatchResult? result;
                           bool? isHome;
 
-                          if (_matchup.isHome(_authUser.nafName)) {
+                          if (_matchup.isHome(nafName)) {
                             result = _matchup.homeReportedResults;
                             isHome = true;
-                          } else if (_matchup.isAway(_authUser.nafName)) {
+                          } else if (_matchup.isAway(nafName)) {
                             result = _matchup.awayReportedResults;
                             isHome = false;
                           }
@@ -553,8 +557,10 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   void _uploadToServer() async {
+    String nafName = _authUser.getNafName();
+
     bool? isHome; // fall back (e.g. for admin)
-    if (_matchup.isHome(_authUser.nafName)) {
+    if (_matchup.isHome(nafName)) {
       isHome = true;
       _matchup.homeReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.homeReportedResults.homeCas = homeReportWidget.getCas();
@@ -567,7 +573,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           awayReportWidget.getBonusPts();
 
       _matchup.homeReportedResults.reported = true;
-    } else if (_matchup.isAway(_authUser.nafName)) {
+    } else if (_matchup.isAway(nafName)) {
       isHome = false;
       _matchup.awayReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.awayReportedResults.homeCas = homeReportWidget.getCas();

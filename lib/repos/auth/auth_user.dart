@@ -2,12 +2,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthUser {
   User? user;
-  String? nafName;
+  String? _nafName;
   String? error;
 
   AuthUser({this.user, this.error}) {
-    this.nafName = this.user?.displayName;
+    this._nafName = this.user?.displayName;
   }
 
-  AuthUser.nafNameOnly({this.nafName});
+  AuthUser.nafNameOnly(String nafName) {
+    this._nafName = nafName;
+  }
+
+  String getNafName() {
+    if (_nafName == null) {
+      _nafName = user?.displayName;
+    }
+
+    return _nafName != null ? _nafName! : "";
+  }
 }

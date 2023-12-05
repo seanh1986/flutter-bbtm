@@ -98,9 +98,9 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   }
 
   List<CoachMatchup> findAutoSelectedMatchups() {
-    Coach? coach = _authUser.nafName != null
-        ? _tournament.getCoach(_authUser.nafName!)
-        : null;
+    String nafName = _authUser.getNafName();
+
+    Coach? coach = _tournament.getCoach(nafName);
     if (coach == null) {
       return [];
     }

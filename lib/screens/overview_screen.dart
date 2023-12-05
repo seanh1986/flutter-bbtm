@@ -71,20 +71,17 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Widget _welcomeUserAndDisplayCurrentRound() {
-    String userName;
-    if (_authUser.nafName != null) {
-      userName = _authUser.nafName.toString();
-    } else if (_authUser.user?.displayName != null) {
-      userName = _authUser.user!.displayName!.toString();
-    } else {
-      userName = "Guest";
+    String nafName = _authUser.getNafName();
+
+    if (nafName.isEmpty) {
+      nafName = "Guest";
     }
 
     String roundNumber = _tournament.curRoundNumber().toString();
 
     return _generateCardWidget([
       Text(
-        "Welcome " + userName + "!",
+        "Welcome " + nafName + "!",
         style: TextStyle(fontSize: 30),
       ),
       Text(

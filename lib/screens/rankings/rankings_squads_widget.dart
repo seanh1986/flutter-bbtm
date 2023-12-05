@@ -122,8 +122,9 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
     int rank = 1;
     _items.forEach((squad) {
-      bool highlight = widget.authUser.nafName != null &&
-          squad.hasCoach(widget.authUser.nafName!);
+      String nafName = widget.authUser.getNafName();
+
+      bool highlight = squad.hasCoach(nafName);
 
       TextStyle? textStyle = highlight ? TextStyle(color: Colors.red) : null;
 

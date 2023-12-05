@@ -109,7 +109,7 @@ class _LoginParticipantPage extends State<LoginParticipantPage> {
                         if (nafName.trim().isEmpty) {
                           authUser = new AuthUser(user: null, error: "");
                         } else {
-                          authUser = new AuthUser.nafNameOnly(nafName: nafName);
+                          authUser = new AuthUser.nafNameOnly(nafName);
                         }
 
                         _authBloc.add(LogInAuthEvent(authUser: authUser));

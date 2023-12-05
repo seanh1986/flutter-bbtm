@@ -53,16 +53,16 @@ class _MatchupsPage extends State<MatchupsPage> {
     bool allowMyMatchup = false;
     bool allowMySquad = false;
 
-    if (_authUser.nafName != null) {
-      Coach? coach = _tournament.getCoach(_authUser.nafName!);
-      if (coach != null && coach.active) {
-        allowMyMatchup = true;
-      }
+    String nafName = _authUser.getNafName();
 
-      Squad? squad = _tournament.getCoachSquad(_authUser.nafName!);
-      if (squad != null && squad.isActive(_tournament)) {
-        allowMySquad = true;
-      }
+    Coach? coach = _tournament.getCoach(nafName);
+    if (coach != null && coach.active) {
+      allowMyMatchup = true;
+    }
+
+    Squad? squad = _tournament.getCoachSquad(nafName);
+    if (squad != null && squad.isActive(_tournament)) {
+      allowMySquad = true;
     }
 
     _subScreensAllowed.clear();

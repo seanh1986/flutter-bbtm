@@ -3,6 +3,7 @@ import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/squad.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
+import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 
 abstract class RoundMatching {
@@ -15,11 +16,49 @@ class SquadRound extends RoundMatching {
   List<SquadMatchup> matches = [];
 
   SquadRound.newRound(this._round);
+
   SquadRound(this._round, this.matches);
+
   SquadRound.fromRoundMatching(RoundMatching rm) {
     _round = rm.round();
     rm.getMatches().forEach((r) {
       matches.add(r as SquadMatchup);
+    });
+  }
+
+  SquadRound.fromCoachRound(Tournament t, CoachRound cr) {
+    _round = cr._round;
+
+    cr.matches.forEach((m) {
+      String curHomeSquadName =
+          matches.isNotEmpty ? matches.last.homeSquadName : "";
+      String curAwaySquadName =
+          matches.isNotEmpty ? matches.last.awaySquadName : "";
+
+      Squad? matchHomeSquad = t.getCoachSquad(m.homeNafName);
+      Squad? matchAwaySquad = t.getCoachSquad(m.awayNafName);
+
+      if (matchHomeSquad == null || matchAwaySquad == null) {
+        return;
+      }
+
+      SquadMatchup curSquadMatchup = matches.isNotEmpty
+          ? matches.last
+          : SquadMatchup(matchHomeSquad.name(), matchAwaySquad.name());
+
+      bool squadsMatchExactly = curHomeSquadName == matchHomeSquad.name() &&
+          curAwaySquadName == matchAwaySquad.name();
+      bool squadsMatchReverse = curHomeSquadName == matchAwaySquad.name() &&
+          curAwaySquadName == matchHomeSquad.name();
+
+      bool sameSquadMatchup = squadsMatchExactly || squadsMatchReverse;
+
+      if (sameSquadMatchup) {
+        curSquadMatchup.coachMatchups.add(m);
+      } else {
+        matches.add(SquadMatchup(matchHomeSquad.name(), matchAwaySquad.name()));
+        matches.last.coachMatchups.add(m);
+      }
     });
   }
 

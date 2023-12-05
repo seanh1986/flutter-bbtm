@@ -93,8 +93,10 @@ class _HomePageState extends State<HomePage> {
     });
 
     _authSub = _authBloc.stream.listen((authState) {
+      String nafName = _authUser.getNafName();
+
       if (authState is AuthStateLoggedIn) {
-        if (_authUser.nafName != authState.authUser.nafName) {
+        if (nafName != authState.authUser.getNafName()) {
           setState(() {
             _authUser = authState.authUser;
           });
@@ -102,7 +104,7 @@ class _HomePageState extends State<HomePage> {
       } else if (authState is AuthStateLoggedOut) {
         ToastUtils.showSuccess(fToast, "Logged Out");
 
-        if (_authUser.nafName != null) {
+        if (nafName != null) {
           setState(() {
             _authUser = AuthUser();
           });
