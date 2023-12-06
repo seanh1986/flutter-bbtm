@@ -101,18 +101,26 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
       SizedBox(height: 10),
     ];
 
-    m.coachMatchups.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
-          tournament: _tournament,
-          authUser: _authUser,
-          matchup: m,
-          refreshState: widget.refreshState,
-        )));
+    m.coachMatchups.forEach((m) => {
+          matchupWidgets.add(MatchupCoachWidget(
+            tournament: _tournament,
+            authUser: _authUser,
+            matchup: m,
+            refreshState: widget.refreshState,
+          ))
+        });
 
     return Expanded(
         child: ListView(
             children: matchupWidgets,
             shrinkWrap: true,
             scrollDirection: Axis.vertical));
+
+    // return Expanded(
+    //     child: ListView(
+    //         children: matchupWidgets,
+    //         shrinkWrap: true,
+    //         scrollDirection: Axis.vertical));
   }
 
   Widget _squadMatchupListUi() {
