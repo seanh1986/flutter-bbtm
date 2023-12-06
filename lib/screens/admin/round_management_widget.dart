@@ -6,6 +6,7 @@ import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/tournament/tournament_backup.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:bbnaf/utils/toast.dart';
@@ -211,8 +212,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                       widget.tournament, coachRound.matches[mIdx]))
                   .toList();
 
+              LoadingIndicatorDialog().show(context);
               bool success =
                   await _tournyBloc.updateMatchEvents(matchesToUpdate);
+              LoadingIndicatorDialog().dismiss();
 
               if (success) {
                 ToastUtils.showSuccess(
@@ -309,8 +312,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
               if (pairingError == RoundPairingError.NoError) {
                 ToastUtils.show(fToast, "Updating Tournament Data");
 
+                LoadingIndicatorDialog().show(context);
                 bool success =
                     await _tournyBloc.advanceRound(widget.tournament);
+                LoadingIndicatorDialog().dismiss();
 
                 if (success) {
                   ToastUtils.showSuccess(
@@ -369,8 +374,11 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
 
             VoidCallback discardCallback = () async {
               //widget.tournament.coachRounds.removeLast();
+              LoadingIndicatorDialog().show(context);
               bool success =
                   await _tournyBloc.discardCurrentRound(widget.tournament);
+              LoadingIndicatorDialog().dismiss();
+
               if (success) {
                 ToastUtils.showSuccess(fToast, "Removed current round");
                 _tournyBloc
@@ -448,8 +456,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                     VoidCallback confirmedRecoveryCallback = () async {
                       ToastUtils.show(fToast, "Recovering Backup");
 
+                      LoadingIndicatorDialog().show(context);
                       bool success = await widget.tournyBloc
                           .recoverTournamentBackup(tournyBackup.tournament);
+                      LoadingIndicatorDialog().dismiss();
 
                       if (success) {
                         ToastUtils.showSuccess(

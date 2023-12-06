@@ -3,6 +3,7 @@ import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
@@ -135,8 +136,10 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
                   List<RenameNafName> renames =
                       _coachSource.coachIdxNafRenames.values.toList();
 
+                  LoadingIndicatorDialog().show(context);
                   bool success = await _tournyBloc.overwriteCoaches(
                       widget.tournament.info, _coaches, renames);
+                  LoadingIndicatorDialog().dismiss();
 
                   _showSuccessFailToast(success);
                 };

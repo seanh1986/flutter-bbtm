@@ -7,6 +7,7 @@ import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/matchups/matchup_report_widget.dart';
+import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/screens/matchups/best_sport_widget.dart';
 import 'package:flutter/foundation.dart';
@@ -276,9 +277,11 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                                 widget.result.bestSportOppRank;
 
                             if (result.reported && isHome != null) {
+                              LoadingIndicatorDialog().show(context);
                               _tournyBloc.updateMatchEvent(
                                   UpdateMatchReportEvent(
                                       _tournament, _matchup, isHome));
+                              LoadingIndicatorDialog().dismiss();
                             }
                           }
 
@@ -624,7 +627,10 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
       ToastUtils.show(fToast, "Uploading Match Report!");
 
+      LoadingIndicatorDialog().show(context);
       bool updateSuccess = await _tournyBloc.updateMatchEvent(event);
+      LoadingIndicatorDialog().dismiss();
+
       if (updateSuccess) {
         ToastUtils.showSuccess(fToast, "Uploaded Match Report!");
         setState(() {});

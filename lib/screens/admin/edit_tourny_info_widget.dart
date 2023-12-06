@@ -2,6 +2,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
@@ -160,8 +161,10 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
               ToastUtils.show(fToast, "Updating Tournament Data");
 
+              LoadingIndicatorDialog().show(context);
               bool success =
                   await widget.tournyBloc.overwriteTournamentInfo(info);
+              LoadingIndicatorDialog().dismiss();
 
               _showSuccessFailToast(success);
             };
