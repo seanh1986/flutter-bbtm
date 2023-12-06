@@ -62,7 +62,6 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     _authUser = widget.authUser;
   }
 
-  // TODO: Add CurCoach widget at top if non-null
   @override
   Widget build(BuildContext context) {
     if (widget.refreshState) {

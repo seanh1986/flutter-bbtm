@@ -270,6 +270,14 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                           } else if (_matchup.isAway(nafName)) {
                             result = _matchup.awayReportedResults;
                             isHome = false;
+                          } else if (_tournament.isSquadCaptainFor(
+                              nafName, _matchup.homeNafName)) {
+                            result = _matchup.homeReportedResults;
+                            isHome = true;
+                          } else if (_tournament.isSquadCaptainFor(
+                              nafName, _matchup.awayNafName)) {
+                            result = _matchup.awayReportedResults;
+                            isHome = false;
                           }
 
                           if (result != null) {
@@ -563,7 +571,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     String nafName = _authUser.getNafName();
 
     bool? isHome; // fall back (e.g. for admin)
-    if (_matchup.isHome(nafName)) {
+    if (_matchup.isHome(nafName) ||
+        _tournament.isSquadCaptainFor(nafName, _matchup.homeNafName)) {
       isHome = true;
       _matchup.homeReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.homeReportedResults.homeCas = homeReportWidget.getCas();
@@ -576,7 +585,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           awayReportWidget.getBonusPts();
 
       _matchup.homeReportedResults.reported = true;
-    } else if (_matchup.isAway(nafName)) {
+    } else if (_matchup.isAway(nafName) ||
+        _tournament.isSquadCaptainFor(nafName, _matchup.awayNafName)) {
       isHome = false;
       _matchup.awayReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.awayReportedResults.homeCas = homeReportWidget.getCas();
@@ -589,12 +599,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           awayReportWidget.getBonusPts();
 
       _matchup.awayReportedResults.reported = true;
-    }
-    // TODO: check if squad captain
-    // else if () {
-
-    // }
-    else {
+    } else {
       _matchup.homeReportedResults.homeTds = homeReportWidget.getTds();
       _matchup.homeReportedResults.homeCas = homeReportWidget.getCas();
       _matchup.homeReportedResults.homeBonusPts =

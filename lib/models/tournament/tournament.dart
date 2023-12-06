@@ -95,6 +95,28 @@ class Tournament {
     return coach != null ? getSquad(coach.squadName) : null;
   }
 
+  bool areSameSquad(String nafName1, String nafName2) {
+    Squad? squad1 = getCoachSquad(nafName1);
+    Squad? squad2 = getCoachSquad(nafName2);
+
+    if (squad1 == null || squad2 == null) {
+      return false;
+    }
+
+    return squad1.name().toLowerCase() == squad2.name().toLowerCase();
+  }
+
+  bool isSquadCaptainFor(String c, String memberNafName) {
+    Squad? squad1 = getCoachSquad(memberNafName);
+    Squad? squad2 = getCoachSquad(memberNafName);
+
+    if (squad1 == null || squad2 == null) {
+      return false;
+    }
+
+    return squad1.name().toLowerCase() == squad2.name().toLowerCase();
+  }
+
   List<Coach> getCoaches() {
     return _coaches;
   }
@@ -271,15 +293,21 @@ class Tournament {
       return Authorization.Admin;
     }
 
-    // TODO: Check if squad captain
-
-    // User is in matchup
     String nafName = authUser.getNafName();
 
+    // User is in matchup
     if (matchup.awayNafName.toLowerCase() == nafName.toLowerCase()) {
       return Authorization.AwayCoach;
     } else if (matchup.homeNafName.toLowerCase() == nafName.toLowerCase()) {
       return Authorization.HomeCoach;
+    }
+
+    if (useSquads()) {
+      if (isSquadCaptainFor(nafName, matchup.awayNafName)) {
+        return Authorization.AwayCaptain;
+      } else if (isSquadCaptainFor(nafName, matchup.homeNafName)) {
+        return Authorization.HomeCaptain;
+      }
     }
 
     return Authorization.Unauthorized;
