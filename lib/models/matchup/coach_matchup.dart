@@ -176,10 +176,10 @@ class CoachMatchup extends IMatchup {
     this.tableNum = tTable != null ? tTable : -1;
 
     final tHomeNafName = json['home_nafname'] as String?;
-    this.homeNafName = tHomeNafName != null ? tHomeNafName : "";
+    this.homeNafName = tHomeNafName != null ? tHomeNafName.trim() : "";
 
     final tAwayNafName = json['away_nafname'] as String?;
-    this.awayNafName = tAwayNafName != null ? tAwayNafName : "";
+    this.awayNafName = tAwayNafName != null ? tAwayNafName.trim() : "";
 
     final tHomeReportedResults =
         json['home_reported_results'] as Map<String, dynamic>?;

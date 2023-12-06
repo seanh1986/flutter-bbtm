@@ -18,6 +18,8 @@ class Squad extends IMatchupParticipant {
 
   double oppPoints = 0.0;
 
+  double oppCoachPoints = 0.0;
+
   List<double> _tieBreakers = <double>[];
 
   List<SquadOpponent> _opponents = <SquadOpponent>[];
@@ -230,14 +232,27 @@ class Squad extends IMatchupParticipant {
 
   void updateOppScoreAndTieBreakers(Tournament t) {
     oppPoints = 0.0;
+    oppCoachPoints = 0.0;
     _tieBreakers.clear();
 
     _coaches.forEach((nafName) {
       Coach? c = t.getCoach(nafName);
       if (c != null) {
-        oppPoints += c.oppPoints;
+        oppCoachPoints += c.oppPoints;
       }
     });
+
+    if (t.useSquadVsSquad()) {
+      _opponents.forEach((s) {
+        String oppSquadName = s.name();
+        Squad? oppSquad = t.getSquad(oppSquadName);
+        if (oppSquad != null) {
+          oppPoints += oppSquad.points();
+        }
+      });
+    } else {
+      oppPoints = oppCoachPoints;
+    }
 
     t.info.squadDetails.squadTieBreakers.forEach((tb) {
       switch (tb) {
@@ -314,6 +329,17 @@ class Squad extends IMatchupParticipant {
     });
 
     return sumCas;
+  }
+
+  int sumBestSport(Tournament t) {
+    int sumBestSport = 0;
+
+    _coaches.forEach((nafName) {
+      Coach? c = t.getCoach(nafName);
+      sumBestSport += c != null ? c.bestSportPoints : 0;
+    });
+
+    return sumBestSport;
   }
 
   int sumOppTds(Tournament t) {

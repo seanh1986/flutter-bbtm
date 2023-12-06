@@ -81,7 +81,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   SquadMatchup? findAutoSelectedMatchup() {
     String nafName = _authUser.getNafName();
 
-    if (!widget.autoSelectAuthUserMatchup || nafName.isEmpty) {
+    if (!_autoSelectAuthUserMatchup || nafName.isEmpty) {
       return null;
     }
 
