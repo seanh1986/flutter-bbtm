@@ -3,7 +3,6 @@ import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
-import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:collection/collection.dart';
 
 class Squad extends IMatchupParticipant {
@@ -23,7 +22,10 @@ class Squad extends IMatchupParticipant {
 
   List<SquadOpponent> _opponents = <SquadOpponent>[];
 
-  Squad(this._name, this._coaches);
+  Squad(String name, List<String> coaches) {
+    this._name = name.trim();
+    this._coaches = coaches.map((e) => e.trim()).toList();
+  }
 
   @override
   OrgType type() {
@@ -90,7 +92,7 @@ class Squad extends IMatchupParticipant {
   }
 
   bool hasCoach(String nafName) {
-    String nafNameLc = nafName.toLowerCase();
+    String nafNameLc = nafName.toLowerCase().trim();
     return _coaches
         .where((element) => element.toLowerCase() == nafNameLc)
         .isNotEmpty;
@@ -360,10 +362,11 @@ class Squad extends IMatchupParticipant {
 
   Squad.fromJson(Map<String, Object?> json) {
     final tName = json['name'] as String?;
-    this._name = tName != null ? tName : "";
+    this._name = tName != null ? tName.trim() : "";
 
     final tCoaches = json['coaches'] as List<String>?;
-    this._coaches = tCoaches != null ? tCoaches : [];
+    this._coaches =
+        tCoaches != null ? tCoaches.map((e) => e.trim()).toList() : [];
   }
 
   Map toJson() => {

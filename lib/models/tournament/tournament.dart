@@ -38,11 +38,11 @@ class Tournament {
   void addSquad(Squad s) {
     int idx = _squads.length;
     _squads.add(s);
-    _squadIdxMap.putIfAbsent(s.name().toLowerCase(), () => idx);
+    _squadIdxMap.putIfAbsent(s.name().trim().toLowerCase(), () => idx);
   }
 
   Squad? getSquad(String squadName) {
-    int? idx = _squadIdxMap[squadName.toLowerCase()];
+    int? idx = _squadIdxMap[squadName.trim().toLowerCase()];
     return idx != null ? _squads[idx] : null;
   }
 
@@ -53,7 +53,7 @@ class Tournament {
   void addCoach(Coach c) {
     int idx = _coaches.length;
     _coaches.add(c);
-    _coachIdxMap.putIfAbsent(c.name().toLowerCase(), () => idx);
+    _coachIdxMap.putIfAbsent(c.name().toLowerCase().trim(), () => idx);
   }
 
   void updateCoaches(List<Coach> newCoaches, List<RenameNafName> renames) {
@@ -82,7 +82,7 @@ class Tournament {
   }
 
   Coach? getCoach(String nafName) {
-    int? idx = _coachIdxMap[nafName.toLowerCase()];
+    int? idx = _coachIdxMap[nafName.trim().toLowerCase()];
     return idx != null ? _coaches[idx] : null;
   }
 
@@ -333,14 +333,14 @@ class Tournament {
     _squadIdxMap.clear();
     for (int i = 0; i < _squads.length; i++) {
       Squad s = _squads[i];
-      _squadIdxMap.putIfAbsent(s.name().toLowerCase(), () => i);
+      _squadIdxMap.putIfAbsent(s.name().toLowerCase().trim(), () => i);
     }
 
     /// Update coach map
     _coachIdxMap.clear();
     for (int i = 0; i < _coaches.length; i++) {
       Coach c = _coaches[i];
-      _coachIdxMap.putIfAbsent(c.name().toLowerCase(), () => i);
+      _coachIdxMap.putIfAbsent(c.name().toLowerCase().trim(), () => i);
     }
 
     // TODO: Eventually logic can be moved elsewhere

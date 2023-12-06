@@ -47,14 +47,16 @@ class Coach extends IMatchupParticipant {
   List<CoachMatchup> matches = [];
 
   Coach(
-    this.nafName,
-    this.squadName,
+    String nafName,
+    String squadName,
     this.coachName,
     this.race,
     this.teamName,
     this.nafNumber,
   ) {
-    active = nafName.isNotEmpty;
+    this.nafName = nafName.trim();
+    this.squadName = squadName.trim();
+    active = this.nafName.isNotEmpty;
   }
 
   @override
@@ -259,16 +261,16 @@ class Coach extends IMatchupParticipant {
 
   Coach.fromJson(int id, Map<String, Object?> json) {
     final tNafName = json['naf_name'] as String?;
-    this.nafName = tNafName != null ? tNafName : "";
+    this.nafName = tNafName != null ? tNafName.trim() : "";
 
     final tCoachName = json['coach_name'] as String?;
-    this.coachName = tCoachName != null ? tCoachName : "";
+    this.coachName = tCoachName != null ? tCoachName.trim() : "";
 
     final tTeamName = json['team_name'] as String?;
-    this.teamName = tTeamName != null ? tTeamName : "";
+    this.teamName = tTeamName != null ? tTeamName.trim() : "";
 
     final tSquadName = json['squad_name'] as String?;
-    this.squadName = tSquadName != null ? tSquadName : "";
+    this.squadName = tSquadName != null ? tSquadName.trim() : "";
 
     final tRace = json['race'] as String?;
     this.race = tRace != null ? RaceUtils.getRace(tRace) : Race.Unknown;
@@ -280,7 +282,7 @@ class Coach extends IMatchupParticipant {
     this.active = tActive != null && tActive;
 
     final tRoster = json['roster'] as String?;
-    this.rosterFileName = tRoster != null ? tRoster : "";
+    this.rosterFileName = tRoster != null ? tRoster.trim() : "";
   }
 
   Map<String, dynamic> toJson() => {

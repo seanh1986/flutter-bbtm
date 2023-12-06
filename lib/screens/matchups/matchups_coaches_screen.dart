@@ -108,7 +108,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     switch (_autoSelectOption) {
       case AutoSelectOption.AUTH_USER_MATCHUP:
         CoachMatchup? match = _matchups.firstWhereOrNull(
-            (element) => element.hasParticipantName(coach.name()));
+            (element) => element.hasParticipantName(coach.nafName));
         return match != null ? [match] : [];
       case AutoSelectOption.AUTH_USER_SQUAD:
         return _matchups.where((m) {

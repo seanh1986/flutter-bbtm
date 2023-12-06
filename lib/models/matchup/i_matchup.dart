@@ -32,15 +32,15 @@ abstract class IMatchup {
   MatchResult getResult();
 
   bool hasParticipantName(String name) {
-    String nameLc = name.toLowerCase();
-    return homeName().toLowerCase() == nameLc ||
-        awayName().toLowerCase() == nameLc;
+    String nameLc = name.toLowerCase().trim();
+    return homeName().toLowerCase().trim() == nameLc ||
+        awayName().toLowerCase().trim() == nameLc;
   }
 
   bool hasParticipant(IMatchupParticipant p) {
-    String nameLc = p.name().toLowerCase();
-    return homeName().toLowerCase() == nameLc ||
-        awayName().toLowerCase() == nameLc;
+    String nameLc = p.name().toLowerCase().trim();
+    return homeName().toLowerCase().trim() == nameLc ||
+        awayName().toLowerCase().trim() == nameLc;
   }
 
   bool hasParticipants(

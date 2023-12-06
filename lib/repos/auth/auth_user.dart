@@ -10,7 +10,7 @@ class AuthUser {
   }
 
   AuthUser.nafNameOnly(String nafName) {
-    this._nafName = nafName;
+    this._nafName = nafName.trim().toLowerCase();
   }
 
   String getNafName() {
@@ -18,6 +18,6 @@ class AuthUser {
       _nafName = user?.displayName;
     }
 
-    return _nafName != null ? _nafName! : "";
+    return _nafName != null ? _nafName!.trim() : "";
   }
 }
