@@ -239,16 +239,19 @@ class SwissPairings {
           .any((match) => match.getResult() == MatchResult.NoResult);
     }
 
-    bool allSquadsEntered;
-    if (tournament.squadRounds.isEmpty) {
-      allSquadsEntered = true;
-    } else {
-      SquadRound round = tournament.squadRounds.last;
-      allSquadsEntered = !round.matches
-          .any((match) => match.getResult() == MatchResult.NoResult);
-    }
+    return allCoachesEntered;
 
-    return allCoachesEntered && allSquadsEntered;
+    // No longer needed, as it's calculated on-the-fly
+    // bool allSquadsEntered;
+    // if (tournament.squadRounds.isEmpty) {
+    //   allSquadsEntered = true;
+    // } else {
+    //   SquadRound round = tournament.squadRounds.last;
+    //   allSquadsEntered = !round.matches
+    //       .any((match) => match.getResult() == MatchResult.NoResult);
+    // }
+    //
+    // return allCoachesEntered && allSquadsEntered;
   }
 
   SwissRound? _applySwiss(
