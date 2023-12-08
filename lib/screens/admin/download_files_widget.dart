@@ -84,10 +84,10 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
             VoidCallback downloadBackupCallback = () async {
               ToastUtils.show(fToast, "Downloading Backup File");
 
-              LoadingIndicatorDialog().show(context);
+              // LoadingIndicatorDialog().show(context);
               bool success = await _tournyBloc.downloadTournamentBackup(
                   DownloadTournamentBackup(widget.tournament));
-              LoadingIndicatorDialog().dismiss();
+              // LoadingIndicatorDialog().dismiss();
 
               if (success) {
                 ToastUtils.showSuccess(
@@ -125,10 +125,10 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
             VoidCallback downloadNafUploadCallback = () async {
               ToastUtils.show(fToast, "Downloading Naf Upload File");
 
-              LoadingIndicatorDialog().show(context);
+              // LoadingIndicatorDialog().show(context);
               bool success =
                   await _tournyBloc.downloadNafUploadFile(widget.tournament);
-              LoadingIndicatorDialog().dismiss();
+              // LoadingIndicatorDialog().dismiss();
 
               if (success) {
                 ToastUtils.showSuccess(fToast, "Naf Upload downloaded");
@@ -166,10 +166,10 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
             VoidCallback downloadGlamCallback = () async {
               ToastUtils.show(fToast, "Downloading Glam File");
 
-              LoadingIndicatorDialog().show(context);
+              // LoadingIndicatorDialog().show(context);
               bool success =
                   await _tournyBloc.downloadGlamFile(widget.tournament);
-              LoadingIndicatorDialog().dismiss();
+              // LoadingIndicatorDialog().dismiss();
 
               if (success) {
                 ToastUtils.showSuccess(fToast, "Glam downloaded");

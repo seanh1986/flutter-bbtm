@@ -161,10 +161,10 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     }
     ToastUtils.show(fToast, "Downloading: " + _rosterFileName);
 
-    LoadingIndicatorDialog().show(context);
+    // LoadingIndicatorDialog().show(context);
     isDownloaded =
         await _tournyBloc.downloadFile(DownloadFile(_rosterFileName));
-    LoadingIndicatorDialog().dismiss();
+    // LoadingIndicatorDialog().dismiss();
   }
 
   Widget _itemHeader(IMatchupParticipant participant) {
@@ -192,6 +192,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
             onPressed: () => {_handleRosterDownload()});
       } else {
         try {
+          // LoadingIndicatorDialog().show(context);
           _tournyBloc.getFileUrl(participant.rosterFileName).then((value) => {
                 if (mounted)
                   {
@@ -202,6 +203,8 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
               });
         } catch (e) {
           // Do nothing
+        } finally {
+          // LoadingIndicatorDialog().dismiss();
         }
       }
     }
