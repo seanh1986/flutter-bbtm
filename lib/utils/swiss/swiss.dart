@@ -63,7 +63,7 @@ class SwissPairings {
     } else if (verifyAllResultsEntered()) {
       matching = _applySwiss(round, tournament.getSquads(), true);
     } else {
-      debugPrint('Not all results entered');
+      print('Not all results entered');
       errorType = RoundPairingError.MissingPreviousResults;
     }
 
@@ -72,7 +72,7 @@ class SwissPairings {
 
       tournament.updateRound(matching);
     } else {
-      debugPrint('Failed to find matchings');
+      print('Failed to find matchings');
       if (errorType == RoundPairingError.NoError) {
         errorType = RoundPairingError.UnableToFindValidMatches;
       }
@@ -95,7 +95,7 @@ class SwissPairings {
       matching =
           _applySwiss(round, tournament.getCoaches(), avoidSquadsAfterInit);
     } else {
-      debugPrint('Not all results entered');
+      print('Not all results entered');
       errorType = RoundPairingError.MissingPreviousResults;
     }
 
@@ -104,7 +104,7 @@ class SwissPairings {
 
       tournament.updateRound(matching);
     } else {
-      debugPrint('Failed to find matchings');
+      print('Failed to find matchings');
       if (errorType == RoundPairingError.NoError) {
         errorType = RoundPairingError.UnableToFindValidMatches;
       }
@@ -329,13 +329,22 @@ class SwissPairings {
       bool avoidWithinSquads) {
     SwissRound newMatchups = SwissRound(roundNum);
 
+    int numMatchupsWeShouldHave = (sortedPlayers.length / 2.0).floor();
+
+    print("round " +
+        roundNum.toString() +
+        " NumPlayers: " +
+        sortedPlayers.length.toString() +
+        ", numMatchupsWeShouldHave: " +
+        numMatchupsWeShouldHave.toString());
+
     // Iterate over the players, find a matching for the top player
 
     for (int i = 0; i < sortedPlayers.length; i++) {
       IMatchupParticipant bestPlayer = sortedPlayers[i];
 
       if (byePlayerIdx == i) {
-        debugPrint("round " +
+        print("round " +
             roundNum.toString() +
             " Player on bye: " +
             bestPlayer.name());
@@ -343,11 +352,14 @@ class SwissPairings {
       }
       // check if this player is already scheduled this round
       if (newMatchups.hasMatchForPlayer(bestPlayer)) {
-        // debugPrint("round " +
-        //     roundNum.toString() +
-        //     " Skip " +
-        //     bestPlayer.name() +
-        //     " since they already have a match assigned");
+        print("round " +
+            roundNum.toString() +
+            " Skip " +
+            bestPlayer.name() +
+            " [" +
+            i.toString() +
+            "]"
+                " since they already have a match assigned");
         continue;
       }
 
@@ -359,25 +371,46 @@ class SwissPairings {
         }
 
         newMatchups.matches.add(matchup);
+
+        print("added matchup: " +
+            matchup.homeName() +
+            " vs. " +
+            matchup.awayName());
         continue; // Move on to next player
       }
 
-      int numMatchupsWeShouldHave = (sortedPlayers.length / 2).floor();
       if (newMatchups.matches.length == numMatchupsWeShouldHave) {
+        print("Num Mathches: " +
+            newMatchups.matches.length.toString() +
+            " / " +
+            numMatchupsWeShouldHave.toString() +
+            " -> all done!");
         return newMatchups; // All necessary matchups
       }
 
-      debugPrint("Could not find match for " +
+      print("Could not find match for " +
           bestPlayer.name() +
           " -> # matchups assigned: " +
           newMatchups.matches.length.toString());
 
-      bool success = _handleNoMatchForBestPlayer(
-          roundNum, sortedPlayers, i, byePlayerIdx, newMatchups);
+      bool success = _handleNoMatchForBestPlayer(roundNum, sortedPlayers, i,
+          byePlayerIdx, newMatchups, numMatchupsWeShouldHave);
       if (!success) {
-        debugPrint("could not match all players. not enough players?");
+        print("could not match all players. not enough players?");
         return null;
       }
+    }
+
+    bool success = newMatchups.matches.length == numMatchupsWeShouldHave;
+    print("Num Mathches: " +
+        newMatchups.matches.length.toString() +
+        " / " +
+        numMatchupsWeShouldHave.toString() +
+        " -> " +
+        (success ? "Success!" : "Failed!"));
+
+    if (!success) {
+      return null;
     }
 
     return newMatchups;
@@ -431,7 +464,7 @@ class SwissPairings {
       IMatchupParticipant nextPlayer = sortedPlayers[j];
 
       if (byePlayerIdx == j) {
-        debugPrint("Player on bye:" + nextPlayer.name());
+        print("Player on bye:" + nextPlayer.name());
         continue; // check if this player is on bye
       }
 
@@ -440,17 +473,23 @@ class SwissPairings {
           .any((name) => nextPlayer.name().toLowerCase() == name.toLowerCase());
 
       if (haveAlreadyPlayed) {
-        debugPrint("skip " +
+        print("skip " +
             bestPlayer.name() +
-            " vs. " +
+            " [" +
+            bestPlayerIdx.toString() +
+            "]"
+                " vs. " +
             nextPlayer.name() +
-            " -> already played");
+            "[" +
+            j.toString() +
+            "]"
+                " -> already played");
         continue;
       }
 
       // check that the next player is not already scheduled
       if (newMatchups.hasMatchForPlayerName(nextPlayer.name())) {
-        debugPrint("skip " +
+        print("skip " +
             bestPlayer.name() +
             " vs. " +
             nextPlayer.name() +
@@ -467,7 +506,7 @@ class SwissPairings {
         if (squad_1 != null &&
             squad_2 != null &&
             squad_1.name() == squad_2.name()) {
-          debugPrint("skip " +
+          print("skip " +
               bestPlayer.name() +
               " vs. " +
               nextPlayer.name() +
@@ -483,6 +522,12 @@ class SwissPairings {
       }
     }
 
+    print("No valid match found for:" +
+        bestPlayer.name() +
+        "[" +
+        bestPlayerIdx.toString() +
+        "]");
+
     // No valid match found
     return null;
   }
@@ -492,17 +537,21 @@ class SwissPairings {
       List<IMatchupParticipant> sortedPlayers,
       int bestPlayerIdx,
       int byePlayerIdx,
-      SwissRound newMatchups) {
+      SwissRound newMatchups,
+      int numMatchupsWeShouldHave) {
     IMatchupParticipant bestPlayer = sortedPlayers[bestPlayerIdx];
 
     // no match for the best player found. we now have to find a couple to break,
     // and opp for this player that will satisfy all conditions
     // so iterate on the pairing so far in reverse order
-    debugPrint("round " +
+    print("round " +
         roundNum.toString() +
         " need to switch pairs for " +
         bestPlayer.name() +
-        " we have " +
+        "[" +
+        bestPlayerIdx.toString() +
+        "]"
+            " we have " +
         newMatchups.matches.length.toString() +
         " games");
 
@@ -520,16 +569,23 @@ class SwissPairings {
           .opponents()
           .any((name) => player_2.name().toLowerCase() == name.toLowerCase());
 
-      debugPrint("  -> Matchup to break(?): " +
+      bool validToBreak =
+          !hasBestPlayerPlayedVsPlayer_1 || !hasBestPlayerPlayedVsPlayer_2;
+
+      print("  -> Matchup to break(?): " +
           player_1.name().toString() +
           " vs. " +
           player_2.name().toString() +
           ". hasBestPlayerPlayedVsPlayer_1: " +
           (hasBestPlayerPlayedVsPlayer_1 ? "Y" : "N") +
           ". hasBestPlayerPlayedVsPlayer_2: " +
-          (hasBestPlayerPlayedVsPlayer_2 ? "Y" : "N"));
+          (hasBestPlayerPlayedVsPlayer_2
+              ? "Y"
+              : "N" +
+                  " => " +
+                  (validToBreak ? "Valid to Break" : "Not Valid to Break")));
 
-      if (hasBestPlayerPlayedVsPlayer_1 && hasBestPlayerPlayedVsPlayer_2) {
+      if (!validToBreak) {
         // Can't use this pair because the best score user already played vs both of them
         continue;
       }
@@ -546,7 +602,7 @@ class SwissPairings {
         // score user, or the chosen pairs p1, p2
         // check if this player is already scheduled this round
         if (newMatchups.hasMatchForPlayerName(switchPlayer.name())) {
-          debugPrint("round " +
+          print("round " +
               roundNum.toString() +
               " Match already exists for switchPlayer: " +
               bestPlayer.name());
@@ -557,18 +613,24 @@ class SwissPairings {
             p == byePlayerIdx ||
             switchPlayer == player_1 ||
             switchPlayer == player_2) {
-          // debugPrint("round " +
-          //     roundNum.toString() +
-          //     " switch player: " +
-          //     switchPlayer.name() +
-          //     " is either bestPlayer, bye, p1, or p2");
+          print("round " +
+              roundNum.toString() +
+              " switch player: " +
+              switchPlayer.name() +
+              " [" +
+              p.toString() +
+              "]" +
+              " is either bestPlayer, bye, p1, or p2");
           continue;
         }
 
-        debugPrint("round " +
+        print("round " +
             roundNum.toString() +
             " candidate switch player: " +
-            switchPlayer.name());
+            switchPlayer.name() +
+            " [" +
+            p.toString() +
+            "]");
 
         // Check if that it is possible to make some pairing switch
         bool hasSwitchPlayedPlayer1 = switchPlayer
@@ -577,9 +639,9 @@ class SwissPairings {
 
         if (!hasSwitchPlayedPlayer1 && !hasBestPlayerPlayedVsPlayer_2) {
           // we can switch. p1 vs the switch user, best player vs p2
-          debugPrint("round " +
+          print("round " +
               roundNum.toString() +
-              "pairing remove game " +
+              " pairing remove game " +
               pairedGame.homeName() +
               " vs. " +
               pairedGame.awayName());
@@ -588,6 +650,15 @@ class SwissPairings {
           if (!success) {
             return false;
           }
+
+          print("swamped (A) matchups. " +
+              bestPlayer.name() +
+              " vs. " +
+              player_2.name() +
+              " & " +
+              player_1.name() +
+              " vs. " +
+              switchPlayer.name());
 
           if (bestPlayer.type() == OrgType.Coach) {
             newMatchups.matches
@@ -607,9 +678,10 @@ class SwissPairings {
         bool hasSwitchPlayedPlayer2 = switchPlayer
             .opponents()
             .any((name) => player_2.name().toLowerCase() == name.toLowerCase());
+
         if (!hasSwitchPlayedPlayer2 && !hasBestPlayerPlayedVsPlayer_1) {
           // we can switch. p2 vs the switch user, best player vs p1
-          debugPrint("round " +
+          print("round " +
               roundNum.toString() +
               "pairing remove game " +
               pairedGame.homeName() +
@@ -620,6 +692,15 @@ class SwissPairings {
           if (!success) {
             return false;
           }
+
+          print("swamped (B) matchups. " +
+              bestPlayer.name() +
+              " vs. " +
+              player_2.name() +
+              " & " +
+              player_1.name() +
+              " vs. " +
+              switchPlayer.name());
 
           if (bestPlayer.type() == OrgType.Coach) {
             newMatchups.matches
@@ -637,6 +718,13 @@ class SwissPairings {
         }
       }
     }
+
+    print("Failed to find a pairing (via Breaking) for " +
+        bestPlayer.name() +
+        "[" +
+        bestPlayerIdx.toString() +
+        "]");
+
     // nothing to do... probably not enough players or some crazy pairing
     return false;
   }
