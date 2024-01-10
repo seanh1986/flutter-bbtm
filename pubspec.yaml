@@ -24,6 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  uuid: ^4.0.0
   cupertino_icons: ^1.0.0
   english_words: ^4.0.0
   json_annotation: ^4.0.1

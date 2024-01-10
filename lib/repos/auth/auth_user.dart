@@ -20,4 +20,8 @@ class AuthUser {
 
     return _nafName != null ? _nafName!.trim() : "";
   }
+
+  String getEmail() {
+    return user != null && user!.email != null ? user!.email as String : "";
+  }
 }

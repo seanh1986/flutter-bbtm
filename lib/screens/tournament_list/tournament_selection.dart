@@ -4,10 +4,12 @@ import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/blocs/tournament_list/tournament_list.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/home_screen.dart';
 import 'package:bbnaf/screens/login/login_screen.dart';
 import 'package:bbnaf/screens/login/login_screen_organizer.dart';
 import 'package:bbnaf/screens/splash_screen.dart';
+import 'package:bbnaf/screens/tournament_list/tournament_creation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -29,7 +31,7 @@ enum DateType {
   Past_Tournaments,
   Recent_or_Upcoming_Tournaments,
   Future_Tournaments,
-  // Create_Tournament,
+  Create_Tournament,
 }
 
 class _TournamentSelectionPage extends State<TournamentSelectionPage> {
@@ -84,8 +86,15 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
     _tournySelectSub = _tournyBloc.stream.listen((tournyState) {
       if (tournyState is TournamentStateLoaded) {
         if (_authState is AuthStateLoggedIn) {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => HomePage()));
+          if (dateType == DateType.Create_Tournament) {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => _createNewTournament()));
+          } else {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => HomePage()));
+          }
         } else {
           Navigator.push(
               context,
@@ -238,8 +247,8 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
         return _createTournamentListView(_pastTournaments);
       case DateType.Future_Tournaments:
         return _createTournamentListView(_futureTournaments);
-      // case DateType.Create_Tournament:
-      //   return _createNewTournament();
+      case DateType.Create_Tournament:
+        return _createNewTournament();
       case DateType.Recent_or_Upcoming_Tournaments:
       default:
         return _createTournamentListView(_recentAndUpcomingTournaments);
@@ -306,9 +315,14 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   }
 
   Widget _createNewTournament() {
-    if (_authState is AuthStateLoggedIn &&
-        (_authState as AuthStateLoggedIn).authUser.user != null) {
-      return Text("TODO");
+    AuthUser? authUser;
+    if (_authState is AuthStateLoggedIn) {
+      authUser = (_authState as AuthStateLoggedIn).authUser;
+    }
+
+    if (authUser != null && authUser.user != null) {
+      // return Text("");
+      return Expanded(child: TournamentCreationPage(authUser: authUser));
     } else {
       return LoginOrganizerPage();
     }
