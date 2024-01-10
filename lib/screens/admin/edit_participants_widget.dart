@@ -147,7 +147,31 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
                 _showDialogToConfirmOverwrite(context, callback);
               },
               child: const Text('Update'),
-            )
+            ),
+            // SizedBox(width: 40),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     VoidCallback callback = () async {
+            //       // Remove empty rows
+            //       _coaches.removeWhere((element) =>
+            //           element.coachName.trim().isEmpty &&
+            //           element.nafName.trim().isEmpty);
+
+            //       List<RenameNafName> renames =
+            //           _coachSource.coachIdxNafRenames.values.toList();
+
+            //       LoadingIndicatorDialog().show(context);
+            //       bool success = await _tournyBloc.overwriteCoaches(
+            //           widget.tournament.info, _coaches, renames);
+            //       LoadingIndicatorDialog().dismiss();
+
+            //       _showSuccessFailToast(success);
+            //     };
+
+            //     _showDialogToConfirmOverwrite(context, callback);
+            //   },
+            //   child: const Text('Load from File'),
+            ),
           ]),
         ]));
   }
