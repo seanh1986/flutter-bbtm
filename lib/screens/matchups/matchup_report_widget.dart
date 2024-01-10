@@ -6,7 +6,6 @@ import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/screens/matchups/matchup_coach_widget.dart';
-import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

@@ -134,10 +134,9 @@ class _RankingCoachPage extends State<RankingCoachPage> {
           coach.nafName.toLowerCase() == nafname.toLowerCase();
 
       // Check if coach is on squad of the logged-in user
-      Squad? squad =
-          !primaryHighlight && widget.tournament.useSquads() && nafname != null
-              ? widget.tournament.getCoachSquad(nafname)
-              : null;
+      Squad? squad = !primaryHighlight && widget.tournament.useSquads()
+          ? widget.tournament.getCoachSquad(nafname)
+          : null;
       bool secondaryHighlight = squad != null && squad.hasCoach(coach.nafName);
 
       TextStyle? textStyle = primaryHighlight

@@ -3,7 +3,7 @@ import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 class OverviewScreen extends StatefulWidget {
   final Tournament tournament;
@@ -106,7 +106,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         style: TextStyle(fontSize: 16, decoration: TextDecoration.underline),
       ),
       Text(""),
-      Html(data: t.detailsWeather),
+      HtmlWidget(t.detailsWeather),
     ]);
   }
 
@@ -121,7 +121,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         style: TextStyle(fontSize: 16, decoration: TextDecoration.underline),
       ),
       Text(""),
-      Html(data: t.detailsKickOff),
+      HtmlWidget(t.detailsKickOff),
     ]);
   }
 
@@ -136,7 +136,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         style: TextStyle(fontSize: 16, decoration: TextDecoration.underline),
       ),
       Text(""),
-      Html(data: t.detailsSpecialRules),
+      HtmlWidget(t.detailsSpecialRules),
     ]);
   }
 

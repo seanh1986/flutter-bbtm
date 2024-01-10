@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'blocs/tournament_list/tournament_list.dart';
 import 'repos/auth/auth_repo.dart';
 import 'repos/tournament/tournament_repo.dart';
@@ -138,39 +137,49 @@ class _AppState extends State<App> {
     // tId = "X0qh35qbzPhBQKBb6y6c";
 
     return MaterialApp(
-        title: 'BloodBowl Tournament Management',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSwatch(
-            primarySwatch: Colors.blue,
-            accentColor: Colors.redAccent,
-            cardColor: Colors.lightBlueAccent,
-          ),
-          textTheme:
-              const TextTheme(bodyMedium: TextStyle(color: Colors.black)),
+      title: 'BloodBowl Tournament Management',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.blue,
+          accentColor: Colors.redAccent,
+          cardColor: Colors.lightBlueAccent,
         ),
-        home: TournamentSelectionPage(
-          tournamentId: tId,
-        ),
-        initialRoute: "/",
-        builder: (context, child) => ResponsiveWrapper.builder(
-              child,
-              maxWidth: 1200,
-              minWidth: 480,
-              defaultScale: true,
-              breakpoints: [
-                ResponsiveBreakpoint.resize(480, name: MOBILE),
-                ResponsiveBreakpoint.autoScale(800, name: TABLET),
-                ResponsiveBreakpoint.resize(1000, name: DESKTOP),
-                ResponsiveBreakpoint.autoScale(2460, name: '4K'),
-              ],
-              background: Container(
-                  decoration: BoxDecoration(
-                      image: DecorationImage(
-                image: AssetImage(
-                    './assets/images/background/background_football_field.png'),
-                fit: BoxFit.cover,
-              ))),
-            ));
+        textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.black)),
+      ),
+      home: TournamentSelectionPage(
+        tournamentId: tId,
+      ),
+      initialRoute: "/",
+      // builder: (context, child) => ResponsiveBreakpoints.builder(
+      //       child: child!,
+      //       breakpoints: [
+      //         const Breakpoint(start: 0, end: 450, name: MOBILE),
+      //         const Breakpoint(start: 451, end: 800, name: TABLET),
+      //         const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+      //         const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+      //       ],
+      //     )
+    );
+
+    // ResponsiveBreakpoints.builder(
+    //       child,
+    //       maxWidth: 1200,
+    //       minWidth: 480,
+    //       defaultScale: true,
+    //       breakpoints: [
+    //         ResponsiveBreakpoint.resize(480, name: MOBILE),
+    //         ResponsiveBreakpoint.autoScale(800, name: TABLET),
+    //         ResponsiveBreakpoint.resize(1000, name: DESKTOP),
+    //         ResponsiveBreakpoint.autoScale(2460, name: '4K'),
+    //       ],
+    //       background: Container(
+    //           decoration: BoxDecoration(
+    //               image: DecorationImage(
+    //         image: AssetImage(
+    //             './assets/images/background/background_football_field.png'),
+    //         fit: BoxFit.cover,
+    //       ))),
+    //     ));
   }
 
   Widget _launchFailed() {

@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:core';
 import 'package:enum_to_string/enum_to_string.dart';
 
