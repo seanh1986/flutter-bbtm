@@ -171,7 +171,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
             //     _showDialogToConfirmOverwrite(context, callback);
             //   },
             //   child: const Text('Load from File'),
-            ),
+            // ),
           ]),
         ]));
   }
