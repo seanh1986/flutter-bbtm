@@ -1,3 +1,5 @@
+import 'dart:js';
+
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
@@ -13,6 +15,7 @@ import 'repos/tournament/tournament_repo.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 // Ensure we only handle initial uri once
 bool _initialUriIsHandled = false;
@@ -34,12 +37,15 @@ void main() async {
 
   runApp(MultiBlocProvider(providers: [
     BlocProvider<AuthBloc>(
+        lazy: false,
         create: (context) =>
             AuthBloc(aRepo: _authRepo)..add(AppStartedAuthEvent())),
     BlocProvider<TournamentListsBloc>(
+        lazy: false,
         create: (context) => TournamentListsBloc(tRepo: _tournamentRepo)
           ..add(RequestLoadTournamentListEvent())),
     BlocProvider<TournamentBloc>(
+        lazy: false,
         create: (context) => TournamentBloc(tRepo: _tournamentRepo)
           ..add(TournamentEventUninitialized())),
   ], child: App()));
@@ -137,29 +143,29 @@ class _AppState extends State<App> {
     // tId = "X0qh35qbzPhBQKBb6y6c";
 
     return MaterialApp(
-      title: 'BloodBowl Tournament Management',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.blue,
-          accentColor: Colors.redAccent,
-          cardColor: Colors.lightBlueAccent,
+        title: 'BloodBowl Tournament Management',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSwatch(
+            primarySwatch: Colors.blue,
+            accentColor: Colors.redAccent,
+            cardColor: Colors.lightBlueAccent,
+          ),
+          textTheme:
+              const TextTheme(bodyMedium: TextStyle(color: Colors.black)),
         ),
-        textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.black)),
-      ),
-      home: TournamentSelectionPage(
-        tournamentId: tId,
-      ),
-      initialRoute: "/",
-      // builder: (context, child) => ResponsiveBreakpoints.builder(
-      //       child: child!,
-      //       breakpoints: [
-      //         const Breakpoint(start: 0, end: 450, name: MOBILE),
-      //         const Breakpoint(start: 451, end: 800, name: TABLET),
-      //         const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-      //         const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
-      //       ],
-      //     )
-    );
+        home: TournamentSelectionPage(
+          tournamentId: tId,
+        ),
+        initialRoute: "/",
+        builder: (context, child) => ResponsiveBreakpoints.builder(
+              child: child!,
+              breakpoints: [
+                const Breakpoint(start: 0, end: 450, name: MOBILE),
+                const Breakpoint(start: 451, end: 800, name: TABLET),
+                const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+              ],
+            ));
 
     // ResponsiveBreakpoints.builder(
     //       child,

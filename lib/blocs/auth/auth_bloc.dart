@@ -10,18 +10,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   AuthBloc({required AuthRepository aRepo})
       : _authRepository = aRepo,
-        super(AuthStateUninitializd());
-
-  @override
-  Stream<AuthState> mapEventToState(AuthEvent event) async* {
-    if (event is AppStartedAuthEvent) {
-      yield* _mapAppStartedToState();
-    } else if (event is LogInAuthEvent) {
-      yield* _mapLoggedInToState(event);
-    } else if (event is LogOutAuthEvent) {
-      yield* _mapLoggedOutToState();
-    }
+        super(AuthStateUninitializd()) {
+    on<AppStartedAuthEvent>((event, emit) => _mapAppStartedToState());
+    on<LogInAuthEvent>((event, emit) => _mapLoggedInToState(event));
+    on<LogOutAuthEvent>((event, emit) => _mapLoggedOutToState());
   }
+
+  // Stream<AuthState> mapEventToState(AuthEvent event) async* {
+  //   if (event is AppStartedAuthEvent) {
+  //     yield* _mapAppStartedToState();
+  //   } else if (event is LogInAuthEvent) {
+  //     yield* _mapLoggedInToState(event);
+  //   } else if (event is LogOutAuthEvent) {
+  //     yield* _mapLoggedOutToState();
+  //   }
+  // }
 
   Stream<AuthState> _mapAppStartedToState() async* {
     try {

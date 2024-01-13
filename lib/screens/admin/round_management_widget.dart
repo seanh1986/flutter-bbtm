@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:ui';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/models/tournament/tournament_backup.dart';
 import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';

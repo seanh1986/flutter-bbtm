@@ -137,6 +137,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       Squad? squad = !primaryHighlight && widget.tournament.useSquads()
           ? widget.tournament.getCoachSquad(nafname)
           : null;
+
       bool secondaryHighlight = squad != null && squad.hasCoach(coach.nafName);
 
       TextStyle? textStyle = primaryHighlight

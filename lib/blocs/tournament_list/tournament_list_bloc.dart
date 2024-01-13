@@ -10,17 +10,24 @@ class TournamentListsBloc
 
   TournamentListsBloc({required TournamentRepository tRepo})
       : _tournamentRepository = tRepo,
-        super(TournamentListLoading());
+        super(TournamentListNotLoaded()) {
+    on<RequestLoadTournamentListEvent>(
+        (event, emit) => _mapRequestLoadTournamentListToState());
+    on<UpdatedTournamentListEvent>(
+        (event, emit) => _mapUpdatedTournamentListToState(event));
 
-  @override
-  Stream<TournamentListState> mapEventToState(
-      TournamentListEvent event) async* {
-    if (event is RequestLoadTournamentListEvent) {
-      yield* _mapRequestLoadTournamentListToState();
-    } else if (event is UpdatedTournamentListEvent) {
-      yield* _mapUpdatedTournamentListToState(event);
-    }
+    _mapRequestLoadTournamentListToState();
   }
+
+  // @override
+  // Stream<TournamentListState> mapEventToState(
+  //     TournamentListEvent event) async* {
+  //   if (event is RequestLoadTournamentListEvent) {
+  //     yield* _mapRequestLoadTournamentListToState();
+  //   } else if (event is UpdatedTournamentListEvent) {
+  //     yield* _mapUpdatedTournamentListToState(event);
+  //   }
+  // }
 
   // Trigger load
   Stream<TournamentListState> _mapRequestLoadTournamentListToState() async* {

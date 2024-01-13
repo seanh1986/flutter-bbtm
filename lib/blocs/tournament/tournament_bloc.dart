@@ -14,20 +14,29 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
 
   TournamentBloc({required TournamentRepository tRepo})
       : _repo = tRepo,
-        super(TournamentStateUninitialized());
-
-  @override
-  Stream<TournamentState> mapEventToState(TournamentEvent event) async* {
-    if (event is TournamentEventUninitialized) {
-      yield* _mapToNoTournamentState(event);
-    } else if (event is TournamentEventFetchData) {
-      yield* _mapToLoadTournamentState(event);
-    } else if (event is TournamentEventSelectedTourny) {
-      yield* _mapToNewTournamentState(event);
-    } else if (event is TournamentEventRefreshData) {
-      yield* _mapToRefreshTournamentState(event);
-    }
+        super(TournamentStateUninitialized()) {
+    on<TournamentEventUninitialized>(
+        (event, emit) => _mapToNoTournamentState(event));
+    on<TournamentEventFetchData>(
+        (event, emit) => _mapToLoadTournamentState(event));
+    on<TournamentEventSelectedTourny>(
+        (event, emit) => _mapToNewTournamentState(event));
+    on<TournamentEventRefreshData>(
+        (event, emit) => _mapToRefreshTournamentState(event));
   }
+
+  // @override
+  // Stream<TournamentState> mapEventToState(TournamentEvent event) async* {
+  //   if (event is TournamentEventUninitialized) {
+  //     yield* _mapToNoTournamentState(event);
+  //   } else if (event is TournamentEventFetchData) {
+  //     yield* _mapToLoadTournamentState(event);
+  //   } else if (event is TournamentEventSelectedTourny) {
+  //     yield* _mapToNewTournamentState(event);
+  //   } else if (event is TournamentEventRefreshData) {
+  //     yield* _mapToRefreshTournamentState(event);
+  //   }
+  // }
 
   Future<String> getFileUrl(String filename) {
     return _repo.getFileUrl(filename);

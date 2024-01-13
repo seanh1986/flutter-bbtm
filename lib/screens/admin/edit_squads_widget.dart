@@ -268,7 +268,7 @@ class _EditSquadsWidget extends State<EditSquadsWidget> {
         );
       });
 
-      Overlay.of(context)!.insert(entry);
+      Overlay.of(context).insert(entry);
       await Future.delayed(duration);
       entry.remove();
       toList.add(item);

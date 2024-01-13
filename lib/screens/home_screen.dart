@@ -104,12 +104,10 @@ class _HomePageState extends State<HomePage> {
       } else if (authState is AuthStateLoggedOut) {
         ToastUtils.showSuccess(fToast, "Logged Out");
 
-        if (nafName != null) {
-          setState(() {
-            _authUser = AuthUser();
-          });
-        }
-      }
+        setState(() {
+          _authUser = AuthUser();
+        });
+            }
     });
   }
 
