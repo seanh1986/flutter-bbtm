@@ -1,6 +1,6 @@
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/squad.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/matchups/matchups_coaches_screen.dart';
 import 'package:bbnaf/screens/matchups/matchups_squad_screen.dart';

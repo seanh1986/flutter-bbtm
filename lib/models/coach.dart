@@ -2,8 +2,7 @@ import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/models/squad.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 
 class Coach extends IMatchupParticipant {
   late String nafName; // Key

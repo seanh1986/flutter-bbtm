@@ -1,5 +1,5 @@
-import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/tournament_repository/src/models/tournament.dart';
+import 'package:bbnaf/tournament_repository/src/models/tournament_info.dart';
 
 class TournamentBackup {
   late Tournament tournament;

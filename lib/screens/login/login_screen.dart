@@ -1,4 +1,4 @@
-import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:bbnaf/screens/login/login_screen_participant.dart';
 import 'package:bbnaf/screens/login/widget_login_header.dart';

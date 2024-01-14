@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bbnaf/blocs/auth/auth.dart';
-import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/repos/auth/auth_repo.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';

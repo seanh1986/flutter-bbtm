@@ -1,6 +1,6 @@
 import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class TournamentEvent extends Equatable {

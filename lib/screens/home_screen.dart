@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:bbnaf/blocs/auth/auth.dart';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/admin/admin_screen.dart';
 import 'package:bbnaf/screens/matchups/matchups_screen.dart';
@@ -107,7 +107,7 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _authUser = AuthUser();
         });
-            }
+      }
     });
   }
 

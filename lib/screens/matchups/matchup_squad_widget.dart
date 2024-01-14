@@ -1,5 +1,5 @@
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:flutter/material.dart';
 
 class MatchupSquadWidget extends StatefulWidget {

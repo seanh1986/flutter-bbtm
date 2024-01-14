@@ -1,4 +1,4 @@
-import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class TournamentState extends Equatable {

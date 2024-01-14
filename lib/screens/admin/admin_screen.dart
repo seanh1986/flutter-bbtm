@@ -1,5 +1,5 @@
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/admin/download_files_widget.dart';
 import 'package:bbnaf/screens/admin/round_management_widget.dart';

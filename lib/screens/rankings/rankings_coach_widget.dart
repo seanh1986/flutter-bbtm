@@ -1,5 +1,5 @@
 import 'package:bbnaf/models/squad.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

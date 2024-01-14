@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
 import 'package:bbnaf/models/coach.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/models/tournament/tournament_backup.dart';
-import 'package:bbnaf/models/tournament/tournament_info.dart';
 import 'package:bbnaf/repos/tournament/tournament_repo.dart';
 import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
