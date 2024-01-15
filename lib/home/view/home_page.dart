@@ -11,7 +11,8 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final user = context.select((AppBloc bloc) => bloc.state.user);
+    final user =
+        context.select((AppBloc bloc) => bloc.state.authenticationState.user);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),

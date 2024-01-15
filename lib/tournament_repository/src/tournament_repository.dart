@@ -45,15 +45,15 @@ class TournamentRepository {
   // Read only operations
   // ------------------
 
-  Future<void> requestTournamentList() async {
-    tournamentList;
-  }
+  // Future<void> requestTournamentList() async {}
 
   Future<void> requestTournament(String tournamentId) async {
     getTournamentData(tournamentId);
   }
 
-  Stream<List<TournamentInfo>> get tournamentList {
+  List<TournamentInfo> _tournamentList = [];
+
+  Stream<List<TournamentInfo>> getTournamentList() {
     print("TournamentRepository: tournamentList");
 
     return _tournyRef.snapshots().map((snapshot) {
@@ -68,8 +68,14 @@ class TournamentRepository {
         }
       });
 
+      _tournamentList = List.from(tournies);
+
       return tournies;
     });
+  }
+
+  List<TournamentInfo> get currentTournamentList {
+    return _tournamentList;
   }
 
   Stream<Tournament> getTournamentData(String tournamentId) async* {

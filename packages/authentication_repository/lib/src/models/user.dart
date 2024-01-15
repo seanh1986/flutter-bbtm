@@ -37,4 +37,12 @@ class User extends Equatable {
 
   @override
   List<Object?> get props => [email, id, name, photo];
+
+  String getNafName() {
+    return name != null ? name!.trim() : "";
+  }
+
+  String getEmail() {
+    return email != null ? email as String : "";
+  }
 }

@@ -17,32 +17,29 @@ final class _AppUserChanged extends AppEvent {
 }
 
 // Request tournament list refresh
-final class AppTournamentListRequested extends AppEvent {
-  const AppTournamentListRequested(this.user);
+// final class AppTournamentListRequested extends AppEvent {
+//   const AppTournamentListRequested(this.user);
 
-  final User user;
-}
+//   final User user;
+// }
 
 // Tournament list is loaded
 final class AppTournamentListLoaded extends AppEvent {
-  const AppTournamentListLoaded(this.user, this.tournamentList);
+  const AppTournamentListLoaded(this.tournamentList);
 
-  final User user;
   final List<TournamentInfo> tournamentList;
 }
 
 // Tournament refresh is requested
 final class AppTournamentRequested extends AppEvent {
-  const AppTournamentRequested(this.user, this.tournamentInfo);
+  const AppTournamentRequested(this.tournamentInfo);
 
-  final User user;
   final TournamentInfo tournamentInfo;
 }
 
 // Tournament loaded
 final class AppTournamentLoaded extends AppEvent {
-  const AppTournamentLoaded(this.user, this.tournament);
+  const AppTournamentLoaded(this.tournament);
 
-  final User user;
   final Tournament tournament;
 }

@@ -7,7 +7,7 @@ import 'package:bbnaf/screens/admin/admin_screen.dart';
 import 'package:bbnaf/screens/matchups/matchups_screen.dart';
 import 'package:bbnaf/screens/overview_screen.dart';
 import 'package:bbnaf/screens/rankings/rankings_screen.dart';
-import 'package:bbnaf/screens/tournament_list/tournament_selection.dart';
+import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';

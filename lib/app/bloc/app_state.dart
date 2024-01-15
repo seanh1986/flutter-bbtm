@@ -1,46 +1,82 @@
 part of 'app_bloc.dart';
 
-enum AppStatus {
+enum TournamentStatus {
   selected_tournament,
   create_tournament,
   tournament_list,
+  no_tournament_list,
+}
+
+enum AuthenticationStatus {
   authenticated,
   unauthenticated,
 }
 
-final class AppState extends Equatable {
-  const AppState._(
-      {required this.status,
-      this.user = User.empty,
-      List<TournamentInfo>? tournamentList,
-      this.tournament})
-      : tournamentList = tournamentList ?? const [];
+final class AuthenticationState extends Equatable {
+  const AuthenticationState._({required this.status, this.user = User.empty});
 
-  const AppState.authenticated(User user)
-      : this._(status: AppStatus.authenticated, user: user);
-
-  const AppState.unauthenticated() : this._(status: AppStatus.unauthenticated);
-
-  const AppState.tournamentList(User user, List<TournamentInfo> tournamentList)
+  const AuthenticationState.authenticated(User user)
       : this._(
-            status: AppStatus.tournament_list,
-            user: user,
-            tournamentList: tournamentList);
+          status: AuthenticationStatus.authenticated,
+          user: user,
+        );
 
-  const AppState.createTournament(User user)
-      : this._(status: AppStatus.create_tournament, user: user);
+  const AuthenticationState.unauthenticated()
+      : this._(status: AuthenticationStatus.unauthenticated);
 
-  const AppState.selectedTournament(User user, Tournament tournament)
-      : this._(
-            status: AppStatus.create_tournament,
-            user: user,
-            tournament: tournament);
-
-  final AppStatus status;
+  final AuthenticationStatus status;
   final User user;
-  final List<TournamentInfo> tournamentList;
-  final Tournament? tournament;
 
   @override
-  List<Object> get props => [status, user];
+  List<Object> get props => [
+        status,
+        user,
+      ];
+}
+
+final class TournamentState extends Equatable {
+  const TournamentState._(
+      {required this.status,
+      List<TournamentInfo>? tournamentList,
+      String? tournamentId})
+      : tournamentList = tournamentList ?? const [],
+        tournamentId = tournamentId ?? "";
+
+  const TournamentState.noTournamentList()
+      : this._(status: TournamentStatus.no_tournament_list);
+
+  const TournamentState.tournamentList(List<TournamentInfo> tournamentList)
+      : this._(
+            status: TournamentStatus.tournament_list,
+            tournamentList: tournamentList);
+
+  const TournamentState.createTournament(List<TournamentInfo> tournamentList)
+      : this._(
+            status: TournamentStatus.create_tournament,
+            tournamentList: tournamentList);
+
+  const TournamentState.selectTournament(
+      List<TournamentInfo> tournamentList, String tournamentId)
+      : this._(
+            status: TournamentStatus.selected_tournament,
+            tournamentList: tournamentList,
+            tournamentId: tournamentId);
+
+  final TournamentStatus status;
+  final List<TournamentInfo> tournamentList;
+  final String tournamentId;
+
+  @override
+  List<Object> get props => [status, tournamentList, tournamentId];
+}
+
+final class AppState extends Equatable {
+  const AppState(
+      {required this.authenticationState, required this.tournamentState});
+
+  final AuthenticationState authenticationState;
+  final TournamentState tournamentState;
+
+  @override
+  List<Object> get props => [authenticationState, tournamentState];
 }

@@ -29,7 +29,7 @@ class LoginForm extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'assets/images/logos/amorical_logo.png',
+                'assets/images/logos/amorical_logo_2024.png',
                 height: 120,
               ),
               const SizedBox(height: 16),

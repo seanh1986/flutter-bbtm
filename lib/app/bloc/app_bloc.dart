@@ -15,11 +15,13 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       required TournamentRepository tournamentRepository})
       : _authenticationRepository = authenticationRepository,
         _tournamentRepository = tournamentRepository,
-        super(
-          authenticationRepository.currentUser.isNotEmpty
-              ? AppState.authenticated(authenticationRepository.currentUser)
-              : const AppState.unauthenticated(),
-        ) {
+        super(AppState(
+            authenticationState:
+                (authenticationRepository.currentUser.isNotEmpty
+                    ? AuthenticationState.authenticated(
+                        authenticationRepository.currentUser)
+                    : const AuthenticationState.unauthenticated()),
+            tournamentState: TournamentState.noTournamentList())) {
     // Authentication Related
     on<_AppUserChanged>(_onUserChanged);
     on<AppLogoutRequested>(_onLogoutRequested);
@@ -27,11 +29,12 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       (user) => add(_AppUserChanged(user)),
     );
     // Tournament List Related
-    on<AppTournamentListRequested>(_onTournamentListRequested);
+    // on<AppTournamentListRequested>(_onTournamentListRequested);
     on<AppTournamentListLoaded>(_onTournamentListLoaded);
-    _tournamentListSubscription = _tournamentRepository.tournamentList.listen(
-        (tournamentList) => add(AppTournamentListLoaded(
-            _authenticationRepository.currentUser, tournamentList)));
+    _tournamentListSubscription = _tournamentRepository
+        .getTournamentList()
+        .listen(
+            (tournamentList) => add(AppTournamentListLoaded(tournamentList)));
     // Tournament Related
     // on<AppTournamentRequested>(_AppTournamentRequested);
     // on<AppTournamentLoaded>(_AppTournamentLoaded);
@@ -47,11 +50,11 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   // late final StreamSubscription<Tournament> _tournamentSubscription;
 
   void _onUserChanged(_AppUserChanged event, Emitter<AppState> emit) {
-    emit(
-      event.user.isNotEmpty
-          ? AppState.authenticated(event.user)
-          : const AppState.unauthenticated(),
-    );
+    emit(AppState(
+        authenticationState: event.user.isNotEmpty
+            ? AuthenticationState.authenticated(event.user)
+            : const AuthenticationState.unauthenticated(),
+        tournamentState: state.tournamentState));
   }
 
   void _onLogoutRequested(AppLogoutRequested event, Emitter<AppState> emit) {
@@ -59,19 +62,28 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   }
 
   // Download tournament list & refresh
-  void _onTournamentListRequested(
-      AppTournamentListRequested event, Emitter<AppState> emit) {
-    unawaited(_tournamentRepository.requestTournamentList());
-  }
+  // void _onTournamentListRequested(
+  //     AppTournamentListRequested event, Emitter<AppState> emit) async {
+  //   Stream<List<TournamentInfo>> tournamentList =
+  //       _tournamentRepository.getTournamentList();
+
+  //   tournamentList.User user = _authenticationRepository.currentUser;
+  //   List<TournamentInfo> tournamentList =
+  //       _tournamentRepository.currentTournamentList;
+
+  //   if (tournamentList.isNotEmpty) {
+  //     AppTournamentListLoaded loadedEvent =
+  //         AppTournamentListLoaded(user, tournamentList);
+  //     add(loadedEvent);
+  //   }
+  // }
 
   // Refresh app due to tournament list refresh
   void _onTournamentListLoaded(
       AppTournamentListLoaded event, Emitter<AppState> emit) {
-    emit(
-      event.user.isNotEmpty
-          ? AppState.tournamentList(event.user, event.tournamentList)
-          : const AppState.unauthenticated(),
-    );
+    emit(AppState(
+        authenticationState: state.authenticationState,
+        tournamentState: TournamentState.tournamentList(event.tournamentList)));
   }
 
   @override
