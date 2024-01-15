@@ -34,40 +34,41 @@ final class AuthenticationState extends Equatable {
       ];
 }
 
-final class TournamentState extends Equatable {
-  const TournamentState._(
+// ignore: must_be_immutable
+class TournamentState extends Equatable {
+  TournamentState._(
       {required this.status,
       List<TournamentInfo>? tournamentList,
-      String? tournamentId})
+      Tournament? tournament})
       : tournamentList = tournamentList ?? const [],
-        tournamentId = tournamentId ?? "";
+        tournament = tournament ?? Tournament.empty();
 
-  const TournamentState.noTournamentList()
+  TournamentState.noTournamentList()
       : this._(status: TournamentStatus.no_tournament_list);
 
-  const TournamentState.tournamentList(List<TournamentInfo> tournamentList)
+  TournamentState.tournamentList(List<TournamentInfo> tournamentList)
       : this._(
             status: TournamentStatus.tournament_list,
             tournamentList: tournamentList);
 
-  const TournamentState.createTournament(List<TournamentInfo> tournamentList)
+  TournamentState.createTournament(List<TournamentInfo> tournamentList)
       : this._(
             status: TournamentStatus.create_tournament,
             tournamentList: tournamentList);
 
-  const TournamentState.selectTournament(
-      List<TournamentInfo> tournamentList, String tournamentId)
+  TournamentState.selectTournament(
+      List<TournamentInfo> tournamentList, Tournament tournament)
       : this._(
             status: TournamentStatus.selected_tournament,
             tournamentList: tournamentList,
-            tournamentId: tournamentId);
+            tournament: tournament);
 
   final TournamentStatus status;
   final List<TournamentInfo> tournamentList;
-  final String tournamentId;
+  Tournament tournament;
 
   @override
-  List<Object> get props => [status, tournamentList, tournamentId];
+  List<Object> get props => [status, tournamentList, tournament];
 }
 
 final class AppState extends Equatable {

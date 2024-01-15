@@ -63,14 +63,19 @@ ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
         )
         .apply(
           bodyColor: isDarkTheme ? Colors.white : Colors.black,
-          displayColor: Colors.grey,
+          displayColor: isDarkTheme ? Colors.white : Colors.black,
         ),
     switchTheme: SwitchThemeData(
       thumbColor: MaterialStateProperty.all(
-          isDarkTheme ? Colors.orange : Colors.purple),
+          isDarkTheme ? Colors.blue : Colors.lightBlue),
     ),
     listTileTheme: ListTileThemeData(
-        iconColor: isDarkTheme ? Colors.orange : Colors.purple),
+      titleTextStyle: TextStyle(
+          color: isDarkTheme ? Colors.white : Colors.black, fontSize: 22),
+      iconColor: isDarkTheme ? Colors.grey : Colors.grey,
+      tileColor: isDarkTheme ? Colors.black : Colors.white,
+      textColor: isDarkTheme ? Colors.white : Colors.black,
+    ),
     appBarTheme: AppBarTheme(
         backgroundColor: isDarkTheme ? Colors.black : Colors.white,
         iconTheme:
@@ -82,7 +87,7 @@ ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-            backgroundColor: isDarkTheme ? Colors.orange : Colors.purple,
+            backgroundColor: isDarkTheme ? Colors.blue : Colors.lightBlue,
             textStyle:
                 TextStyle(color: isDarkTheme ? Colors.white : Colors.black),
             shape: RoundedRectangleBorder(

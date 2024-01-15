@@ -36,7 +36,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         .listen(
             (tournamentList) => add(AppTournamentListLoaded(tournamentList)));
     // Tournament Related
-    // on<AppTournamentRequested>(_AppTournamentRequested);
+    on<AppTournamentRequested>(_appTournamentRequested);
     // on<AppTournamentLoaded>(_AppTournamentLoaded);
     // _tournamentSubscription = _tournamentRepository.getTournamentData(tournamentId)
   }
@@ -84,6 +84,21 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     emit(AppState(
         authenticationState: state.authenticationState,
         tournamentState: TournamentState.tournamentList(event.tournamentList)));
+  }
+
+  void _appTournamentRequested(
+      AppTournamentRequested event, Emitter<AppState> emit) async {
+    Tournament tournament =
+        await _tournamentRepository.requestTournament(event.tournamentInfo.id);
+
+    if (tournament.isEmpty()) {
+      return;
+    }
+
+    emit(AppState(
+        authenticationState: state.authenticationState,
+        tournamentState: TournamentState.selectTournament(
+            state.tournamentState.tournamentList, tournament)));
   }
 
   @override

@@ -47,11 +47,16 @@ class TournamentRepository {
 
   // Future<void> requestTournamentList() async {}
 
-  Future<void> requestTournament(String tournamentId) async {
-    getTournamentData(tournamentId);
+  Future<Tournament> requestTournament(String tournamentId) async {
+    Tournament t = await _tournyRef
+        .doc(tournamentId)
+        .get()
+        .then((value) => _parseTournamentResponse(value));
+
+    return t;
   }
 
-  List<TournamentInfo> _tournamentList = [];
+  // List<TournamentInfo> _tournamentList = [];
 
   Stream<List<TournamentInfo>> getTournamentList() {
     print("TournamentRepository: tournamentList");
@@ -68,23 +73,16 @@ class TournamentRepository {
         }
       });
 
-      _tournamentList = List.from(tournies);
+      // _tournamentList = List.from(tournies);
 
       return tournies;
     });
   }
 
-  List<TournamentInfo> get currentTournamentList {
-    return _tournamentList;
-  }
-
   Stream<Tournament> getTournamentData(String tournamentId) async* {
     print("TournamentRepository: getTournamentData");
 
-    Tournament t = await _tournyRef
-        .doc(tournamentId)
-        .get()
-        .then((value) => _parseTournamentResponse(value));
+    Tournament t = await requestTournament(tournamentId);
 
     yield t;
   }
