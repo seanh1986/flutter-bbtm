@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:checkbox_formfield/checkbox_formfield.dart';
 
 class EditTournamentInfoWidget extends StatefulWidget {
   EditTournamentInfoWidget({Key? key}) : super(key: key);
@@ -112,7 +113,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       Divider(),
       _createScoringDetails("Coach Scoring:", _scoringDetails),
       Divider(),
-      _createCasulatyDetails(_casualtyDetails),
+      _createCasulatyDetails(),
       Divider(),
       _createSquadDetails(_squadDetails),
       Divider(),
@@ -416,7 +417,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         mainAxisAlignment: MainAxisAlignment.center, children: children);
   }
 
-  Widget _createCasulatyDetails(CasualtyDetails details) {
+  Widget _createCasulatyDetails() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
@@ -424,38 +425,57 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         Text("Casualty Details:"),
         SizedBox(width: 10.0),
         Expanded(
-            child: CheckboxFormField(
-          title: Text('Spp'),
-          initialValue: details.spp,
-          onSaved: (value) => details.spp = value != null && value,
-        )),
+            child: CheckboxListTileFormField(
+                title: Text('Spp'),
+                initialValue: _casualtyDetails.spp,
+                onChanged: (value) {
+                  _casualtyDetails.spp = value;
+                },
+                autovalidateMode: AutovalidateMode.always,
+                contentPadding: EdgeInsets.all(1))),
         SizedBox(width: 10.0),
         Expanded(
-            child: CheckboxFormField(
+            child: CheckboxListTileFormField(
           title: Text('Foul'),
-          initialValue: details.foul,
-          onSaved: (value) => details.foul = value != null && value,
+          initialValue: _casualtyDetails.foul,
+          onChanged: (value) {
+            _casualtyDetails.foul = value;
+          },
+          autovalidateMode: AutovalidateMode.always,
+          contentPadding: EdgeInsets.all(1),
         )),
         SizedBox(width: 10.0),
         Expanded(
-            child: CheckboxFormField(
+            child: CheckboxListTileFormField(
           title: Text('Surf'),
-          initialValue: details.surf,
-          onSaved: (value) => details.surf = value != null && value,
+          initialValue: _casualtyDetails.surf,
+          onChanged: (value) {
+            _casualtyDetails.surf = value;
+          },
+          autovalidateMode: AutovalidateMode.always,
+          contentPadding: EdgeInsets.all(1),
         )),
         SizedBox(width: 10.0),
         Expanded(
-            child: CheckboxFormField(
+            child: CheckboxListTileFormField(
           title: Text('Weapon'),
-          initialValue: details.weapon,
-          onSaved: (value) => details.weapon = value != null && value,
+          initialValue: _casualtyDetails.weapon,
+          onChanged: (value) {
+            _casualtyDetails.weapon = value;
+          },
+          autovalidateMode: AutovalidateMode.always,
+          contentPadding: EdgeInsets.all(1),
         )),
         SizedBox(width: 10.0),
         Expanded(
-            child: CheckboxFormField(
+            child: CheckboxListTileFormField(
           title: Text('Dodge'),
-          initialValue: details.dodge,
-          onSaved: (value) => details.dodge = value != null && value,
+          initialValue: _casualtyDetails.dodge,
+          onChanged: (value) {
+            _casualtyDetails.dodge = value;
+          },
+          autovalidateMode: AutovalidateMode.always,
+          contentPadding: EdgeInsets.all(1),
         )),
       ],
     );

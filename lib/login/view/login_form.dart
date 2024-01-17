@@ -30,7 +30,7 @@ class LoginForm extends StatelessWidget {
             children: [
               Image.asset(
                 'assets/images/logos/amorical_logo_2024.png',
-                height: 120,
+                height: 200,
               ),
               const SizedBox(height: 16),
               _EmailInput(),
