@@ -1,17 +1,13 @@
-import 'package:bbnaf/models/coach.dart';
-import 'package:bbnaf/models/squad.dart';
+import 'package:authentication_repository/authentication_repository.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/matchups/matchups_coaches_screen.dart';
 import 'package:bbnaf/screens/matchups/matchups_squad_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MatchupsPage extends StatefulWidget {
-  final Tournament tournament;
-  final AuthUser authUser;
-
-  MatchupsPage({Key? key, required this.tournament, required this.authUser})
-      : super(key: key);
+  MatchupsPage({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -28,7 +24,7 @@ enum MatchupSubScreens {
 
 class _MatchupsPage extends State<MatchupsPage> {
   late Tournament _tournament;
-  late AuthUser _authUser;
+  late User _user;
 
   late MatchupSubScreens _subScreen;
 
@@ -37,11 +33,6 @@ class _MatchupsPage extends State<MatchupsPage> {
   @override
   void initState() {
     super.initState();
-
-    _tournament = widget.tournament;
-    _authUser = widget.authUser;
-
-    _initSubScreen();
   }
 
   @override
@@ -53,7 +44,7 @@ class _MatchupsPage extends State<MatchupsPage> {
     bool allowMyMatchup = false;
     bool allowMySquad = false;
 
-    String nafName = _authUser.getNafName();
+    String nafName = _user.getNafName();
 
     Coach? coach = _tournament.getCoach(nafName);
     if (coach != null && coach.active) {
@@ -88,6 +79,12 @@ class _MatchupsPage extends State<MatchupsPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+    _user = appState.authenticationState.user;
+
+    _initSubScreen();
+
     List<Widget> _widgets = [
       _toggleButtonsList(context),
       SizedBox(height: 20),
@@ -150,34 +147,21 @@ class _MatchupsPage extends State<MatchupsPage> {
       case MatchupSubScreens.MY_SQUAD:
         if (_tournament.useSquadVsSquad()) {
           return SquadMatchupsPage(
-              tournament: _tournament,
-              authUser: _authUser,
-              autoSelectAuthUserMatchup: true,
-              refreshState: true);
+              autoSelectAuthUserMatchup: true, refreshState: true);
         } else {
           return CoachMatchupsPage(
-              tournament: _tournament,
-              authUser: _authUser,
               autoSelectOption: AutoSelectOption.AUTH_USER_SQUAD,
               refreshState: true);
         }
       case MatchupSubScreens.SQUAD_MATCHUPS:
         return SquadMatchupsPage(
-            tournament: _tournament,
-            authUser: _authUser,
-            autoSelectAuthUserMatchup: false,
-            refreshState: true);
+            autoSelectAuthUserMatchup: false, refreshState: true);
       case MatchupSubScreens.COACH_MATCHUPS:
         return CoachMatchupsPage(
-            tournament: _tournament,
-            authUser: _authUser,
-            autoSelectOption: AutoSelectOption.NONE,
-            refreshState: true);
+            autoSelectOption: AutoSelectOption.NONE, refreshState: true);
       case MatchupSubScreens.MY_MATCHUP:
       default:
         return CoachMatchupsPage(
-            tournament: _tournament,
-            authUser: _authUser,
             autoSelectOption: AutoSelectOption.AUTH_USER_MATCHUP,
             refreshState: true);
     }

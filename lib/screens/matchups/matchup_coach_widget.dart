@@ -1,6 +1,6 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/models/coach.dart';
+import 'package:authentication_repository/authentication_repository.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
@@ -15,17 +15,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class MatchupCoachWidget extends StatefulWidget {
-  final Tournament tournament;
-  final AuthUser authUser;
   final CoachMatchup matchup;
   final bool refreshState;
 
   MatchupCoachWidget(
-      {Key? key,
-      required this.tournament,
-      required this.authUser,
-      required this.matchup,
-      required this.refreshState})
+      {Key? key, required this.matchup, required this.refreshState})
       : super(key: key);
 
   @override
@@ -47,10 +41,8 @@ enum UploadState {
 
 class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   late Tournament _tournament;
-  late AuthUser _authUser;
+  late User _user;
   late CoachMatchup _matchup;
-
-  late TournamentBloc _tournyBloc;
 
   late ReportedMatchResultWithStatus _reportWithStatus;
   UploadState _state = UploadState.NotYetSet;
@@ -80,28 +72,27 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
   @override
   void dispose() {
-    _tournyBloc.close();
     super.dispose();
   }
 
   void _refreshState() {
-    _tournament = widget.tournament;
-    _authUser = widget.authUser;
     _matchup = widget.matchup;
   }
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+    _user = appState.authenticationState.user;
+
     if (widget.refreshState) {
       _refreshState();
     }
 
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-
     _reportWithStatus = _matchup.getReportedMatchStatus();
 
     Authorization authorization =
-        _tournament.getMatchAuthorization(_matchup, _authUser);
+        _tournament.getMatchAuthorization(_matchup, _user);
 
     _state = _getMatchUploadState(_reportWithStatus, authorization);
 
@@ -179,7 +170,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     Color? color;
     Alignment alignment = Alignment.center;
 
-    String nafName = _authUser.getNafName();
+    String nafName = _user.getNafName();
 
     if (_matchup.isHome(nafName)) {
       result = _matchup.homeReportedResults;
@@ -258,7 +249,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                           print("bestSportOppRank: " +
                               widget.result.bestSportOppRank.toString());
 
-                          String nafName = _authUser.getNafName();
+                          String nafName = _user.getNafName();
 
                           ReportedMatchResult? result;
                           bool? isHome;
@@ -284,11 +275,14 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                                 widget.result.bestSportOppRank;
 
                             if (result.reported && isHome != null) {
-                              LoadingIndicatorDialog().show(context);
-                              _tournyBloc.updateMatchEvent(
+                              context.read<AppBloc>().add(UpdateMatchEvent(
                                   UpdateMatchReportEvent(
-                                      _tournament, _matchup, isHome));
-                              LoadingIndicatorDialog().dismiss();
+                                      _tournament, _matchup, isHome)));
+                              // LoadingIndicatorDialog().show(context);
+                              // _tournyBloc.updateMatchEvent(
+                              // UpdateMatchReportEvent(
+                              //     _tournament, _matchup, isHome));
+                              // LoadingIndicatorDialog().dismiss();
                             }
                           }
 
@@ -418,7 +412,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       awayCas,
     ];
 
-    List<BonusDetails> bonuses = widget.tournament.info.scoringDetails.bonusPts;
+    List<BonusDetails> bonuses = _tournament.info.scoringDetails.bonusPts;
     if (bonuses.isNotEmpty) {
       for (int i = 0; i < bonuses.length; i++) {
         BonusDetails bonusDetails = bonuses[i];
@@ -528,7 +522,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     sb.writeln("homeCas: " + homeCas.toString());
     sb.writeln("awayCas: " + awayCas.toString());
 
-    List<BonusDetails> bonuses = widget.tournament.info.scoringDetails.bonusPts;
+    List<BonusDetails> bonuses = _tournament.info.scoringDetails.bonusPts;
     if (bonuses.isNotEmpty) {
       List<int> homeBonuses = homeReportWidget.getBonusPts();
       List<int> awayBonuses = awayReportWidget.getBonusPts();
@@ -567,7 +561,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   void _uploadToServer() async {
-    String nafName = _authUser.getNafName();
+    String nafName = _user.getNafName();
 
     bool? isHome; // fall back (e.g. for admin)
     if (_matchup.isHome(nafName) ||
@@ -631,32 +625,34 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
       ToastUtils.show(fToast, "Uploading Match Report!");
 
-      LoadingIndicatorDialog().show(context);
-      bool updateSuccess = await _tournyBloc.updateMatchEvent(event);
-      LoadingIndicatorDialog().dismiss();
+      context.read<AppBloc>().add(UpdateMatchEvent(event));
 
-      if (updateSuccess) {
-        ToastUtils.showSuccess(fToast, "Uploaded Match Report!");
-        setState(() {});
+      // LoadingIndicatorDialog().show(context);
+      // bool updateSuccess = await _tournyBloc.updateMatchEvent(event);
+      // LoadingIndicatorDialog().dismiss();
 
-        // Tournament? refreshedTournament =
-        //     await _tournyBloc.getRefreshedTournamentData(_tournament.info.id);
+      // if (updateSuccess) {
+      //   ToastUtils.showSuccess(fToast, "Uploaded Match Report!");
+      //   setState(() {});
 
-        // if (refreshedTournament != null) {
-        //   _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
-        //   if (mounted) {
-        //     setState(() {
-        //       _tournament = refreshedTournament;
-        //     });
-        //   }
-        // } else {
-        //   ToastUtils.showFailed(fToast,
-        //       "Automatic tournament refresh failed. Please refresh the page.");
-        // }
-      } else {
-        ToastUtils.showFailed(fToast,
-            "Uploading Match Failed. Please reload the page and try again.");
-      }
+      //   // Tournament? refreshedTournament =
+      //   //     await _tournyBloc.getRefreshedTournamentData(_tournament.info.id);
+
+      //   // if (refreshedTournament != null) {
+      //   //   _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
+      //   //   if (mounted) {
+      //   //     setState(() {
+      //   //       _tournament = refreshedTournament;
+      //   //     });
+      //   //   }
+      //   // } else {
+      //   //   ToastUtils.showFailed(fToast,
+      //   //       "Automatic tournament refresh failed. Please refresh the page.");
+      //   // }
+      // } else {
+      //   ToastUtils.showFailed(fToast,
+      //       "Uploading Match Failed. Please reload the page and try again.");
+      // }
     } catch (_) {
       ToastUtils.showFailed(fToast,
           "Uploading Match Failed. Please reload the page and try again.");

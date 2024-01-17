@@ -1,12 +1,12 @@
 import 'dart:collection';
+import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/tournament_repository/src/models/tournament_info.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
-import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/squad.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:xml/xml.dart';
@@ -287,13 +287,13 @@ class Tournament {
     return true;
   }
 
-  Authorization getMatchAuthorization(CoachMatchup matchup, AuthUser authUser) {
+  Authorization getMatchAuthorization(CoachMatchup matchup, User user) {
     // Check if Admin
-    if (isUserAdmin(authUser)) {
+    if (isUserAdmin(user)) {
       return Authorization.Admin;
     }
 
-    String nafName = authUser.getNafName();
+    String nafName = user.getNafName();
 
     // User is in matchup
     if (matchup.awayNafName.toLowerCase() == nafName.toLowerCase()) {
@@ -313,9 +313,8 @@ class Tournament {
     return Authorization.Unauthorized;
   }
 
-  bool isUserAdmin(AuthUser authUser) {
-    return authUser.user?.email != null &&
-        info.organizers.any((e) => e.email == authUser.user?.email);
+  bool isUserAdmin(User user) {
+    return info.organizers.any((e) => e.email == user.getEmail());
   }
 
   bool isEmpty() {

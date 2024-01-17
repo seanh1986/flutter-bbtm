@@ -1,7 +1,5 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/models/coach.dart';
-import 'package:bbnaf/models/races.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';
@@ -13,12 +11,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
 
 class EditParticipantsWidget extends StatefulWidget {
-  final Tournament tournament;
-  final TournamentBloc tournyBloc;
-
-  EditParticipantsWidget(
-      {Key? key, required this.tournament, required this.tournyBloc})
-      : super(key: key);
+  EditParticipantsWidget({Key? key}) : super(key: key);
 
   @override
   State<EditParticipantsWidget> createState() {
@@ -29,8 +22,6 @@ class EditParticipantsWidget extends StatefulWidget {
 class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   late List<Coach> _coaches = [];
 
-  late TournamentBloc _tournyBloc;
-
   List<DataColumn> _coachCols = [];
 
   late CoachesDataSource _coachSource;
@@ -39,20 +30,18 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   late FToast fToast;
 
+  late Tournament _tournament;
+
   @override
   void initState() {
     super.initState();
 
     fToast = FToast();
     fToast.init(context);
-
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-
-    _initFromTournament(widget.tournament);
   }
 
-  void _initFromTournament(Tournament t) {
-    _coaches = List.from(t.getCoaches());
+  void _initFromTournament() {
+    _coaches = List.from(_tournament.getCoaches());
 
     _coachCols = [
       DataColumn(label: Text("Name")),
@@ -61,7 +50,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
       DataColumn(label: Text("Race")),
     ];
 
-    if (t.useSquads() || t.useSquadsForInitOnly()) {
+    if (_tournament.useSquads() || _tournament.useSquadsForInitOnly()) {
       _coachCols.add(DataColumn(label: Text("Squad")));
     }
 
@@ -74,12 +63,15 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   @override
   void dispose() {
-    _tournyBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+    _initFromTournament();
+
     return Expanded(
         child: Column(children: [
       TitleBar(title: "Edit Tournament Participants"),
@@ -119,7 +111,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  _coaches = List.from(widget.tournament.getCoaches());
+                  _coaches = List.from(_tournament.getCoaches());
                 });
               },
               child: const Text('Discard'),
@@ -136,12 +128,15 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
                   List<RenameNafName> renames =
                       _coachSource.coachIdxNafRenames.values.toList();
 
-                  LoadingIndicatorDialog().show(context);
-                  bool success = await _tournyBloc.overwriteCoaches(
-                      widget.tournament.info, _coaches, renames);
-                  LoadingIndicatorDialog().dismiss();
+                  context
+                      .read<AppBloc>()
+                      .add(UpdateCoaches(_tournament.info, _coaches, renames));
+                  // LoadingIndicatorDialog().show(context);
+                  // bool success = await _tournyBloc.overwriteCoaches(
+                  //     _tournament.info, _coaches, renames);
+                  // LoadingIndicatorDialog().dismiss();
 
-                  _showSuccessFailToast(success);
+                  // _showSuccessFailToast(success);
                 };
 
                 _showDialogToConfirmOverwrite(context, callback);
@@ -176,8 +171,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   void _initCoaches() {
     _coachSource = CoachesDataSource(
-        useSquad: widget.tournament.useSquads() ||
-            widget.tournament.useSquadsForInitOnly(),
+        useSquad: _tournament.useSquads() || _tournament.useSquadsForInitOnly(),
         coaches: _coaches,
         activeCallback: (cIdx, active) {
           setState(() {

@@ -28,6 +28,9 @@ class TournamentInfo {
       required this.dateTimeStart,
       required this.dateTimeEnd});
 
+  TournamentInfo.copy(TournamentInfo info)
+      : this.fromJson(info.id, info.toJson());
+
   TournamentInfo.fromJson(String documentId, Map<String, dynamic> json) {
     this.id = documentId;
 

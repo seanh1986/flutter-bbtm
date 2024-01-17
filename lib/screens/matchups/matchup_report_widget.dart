@@ -1,9 +1,7 @@
 import 'dart:collection';
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/models/coach.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
-import 'package:bbnaf/models/races.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/screens/matchups/matchup_coach_widget.dart';
 import 'package:bbnaf/utils/toast.dart';
@@ -98,8 +96,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   final double fabSize = kIsWeb ? 25.0 : 15.0;
   final double raceIconSize = kIsWeb ? 50.0 : 30.0;
 
-  late TournamentBloc _tournyBloc;
-
   late FToast fToast;
 
   String _rosterFileName = "";
@@ -117,7 +113,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   @override
   void dispose() {
-    _tournyBloc.close();
     super.dispose();
   }
 
@@ -128,8 +123,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   @override
   Widget build(BuildContext context) {
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-
     if (widget.refreshState) {
       _refreshState();
     }
@@ -160,10 +153,11 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     }
     ToastUtils.show(fToast, "Downloading: " + _rosterFileName);
 
-    // LoadingIndicatorDialog().show(context);
-    isDownloaded =
-        await _tournyBloc.downloadFile(DownloadFile(_rosterFileName));
-    // LoadingIndicatorDialog().dismiss();
+    context.read<AppBloc>().add(DownloadFile(_rosterFileName));
+    // // LoadingIndicatorDialog().show(context);
+    // isDownloaded =
+    //     await _tournyBloc.downloadFile(DownloadFile(_rosterFileName));
+    // // LoadingIndicatorDialog().dismiss();
   }
 
   Widget _itemHeader(IMatchupParticipant participant) {
@@ -191,15 +185,27 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
             onPressed: () => {_handleRosterDownload()});
       } else {
         try {
-          // LoadingIndicatorDialog().show(context);
-          _tournyBloc.getFileUrl(participant.rosterFileName).then((value) => {
-                if (mounted)
-                  {
-                    setState(() {
-                      _rosterFileName = participant.rosterFileName;
-                    })
-                  }
-              });
+          context
+              .read<AppBloc>()
+              .getFileUrl(participant.rosterFileName)
+              .then((value) => {
+                    if (mounted)
+                      {
+                        setState(() {
+                          _rosterFileName = participant.rosterFileName;
+                        })
+                      }
+                  });
+
+          // // LoadingIndicatorDialog().show(context);
+          // _tournyBloc.getFileUrl(participant.rosterFileName).then((value) => {
+          //       if (mounted)
+          //         {
+          //           setState(() {
+          //             _rosterFileName = participant.rosterFileName;
+          //           })
+          //         }
+          //     });
         } catch (e) {
           // Do nothing
         } finally {

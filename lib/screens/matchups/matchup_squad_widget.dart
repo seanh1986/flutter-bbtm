@@ -1,14 +1,13 @@
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MatchupSquadWidget extends StatefulWidget {
-  final Tournament tournament;
   final SquadMatchup matchup;
 
-  MatchupSquadWidget(
-      {Key? key, required this.tournament, required this.matchup})
-      : super(key: key);
+  MatchupSquadWidget({Key? key, required this.matchup}) : super(key: key);
 
   @override
   State<MatchupSquadWidget> createState() {
@@ -25,12 +24,14 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
   @override
   void initState() {
     super.initState();
-    _tournament = widget.tournament;
     _matchup = widget.matchup;
   }
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+
     return Container(
         alignment: FractionalOffset.center, child: _squadMatchupWidget());
   }

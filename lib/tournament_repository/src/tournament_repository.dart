@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:cache/cache.dart';
@@ -56,7 +54,11 @@ class TournamentRepository {
     return t;
   }
 
-  // List<TournamentInfo> _tournamentList = [];
+  List<TournamentInfo>? _tournamentList;
+
+  List<TournamentInfo>? getCurrentTournamentList() {
+    return _tournamentList;
+  }
 
   Stream<List<TournamentInfo>> getTournamentList() {
     print("TournamentRepository: tournamentList");
@@ -73,7 +75,7 @@ class TournamentRepository {
         }
       });
 
-      // _tournamentList = List.from(tournies);
+      _tournamentList = List.from(tournies);
 
       return tournies;
     });

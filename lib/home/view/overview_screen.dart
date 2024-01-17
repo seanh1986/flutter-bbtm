@@ -1,15 +1,14 @@
+import 'package:authentication_repository/authentication_repository.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 class OverviewScreen extends StatefulWidget {
-  final Tournament tournament;
-  final AuthUser authUser;
-
-  OverviewScreen({Key? key, required this.tournament, required this.authUser})
-      : super(key: key);
+  OverviewScreen({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -19,18 +18,19 @@ class OverviewScreen extends StatefulWidget {
 
 class _OverviewScreenState extends State<OverviewScreen> {
   late Tournament _tournament;
-  late AuthUser _authUser;
+  late User _user;
 
   @override
   void initState() {
-    _tournament = widget.tournament;
-    _authUser = widget.authUser;
-
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+    _user = appState.authenticationState.user;
+
     List<Widget> widgets = [
       _welcomeUserAndDisplayCurrentRound(),
     ];
@@ -70,7 +70,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Widget _welcomeUserAndDisplayCurrentRound() {
-    String nafName = _authUser.getNafName();
+    String nafName = _user.getNafName();
 
     if (nafName.isEmpty) {
       nafName = "Guest";

@@ -1,180 +1,180 @@
-import 'dart:async';
+// import 'dart:async';
 
-import 'package:bbnaf/blocs/auth/auth.dart';
-import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/repos/auth/auth_repo.dart';
-import 'package:bbnaf/repos/auth/auth_user.dart';
-import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
-import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
-import 'package:bbnaf/repos/tournament/tournament_repo.dart';
-import 'package:bbnaf/screens/home_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_login/flutter_login.dart';
+// import 'package:bbnaf/blocs/auth/auth.dart';
+// import 'package:bbnaf/tournament_repository/src/models/models.dart';
+// import 'package:bbnaf/repos/auth/auth_repo.dart';
+// import 'package:bbnaf/repos/auth/auth_user.dart';
+// import 'package:bbnaf/repos/auth/firebase_auth_repo.dart';
+// import 'package:bbnaf/repos/tournament/firebase_tournament_repo.dart';
+// import 'package:bbnaf/repos/tournament/tournament_repo.dart';
+// import 'package:bbnaf/home/view/home_page.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter/scheduler.dart';
+// import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:flutter_login/flutter_login.dart';
 
-import 'login_screen.dart';
+// import 'login_screen.dart';
 
-class LoginOrganizerPage extends StatefulWidget {
-  final TournamentInfo? tournamentInfo;
+// class LoginOrganizerPage extends StatefulWidget {
+//   final TournamentInfo? tournamentInfo;
 
-  LoginOrganizerPage({this.tournamentInfo});
+//   LoginOrganizerPage({this.tournamentInfo});
 
-  @override
-  _LoginOrganizerPage createState() => _LoginOrganizerPage();
-}
+//   @override
+//   _LoginOrganizerPage createState() => _LoginOrganizerPage();
+// }
 
-class _LoginOrganizerPage extends State<LoginOrganizerPage> {
-  AuthRepository _authRepo = FirebaseAuthRepository();
-  TournamentRepository _tournyRepo = FirebaseTournamentRepository();
+// class _LoginOrganizerPage extends State<LoginOrganizerPage> {
+//   AuthRepository _authRepo = FirebaseAuthRepository();
+//   TournamentRepository _tournyRepo = FirebaseTournamentRepository();
 
-  late AuthBloc _authBloc;
-  late StreamSubscription _authSub;
+//   late AuthBloc _authBloc;
+//   late StreamSubscription _authSub;
 
-  final String keyNafName = "nafName";
+//   final String keyNafName = "nafName";
 
-  AuthUser _authUser = AuthUser();
+//   AuthUser _authUser = AuthUser();
 
-  List<UserFormField> _additionalFields = [];
+//   List<UserFormField> _additionalFields = [];
 
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+//   TextEditingController emailController = TextEditingController();
+//   TextEditingController passwordController = TextEditingController();
 
-  Duration get loginTime => Duration(milliseconds: timeDilation.ceil() * 2250);
+//   Duration get loginTime => Duration(milliseconds: timeDilation.ceil() * 2250);
 
-  @override
-  void initState() {
-    _authBloc = BlocProvider.of<AuthBloc>(context);
-    _additionalFields
-        .add(new UserFormField(keyName: keyNafName, displayName: "NAF Name"));
+//   @override
+//   void initState() {
+//     _authBloc = BlocProvider.of<AuthBloc>(context);
+//     _additionalFields
+//         .add(new UserFormField(keyName: keyNafName, displayName: "NAF Name"));
 
-    super.initState();
-  }
+//     super.initState();
+//   }
 
-  @override
-  void dispose() {
-    _authBloc.close();
-    _authSub.cancel();
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     _authBloc.close();
+//     _authSub.cancel();
+//     super.dispose();
+//   }
 
-  void _init() {
-    _authSub = _authBloc.stream.listen((authState) {
-      if (authState is AuthStateLoggedIn) {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => HomePage()));
-      }
-    });
-  }
+//   void _init() {
+//     _authSub = _authBloc.stream.listen((authState) {
+//       if (authState is AuthStateLoggedIn) {
+//         Navigator.push(
+//             context, MaterialPageRoute(builder: (context) => HomePage()));
+//       }
+//     });
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    _init();
+//   @override
+//   Widget build(BuildContext context) {
+//     _init();
 
-    return Stack(children: [
-      //LoginScreenHeader(showBackButton: true),
-      FlutterLogin(
-        title: 'Bloodbowl Tournament Manager',
-        logo: LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
-        // LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
-        //AssetImage('assets/images/logos/amorical_logo.png'),
-        additionalSignupFields: _additionalFields,
-        userValidator: (value) {
-          if (!value!.contains('@') || !value.endsWith('.com')) {
-            return "Email must contain '@' and end with '.com'";
-          }
-          return null;
-        },
-        passwordValidator: (value) {
-          if (value!.isEmpty) {
-            return 'Password is empty';
-          }
-          return null;
-        },
-        loginAfterSignUp: true,
-        navigateBackAfterRecovery: true,
-        onSignup: _signupUser,
-        onLogin: _tryLoginUser,
-        hideForgotPasswordButton: true,
-        onRecoverPassword: _recoverPassword,
-        onSubmitAnimationCompleted: () {
-          debugPrint('onSubmitAnimationCompleted');
-          _authBloc.add(new LogInAuthEvent(authUser: _authUser));
-        },
-      )
-    ]);
+//     return Stack(children: [
+//       //LoginScreenHeader(showBackButton: true),
+//       FlutterLogin(
+//         title: 'Bloodbowl Tournament Manager',
+//         logo: LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
+//         // LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
+//         //AssetImage('assets/images/logos/amorical_logo.png'),
+//         additionalSignupFields: _additionalFields,
+//         userValidator: (value) {
+//           if (!value!.contains('@') || !value.endsWith('.com')) {
+//             return "Email must contain '@' and end with '.com'";
+//           }
+//           return null;
+//         },
+//         passwordValidator: (value) {
+//           if (value!.isEmpty) {
+//             return 'Password is empty';
+//           }
+//           return null;
+//         },
+//         loginAfterSignUp: true,
+//         navigateBackAfterRecovery: true,
+//         onSignup: _signupUser,
+//         onLogin: _tryLoginUser,
+//         hideForgotPasswordButton: true,
+//         onRecoverPassword: _recoverPassword,
+//         onSubmitAnimationCompleted: () {
+//           debugPrint('onSubmitAnimationCompleted');
+//           _authBloc.add(new LogInAuthEvent(authUser: _authUser));
+//         },
+//       )
+//     ]);
 
-    // return FlutterLogin(
-    //     title: 'Bloodbowl Tournament Manager',
-    //     logo: LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
-    //     // LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
-    //     //AssetImage('assets/images/logos/amorical_logo.png'),
-    //     additionalSignupFields: _additionalFields,
-    //     userValidator: (value) {
-    //       if (!value!.contains('@') || !value.endsWith('.com')) {
-    //         return "Email must contain '@' and end with '.com'";
-    //       }
-    //       return null;
-    //     },
-    //     passwordValidator: (value) {
-    //       if (value!.isEmpty) {
-    //         return 'Password is empty';
-    //       }
-    //       return null;
-    //     },
-    //     loginAfterSignUp: true,
-    //     navigateBackAfterRecovery: true,
-    //     onSignup: _signupUser,
-    //     onLogin: _tryLoginUser,
-    //     hideForgotPasswordButton: true,
-    //     onRecoverPassword: _recoverPassword,
-    //     onSubmitAnimationCompleted: () {
-    //       debugPrint('onSubmitAnimationCompleted');
-    //       _authBloc.add(new LoggedInAuthEvent(authUser: _authUser));
-    //     },
-    //   );
-  }
+//     // return FlutterLogin(
+//     //     title: 'Bloodbowl Tournament Manager',
+//     //     logo: LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
+//     //     // LoginPage.getLogo(widget.tournamentInfo, _tournyRepo),
+//     //     //AssetImage('assets/images/logos/amorical_logo.png'),
+//     //     additionalSignupFields: _additionalFields,
+//     //     userValidator: (value) {
+//     //       if (!value!.contains('@') || !value.endsWith('.com')) {
+//     //         return "Email must contain '@' and end with '.com'";
+//     //       }
+//     //       return null;
+//     //     },
+//     //     passwordValidator: (value) {
+//     //       if (value!.isEmpty) {
+//     //         return 'Password is empty';
+//     //       }
+//     //       return null;
+//     //     },
+//     //     loginAfterSignUp: true,
+//     //     navigateBackAfterRecovery: true,
+//     //     onSignup: _signupUser,
+//     //     onLogin: _tryLoginUser,
+//     //     hideForgotPasswordButton: true,
+//     //     onRecoverPassword: _recoverPassword,
+//     //     onSubmitAnimationCompleted: () {
+//     //       debugPrint('onSubmitAnimationCompleted');
+//     //       _authBloc.add(new LoggedInAuthEvent(authUser: _authUser));
+//     //     },
+//     //   );
+//   }
 
-  Future<String?> _tryLoginUser(LoginData data) async {
-    debugPrint('Email: ${data.name}, Password: ${data.password}');
+//   Future<String?> _tryLoginUser(LoginData data) async {
+//     debugPrint('Email: ${data.name}, Password: ${data.password}');
 
-    String email = data.name;
-    String password = data.password;
+//     String email = data.name;
+//     String password = data.password;
 
-    _authUser = await _authRepo.signInWithCredentials(email, password);
+//     _authUser = await _authRepo.signInWithCredentials(email, password);
 
-    return _authUser.error;
-  }
+//     return _authUser.error;
+//   }
 
-  Future<String?> _signupUser(SignupData data) async {
-    debugPrint('Signup info');
-    debugPrint('Name: ${data.name}');
-    debugPrint('Password: ${data.password}');
+//   Future<String?> _signupUser(SignupData data) async {
+//     debugPrint('Signup info');
+//     debugPrint('Name: ${data.name}');
+//     debugPrint('Password: ${data.password}');
 
-    data.additionalSignupData?.forEach((key, value) {
-      debugPrint('$key: $value');
-    });
+//     data.additionalSignupData?.forEach((key, value) {
+//       debugPrint('$key: $value');
+//     });
 
-    String? optionalNafName = data.additionalSignupData?[keyNafName];
+//     String? optionalNafName = data.additionalSignupData?[keyNafName];
 
-    if (data.name == null || data.password == null || optionalNafName == null) {
-      return null;
-    }
+//     if (data.name == null || data.password == null || optionalNafName == null) {
+//       return null;
+//     }
 
-    String email = data.name.toString();
-    String password = data.password.toString();
-    String nafName = optionalNafName.toString();
+//     String email = data.name.toString();
+//     String password = data.password.toString();
+//     String nafName = optionalNafName.toString();
 
-    _authUser = await _authRepo.signUp(
-        nafName: nafName, email: email, password: password);
+//     _authUser = await _authRepo.signUp(
+//         nafName: nafName, email: email, password: password);
 
-    return _authUser.error;
-  }
+//     return _authUser.error;
+//   }
 
-  Future<String?> _recoverPassword(String name) async {
-    debugPrint('Email: $name');
-    return Future.delayed(loginTime).then((_) {
-      return null;
-    });
-  }
-}
+//   Future<String?> _recoverPassword(String name) async {
+//     debugPrint('Email: $name');
+//     return Future.delayed(loginTime).then((_) {
+//       return null;
+//     });
+//   }
+// }

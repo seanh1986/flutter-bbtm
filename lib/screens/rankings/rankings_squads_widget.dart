@@ -1,8 +1,10 @@
+import 'package:authentication_repository/authentication_repository.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:bbnaf/models/squad.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:flutter/paginated_data_table.dart';
 
 enum SquadRankingFields {
@@ -23,16 +25,9 @@ enum SquadRankingFields {
 }
 
 class RankingSquadsPage extends StatefulWidget {
-  final Tournament tournament;
-  final AuthUser authUser;
   final List<SquadRankingFields> fields;
 
-  RankingSquadsPage(
-      {Key? key,
-      required this.tournament,
-      required this.authUser,
-      required this.fields})
-      : super(key: key);
+  RankingSquadsPage({Key? key, required this.fields}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -41,6 +36,9 @@ class RankingSquadsPage extends StatefulWidget {
 }
 
 class _RankingSquadsPage extends State<RankingSquadsPage> {
+  late Tournament _tournament;
+  late User _user;
+
   int _sortColumnIndex = 3;
   late SquadRankingFields _sortField = widget.fields.first;
   bool _sortAscending = false;
@@ -50,13 +48,12 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   @override
   void initState() {
     super.initState();
-    _refreshState();
   }
 
   void _refreshState() {
-    _items = List.from(widget.tournament
+    _items = List.from(_tournament
         .getSquads()
-        .where((a) => a.isActive(widget.tournament) || a.gamesPlayed() > 0));
+        .where((a) => a.isActive(_tournament) || a.gamesPlayed() > 0));
 
     _items.sort((Squad a, Squad b) {
       final double aValue = _getSortingValue(a, _sortField);
@@ -122,7 +119,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
     int rank = 1;
     _items.forEach((squad) {
-      String nafName = widget.authUser.getNafName();
+      String nafName = _user.getNafName();
 
       bool highlight = squad.hasCoach(nafName);
 
@@ -160,6 +157,10 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+    _user = appState.authenticationState.user;
+
     _refreshState();
 
     return Scaffold(
@@ -289,21 +290,21 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
       case SquadRankingFields.L:
         return s.losses().toDouble();
       case SquadRankingFields.SumIndividualScore:
-        return s.sumIndividualScores(widget.tournament);
+        return s.sumIndividualScores(_tournament);
       case SquadRankingFields.W_Percent:
         return s.winPercent();
       case SquadRankingFields.SumTd:
-        return s.sumTds(widget.tournament).toDouble();
+        return s.sumTds(_tournament).toDouble();
       case SquadRankingFields.SumCas:
-        return s.sumCas(widget.tournament).toDouble();
+        return s.sumCas(_tournament).toDouble();
       case SquadRankingFields.SumOppTd:
-        return s.sumOppTds(widget.tournament).toDouble();
+        return s.sumOppTds(_tournament).toDouble();
       case SquadRankingFields.SumOppCas:
-        return s.sumOppCas(widget.tournament).toDouble();
+        return s.sumOppCas(_tournament).toDouble();
       case SquadRankingFields.SumDeltaTd:
-        return s.sumDeltaTds(widget.tournament).toDouble();
+        return s.sumDeltaTds(_tournament).toDouble();
       case SquadRankingFields.SumDeltaCas:
-        return s.sumDeltaCas(widget.tournament).toDouble();
+        return s.sumDeltaCas(_tournament).toDouble();
       case SquadRankingFields.OppScore:
         return s.oppPoints.toDouble();
       default:

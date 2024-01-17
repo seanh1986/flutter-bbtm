@@ -1,17 +1,13 @@
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
+import 'package:authentication_repository/authentication_repository.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/rankings/rankings_coach_widget.dart';
 import 'package:bbnaf/screens/rankings/rankings_squads_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RankingsPage extends StatefulWidget {
-  final Tournament tournament;
-  final AuthUser authUser;
-
-  RankingsPage({Key? key, required this.tournament, required this.authUser})
-      : super(key: key);
+  RankingsPage({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -21,19 +17,15 @@ class RankingsPage extends StatefulWidget {
 
 class _RankingsPage extends State<RankingsPage> {
   late Tournament _tournament;
-  late TournamentBloc _tournyBloc;
+  late User _user;
 
   @override
   void initState() {
     super.initState();
-    _tournament = widget.tournament;
-
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
   }
 
   @override
   void dispose() {
-    _tournyBloc.close();
     super.dispose();
   }
 
@@ -43,6 +35,10 @@ class _RankingsPage extends State<RankingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+    _user = appState.authenticationState.user;
+
     _refreshState();
 
     if (_tournament.useSquads()) {
@@ -87,7 +83,7 @@ class _RankingsPage extends State<RankingsPage> {
     List<Widget> topBar;
     List<Widget> views;
 
-    if (widget.tournament.isUserAdmin(widget.authUser)) {
+    if (_tournament.isUserAdmin(_user)) {
       tabLength = 4;
       topBar = [
         Tab(text: "Combined"),
@@ -96,55 +92,34 @@ class _RankingsPage extends State<RankingsPage> {
         Tab(text: "Sport")
       ];
       views = [
-        RankingCoachPage(
-            tournament: _tournament,
-            authUser: widget.authUser,
-            fields: _getCoachRankingFieldsCombinedAdmin()),
-        RankingCoachPage(
-            tournament: _tournament,
-            authUser: widget.authUser,
-            fields: [
-              CoachRankingFields.Td,
-              CoachRankingFields.OppTd,
-              CoachRankingFields.DeltaTd
-            ]),
-        RankingCoachPage(
-            tournament: _tournament,
-            authUser: widget.authUser,
-            fields: [
-              CoachRankingFields.Cas,
-              CoachRankingFields.OppCas,
-              CoachRankingFields.DeltaCas
-            ]),
-        RankingCoachPage(
-            tournament: _tournament,
-            authUser: widget.authUser,
-            fields: [CoachRankingFields.BestSport])
+        RankingCoachPage(fields: _getCoachRankingFieldsCombinedAdmin()),
+        RankingCoachPage(fields: [
+          CoachRankingFields.Td,
+          CoachRankingFields.OppTd,
+          CoachRankingFields.DeltaTd
+        ]),
+        RankingCoachPage(fields: [
+          CoachRankingFields.Cas,
+          CoachRankingFields.OppCas,
+          CoachRankingFields.DeltaCas
+        ]),
+        RankingCoachPage(fields: [CoachRankingFields.BestSport])
       ];
     } else {
       tabLength = 3;
       topBar = [Tab(text: "Combined"), Tab(text: "Td"), Tab(text: "Cas")];
       views = [
-        RankingCoachPage(
-            tournament: _tournament,
-            authUser: widget.authUser,
-            fields: _getCoachRankingFieldsCombined()),
-        RankingCoachPage(
-            tournament: _tournament,
-            authUser: widget.authUser,
-            fields: [
-              CoachRankingFields.Td,
-              CoachRankingFields.OppTd,
-              CoachRankingFields.DeltaTd
-            ]),
-        RankingCoachPage(
-            tournament: _tournament,
-            authUser: widget.authUser,
-            fields: [
-              CoachRankingFields.Cas,
-              CoachRankingFields.OppCas,
-              CoachRankingFields.DeltaCas
-            ])
+        RankingCoachPage(fields: _getCoachRankingFieldsCombined()),
+        RankingCoachPage(fields: [
+          CoachRankingFields.Td,
+          CoachRankingFields.OppTd,
+          CoachRankingFields.DeltaTd
+        ]),
+        RankingCoachPage(fields: [
+          CoachRankingFields.Cas,
+          CoachRankingFields.OppCas,
+          CoachRankingFields.DeltaCas
+        ])
       ];
     }
 
@@ -194,10 +169,7 @@ class _RankingsPage extends State<RankingsPage> {
             body: TabBarView(
               physics: NeverScrollableScrollPhysics(),
               children: <Widget>[
-                RankingSquadsPage(
-                    tournament: _tournament,
-                    authUser: widget.authUser,
-                    fields: _getSquadRankingFieldsCombined()),
+                RankingSquadsPage(fields: _getSquadRankingFieldsCombined()),
                 _coachRankingsWithToggles(),
               ],
             )));

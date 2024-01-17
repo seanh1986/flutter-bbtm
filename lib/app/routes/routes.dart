@@ -17,34 +17,6 @@ List<Page<dynamic>> onGenerateAppViewPages(
     case AuthenticationStatus.unauthenticated:
       return [LoginPage.page()];
   }
-
-  // if (state.authenticationState.status != AuthenticationStatus.authenticated) {
-  //   return [LoginPage.page()];
-  // }
-
-  // return [
-  //   MaterialPage(child: TournamentSelectionPage()),
-  //   // MaterialPage(child: TournamentCreationPage()),
-  // ];
-
-  // switch (state.status) {
-  //   case AppStatus.selected_tournament:
-  //     return [];
-  //   // case AppStatus.create_tournament:
-  //   //   return [];
-  //   case AppStatus.tournament_list:
-  //   case AppStatus.authenticated:
-  //     return [
-  //       MaterialPage(child: TournamentSelectionPage()),
-  //       // MaterialPage(child: TournamentCreationPage()),
-  //     ];
-  //   // return [HomePage.page()];
-  //   case AppStatus.unauthenticated:
-  //     return [LoginPage.page()];
-  //   default:
-  //     print("Non-handled AppStatus (!) -> to LoginPage");
-  //     return [LoginPage.page()];
-  // }
 }
 
 List<Page<dynamic>> _authUserRouteByTournamentState(

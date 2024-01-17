@@ -1,5 +1,5 @@
-import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 

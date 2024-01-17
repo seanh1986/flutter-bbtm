@@ -1,5 +1,5 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';
@@ -12,12 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class EditTournamentInfoWidget extends StatefulWidget {
-  final Tournament tournament;
-  final TournamentBloc tournyBloc;
-
-  EditTournamentInfoWidget(
-      {Key? key, required this.tournament, required this.tournyBloc})
-      : super(key: key);
+  EditTournamentInfoWidget({Key? key}) : super(key: key);
 
   @override
   State<EditTournamentInfoWidget> createState() {
@@ -34,8 +29,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   late CasualtyDetails _casualtyDetails;
   late SquadDetails _squadDetails;
 
-  late TournamentBloc _tournyBloc;
-
   List<DataColumn> _organizerCols = [
     DataColumn(label: Text("")), // For add/remove rows
     DataColumn(label: Text("Email")),
@@ -47,6 +40,8 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
   late FToast fToast;
 
+  late Tournament _tournament;
+
   @override
   void initState() {
     super.initState();
@@ -54,23 +49,19 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
     fToast = FToast();
     fToast.init(context);
 
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
 
-    _initFromTournament(widget.tournament);
-  }
-
-  void _initFromTournament(Tournament t) {
-    _name = t.info.name;
-    _location = t.info.location;
-    _organizers = t.info.organizers;
-    _scoringDetails = t.info.scoringDetails;
-    _casualtyDetails = t.info.casualtyDetails;
-    _squadDetails = t.info.squadDetails;
+    _name = _tournament.info.name;
+    _location = _tournament.info.location;
+    _organizers = _tournament.info.organizers;
+    _scoringDetails = _tournament.info.scoringDetails;
+    _casualtyDetails = _tournament.info.casualtyDetails;
+    _squadDetails = _tournament.info.squadDetails;
   }
 
   @override
   void dispose() {
-    _tournyBloc.close();
     super.dispose();
   }
 
@@ -131,9 +122,9 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         ElevatedButton(
           onPressed: () {
             setState(() {
-              _name = widget.tournament.info.name;
-              _location = widget.tournament.info.location;
-              _organizers = widget.tournament.info.organizers;
+              _name = _tournament.info.name;
+              _location = _tournament.info.location;
+              _organizers = _tournament.info.organizers;
             });
           },
           child: const Text('Discard'),
@@ -142,7 +133,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         ElevatedButton(
           onPressed: () {
             VoidCallback callback = () async {
-              TournamentInfo info = widget.tournament.info;
+              TournamentInfo info = _tournament.info;
 
               info.name = _name;
               info.location = _location;
@@ -158,14 +149,15 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
               info.casualtyDetails = _casualtyDetails;
               info.squadDetails = _squadDetails;
 
-              ToastUtils.show(fToast, "Updating Tournament Data");
+              ToastUtils.show(fToast, "Updating Tournament Info");
 
-              LoadingIndicatorDialog().show(context);
-              bool success =
-                  await widget.tournyBloc.overwriteTournamentInfo(info);
-              LoadingIndicatorDialog().dismiss();
+              context.read<AppBloc>().add(UpdateTournamentInfo(context, info));
+              // LoadingIndicatorDialog().show(context);
+              // bool success =
+              //     await widget.tournyBloc.overwriteTournamentInfo(info);
+              // LoadingIndicatorDialog().dismiss();
 
-              _showSuccessFailToast(success);
+              // _showSuccessFailToast(success);
             };
 
             _showDialogToConfirmOverwrite(context, callback);

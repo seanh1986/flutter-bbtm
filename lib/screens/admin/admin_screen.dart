@@ -1,6 +1,5 @@
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/admin/download_files_widget.dart';
 import 'package:bbnaf/screens/admin/round_management_widget.dart';
 import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
@@ -9,11 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AdminScreen extends StatefulWidget {
-  final Tournament tournament;
-  final AuthUser authUser;
-
-  AdminScreen({Key? key, required this.tournament, required this.authUser})
-      : super(key: key);
+  AdminScreen({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -31,7 +26,6 @@ enum AdminSubScreens {
 
 class _AdminScreenState extends State<AdminScreen> {
   late Tournament _tournament;
-  late TournamentBloc _tournyBloc;
 
   List<AdminSubScreens> adminSubScreens = [
     AdminSubScreens.EDIT_INFO,
@@ -43,20 +37,19 @@ class _AdminScreenState extends State<AdminScreen> {
 
   @override
   void initState() {
-    _tournament = widget.tournament;
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-
     super.initState();
   }
 
   @override
   void dispose() {
-    _tournyBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+
     List<Widget> _widgets = [
       _toggleButtonsList(context),
       SizedBox(height: 20),
@@ -104,19 +97,15 @@ class _AdminScreenState extends State<AdminScreen> {
   Widget? _getSubScreen() {
     switch (subScreen) {
       case AdminSubScreens.EDIT_INFO:
-        return EditTournamentInfoWidget(
-            tournament: _tournament, tournyBloc: _tournyBloc);
+        return EditTournamentInfoWidget();
       case AdminSubScreens.EDIT_SQUADS:
         return null; // TODO...
       case AdminSubScreens.EDIT_PARTICIPANTS:
-        return EditParticipantsWidget(
-            tournament: _tournament, tournyBloc: _tournyBloc);
+        return EditParticipantsWidget();
       case AdminSubScreens.ROUND_MANAGEMENT:
-        return RoundManagementWidget(
-            tournament: _tournament, tournyBloc: _tournyBloc);
+        return RoundManagementWidget();
       case AdminSubScreens.DOWNLOAD_FILES:
-        return DownloadFilesWidget(
-            tournament: _tournament, tournyBloc: _tournyBloc);
+        return DownloadFilesWidget();
       default:
         return null;
     }

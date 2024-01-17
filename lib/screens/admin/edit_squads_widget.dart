@@ -1,6 +1,5 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/models/coach.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
@@ -9,12 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class EditSquadsWidget extends StatefulWidget {
-  final Tournament tournament;
-  final TournamentBloc tournyBloc;
-
-  EditSquadsWidget(
-      {Key? key, required this.tournament, required this.tournyBloc})
-      : super(key: key);
+  EditSquadsWidget({Key? key}) : super(key: key);
 
   @override
   State<EditSquadsWidget> createState() {
@@ -29,7 +23,7 @@ class _EditSquadsWidget extends State<EditSquadsWidget> {
 
   final _unselectedListKey = GlobalKey<AnimatedListState>();
 
-  late TournamentBloc _tournyBloc;
+  late Tournament _originalTournament;
   late Tournament _tournament;
 
   late FToast fToast;
@@ -41,8 +35,8 @@ class _EditSquadsWidget extends State<EditSquadsWidget> {
     fToast = FToast();
     fToast.init(context);
 
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-    _tournament = widget.tournament;
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
   }
 
   void _initFromTournament(Tournament t) {
@@ -68,12 +62,14 @@ class _EditSquadsWidget extends State<EditSquadsWidget> {
 
   @override
   void dispose() {
-    _tournyBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _originalTournament = appState.tournamentState.tournament;
+
     return Column(children: [
       TitleBar(title: "Edit Tournament Squads"),
       SizedBox(height: 20),
@@ -129,7 +125,7 @@ class _EditSquadsWidget extends State<EditSquadsWidget> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  _tournament = widget.tournament;
+                  _tournament = _originalTournament;
                 });
               },
               child: const Text('Discard'),
@@ -211,7 +207,7 @@ class _EditSquadsWidget extends State<EditSquadsWidget> {
     int numActiveCoaches = coaches.where((element) => element.active).length;
 
     int requiredNumCoachesPerSquad =
-        widget.tournament.info.squadDetails.requiredNumCoachesPerSquad;
+        _originalTournament.info.squadDetails.requiredNumCoachesPerSquad;
 
     return numActiveCoaches == requiredNumCoachesPerSquad;
   }

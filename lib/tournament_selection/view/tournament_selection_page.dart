@@ -1,11 +1,8 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
-import 'package:bbnaf/blocs/auth/auth.dart';
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/blocs/tournament_list/tournament_list.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
-import 'package:bbnaf/screens/home_screen.dart';
+import 'package:bbnaf/home/view/home_page.dart';
 import 'package:bbnaf/screens/login/login_screen.dart';
 import 'package:bbnaf/screens/login/login_screen_organizer.dart';
 import 'package:bbnaf/screens/splash_screen.dart';
@@ -83,9 +80,8 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
       int tIdx = tournamentList.indexWhere((t) => t.id == tournamentId);
 
       if (tIdx >= 0) {
-        TournamentInfo tournamentInfo = tournamentList[tIdx];
-        context.read<AppBloc>().add(AppTournamentRequested(tournamentInfo));
-
+        // Verify that input tournamentId is valid
+        context.read<AppBloc>().add(AppTournamentRequested(tournamentId!));
         return SplashScreen();
       }
     }
@@ -281,7 +277,8 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
         child: ListTile(
-          onTap: () => {context.read<AppBloc>().add(AppTournamentRequested(t))},
+          onTap: () =>
+              {context.read<AppBloc>().add(AppTournamentRequested(t.id))},
           title: Padding(
               padding: EdgeInsets.all(16.0),
               child: Container(
