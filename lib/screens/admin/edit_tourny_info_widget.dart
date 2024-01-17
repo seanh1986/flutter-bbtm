@@ -42,22 +42,14 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
   late Tournament _tournament;
 
+  bool _initVars = true;
+
   @override
   void initState() {
     super.initState();
 
     fToast = FToast();
     fToast.init(context);
-
-    AppState appState = context.select((AppBloc bloc) => bloc.state);
-    _tournament = appState.tournamentState.tournament;
-
-    _name = _tournament.info.name;
-    _location = _tournament.info.location;
-    _organizers = _tournament.info.organizers;
-    _scoringDetails = _tournament.info.scoringDetails;
-    _casualtyDetails = _tournament.info.casualtyDetails;
-    _squadDetails = _tournament.info.squadDetails;
   }
 
   @override
@@ -67,6 +59,18 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+
+    if (_initVars) {
+      _name = _tournament.info.name;
+      _location = _tournament.info.location;
+      _organizers = _tournament.info.organizers;
+      _scoringDetails = _tournament.info.scoringDetails;
+      _casualtyDetails = _tournament.info.casualtyDetails;
+      _squadDetails = _tournament.info.squadDetails;
+    }
+
     return Column(children: [
       TitleBar(title: "Edit Tournament Info"),
       SizedBox(height: 20),
@@ -122,6 +126,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         ElevatedButton(
           onPressed: () {
             setState(() {
+              _initVars = false;
               _name = _tournament.info.name;
               _location = _tournament.info.location;
               _organizers = _tournament.info.organizers;

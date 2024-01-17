@@ -28,6 +28,8 @@ class _MatchupsPage extends State<MatchupsPage> {
 
   late MatchupSubScreens _subScreen;
 
+  bool refreshSubScreen = true;
+
   List<MatchupSubScreens> _subScreensAllowed = [];
 
   @override
@@ -68,12 +70,14 @@ class _MatchupsPage extends State<MatchupsPage> {
     }
     _subScreensAllowed.add(MatchupSubScreens.COACH_MATCHUPS);
 
-    if (allowMyMatchup) {
-      _subScreen = MatchupSubScreens.MY_MATCHUP;
-    } else if (_tournament.useSquadVsSquad()) {
-      _subScreen = MatchupSubScreens.SQUAD_MATCHUPS;
-    } else {
-      _subScreen = MatchupSubScreens.COACH_MATCHUPS;
+    if (refreshSubScreen) {
+      if (allowMyMatchup) {
+        _subScreen = MatchupSubScreens.MY_MATCHUP;
+      } else if (_tournament.useSquadVsSquad()) {
+        _subScreen = MatchupSubScreens.SQUAD_MATCHUPS;
+      } else {
+        _subScreen = MatchupSubScreens.COACH_MATCHUPS;
+      }
     }
   }
 
@@ -123,6 +127,7 @@ class _MatchupsPage extends State<MatchupsPage> {
           child: Text(element.name.replaceAll("_", " ")),
           onPressed: () {
             setState(() {
+              refreshSubScreen = false;
               _subScreen = element;
             });
           },

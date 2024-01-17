@@ -25,8 +25,6 @@ enum AdminSubScreens {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
-  late Tournament _tournament;
-
   List<AdminSubScreens> adminSubScreens = [
     AdminSubScreens.EDIT_INFO,
     AdminSubScreens.EDIT_PARTICIPANTS,
@@ -47,9 +45,6 @@ class _AdminScreenState extends State<AdminScreen> {
 
   @override
   Widget build(BuildContext context) {
-    AppState appState = context.select((AppBloc bloc) => bloc.state);
-    _tournament = appState.tournamentState.tournament;
-
     List<Widget> _widgets = [
       _toggleButtonsList(context),
       SizedBox(height: 20),
@@ -67,12 +62,11 @@ class _AdminScreenState extends State<AdminScreen> {
   Widget _toggleButtonsList(BuildContext context) {
     List<Widget> toggleWidgets = [];
 
+    final theme = Theme.of(context);
+
     adminSubScreens.forEach((element) {
       toggleWidgets.add(ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).primaryColor,
-          textStyle: TextStyle(color: Colors.white),
-        ),
+        style: theme.elevatedButtonTheme.style,
         child: Text(element.name.replaceAll("_", " ")),
         onPressed: () {
           setState(() {

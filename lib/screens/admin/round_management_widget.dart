@@ -43,7 +43,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     fToast = FToast();
     fToast.init(context);
 
-    _refreshState();
+    // _refreshState();
   }
 
   @override
@@ -77,6 +77,8 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   Widget build(BuildContext context) {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
+
+    _refreshState();
 
     _roundSummaryCols = _getRoundSummaryCols();
 
