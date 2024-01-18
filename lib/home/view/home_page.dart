@@ -82,6 +82,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _generateUi(BuildContext context, AppState appState) {
+    final theme = Theme.of(context);
+
     _children = [
       new _WidgetFamily([OverviewScreen()]),
       new _WidgetFamily([MatchupsPage()]),
@@ -115,8 +117,12 @@ class _HomePageState extends State<HomePage> {
           bottomNavigationBar: BottomNavigationBar(
             items: _getBottomNavigationBarItems(),
             currentIndex: _parentIndex,
-            selectedItemColor: Theme.of(context).colorScheme.secondary,
             onTap: _onItemTapped,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
+            selectedItemColor: theme.bottomNavigationBarTheme.selectedItemColor,
+            unselectedItemColor:
+                theme.bottomNavigationBarTheme.unselectedItemColor,
           ),
         ));
   }
