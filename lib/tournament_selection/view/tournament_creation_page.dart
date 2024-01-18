@@ -1,5 +1,6 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
+import 'package:bbnaf/screens/admin/edit_tourny_info_widget.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:flutter/material.dart';
@@ -24,24 +25,12 @@ class TournamentCreationPage extends StatefulWidget {
 
 class _TournamentCreationPage extends State<TournamentCreationPage> {
   late Tournament _tournament;
-  // late TournamentBloc _tournyBloc;
-
-  late final User user;
+  late User _user;
   late final String id;
 
   @override
   void initState() {
-    // _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-
-    // _tournament = Tournament.empty();
-
-    // _tournament.info.id = Uuid().v1();
     id = Uuid().v1();
-
-    // String email = widget.authUser.getEmail();
-    // String nafName = widget.authUser.getNafName();
-
-    // _tournament.info.organizers.add(OrganizerInfo(email, nafName, true));
 
     super.initState();
   }
@@ -54,25 +43,20 @@ class _TournamentCreationPage extends State<TournamentCreationPage> {
 
   @override
   Widget build(BuildContext context) {
-    user =
+    _user =
         context.select((AppBloc bloc) => bloc.state.authenticationState.user);
 
-    String email = user.getEmail();
-    String nafName = user.getNafName();
+    String email = _user.getEmail();
+    String nafName = _user.getNafName();
 
     _tournament = Tournament.empty();
     _tournament.info.id = id;
     _tournament.info.organizers.add(OrganizerInfo(email, nafName, true));
 
     // return AdminScreen(tournament: _tournament, authUser: widget.authUser);
-    // return Material(
-    //     child: EditTournamentInfoWidget(
-    //         tournament: _tournament, tournyBloc: _tournyBloc));
-    return Text("TODO: Create Tournament. Id: " +
-        id +
-        ". Orga: " +
-        email +
-        " | " +
-        nafName);
+    return Material(
+        child: EditTournamentInfoWidget(
+      tournament: _tournament,
+    ));
   }
 }

@@ -7,6 +7,7 @@ import 'package:bbnaf/screens/login/login_screen.dart';
 import 'package:bbnaf/screens/login/login_screen_organizer.dart';
 import 'package:bbnaf/screens/splash_screen.dart';
 import 'package:bbnaf/tournament_selection/view/tournament_creation_page.dart';
+import 'package:flow_builder/flow_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -28,6 +29,7 @@ enum DateType {
   Recent_or_Upcoming_Tournaments,
   Past_Tournaments,
   Future_Tournaments,
+  Create_Tournament,
 }
 
 class _TournamentSelectionPage extends State<TournamentSelectionPage> {
@@ -89,61 +91,6 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
     return _showTournamentList(context, tournamentList);
   }
 
-  /// Once tournament list is loaded, we either forward to the hardcoded
-  /// selected tournament, if it can be found, or we launch the tournament list
-  // Widget _onTournamentListLoaded(
-  //     BuildContext context, TournamentListLoaded listState) {
-  //   if (tournamentId != null) {
-  //     int tIdx = listState.tournaments.indexWhere((t) => t.id == tournamentId);
-
-  //     if (tIdx >= 0) {
-  //       TournamentInfo tournamentInfo = listState.tournaments[tIdx];
-  //       _processTournamentSelection(context, tournamentInfo);
-
-  //       return SplashScreen();
-  //     }
-  //   }
-
-  //   // if (dateType == DateType.Create_Tournament) {
-  //   //   return _createNewTournament();
-  //   // }
-
-  //   // if (_authState is AuthStateLoggedIn) {
-  //   //   if (dateType == DateType.Create_Tournament) {
-  //   //     Navigator.push(context,
-  //   //         MaterialPageRoute(builder: (context) => _createNewTournament()));
-  //   //   } else {
-  //   //     Navigator.push(
-  //   //         context, MaterialPageRoute(builder: (context) => HomePage()));
-  //   //   }
-  //   // } else {
-  //   //   Navigator.push(
-  //   //       context,
-  //   //       MaterialPageRoute(
-  //   //           builder: (context) => LoginPage(tournyState.tournament.info)));
-  //   // }
-
-  //   return _showTournamentList(context, listState.tournaments);
-  // }
-
-  /// Once a tournament has been selected
-  // Widget _onTournamentSelected(
-  //     BuildContext context, TournamentStateLoaded state) {
-  //   return Material(child: HomePage());
-  //   // if (_authState is AuthStateLoggedIn) {
-  //   //   return Material(child: HomePage());
-  //   // } else {
-  //   //   return Material(child: LoginPage(state.tournament.info));
-  //   // }
-  // }
-
-  // void _processTournamentSelection(
-  //     BuildContext context, TournamentInfo tournamentInfo) {
-  //   // BlocProvider.of<TournamentBloc>(context)
-  //   //     .add(TournamentEventFetchData(tournamentInfo.id));
-  //   // _tournyBloc.add(TournamentEventFetchData(tournamentInfo.id));
-  // }
-
   Widget _showTournamentList(
       BuildContext context, List<TournamentInfo> tournamentList) {
     _updatePastFutureRecentUpcomingTournaments(tournamentList);
@@ -163,28 +110,26 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
     List<Widget> toggleWidgets = [];
 
     DateType.values.forEach((element) {
+      bool clickable = dateType != element;
+
       toggleWidgets.add(ElevatedButton(
         style: theme.elevatedButtonTheme.style,
         child: Text(element.name.replaceAll("_", " ")),
-        onPressed: () {
-          setState(() {
-            dateType = element;
-          });
-        },
+        onPressed: clickable
+            ? () {
+                if (element == DateType.Create_Tournament) {
+                  context.read<AppBloc>().add(AppCreateTournament());
+                } else {
+                  setState(() {
+                    dateType = element;
+                  });
+                }
+              }
+            : null,
       ));
 
       toggleWidgets.add(SizedBox(width: 10));
     });
-
-    // Create tournament
-    toggleWidgets.add(SizedBox(width: 10));
-    toggleWidgets.add(ElevatedButton(
-      style: theme.elevatedButtonTheme.style,
-      child: Text("Create Tournament"),
-      onPressed: () {
-        // _processCreateTournament();
-      },
-    ));
 
     return Container(
         height: 60,
@@ -218,18 +163,18 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   Widget _getSubScreen(BuildContext context) {
     switch (dateType) {
       case DateType.Past_Tournaments:
-        return _createTournamentListView(context, _pastTournaments);
+        return _createTournamentListView(context, _pastTournaments, false);
       case DateType.Future_Tournaments:
-        return _createTournamentListView(context, _futureTournaments);
+        return _createTournamentListView(context, _futureTournaments, true);
       case DateType.Recent_or_Upcoming_Tournaments:
       default:
         return _createTournamentListView(
-            context, _recentAndUpcomingTournaments);
+            context, _recentAndUpcomingTournaments, true);
     }
   }
 
   Widget _createTournamentListView(
-      BuildContext context, List<TournamentInfo> tournaments) {
+      BuildContext context, List<TournamentInfo> tournaments, bool ascending) {
     return Container(
       child: GroupedListView<dynamic, DateTime>(
         elements: tournaments,
@@ -239,7 +184,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
         itemBuilder: (context, t) => _itemTournament(context, t),
         itemComparator: (t1, t2) =>
             t1.dateTimeStart.compareTo(t2.dateTimeStart),
-        order: GroupedListOrder.ASC,
+        order: ascending ? GroupedListOrder.ASC : GroupedListOrder.DESC,
         sort: true,
       ),
     );
@@ -294,17 +239,17 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
         ));
   }
 
-  Widget _createNewTournament() {
-    // AuthUser? authUser;
-    // if (_authState is AuthStateLoggedIn) {
-    //   authUser = (_authState as AuthStateLoggedIn).authUser;
-    // }
+  // Widget _createNewTournament() {
+  //   // AuthUser? authUser;
+  //   // if (_authState is AuthStateLoggedIn) {
+  //   //   authUser = (_authState as AuthStateLoggedIn).authUser;
+  //   // }
 
-    // if (authUser != null && authUser.user != null) {
-    //   return Expanded(child: TournamentCreationPage());
-    // } else {
-    //   return LoginOrganizerPage();
-    // }
-    return Expanded(child: TournamentCreationPage());
-  }
+  //   // if (authUser != null && authUser.user != null) {
+  //   //   return Expanded(child: TournamentCreationPage());
+  //   // } else {
+  //   //   return LoginOrganizerPage();
+  //   // }
+  //   return Expanded(child: TournamentCreationPage());
+  // }
 }

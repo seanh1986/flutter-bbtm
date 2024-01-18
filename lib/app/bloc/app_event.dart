@@ -28,6 +28,11 @@ final class AppTournamentListLoaded extends AppEvent {
   final List<TournamentInfo> tournamentList;
 }
 
+// Trigger creation of new tournament
+final class AppCreateTournament extends AppEvent {
+  const AppCreateTournament();
+}
+
 // Tournament refresh is requested
 final class AppTournamentRequested extends AppEvent {
   const AppTournamentRequested(this.tournamentId);

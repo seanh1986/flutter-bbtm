@@ -1,11 +1,9 @@
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/home/view/home_page.dart';
 import 'package:bbnaf/login/view/login_page.dart';
-import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/tournament_selection/view/tournament_creation_page.dart';
 import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 List<Page<dynamic>> onGenerateAppViewPages(
   AppState state,
@@ -24,14 +22,10 @@ List<Page<dynamic>> _authUserRouteByTournamentState(
   switch (tournamentState.status) {
     case TournamentStatus.no_tournament_list:
     case TournamentStatus.tournament_list:
+      return [MaterialPage(child: TournamentSelectionPage())];
     case TournamentStatus.create_tournament:
-      return [
-        MaterialPage(child: TournamentSelectionPage()),
-        // MaterialPage(child: TournamentCreationPage()),
-      ];
+      return [MaterialPage(child: TournamentCreationPage())];
     case TournamentStatus.selected_tournament:
-      return [
-        MaterialPage(child: HomePage()),
-      ];
+      return [MaterialPage(child: HomePage())];
   }
 }

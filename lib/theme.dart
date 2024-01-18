@@ -35,12 +35,26 @@ ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-            backgroundColor: isDarkTheme ? Colors.blue : Colors.lightBlue,
-            textStyle:
-                TextStyle(color: isDarkTheme ? Colors.white : Colors.black),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ))),
+        style: ButtonStyle(
+      backgroundColor:
+          MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) return Colors.red;
+        return Colors.blue; // Defer to the widget's default.
+      }),
+      foregroundColor:
+          MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) return Colors.white;
+        return Colors.white; // Defer to the widget's default.
+      }),
+    )
+
+        // style: ElevatedButton.styleFrom(
+        //     backgroundColor: isDarkTheme ? Colors.blue : Colors.lightBlue,
+        //     textStyle:
+        //         TextStyle(color: isDarkTheme ? Colors.white : Colors.white),
+        //     shape: RoundedRectangleBorder(
+        //       borderRadius: BorderRadius.circular(20),
+        //     ))
+        ),
   );
 }

@@ -51,10 +51,8 @@ class TournamentState extends Equatable {
             status: TournamentStatus.tournament_list,
             tournamentList: tournamentList);
 
-  TournamentState.createTournament(List<TournamentInfo> tournamentList)
-      : this._(
-            status: TournamentStatus.create_tournament,
-            tournamentList: tournamentList);
+  TournamentState.createTournament()
+      : this._(status: TournamentStatus.create_tournament);
 
   TournamentState.selectTournament(
       List<TournamentInfo> tournamentList, Tournament tournament)

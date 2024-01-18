@@ -38,6 +38,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         .getTournamentList()
         .listen(
             (tournamentList) => add(AppTournamentListLoaded(tournamentList)));
+    on<AppCreateTournament>(_createTournament);
     // Tournament Related
     on<AppTournamentRequested>(_appTournamentRequested);
     // Update Related
@@ -108,6 +109,15 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     emit(AppState(
         authenticationState: state.authenticationState,
         tournamentState: TournamentState.tournamentList(event.tournamentList)));
+  }
+
+  // Create new tournament
+  void _createTournament(AppCreateTournament event, Emitter<AppState> emit) {
+    print("AppBloc: CreateTournament");
+
+    emit(AppState(
+        authenticationState: state.authenticationState,
+        tournamentState: TournamentState.createTournament()));
   }
 
   void _appTournamentRequested(

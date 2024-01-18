@@ -13,7 +13,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:checkbox_formfield/checkbox_formfield.dart';
 
 class EditTournamentInfoWidget extends StatefulWidget {
-  EditTournamentInfoWidget({Key? key}) : super(key: key);
+  // Optional can supply tournament object for population (e.g., create tournament)
+  Tournament? tournament;
+
+  EditTournamentInfoWidget({Key? key, this.tournament}) : super(key: key);
 
   @override
   State<EditTournamentInfoWidget> createState() {
@@ -43,8 +46,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
   late Tournament _tournament;
 
-  bool _initVars = true;
-
   @override
   void initState() {
     super.initState();
@@ -60,17 +61,19 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    AppState appState = context.select((AppBloc bloc) => bloc.state);
-    _tournament = appState.tournamentState.tournament;
-
-    if (_initVars) {
-      _name = _tournament.info.name;
-      _location = _tournament.info.location;
-      _organizers = _tournament.info.organizers;
-      _scoringDetails = _tournament.info.scoringDetails;
-      _casualtyDetails = _tournament.info.casualtyDetails;
-      _squadDetails = _tournament.info.squadDetails;
+    if (widget.tournament != null) {
+      _tournament = widget.tournament!;
+    } else {
+      AppState appState = context.select((AppBloc bloc) => bloc.state);
+      _tournament = appState.tournamentState.tournament;
     }
+
+    _name = _tournament.info.name;
+    _location = _tournament.info.location;
+    _organizers = _tournament.info.organizers;
+    _scoringDetails = _tournament.info.scoringDetails;
+    _casualtyDetails = _tournament.info.casualtyDetails;
+    _squadDetails = _tournament.info.squadDetails;
 
     return Column(children: [
       TitleBar(title: "Edit Tournament Info"),
@@ -127,7 +130,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         ElevatedButton(
           onPressed: () {
             setState(() {
-              _initVars = false;
               _name = _tournament.info.name;
               _location = _tournament.info.location;
               _organizers = _tournament.info.organizers;
