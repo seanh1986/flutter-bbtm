@@ -1,6 +1,7 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
+import 'package:bbnaf/utils/excel/coach_import_export.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
@@ -142,6 +143,49 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
                 _showDialogToConfirmOverwrite(context, callback);
               },
               child: const Text('Update'),
+            ),
+            SizedBox(width: 20),
+            ElevatedButton(
+              onPressed: () {
+                CoachImportExport coachImportExport = CoachImportExport();
+                coachImportExport.import().then((importedCoaches) {
+                  if (importedCoaches.isEmpty) {
+                    ToastUtils.show(
+                        fToast, "Failed to import coaches (NumberFound: 0)");
+                    return;
+                  }
+
+                  StringBuffer sb = new StringBuffer();
+
+                  sb.writeln(
+                      "Warning this will overwrite existing coach data. Not recommended once tournament has begun! Please confirm!");
+                  sb.writeln("");
+
+                  sb.writeln("Imported NumCoaches: " +
+                      importedCoaches.length.toString() +
+                      " (Active: " +
+                      _coaches
+                          .where((element) => element.active)
+                          .length
+                          .toString() +
+                      ")");
+
+                  showOkCancelAlertDialog(
+                          context: context,
+                          title: "Import Coaches",
+                          message: sb.toString(),
+                          okLabel: "Import",
+                          cancelLabel: "Dismiss")
+                      .then((value) => {
+                            if (value == OkCancelResult.ok)
+                              {
+                                context.read<AppBloc>().add(UpdateCoaches(
+                                    _tournament.info, importedCoaches, []))
+                              }
+                          });
+                });
+              },
+              child: const Text('Import from File'),
             )
           ]),
         ]));

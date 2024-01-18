@@ -21,6 +21,7 @@ dependencies:
   english_words: ^4.0.0
   enum_to_string: ^2.0.1
   equatable: ^2.0.3
+  excel: ^4.0.2
   file_picker: ^6.1.1
   firebase_auth: ^4.2.6
   firebase_core: ^2.5.0
@@ -47,11 +48,12 @@ dependencies:
   json_serializable: ^6.7.1
   meta: ^1.7.0
   responsive_framework: ^1.1.1
+  string_similarity: ^2.0.0
   uni_links: ^0.5.1
   uuid: ^4.0.0
   xml: ^6.5.0
 
-  # excel: ^4.0.2
+
   # universal_html: ^2.0.8
   # flutter_html: ^2.2.1
   # data_table_2: ^2.2.1

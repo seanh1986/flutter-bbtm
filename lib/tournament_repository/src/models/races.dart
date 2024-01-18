@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:string_similarity/string_similarity.dart';
 
 enum Race {
   Unknown, // Used when race is not relevant (i.e., Squad)
@@ -121,6 +122,23 @@ class RaceUtils {
   static Race getRace(String name) {
     Race? race = _nameToRace[name];
     return race != null ? race : Race.Unknown;
+  }
+
+  static Race getRaceOrFindSimilar(String name) {
+    Race race = getRace(name);
+    if (race != Race.Unknown) {
+      return race;
+    }
+
+    BestMatch result =
+        StringSimilarity.findBestMatch(name, _raceToName.values.toList());
+    if (result.bestMatch.rating != null &&
+        result.bestMatch.target != null &&
+        result.bestMatch.rating! > 0.5) {
+      return getRace(result.bestMatch.target!);
+    }
+
+    return Race.Unknown;
   }
 
   static Race randomRace(Random rnd) {
