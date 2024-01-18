@@ -115,22 +115,25 @@ class _MatchupsPage extends State<MatchupsPage> {
   }
 
   Widget _toggleButtonsList(BuildContext context) {
+    final theme = Theme.of(context);
+
     List<Widget> toggleWidgets = [];
 
     if (_subScreensAllowed.length > 1) {
       _subScreensAllowed.forEach((element) {
+        bool clickable = _subScreen != element;
+
         toggleWidgets.add(ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).primaryColor,
-            textStyle: TextStyle(color: Colors.white),
-          ),
+          style: theme.elevatedButtonTheme.style,
           child: Text(element.name.replaceAll("_", " ")),
-          onPressed: () {
-            setState(() {
-              refreshSubScreen = false;
-              _subScreen = element;
-            });
-          },
+          onPressed: clickable
+              ? () {
+                  setState(() {
+                    refreshSubScreen = false;
+                    _subScreen = element;
+                  });
+                }
+              : null,
         ));
 
         toggleWidgets.add(SizedBox(width: 10));

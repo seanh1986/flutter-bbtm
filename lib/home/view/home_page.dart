@@ -75,10 +75,7 @@ class _HomePageState extends State<HomePage> {
   void _handleRefreshTournamentPressed() {
     print("Refresh Tournament Pressed");
     ToastUtils.show(fToast, "Refreshing Tournament Data");
-    // const String tournamentId = _tournament.info.id;
-    // context
-    //     .read<AppBloc>()
-    //     .add(const AppTournamentRequested(_tournament.info.id));
+    context.read<AppBloc>().add(AppTournamentRequested(_tournament.info.id));
   }
 
   Widget _generateUi(BuildContext context, AppState appState) {
@@ -93,24 +90,30 @@ class _HomePageState extends State<HomePage> {
 
     return PopScope(
         onPopInvoked: (bool didPop) {
-          // TODO: go back to property list?
           _handleBackButton();
         },
         child: Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            // leading: IconButton(
-            //   icon: Icon(Icons.arrow_back, color: Colors.white),
-            //   onPressed: () => Navigator.of(context).pop(),
-            // ),
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: theme.iconTheme.color,
+              ),
+              onPressed: () => _handleBackButton(),
+            ),
             title: Text(_tournament.info.name),
             actions: [
-              // IconButton(
-              //     icon: Icon(Icons.refresh),
-              //     onPressed: () => _handleRefreshTournamentPressed()),
+              IconButton(
+                  icon: Icon(Icons.refresh),
+                  color: theme.iconTheme.color,
+                  onPressed: () => _handleRefreshTournamentPressed()),
+              SizedBox(width: 20),
               IconButton(
                   icon: Icon(Icons.logout),
-                  onPressed: () => _handleLogoutPressed())
+                  color: theme.iconTheme.color,
+                  onPressed: () => _handleLogoutPressed()),
+              SizedBox(width: 10),
             ],
           ),
           body: _children[_parentIndex].widgets[_childIndex],

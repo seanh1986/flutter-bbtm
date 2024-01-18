@@ -42,9 +42,6 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
     fToast = FToast();
     fToast!.init(context);
-
-    _autoSelectAuthUserMatchup = widget.autoSelectAuthUserMatchup;
-    selectedMatchup = null;
   }
 
   @override
@@ -57,6 +54,9 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
+
+    selectedMatchup = null;
+    _autoSelectAuthUserMatchup = widget.autoSelectAuthUserMatchup;
 
     if (_tournament.squadRounds.isNotEmpty) {
       _matchups = List.from(_tournament.squadRounds.last.matches);
