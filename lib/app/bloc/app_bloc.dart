@@ -65,6 +65,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       _tournamentListSubscription;
   // late final StreamSubscription<Tournament> _tournamentSubscription;
 
+  // Do not maintain tournament state when user change occurs!
   void _onUserChanged(_AppUserChanged event, Emitter<AppState> emit) {
     if (event.user.isNotEmpty) {
       print("AppBloc: Autenticated user: " +
@@ -80,7 +81,8 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         authenticationState: event.user.isNotEmpty
             ? AuthenticationState.authenticated(event.user)
             : const AuthenticationState.unauthenticated(),
-        tournamentState: state.tournamentState));
+        tournamentState: TournamentState.tournamentList(
+            state.tournamentState.tournamentList)));
   }
 
   void _onLogoutRequested(AppLogoutRequested event, Emitter<AppState> emit) {

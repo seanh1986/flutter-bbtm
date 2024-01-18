@@ -68,7 +68,7 @@ class _HomePageState extends State<HomePage> {
 
   void _handleLogoutPressed() {
     print("Logout Pressed");
-    ToastUtils.show(fToast, "Logging out");
+    // ToastUtils.show(fToast, "Logging out");
     context.read<AppBloc>().add(const AppLogoutRequested());
   }
 
