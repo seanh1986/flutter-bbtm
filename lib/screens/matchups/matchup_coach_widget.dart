@@ -177,12 +177,12 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     if (_matchup.isHome(nafName)) {
       result = _matchup.homeReportedResults;
       opponent = _tournament.getCoach(_matchup.awayNafName);
-      color = Theme.of(context).colorScheme.primary;
+      // color = Theme.of(context).colorScheme.primary;
       alignment = Alignment.centerLeft;
     } else if (_matchup.isAway(nafName)) {
       result = _matchup.awayReportedResults;
       opponent = _tournament.getCoach(_matchup.homeNafName);
-      color = Theme.of(context).colorScheme.secondary;
+      // color = Theme.of(context).colorScheme.secondary;
       alignment = Alignment.centerRight;
     }
 
@@ -196,9 +196,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           child: Align(
               alignment: alignment,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: color,
-                ),
+                style: theme.elevatedButtonTheme.style,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 10.0),
                   child: Text(

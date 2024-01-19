@@ -118,27 +118,6 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     }
   }
 
-  // Widget _selectedCoachMatchupUi(CoachMatchup m) {
-  //   List<Widget> matchupWidgets = [
-  //     SizedBox(height: 2),
-  //     _getRoundTitle(),
-  //     SizedBox(height: 10),
-  //   ];
-
-  //   matchupWidgets.add(MatchupCoachWidget(
-  //     tournament: _tournament,
-  //     authUser: _authUser,
-  //     matchup: m,
-  //     refreshState: widget.refreshState,
-  //   ));
-
-  //   return Expanded(
-  //       child: ListView(
-  //           children: matchupWidgets,
-  //           shrinkWrap: true,
-  //           scrollDirection: Axis.vertical));
-  // }
-
   Widget _coachMatchupListUi(
       BuildContext context, List<CoachMatchup> matchupsToShow) {
     List<Widget> matchupWidgets = [
@@ -153,10 +132,18 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
         )));
 
     return Expanded(
-        child: ListView(
-            children: matchupWidgets,
-            shrinkWrap: true,
-            scrollDirection: Axis.vertical));
+        child:
+            // ListView.builder(
+            //     shrinkWrap: true,
+            //     scrollDirection: Axis.vertical,
+            //     itemCount: matchupWidgets.length,
+            //     itemBuilder: (context, idx) {
+            //       return ListTile(title: matchupWidgets[idx]);
+            //     })
+            ListView(
+                children: matchupWidgets,
+                shrinkWrap: true,
+                scrollDirection: Axis.vertical));
   }
 
   Widget _getRoundTitle(BuildContext context) {

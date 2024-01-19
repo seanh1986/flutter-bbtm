@@ -93,7 +93,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   final double titleFontSize = kIsWeb ? 16.0 : 10.0;
   final double subTitleFontSize = kIsWeb ? 11.0 : 9.0;
 
-  final double fabSize = kIsWeb ? 24.0 : 15.0;
+  final double fabSize = kIsWeb ? 32.0 : 20.0;
   final double raceIconSize = kIsWeb ? 50.0 : 30.0;
 
   late FToast fToast;
@@ -141,7 +141,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     return Card(
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 2.0, vertical: 6.0),
-        color: isHome ? theme.primaryColor : theme.secondaryHeaderColor,
+        color: isHome ? theme.secondaryHeaderColor : theme.secondaryHeaderColor,
         child: _itemHeader(participant));
   }
 
@@ -356,7 +356,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   Widget _itemCounterCallback(
       BuildContext context, String name, VoidCallback? callback) {
-    // final theme = Theme.of(context);
+    final theme = Theme.of(context);
 
     int? num = widget.counts[name];
     String numStr = num != null ? num.toString() : "?";
@@ -364,18 +364,20 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     bool showFabs = !_hideFabs();
 
     List<Widget> widgets = [
-      Text(numStr, style: TextStyle(fontSize: titleFontSize))
+      Text(numStr,
+          style:
+              theme.textTheme.bodyLarge) // TextStyle(fontSize: titleFontSize))
     ];
 
     if (showFabs) {
-      widgets.add(Container(
-          child: Wrap(
+      widgets.add(Wrap(
         children: [
           RawMaterialButton(
+            constraints: BoxConstraints.tight(Size(fabSize, fabSize)),
             shape: CircleBorder(),
             fillColor: _getFillColor(),
             elevation: 0.0,
-            child: Icon(Icons.add, color: Colors.black, size: fabSize),
+            child: Icon(Icons.add, color: Colors.black, size: fabSize / 2.0),
             onPressed: _editableState() // only click-able in editing mode
                 ? () {
                     if (widget.counts.containsKey(name)) {
@@ -393,20 +395,23 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
                 : null,
           )
         ],
-      )));
+      ));
     }
 
-    widgets.add(Text(name, style: TextStyle(fontSize: titleFontSize)));
+    widgets.add(Text(name,
+        style: theme
+            .textTheme.bodyLarge)); // TextStyle(fontSize: titleFontSize)));
 
     if (showFabs) {
       widgets.add(Container(
           child: Wrap(
         children: [
           RawMaterialButton(
+            constraints: BoxConstraints.tight(Size(fabSize, fabSize)),
             shape: CircleBorder(),
             fillColor: _getFillColor(),
             elevation: 0.0,
-            child: Icon(Icons.remove, color: Colors.black, size: fabSize),
+            child: Icon(Icons.remove, color: Colors.black, size: fabSize / 2.0),
             onPressed: _editableState() // only click-able in editing mode
                 ? () {
                     if (widget.counts.containsKey(name) &&
@@ -465,7 +470,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
       case UploadState.Editing:
       case UploadState.CanConfirm:
       default:
-        return Theme.of(context).primaryColorLight;
+        return Colors.white;
     }
   }
 }
