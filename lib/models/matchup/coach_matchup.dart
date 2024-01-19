@@ -25,10 +25,10 @@ class CoachMatchup extends IMatchup {
 
   int tableNum = -1;
 
-  late final String homeNafName;
+  late String homeNafName;
   ReportedMatchResult homeReportedResults = ReportedMatchResult();
 
-  late final String awayNafName;
+  late String awayNafName;
   ReportedMatchResult awayReportedResults = ReportedMatchResult();
 
   CoachMatchup(this.homeNafName, this.awayNafName);

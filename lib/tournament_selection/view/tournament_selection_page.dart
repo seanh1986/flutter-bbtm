@@ -91,6 +91,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
     Widget subScreenWidget = _getSubScreen(context);
 
     return Column(children: <Widget>[
+      SizedBox(height: 20),
       _toggleButtonsList(context),
       SizedBox(height: 20),
       Expanded(child: subScreenWidget),
@@ -100,7 +101,16 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   Widget _toggleButtonsList(BuildContext context) {
     final theme = Theme.of(context);
 
-    List<Widget> toggleWidgets = [];
+    List<Widget> toggleWidgets = [
+      IconButton(
+        color: theme.appBarTheme.iconTheme!.color,
+        onPressed: () {
+          context.read<AppBloc>().add(AppLogoutRequested());
+        },
+        icon: Icon(Icons.arrow_back_rounded),
+      ),
+      SizedBox(width: 20),
+    ];
 
     DateType.values.forEach((element) {
       bool clickable = dateType != element;

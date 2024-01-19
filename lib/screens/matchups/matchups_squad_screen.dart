@@ -55,7 +55,6 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
 
-    selectedMatchup = null;
     _autoSelectAuthUserMatchup = widget.autoSelectAuthUserMatchup;
 
     if (_tournament.squadRounds.isNotEmpty) {
@@ -72,7 +71,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     }
 
     return selectedMatchup != null
-        ? _selectedSquadMatchupUi(selectedMatchup!)
+        ? _selectedSquadMatchupUi(context, selectedMatchup!)
         : _squadMatchupListUi();
   }
 
@@ -92,10 +91,10 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
         .firstWhereOrNull((element) => element.hasSquad(squad.name()));
   }
 
-  Widget _selectedSquadMatchupUi(SquadMatchup m) {
+  Widget _selectedSquadMatchupUi(BuildContext context, SquadMatchup m) {
     List<Widget> matchupWidgets = [
       SizedBox(height: 10),
-      _getSquadVsSquadTitle(m),
+      _getSquadVsSquadTitle(context, m),
       SizedBox(height: 10),
     ];
 
@@ -158,7 +157,9 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     ]);
   }
 
-  Widget _getSquadVsSquadTitle(SquadMatchup m) {
+  Widget _getSquadVsSquadTitle(BuildContext context, SquadMatchup m) {
+    final theme = Theme.of(context);
+
     StringBuffer sb = StringBuffer();
     sb.writeln("Round #" + _tournament.curRoundNumber().toString() + ":");
 
@@ -190,6 +191,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
     return Column(children: [
       IconButton(
+          color: theme.appBarTheme.iconTheme!.color,
           onPressed: () {
             setState(() {
               selectedMatchup = null;

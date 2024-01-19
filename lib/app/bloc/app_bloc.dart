@@ -213,8 +213,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     print("AppBloc: UpdateCoaches: " +
         info.name +
         " -> NewCoaches: " +
-        newCoaches.length.toString() +
-        ")");
+        newCoaches.length.toString());
     _tournamentRepository
         .overwriteCoaches(info.id, newCoaches, renames)
         .then((value) {
