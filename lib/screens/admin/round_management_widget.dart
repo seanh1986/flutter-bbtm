@@ -30,6 +30,8 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   late Tournament _tournament;
   late FToast fToast;
 
+  bool updateRoundIdx = true;
+
   int _selectedRoundIdx = -1;
   List<CoachRound> _coachRounds = [];
 
@@ -42,8 +44,6 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
 
     fToast = FToast();
     fToast.init(context);
-
-    // _refreshState();
   }
 
   @override
@@ -78,7 +78,11 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
 
-    _refreshState();
+    _coachRounds = _tournament.coachRounds;
+
+    if (updateRoundIdx && _coachRounds.isNotEmpty) {
+      _selectedRoundIdx = _coachRounds.length - 1;
+    }
 
     _roundSummaryCols = _getRoundSummaryCols();
 
@@ -90,14 +94,6 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     ];
 
     return Column(children: _widgets);
-  }
-
-  void _refreshState() {
-    _coachRounds = _tournament.coachRounds;
-
-    if (_coachRounds.isNotEmpty) {
-      _selectedRoundIdx = _coachRounds.length - 1;
-    }
   }
 
   Widget _advanceDiscardBackupBtns(BuildContext context) {
@@ -134,27 +130,29 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   }
 
   Widget _viewRoundsToggleButtonsList(BuildContext context) {
+    final theme = Theme.of(context);
+
     List<Widget> toggleWidgets = [];
 
     for (int i = 0; i < _coachRounds.length; i++) {
       CoachRound r = _coachRounds[i];
 
-      bool isSelected = _selectedRoundIdx == i;
+      bool clickable = _selectedRoundIdx != i;
 
       toggleWidgets.add(ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              backgroundColor: isSelected
-                  ? Colors.redAccent
-                  : Theme.of(context).primaryColor),
+          style: theme.elevatedButtonTheme.style,
           child: Text(
             "Round " + r.round().toString(),
             style: TextStyle(color: Colors.white),
           ),
-          onPressed: () {
-            setState(() {
-              _selectedRoundIdx = i;
-            });
-          }));
+          onPressed: clickable
+              ? () {
+                  setState(() {
+                    updateRoundIdx = false;
+                    _selectedRoundIdx = i;
+                  });
+                }
+              : null));
 
       toggleWidgets.add(SizedBox(width: 10));
     }
@@ -259,14 +257,13 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   }
 
   Widget _advanceRoundButton(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
         height: 60,
         padding: EdgeInsets.all(10),
         child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            textStyle: TextStyle(color: Colors.white),
-          ),
+          style: theme.elevatedButtonTheme.style,
           child: Text('Advance to Round: ' +
               (_tournament.curRoundNumber() + 1).toString()),
           onPressed: () {

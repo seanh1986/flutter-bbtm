@@ -275,10 +275,10 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                                 widget.result.bestSportOppRank;
 
                             if (result.reported && isHome != null) {
+                              //LoadingIndicatorDialog().show(context);
                               context.read<AppBloc>().add(UpdateMatchEvent(
                                   UpdateMatchReportEvent(
                                       _tournament, _matchup, isHome)));
-                              // LoadingIndicatorDialog().show(context);
                               // _tournyBloc.updateMatchEvent(
                               // UpdateMatchReportEvent(
                               //     _tournament, _matchup, isHome));

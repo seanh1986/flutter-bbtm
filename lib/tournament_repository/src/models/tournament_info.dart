@@ -414,6 +414,15 @@ class SquadDetails {
       this.scoringDetails = ScoringDetails.fromJson(tScoringDetails);
     }
 
+    final tMatchMaking = json['squad_match_making'] as String?;
+    if (tMatchMaking != null) {
+      SquadMatchMaking? pMatchMaking =
+          EnumToString.fromString(SquadMatchMaking.values, tMatchMaking);
+      if (pMatchMaking != null) {
+        this.matchMaking = pMatchMaking;
+      }
+    }
+
     final tTieBreakers = json['squad_tie_breakers'] as List<dynamic>?;
 
     List<SquadTieBreakers> tParsedTieBrakers = [];
@@ -447,6 +456,7 @@ class SquadDetails {
         'max_coaches_per_squad': maxNumCoachesPerSquad,
         'scoring_type': EnumToString.convertToString(scoringType),
         'scoring_details': scoringDetails.toJson(),
+        'squad_match_making': EnumToString.convertToString(matchMaking),
         'squad_tie_breakers': squadTieBreakers
             .map((e) => EnumToString.convertToString(e))
             .toList(),

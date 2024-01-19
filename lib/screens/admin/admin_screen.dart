@@ -62,14 +62,18 @@ class _AdminScreenState extends State<AdminScreen> {
     final theme = Theme.of(context);
 
     adminSubScreens.forEach((element) {
+      bool clickable = subScreen != element;
+
       toggleWidgets.add(ElevatedButton(
         style: theme.elevatedButtonTheme.style,
         child: Text(element.name.replaceAll("_", " ")),
-        onPressed: () {
-          setState(() {
-            subScreen = element;
-          });
-        },
+        onPressed: clickable
+            ? () {
+                setState(() {
+                  subScreen = element;
+                });
+              }
+            : null,
       ));
 
       toggleWidgets.add(SizedBox(width: 10));

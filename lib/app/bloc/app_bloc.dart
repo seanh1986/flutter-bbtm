@@ -189,7 +189,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       UpdateTournamentInfo event, Emitter<AppState> emit) {
     BuildContext context = event.context;
     TournamentInfo info = event.tournamentInfo;
-    LoadingIndicatorDialog().show(context);
+    // LoadingIndicatorDialog().show(context);
     print("AppBloc: updateTournamentInfo: " + info.name + "(" + info.id + ")");
     _tournamentRepository.overwriteTournamentInfo(info).then((value) {
       print("AppBloc: updateTournamentInfo " +
@@ -198,7 +198,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
           info.id +
           ") Finished -> " +
           value.toString());
-      LoadingIndicatorDialog().dismiss();
+      // LoadingIndicatorDialog().dismiss();
       if (value) {
         add(AppTournamentRequested(info.id));
       }

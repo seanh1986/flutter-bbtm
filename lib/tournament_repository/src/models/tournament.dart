@@ -143,8 +143,9 @@ class Tournament {
       return true;
     } else if (info.squadDetails.matchMaking ==
         SquadMatchMaking.ATTEMPT_SQUAD_VS_SQUAD_AVOID_BYES) {
-      // If # squads is divisble by 2, then valid
-      return _squads.length % 2 == 0;
+      // If # active squads is divisble by 2, then valid
+      int activeSquads = _squads.where((s) => s.isActive(this)).length;
+      return activeSquads % 2 == 0;
     }
 
     return false;
