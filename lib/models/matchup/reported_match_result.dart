@@ -1,4 +1,4 @@
-import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 
 class ReportedMatchResult {
   bool reported = false;

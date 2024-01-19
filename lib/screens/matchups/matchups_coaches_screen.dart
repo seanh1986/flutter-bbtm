@@ -1,10 +1,10 @@
-import 'package:bbnaf/models/coach.dart';
+import 'package:authentication_repository/authentication_repository.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/squad.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/screens/matchups/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
 
@@ -15,17 +15,11 @@ enum AutoSelectOption {
 }
 
 class CoachMatchupsPage extends StatefulWidget {
-  final Tournament tournament;
-  final AuthUser authUser;
   final AutoSelectOption autoSelectOption;
   final bool refreshState;
 
   CoachMatchupsPage(
-      {Key? key,
-      required this.tournament,
-      required this.authUser,
-      required this.autoSelectOption,
-      required this.refreshState})
+      {Key? key, required this.autoSelectOption, required this.refreshState})
       : super(key: key);
 
   @override
@@ -36,7 +30,7 @@ class CoachMatchupsPage extends StatefulWidget {
 
 class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   late Tournament _tournament;
-  late AuthUser _authUser;
+  late User _user;
   List<CoachMatchup> _matchups = [];
 
   late AutoSelectOption _autoSelectOption;
@@ -57,16 +51,11 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     super.dispose();
   }
 
-  void _refreshState() {
-    _tournament = widget.tournament;
-    _authUser = widget.authUser;
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (widget.refreshState) {
-      _refreshState();
-    }
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+    _user = appState.authenticationState.user;
 
     if (_tournament.coachRounds.isNotEmpty) {
       _matchups = List.from(_tournament.coachRounds.last.matches);
@@ -97,7 +86,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   }
 
   List<CoachMatchup> findAutoSelectedMatchups() {
-    String nafName = _authUser.getNafName();
+    String nafName = _user.getNafName();
 
     Coach? coach = _tournament.getCoach(nafName);
     if (coach == null) {
@@ -158,8 +147,6 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     ];
 
     matchupsToShow.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
-          tournament: _tournament,
-          authUser: _authUser,
           matchup: m,
           refreshState: widget.refreshState,
         )));

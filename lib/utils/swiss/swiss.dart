@@ -1,14 +1,10 @@
 import 'dart:core';
 import 'dart:math';
-import 'package:bbnaf/models/coach.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
-import 'package:bbnaf/models/squad.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
-import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 
 // enum FirstRoundMatchingRule {

@@ -1,19 +1,11 @@
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/admin/download_files_widget.dart';
 import 'package:bbnaf/screens/admin/round_management_widget.dart';
 import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
 import 'package:bbnaf/screens/admin/edit_tourny_info_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AdminScreen extends StatefulWidget {
-  final Tournament tournament;
-  final AuthUser authUser;
-
-  AdminScreen({Key? key, required this.tournament, required this.authUser})
-      : super(key: key);
+  AdminScreen({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -30,9 +22,6 @@ enum AdminSubScreens {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
-  late Tournament _tournament;
-  late TournamentBloc _tournyBloc;
-
   List<AdminSubScreens> adminSubScreens = [
     AdminSubScreens.EDIT_INFO,
     AdminSubScreens.EDIT_PARTICIPANTS,
@@ -43,15 +32,11 @@ class _AdminScreenState extends State<AdminScreen> {
 
   @override
   void initState() {
-    _tournament = widget.tournament;
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-
     super.initState();
   }
 
   @override
   void dispose() {
-    _tournyBloc.close();
     super.dispose();
   }
 
@@ -74,18 +59,21 @@ class _AdminScreenState extends State<AdminScreen> {
   Widget _toggleButtonsList(BuildContext context) {
     List<Widget> toggleWidgets = [];
 
+    final theme = Theme.of(context);
+
     adminSubScreens.forEach((element) {
+      bool clickable = subScreen != element;
+
       toggleWidgets.add(ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).primaryColor,
-          textStyle: TextStyle(color: Colors.white),
-        ),
+        style: theme.elevatedButtonTheme.style,
         child: Text(element.name.replaceAll("_", " ")),
-        onPressed: () {
-          setState(() {
-            subScreen = element;
-          });
-        },
+        onPressed: clickable
+            ? () {
+                setState(() {
+                  subScreen = element;
+                });
+              }
+            : null,
       ));
 
       toggleWidgets.add(SizedBox(width: 10));
@@ -104,19 +92,15 @@ class _AdminScreenState extends State<AdminScreen> {
   Widget? _getSubScreen() {
     switch (subScreen) {
       case AdminSubScreens.EDIT_INFO:
-        return EditTournamentInfoWidget(
-            tournament: _tournament, tournyBloc: _tournyBloc);
+        return EditTournamentInfoWidget();
       case AdminSubScreens.EDIT_SQUADS:
         return null; // TODO...
       case AdminSubScreens.EDIT_PARTICIPANTS:
-        return EditParticipantsWidget(
-            tournament: _tournament, tournyBloc: _tournyBloc);
+        return EditParticipantsWidget();
       case AdminSubScreens.ROUND_MANAGEMENT:
-        return RoundManagementWidget(
-            tournament: _tournament, tournyBloc: _tournyBloc);
+        return RoundManagementWidget();
       case AdminSubScreens.DOWNLOAD_FILES:
-        return DownloadFilesWidget(
-            tournament: _tournament, tournyBloc: _tournyBloc);
+        return DownloadFilesWidget();
       default:
         return null;
     }

@@ -7,7 +7,8 @@
         {
             "name": "bbnaf_tournaments",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "program": "lib/main.dart"
         }
     ]
 }

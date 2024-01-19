@@ -1,24 +1,21 @@
-import 'package:bbnaf/models/squad.dart';
+import 'package:authentication_repository/authentication_repository.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/repos/auth/auth_user.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/screens/matchups/matchup_coach_widget.dart';
 import 'package:bbnaf/screens/matchups/matchup_squad_widget.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
 
 class SquadMatchupsPage extends StatefulWidget {
-  final Tournament tournament;
-  final AuthUser authUser;
   final bool autoSelectAuthUserMatchup;
   final bool refreshState;
 
   SquadMatchupsPage(
       {Key? key,
-      required this.tournament,
-      required this.authUser,
       required this.autoSelectAuthUserMatchup,
       required this.refreshState})
       : super(key: key);
@@ -31,7 +28,7 @@ class SquadMatchupsPage extends StatefulWidget {
 
 class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   late Tournament _tournament;
-  late AuthUser _authUser;
+  late User _user;
   List<SquadMatchup> _matchups = [];
 
   late bool _autoSelectAuthUserMatchup;
@@ -45,9 +42,6 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
     fToast = FToast();
     fToast!.init(context);
-
-    _autoSelectAuthUserMatchup = widget.autoSelectAuthUserMatchup;
-    selectedMatchup = null;
   }
 
   @override
@@ -57,8 +51,11 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
   @override
   Widget build(BuildContext context) {
-    _tournament = widget.tournament;
-    _authUser = widget.authUser;
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+    _user = appState.authenticationState.user;
+
+    _autoSelectAuthUserMatchup = widget.autoSelectAuthUserMatchup;
 
     if (_tournament.squadRounds.isNotEmpty) {
       _matchups = List.from(_tournament.squadRounds.last.matches);
@@ -74,12 +71,12 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     }
 
     return selectedMatchup != null
-        ? _selectedSquadMatchupUi(selectedMatchup!)
+        ? _selectedSquadMatchupUi(context, selectedMatchup!)
         : _squadMatchupListUi();
   }
 
   SquadMatchup? findAutoSelectedMatchup() {
-    String nafName = _authUser.getNafName();
+    String nafName = _user.getNafName();
 
     if (!_autoSelectAuthUserMatchup || nafName.isEmpty) {
       return null;
@@ -94,21 +91,17 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
         .firstWhereOrNull((element) => element.hasSquad(squad.name()));
   }
 
-  Widget _selectedSquadMatchupUi(SquadMatchup m) {
+  Widget _selectedSquadMatchupUi(BuildContext context, SquadMatchup m) {
     List<Widget> matchupWidgets = [
       SizedBox(height: 10),
-      _getSquadVsSquadTitle(m),
+      _getSquadVsSquadTitle(context, m),
       SizedBox(height: 10),
     ];
 
-    m.coachMatchups.forEach((m) => {
-          matchupWidgets.add(MatchupCoachWidget(
-            tournament: _tournament,
-            authUser: _authUser,
-            matchup: m,
-            refreshState: widget.refreshState,
-          ))
-        });
+    m.coachMatchups.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
+          matchup: m,
+          refreshState: widget.refreshState,
+        )));
 
     return Expanded(
         child: ListView(
@@ -133,7 +126,6 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     _matchups.forEach((m) {
       InkWell inkWell = InkWell(
           child: MatchupSquadWidget(
-            tournament: _tournament,
             matchup: m,
           ),
           onTap: () {
@@ -165,7 +157,9 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     ]);
   }
 
-  Widget _getSquadVsSquadTitle(SquadMatchup m) {
+  Widget _getSquadVsSquadTitle(BuildContext context, SquadMatchup m) {
+    final theme = Theme.of(context);
+
     StringBuffer sb = StringBuffer();
     sb.writeln("Round #" + _tournament.curRoundNumber().toString() + ":");
 
@@ -197,6 +191,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
     return Column(children: [
       IconButton(
+          color: theme.appBarTheme.iconTheme!.color,
           onPressed: () {
             setState(() {
               selectedMatchup = null;
