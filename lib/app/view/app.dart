@@ -40,8 +40,7 @@ class AppView extends StatelessWidget {
     return MaterialApp(
       theme: getAppTheme(context, false),
       darkTheme: getAppTheme(context, true),
-      // themeMode: ThemeMode.system,
-      themeMode: ThemeMode.light,
+      themeMode: ThemeMode.system,
       home: FlowBuilder<AppState>(
         state: context.select((AppBloc bloc) => bloc.state),
         onGeneratePages: onGenerateAppViewPages,
