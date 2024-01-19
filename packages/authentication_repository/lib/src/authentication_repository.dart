@@ -209,6 +209,9 @@ class AuthenticationRepository {
 
       if (result.user != null) {
         await result.user!.updateDisplayName(nafName);
+        // retrigger login to fix issue with display name not being populated on sign up
+        await _firebaseAuth.signOut();
+        await logInWithEmailAndPassword(email: email, password: password);
       } else {
         print("signUp: " + email + ", " + nafName + " -> null user?");
       }
