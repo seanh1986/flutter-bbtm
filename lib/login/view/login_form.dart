@@ -1,4 +1,5 @@
 import 'package:bbnaf/login/cubit/login_cubit.dart';
+import 'package:bbnaf/login/view/guest_login_page.dart';
 import 'package:bbnaf/sign_up/view/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,7 +40,8 @@ class LoginForm extends StatelessWidget {
               const SizedBox(height: 8),
               _LoginButton(),
               const SizedBox(height: 8),
-              _GoogleLoginButton(),
+              // _GoogleLoginButton(),
+              _GuestButton(),
               const SizedBox(height: 4),
               _SignUpButton(),
             ],
@@ -153,6 +155,19 @@ class _SignUpButton extends StatelessWidget {
         'CREATE ACCOUNT',
         style: TextStyle(color: theme.primaryColor),
       ),
+    );
+  }
+}
+
+class _GuestButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextButton(
+      style: theme.elevatedButtonTheme.style,
+      key: const Key('loginForm_createAccount_flatButton'),
+      onPressed: () => Navigator.of(context).push<void>(GuestLoginPage.route()),
+      child: Text('GUEST LOGIN'),
     );
   }
 }

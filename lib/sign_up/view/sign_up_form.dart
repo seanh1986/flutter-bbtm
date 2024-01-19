@@ -27,6 +27,8 @@ class SignUpForm extends StatelessWidget {
           children: [
             _EmailInput(),
             const SizedBox(height: 8),
+            _NafNameInput(),
+            const SizedBox(height: 8),
             _PasswordInput(),
             const SizedBox(height: 8),
             _ConfirmPasswordInput(),
@@ -54,6 +56,27 @@ class _EmailInput extends StatelessWidget {
             helperText: '',
             errorText:
                 state.email.displayError != null ? 'invalid email' : null,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _NafNameInput extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SignUpCubit, SignUpState>(
+      buildWhen: (previous, current) => previous.nafName != current.nafName,
+      builder: (context, state) {
+        return TextField(
+          key: const Key('signUpForm_nafNameInput_textField'),
+          onChanged: (nafName) =>
+              context.read<SignUpCubit>().nafNameChanged(nafName),
+          decoration: InputDecoration(
+            labelText: 'naf name',
+            helperText: '',
+            errorText: null,
           ),
         );
       },

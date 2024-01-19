@@ -61,12 +61,17 @@ class SignUpCubit extends Cubit<SignUpState> {
     );
   }
 
+  void nafNameChanged(String value) {
+    emit(state.copyWith(nafName: value));
+  }
+
   Future<void> signUpFormSubmitted() async {
     if (!state.isValid) return;
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     try {
       await _authenticationRepository.signUp(
         email: state.email.value,
+        nafName: state.nafName,
         password: state.password.value,
       );
       emit(state.copyWith(status: FormzSubmissionStatus.success));

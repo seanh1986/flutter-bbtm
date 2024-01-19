@@ -1,11 +1,8 @@
-import 'package:bbnaf/app/bloc/app_bloc.dart';
-import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/screens/admin/download_files_widget.dart';
 import 'package:bbnaf/screens/admin/round_management_widget.dart';
 import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
 import 'package:bbnaf/screens/admin/edit_tourny_info_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AdminScreen extends StatefulWidget {
   AdminScreen({Key? key}) : super(key: key);
