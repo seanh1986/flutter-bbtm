@@ -4,6 +4,7 @@ import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/excel/coach_import_export.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,15 +23,17 @@ class EditParticipantsWidget extends StatefulWidget {
 class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   late List<Coach> _coaches = [];
 
-  List<DataColumn> _coachCols = [];
+  List<DataColumn2> _coachCols = [];
 
   late CoachesDataSource _coachSource;
 
-  late DataTable _coachDataTable;
+  late DataTable2 _coachDataTable;
 
   late FToast fToast;
 
   late Tournament _tournament;
+
+  bool initCoaches = true;
 
   @override
   void initState() {
@@ -41,23 +44,21 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   }
 
   void _initFromTournament() {
-    _coaches = List.from(_tournament.getCoaches());
-
     _coachCols = [
-      DataColumn(label: Text("Name")),
-      DataColumn(label: Text("Naf Name")),
-      DataColumn(label: Text("Naf #")),
-      DataColumn(label: Text("Race")),
+      DataColumn2(label: Text("Name")),
+      DataColumn2(label: Text("Naf Name")),
+      DataColumn2(label: Text("Naf #")),
+      DataColumn2(label: Text("Race")),
     ];
 
     if (_tournament.useSquads() || _tournament.useSquadsForInitOnly()) {
-      _coachCols.add(DataColumn(label: Text("Squad")));
+      _coachCols.add(DataColumn2(label: Text("Squad")));
     }
 
     _coachCols.addAll([
-      DataColumn(label: Text("Team")),
-      DataColumn(label: Text("Active")),
-      DataColumn(label: Text("")), // For add/remove rows
+      DataColumn2(label: Text("Team")),
+      DataColumn2(label: Text("Active")),
+      DataColumn2(label: Text("")), // For add/remove rows
     ]);
   }
 
@@ -71,6 +72,10 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
     _initFromTournament();
+
+    if (initCoaches) {
+      _coaches = List.from(_tournament.getCoaches());
+    }
 
     return Expanded(
         child: Column(children: [
@@ -205,10 +210,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
       SizedBox(height: 10),
       Container(
           height: MediaQuery.of(context).size.height * 0.6,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: _coachDataTable,
-          ))
+          child: _coachDataTable)
     ];
   }
 
@@ -221,15 +223,20 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
             _coaches[cIdx].active = active;
           });
         },
-        removeItemCallback: (cIdx) {
+        removeItemCallback: (nafName) {
+          _coaches.removeWhere((c) => c.nafName == nafName);
           setState(() {
-            _coaches.removeAt(cIdx);
+            _coaches = _coaches;
+            initCoaches = false;
           });
         });
 
-    _coachDataTable = DataTable(
+    _coachDataTable = DataTable2(
       columns: _coachCols,
       rows: _getCoachRows(),
+      fixedTopRows: 1,
+      isHorizontalScrollBarVisible: true,
+      isVerticalScrollBarVisible: true,
     );
   }
 
@@ -266,11 +273,11 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
     }
   }
 
-  List<DataRow> _getCoachRows() {
-    List<DataRow> rows = [];
+  List<DataRow2> _getCoachRows() {
+    List<DataRow2> rows = [];
 
     _coachSource.coaches.forEachIndexed((index, element) {
-      DataRow? row = _coachSource.getRow(index);
+      DataRow2? row = _coachSource.getRow(index);
       if (row != null) {
         rows.add(row);
       }
@@ -290,7 +297,7 @@ class CoachesDataSource extends DataTableSource {
   bool useSquad;
   late List<Coach> coaches;
   Function(int, bool)? activeCallback;
-  Function(int)? removeItemCallback;
+  Function(String)? removeItemCallback;
 
   Map<int, RenameNafName> coachIdxNafRenames = {};
 
@@ -301,7 +308,7 @@ class CoachesDataSource extends DataTableSource {
       this.removeItemCallback});
 
   @override
-  DataRow? getRow(int index) {
+  DataRow2? getRow(int index) {
     Coach c = coaches[index];
 
     print("c_idx: " + index.toString() + " -> " + c.coachName);
@@ -375,9 +382,11 @@ class CoachesDataSource extends DataTableSource {
 
     ElevatedButton removeBtn = ElevatedButton(
       onPressed: () {
+        Coach c = coaches[index];
+        String nafName = c.nafName;
         coaches.removeAt(index);
         if (removeItemCallback != null) {
-          removeItemCallback!(index);
+          removeItemCallback!(nafName);
         }
       },
       child: const Text('-'),
@@ -400,7 +409,7 @@ class CoachesDataSource extends DataTableSource {
       DataCell(removeBtn),
     ]);
 
-    return DataRow(cells: cells);
+    return DataRow2(cells: cells);
   }
 
   @override

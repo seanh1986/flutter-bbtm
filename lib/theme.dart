@@ -27,8 +27,8 @@ ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
       ),
       appBarTheme: AppBarTheme(
           backgroundColor: isDarkTheme ? Colors.black : Colors.white,
-          iconTheme: IconThemeData(
-              color: isDarkTheme ? Colors.white : Colors.black54)),
+          iconTheme:
+              IconThemeData(color: isDarkTheme ? Colors.white : Colors.black)),
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -59,6 +59,6 @@ ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: isDarkTheme ? Colors.black : Colors.white,
         selectedItemColor: Colors.red,
-        unselectedItemColor: isDarkTheme ? Colors.grey : Colors.black12,
+        unselectedItemColor: isDarkTheme ? Colors.grey : Colors.black,
       ));
 }

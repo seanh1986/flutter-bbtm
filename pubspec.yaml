@@ -18,6 +18,7 @@ dependencies:
   cloud_firestore: ^4.3.2
   cupertino_icons: ^1.0.0
   data_tables: ^1.0.3
+  data_table_2: ^2.5.10
   english_words: ^4.0.0
   enum_to_string: ^2.0.1
   equatable: ^2.0.3
