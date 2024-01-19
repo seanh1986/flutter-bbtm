@@ -117,6 +117,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
               onPressed: () {
                 setState(() {
                   _coaches = List.from(_tournament.getCoaches());
+                  initCoaches = false;
                 });
               },
               child: const Text('Discard'),
@@ -198,6 +199,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   void _addNewCoach() {
     setState(() {
       _coaches.add(Coach("", "", "", Race.Unknown, "", 0));
+      initCoaches = false;
     });
   }
 
@@ -221,6 +223,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
         activeCallback: (cIdx, active) {
           setState(() {
             _coaches[cIdx].active = active;
+            initCoaches = false;
           });
         },
         removeItemCallback: (nafName) {
