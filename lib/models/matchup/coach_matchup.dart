@@ -1,7 +1,6 @@
 import 'package:bbnaf/models/matchup/i_matchup.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 
 enum ReportedMatchStatus {
   NoReportsYet,
@@ -26,10 +25,10 @@ class CoachMatchup extends IMatchup {
 
   int tableNum = -1;
 
-  late final String homeNafName;
+  late String homeNafName;
   ReportedMatchResult homeReportedResults = ReportedMatchResult();
 
-  late final String awayNafName;
+  late String awayNafName;
   ReportedMatchResult awayReportedResults = ReportedMatchResult();
 
   CoachMatchup(this.homeNafName, this.awayNafName);

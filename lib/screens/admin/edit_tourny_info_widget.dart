@@ -1,7 +1,6 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
@@ -11,14 +10,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:checkbox_formfield/checkbox_formfield.dart';
 
 class EditTournamentInfoWidget extends StatefulWidget {
-  final Tournament tournament;
-  final TournamentBloc tournyBloc;
+  // Optional can supply tournament object for population (e.g., create tournament)
+  Tournament? tournament;
 
-  EditTournamentInfoWidget(
-      {Key? key, required this.tournament, required this.tournyBloc})
-      : super(key: key);
+  EditTournamentInfoWidget({Key? key, this.tournament}) : super(key: key);
 
   @override
   State<EditTournamentInfoWidget> createState() {
@@ -35,7 +33,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   late CasualtyDetails _casualtyDetails;
   late SquadDetails _squadDetails;
 
-  late TournamentBloc _tournyBloc;
+  bool refreshFields = true;
 
   List<DataColumn> _organizerCols = [
     DataColumn(label: Text("")), // For add/remove rows
@@ -48,35 +46,39 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
   late FToast fToast;
 
+  late Tournament _tournament;
+
   @override
   void initState() {
     super.initState();
 
     fToast = FToast();
     fToast.init(context);
-
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-
-    _initFromTournament(widget.tournament);
-  }
-
-  void _initFromTournament(Tournament t) {
-    _name = t.info.name;
-    _location = t.info.location;
-    _organizers = t.info.organizers;
-    _scoringDetails = t.info.scoringDetails;
-    _casualtyDetails = t.info.casualtyDetails;
-    _squadDetails = t.info.squadDetails;
   }
 
   @override
   void dispose() {
-    _tournyBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.tournament != null) {
+      _tournament = widget.tournament!;
+    } else {
+      AppState appState = context.select((AppBloc bloc) => bloc.state);
+      _tournament = appState.tournamentState.tournament;
+    }
+
+    if (refreshFields) {
+      _name = _tournament.info.name;
+      _location = _tournament.info.location;
+      _organizers = _tournament.info.organizers;
+      _scoringDetails = _tournament.info.scoringDetails;
+      _casualtyDetails = _tournament.info.casualtyDetails;
+      _squadDetails = _tournament.info.squadDetails;
+    }
+
     return Column(children: [
       TitleBar(title: "Edit Tournament Info"),
       SizedBox(height: 20),
@@ -87,6 +89,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
   void _addNewOrga() {
     setState(() {
+      refreshFields = false;
       _organizers.add(OrganizerInfo("", "", false));
     });
   }
@@ -118,9 +121,9 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       Divider(),
       _createScoringDetails("Coach Scoring:", _scoringDetails),
       Divider(),
-      _createCasulatyDetails(_casualtyDetails),
+      _createCasulatyDetails(),
       Divider(),
-      _createSquadDetails(_squadDetails),
+      _createSquadDetails(),
       Divider(),
     ];
   }
@@ -132,9 +135,10 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         ElevatedButton(
           onPressed: () {
             setState(() {
-              _name = widget.tournament.info.name;
-              _location = widget.tournament.info.location;
-              _organizers = widget.tournament.info.organizers;
+              refreshFields = true;
+              _name = _tournament.info.name;
+              _location = _tournament.info.location;
+              _organizers = _tournament.info.organizers;
             });
           },
           child: const Text('Discard'),
@@ -143,7 +147,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         ElevatedButton(
           onPressed: () {
             VoidCallback callback = () async {
-              TournamentInfo info = widget.tournament.info;
+              TournamentInfo info = _tournament.info;
 
               info.name = _name;
               info.location = _location;
@@ -159,14 +163,15 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
               info.casualtyDetails = _casualtyDetails;
               info.squadDetails = _squadDetails;
 
-              ToastUtils.show(fToast, "Updating Tournament Data");
+              ToastUtils.show(fToast, "Updating Tournament Info");
 
-              LoadingIndicatorDialog().show(context);
-              bool success =
-                  await widget.tournyBloc.overwriteTournamentInfo(info);
-              LoadingIndicatorDialog().dismiss();
+              context.read<AppBloc>().add(UpdateTournamentInfo(context, info));
+              // LoadingIndicatorDialog().show(context);
+              // bool success =
+              //     await widget.tournyBloc.overwriteTournamentInfo(info);
+              // LoadingIndicatorDialog().dismiss();
 
-              _showSuccessFailToast(success);
+              // _showSuccessFailToast(success);
             };
 
             _showDialogToConfirmOverwrite(context, callback);
@@ -202,6 +207,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         onChanged: (value) {
           if (value != null) {
             setState(() {
+              refreshFields = false;
               if (value) {
                 _organizers.forEach((element) {
                   element.primary = false;
@@ -216,6 +222,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       ElevatedButton removeOrgaBtn = ElevatedButton(
         onPressed: () {
           setState(() {
+            refreshFields = false;
             _organizers.removeAt(i);
           });
         },
@@ -366,6 +373,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       ElevatedButton(
         onPressed: () {
           setState(() {
+            refreshFields = false;
             String bonusPtsIdx =
                 (_scoringDetails.bonusPts.length + 1).toString();
             _scoringDetails.bonusPts
@@ -420,7 +428,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         mainAxisAlignment: MainAxisAlignment.center, children: children);
   }
 
-  Widget _createCasulatyDetails(CasualtyDetails details) {
+  Widget _createCasulatyDetails() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
@@ -428,44 +436,63 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         Text("Casualty Details:"),
         SizedBox(width: 10.0),
         Expanded(
-            child: CheckboxFormField(
-          title: Text('Spp'),
-          initialValue: details.spp,
-          onSaved: (value) => details.spp = value != null && value,
-        )),
+            child: CheckboxListTileFormField(
+                title: Text('Spp'),
+                initialValue: _casualtyDetails.spp,
+                onChanged: (value) {
+                  _casualtyDetails.spp = value;
+                },
+                autovalidateMode: AutovalidateMode.always,
+                contentPadding: EdgeInsets.all(1))),
         SizedBox(width: 10.0),
         Expanded(
-            child: CheckboxFormField(
+            child: CheckboxListTileFormField(
           title: Text('Foul'),
-          initialValue: details.foul,
-          onSaved: (value) => details.foul = value != null && value,
+          initialValue: _casualtyDetails.foul,
+          onChanged: (value) {
+            _casualtyDetails.foul = value;
+          },
+          autovalidateMode: AutovalidateMode.always,
+          contentPadding: EdgeInsets.all(1),
         )),
         SizedBox(width: 10.0),
         Expanded(
-            child: CheckboxFormField(
+            child: CheckboxListTileFormField(
           title: Text('Surf'),
-          initialValue: details.surf,
-          onSaved: (value) => details.surf = value != null && value,
+          initialValue: _casualtyDetails.surf,
+          onChanged: (value) {
+            _casualtyDetails.surf = value;
+          },
+          autovalidateMode: AutovalidateMode.always,
+          contentPadding: EdgeInsets.all(1),
         )),
         SizedBox(width: 10.0),
         Expanded(
-            child: CheckboxFormField(
+            child: CheckboxListTileFormField(
           title: Text('Weapon'),
-          initialValue: details.weapon,
-          onSaved: (value) => details.weapon = value != null && value,
+          initialValue: _casualtyDetails.weapon,
+          onChanged: (value) {
+            _casualtyDetails.weapon = value;
+          },
+          autovalidateMode: AutovalidateMode.always,
+          contentPadding: EdgeInsets.all(1),
         )),
         SizedBox(width: 10.0),
         Expanded(
-            child: CheckboxFormField(
+            child: CheckboxListTileFormField(
           title: Text('Dodge'),
-          initialValue: details.dodge,
-          onSaved: (value) => details.dodge = value != null && value,
+          initialValue: _casualtyDetails.dodge,
+          onChanged: (value) {
+            _casualtyDetails.dodge = value;
+          },
+          autovalidateMode: AutovalidateMode.always,
+          contentPadding: EdgeInsets.all(1),
         )),
       ],
     );
   }
 
-  Widget _createSquadDetails(SquadDetails details) {
+  Widget _createSquadDetails() {
     List<String> squadUsageTypes = EnumToString.toList(SquadUsage.values);
 
     List<DropdownMenuItem<String>> squadUsageTypesDropDown = squadUsageTypes
@@ -478,42 +505,43 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       SizedBox(width: 10.0),
       Expanded(
           child: DropdownButtonFormField<String>(
-        value: EnumToString.convertToString(details.type),
+        value: EnumToString.convertToString(_squadDetails.type),
         items: squadUsageTypesDropDown,
         onChanged: (value) {
           SquadUsage? usage = value is String
               ? EnumToString.fromString(SquadUsage.values, value)
               : null;
-          details.type = usage != null ? usage : SquadUsage.NO_SQUADS;
+          _squadDetails.type = usage != null ? usage : SquadUsage.NO_SQUADS;
 
           // Update UI based on toggle
           setState(() {
-            _squadDetails = details;
+            refreshFields = false;
           });
         },
       ))
     ];
 
-    if (details.type == SquadUsage.SQUADS) {
+    if (_squadDetails.type == SquadUsage.SQUADS) {
       mainSquadDetailsRow.addAll([
         SizedBox(width: 10.0),
         Expanded(
             child: CustomTextFormField(
-          initialValue: details.requiredNumCoachesPerSquad.toString(),
+          initialValue: _squadDetails.requiredNumCoachesPerSquad.toString(),
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           keyboardType: TextInputType.number,
           title: '# Active Coaches / Squad',
           callback: (value) =>
-              details.requiredNumCoachesPerSquad = int.parse(value),
+              _squadDetails.requiredNumCoachesPerSquad = int.parse(value),
         )),
         SizedBox(width: 10.0),
         Expanded(
             child: CustomTextFormField(
-          initialValue: details.requiredNumCoachesPerSquad.toString(),
+          initialValue: _squadDetails.requiredNumCoachesPerSquad.toString(),
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           keyboardType: TextInputType.number,
           title: '# Max Coaches / Squad',
-          callback: (value) => details.maxNumCoachesPerSquad = int.parse(value),
+          callback: (value) =>
+              _squadDetails.maxNumCoachesPerSquad = int.parse(value),
         ))
       ]);
     }
@@ -524,14 +552,14 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
           children: mainSquadDetailsRow)
     ];
 
-    if (details.type == SquadUsage.SQUADS) {
+    if (_squadDetails.type == SquadUsage.SQUADS) {
       // Update Main Content w/ squad scoring type
       mainContent.addAll([
         SizedBox(height: 10),
-        _getSquadScoringSelection(details),
+        _getSquadScoringSelection(),
       ]);
 
-      if (details.scoringType == SquadScoring.SQUAD_RESULT_W_T_L) {
+      if (_squadDetails.scoringType == SquadScoring.SQUAD_RESULT_W_T_L) {
         // Update Main Content w/ squad scoring parameters
         mainContent.addAll([
           SizedBox(height: 10),
@@ -542,7 +570,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       // Update Main Content w/ squad matching
       mainContent.addAll([
         SizedBox(height: 10),
-        _getSquadMatchingSelection(details),
+        _getSquadMatchingSelection(),
       ]);
     }
 
@@ -550,7 +578,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         mainAxisAlignment: MainAxisAlignment.center, children: mainContent);
   }
 
-  Row _getSquadScoringSelection(SquadDetails details) {
+  Row _getSquadScoringSelection() {
     // Create Row for Squad Scoring
     List<String> squadScoringTypes = EnumToString.toList(SquadScoring.values);
 
@@ -564,18 +592,18 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       SizedBox(width: 10.0),
       Expanded(
           child: DropdownButtonFormField<String>(
-        value: EnumToString.convertToString(details.scoringType),
+        value: EnumToString.convertToString(_squadDetails.scoringType),
         items: squadScoringTypesDropDown,
         onChanged: (value) {
           SquadScoring? scoringTypes = value is String
               ? EnumToString.fromString(SquadScoring.values, value)
               : null;
-          details.scoringType = scoringTypes != null
+          _squadDetails.scoringType = scoringTypes != null
               ? scoringTypes
               : SquadScoring.CUMULATIVE_PLAYER_SCORES;
 
           setState(() {
-            _squadDetails = details;
+            refreshFields = false;
           });
         },
       ))
@@ -586,7 +614,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         children: squadScoringRow);
   }
 
-  Row _getSquadMatchingSelection(SquadDetails details) {
+  Row _getSquadMatchingSelection() {
     // Create Row for Squad Scoring
     List<String> squadMatchMakingTypes =
         EnumToString.toList(SquadMatchMaking.values);
@@ -603,13 +631,13 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       SizedBox(width: 10.0),
       Expanded(
           child: DropdownButtonFormField<String>(
-        value: EnumToString.convertToString(details.matchMaking),
+        value: EnumToString.convertToString(_squadDetails.matchMaking),
         items: squadMatchMakingTypesDropDown,
         onChanged: (value) {
           SquadMatchMaking? matchMakingType = value is String
               ? EnumToString.fromString(SquadMatchMaking.values, value)
               : null;
-          details.matchMaking = matchMakingType != null
+          _squadDetails.matchMaking = matchMakingType != null
               ? matchMakingType
               : SquadMatchMaking.ATTEMPT_SQUAD_VS_SQUAD_AVOID_BYES;
         },

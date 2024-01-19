@@ -1,11 +1,8 @@
 import 'dart:convert';
-import 'dart:ui';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/matchup/reported_match_result.dart';
-import 'package:bbnaf/models/tournament/tournament_backup.dart';
-import 'package:bbnaf/models/tournament/tournament_info.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
@@ -15,19 +12,13 @@ import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:file_picker/file_picker.dart';
 
 class RoundManagementWidget extends StatefulWidget {
-  final Tournament tournament;
-  final TournamentBloc tournyBloc;
-
-  RoundManagementWidget(
-      {Key? key, required this.tournament, required this.tournyBloc})
-      : super(key: key);
+  RoundManagementWidget({Key? key}) : super(key: key);
 
   @override
   State<RoundManagementWidget> createState() {
@@ -36,9 +27,10 @@ class RoundManagementWidget extends StatefulWidget {
 }
 
 class _RoundManagementWidget extends State<RoundManagementWidget> {
-  late TournamentBloc _tournyBloc;
-
+  late Tournament _tournament;
   late FToast fToast;
+
+  bool updateRoundIdx = true;
 
   int _selectedRoundIdx = -1;
   List<CoachRound> _coachRounds = [];
@@ -52,15 +44,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
 
     fToast = FToast();
     fToast.init(context);
-
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-
-    _refreshState();
   }
 
   @override
   void dispose() {
-    _tournyBloc.close();
     super.dispose();
   }
 
@@ -76,7 +63,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
       DataColumn(label: Text("A Cas")),
     ];
 
-    if (widget.tournament.info.scoringDetails.bonusPts.isNotEmpty) {
+    if (_tournament.info.scoringDetails.bonusPts.isNotEmpty) {
       useBonus = true;
       cols.add(DataColumn(label: Text("Bonus")));
     }
@@ -88,6 +75,15 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+
+    _coachRounds = _tournament.coachRounds;
+
+    if (updateRoundIdx && _coachRounds.isNotEmpty) {
+      _selectedRoundIdx = _coachRounds.length - 1;
+    }
+
     _roundSummaryCols = _getRoundSummaryCols();
 
     List<Widget> _widgets = [
@@ -98,14 +94,6 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     ];
 
     return Column(children: _widgets);
-  }
-
-  void _refreshState() {
-    _coachRounds = widget.tournament.coachRounds;
-
-    if (_coachRounds.isNotEmpty) {
-      _selectedRoundIdx = _coachRounds.length - 1;
-    }
   }
 
   Widget _advanceDiscardBackupBtns(BuildContext context) {
@@ -142,27 +130,29 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   }
 
   Widget _viewRoundsToggleButtonsList(BuildContext context) {
+    final theme = Theme.of(context);
+
     List<Widget> toggleWidgets = [];
 
     for (int i = 0; i < _coachRounds.length; i++) {
       CoachRound r = _coachRounds[i];
 
-      bool isSelected = _selectedRoundIdx == i;
+      bool clickable = _selectedRoundIdx != i;
 
       toggleWidgets.add(ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              backgroundColor: isSelected
-                  ? Colors.redAccent
-                  : Theme.of(context).primaryColor),
+          style: theme.elevatedButtonTheme.style,
           child: Text(
             "Round " + r.round().toString(),
             style: TextStyle(color: Colors.white),
           ),
-          onPressed: () {
-            setState(() {
-              _selectedRoundIdx = i;
-            });
-          }));
+          onPressed: clickable
+              ? () {
+                  setState(() {
+                    updateRoundIdx = false;
+                    _selectedRoundIdx = i;
+                  });
+                }
+              : null));
 
       toggleWidgets.add(SizedBox(width: 10));
     }
@@ -185,7 +175,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     CoachRound coachRound = _coachRounds[roundIdx];
 
     CoachRoundDataSource dataSource = CoachRoundDataSource(
-        context: context, info: widget.tournament.info, coachRound: coachRound);
+        context: context, info: _tournament.info, coachRound: coachRound);
 
     PaginatedDataTable roundDataTable = PaginatedDataTable(
       columns: _roundSummaryCols,
@@ -197,7 +187,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
         ElevatedButton(
           onPressed: () {
             setState(() {
-              _coachRounds = widget.tournament.coachRounds;
+              _coachRounds = _tournament.coachRounds;
             });
           },
           child: const Text('Discard'),
@@ -209,24 +199,25 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
               List<UpdateMatchReportEvent> matchesToUpdate = dataSource
                   .editedMatchIndices
                   .map((mIdx) => UpdateMatchReportEvent.admin(
-                      widget.tournament, coachRound.matches[mIdx]))
+                      _tournament, coachRound.matches[mIdx]))
                   .toList();
 
-              LoadingIndicatorDialog().show(context);
-              bool success =
-                  await _tournyBloc.updateMatchEvents(matchesToUpdate);
-              LoadingIndicatorDialog().dismiss();
+              context.read<AppBloc>().add(UpdateMatchEvents(matchesToUpdate));
+              // LoadingIndicatorDialog().show(context);
+              // bool success =
+              //     await _tournyBloc.updateMatchEvents(matchesToUpdate);
+              // LoadingIndicatorDialog().dismiss();
 
-              if (success) {
-                ToastUtils.showSuccess(
-                    fToast, "Tournament data successfully updated.");
+              // if (success) {
+              //   ToastUtils.showSuccess(
+              //       fToast, "Tournament data successfully updated.");
 
-                _tournyBloc
-                    .add(TournamentEventRefreshData(widget.tournament.info.id));
-              } else {
-                ToastUtils.showFailed(
-                    fToast, "Tournament data failed to update.");
-              }
+              //   _tournyBloc
+              //       .add(TournamentEventRefreshData(widget.tournament.info.id));
+              // } else {
+              //   ToastUtils.showFailed(
+              //       fToast, "Tournament data failed to update.");
+              // }
             };
 
             _showDialogToConfirmOverwrite(context, callback);
@@ -266,29 +257,28 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   }
 
   Widget _advanceRoundButton(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
         height: 60,
         padding: EdgeInsets.all(10),
         child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            textStyle: TextStyle(color: Colors.white),
-          ),
+          style: theme.elevatedButtonTheme.style,
           child: Text('Advance to Round: ' +
-              (widget.tournament.curRoundNumber() + 1).toString()),
+              (_tournament.curRoundNumber() + 1).toString()),
           onPressed: () {
             StringBuffer sb = new StringBuffer();
             sb.writeln("Are you sure you want to process round " +
-                widget.tournament.curRoundNumber().toString() +
+                _tournament.curRoundNumber().toString() +
                 " and advance to round " +
-                (widget.tournament.curRoundNumber() + 1).toString() +
+                (_tournament.curRoundNumber() + 1).toString() +
                 "?");
 
             VoidCallback advanceCallback = () async {
-              widget.tournament.processRound();
+              _tournament.processRound();
 
               String msg;
-              SwissPairings swiss = SwissPairings(widget.tournament);
+              SwissPairings swiss = SwissPairings(_tournament);
               RoundPairingError pairingError = swiss.pairNextRound();
 
               switch (pairingError) {
@@ -310,33 +300,34 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                   context: context, title: "Advance Round", message: msg);
 
               if (pairingError == RoundPairingError.NoError) {
-                ToastUtils.show(fToast, "Updating Tournament Data");
+                ToastUtils.show(fToast, "Round Advanced");
 
-                LoadingIndicatorDialog().show(context);
-                bool success =
-                    await _tournyBloc.advanceRound(widget.tournament);
-                LoadingIndicatorDialog().dismiss();
+                context.read<AppBloc>().add(AdvanceRound(_tournament));
+                // LoadingIndicatorDialog().show(context);
+                // bool success =
+                //     await _tournyBloc.advanceRound(widget.tournament);
+                // LoadingIndicatorDialog().dismiss();
 
-                if (success) {
-                  ToastUtils.showSuccess(
-                      fToast, "Tournament data successfully updated.");
+                // if (success) {
+                //   ToastUtils.showSuccess(
+                //       fToast, "Tournament data successfully updated.");
 
-                  // Tournament? refreshedTournament = await _tournyBloc
-                  //     .getRefreshedTournamentData(widget.tournament.info.id);
-                  // if (refreshedTournament != null) {
-                  //   _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
+                //   // Tournament? refreshedTournament = await _tournyBloc
+                //   //     .getRefreshedTournamentData(widget.tournament.info.id);
+                //   // if (refreshedTournament != null) {
+                //   //   _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
 
-                  //   if (mounted) {
-                  //     setState(() {});
-                  //   }
-                  // } else {
-                  //   ToastUtils.showFailed(
-                  //       fToast, "Failed to refresh tournament.");
-                  // }
-                } else {
-                  ToastUtils.showFailed(
-                      fToast, "Tournament data failed to update.");
-                }
+                //   //   if (mounted) {
+                //   //     setState(() {});
+                //   //   }
+                //   // } else {
+                //   //   ToastUtils.showFailed(
+                //   //       fToast, "Failed to refresh tournament.");
+                //   // }
+                // } else {
+                //   ToastUtils.showFailed(
+                //       fToast, "Tournament data failed to update.");
+                // }
               }
             };
 
@@ -363,29 +354,30 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
             textStyle: TextStyle(color: Colors.white),
           ),
           child: Text('Discard Current Round (' +
-              widget.tournament.curRoundNumber().toString() +
+              _tournament.curRoundNumber().toString() +
               ")"),
           onPressed: () {
             StringBuffer sb = new StringBuffer();
             sb.writeln(
                 "Are you sure you want to discard the current drawn (round " +
-                    widget.tournament.curRoundNumber().toString() +
+                    _tournament.curRoundNumber().toString() +
                     ")?");
 
             VoidCallback discardCallback = () async {
-              //widget.tournament.coachRounds.removeLast();
-              LoadingIndicatorDialog().show(context);
-              bool success =
-                  await _tournyBloc.discardCurrentRound(widget.tournament);
-              LoadingIndicatorDialog().dismiss();
+              context.read<AppBloc>().add(DiscardCurrentRound(_tournament));
+              // //widget.tournament.coachRounds.removeLast();
+              // LoadingIndicatorDialog().show(context);
+              // bool success =
+              //     await _tournyBloc.discardCurrentRound(widget.tournament);
+              // LoadingIndicatorDialog().dismiss();
 
-              if (success) {
-                ToastUtils.showSuccess(fToast, "Removed current round");
-                _tournyBloc
-                    .add(TournamentEventRefreshData(widget.tournament.info.id));
-              } else {
-                ToastUtils.showFailed(fToast, "Failed to remove current round");
-              }
+              // if (success) {
+              //   ToastUtils.showSuccess(fToast, "Removed current round");
+              //   _tournyBloc
+              //       .add(TournamentEventRefreshData(widget.tournament.info.id));
+              // } else {
+              //   ToastUtils.showFailed(fToast, "Failed to remove current round");
+              // }
             };
 
             showOkCancelAlertDialog(
@@ -456,32 +448,36 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                     VoidCallback confirmedRecoveryCallback = () async {
                       ToastUtils.show(fToast, "Recovering Backup");
 
-                      LoadingIndicatorDialog().show(context);
-                      bool success = await widget.tournyBloc
-                          .recoverTournamentBackup(tournyBackup.tournament);
-                      LoadingIndicatorDialog().dismiss();
+                      context
+                          .read<AppBloc>()
+                          .add(RecoverBackup(tournyBackup.tournament));
 
-                      if (success) {
-                        ToastUtils.showSuccess(
-                            fToast, "Recovering Backup successful.");
+                      // LoadingIndicatorDialog().show(context);
+                      // bool success = await widget.tournyBloc
+                      //     .recoverTournamentBackup(tournyBackup.tournament);
+                      // LoadingIndicatorDialog().dismiss();
 
-                        // Tournament? refreshedTournament =
-                        //     await _tournyBloc.getRefreshedTournamentData(
-                        //         widget.tournament.info.id);
+                      // if (success) {
+                      //   ToastUtils.showSuccess(
+                      //       fToast, "Recovering Backup successful.");
 
-                        // if (refreshedTournament != null) {
-                        //   ToastUtils.showSuccess(
-                        //       fToast, "Tournament refreshed");
-                        //   _tournyBloc
-                        //       .add(SelectTournamentEvent(refreshedTournament));
-                        // } else {
-                        //   ToastUtils.showFailed(fToast,
-                        //       "Automatic tournament refresh failed. Please refresh the page.");
-                        // }
-                      } else {
-                        ToastUtils.showFailed(
-                            fToast, "Recovering Backup failed.");
-                      }
+                      //   // Tournament? refreshedTournament =
+                      //   //     await _tournyBloc.getRefreshedTournamentData(
+                      //   //         widget.tournament.info.id);
+
+                      //   // if (refreshedTournament != null) {
+                      //   //   ToastUtils.showSuccess(
+                      //   //       fToast, "Tournament refreshed");
+                      //   //   _tournyBloc
+                      //   //       .add(SelectTournamentEvent(refreshedTournament));
+                      //   // } else {
+                      //   //   ToastUtils.showFailed(fToast,
+                      //   //       "Automatic tournament refresh failed. Please refresh the page.");
+                      //   // }
+                      // } else {
+                      //   ToastUtils.showFailed(
+                      //       fToast, "Recovering Backup failed.");
+                      // }
                     };
 
                     showOkCancelAlertDialog(

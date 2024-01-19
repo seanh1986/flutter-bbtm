@@ -1,11 +1,10 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:bbnaf/blocs/tournament/tournament_bloc_event_state.dart';
-import 'package:bbnaf/models/coach.dart';
-import 'package:bbnaf/models/races.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
-import 'package:bbnaf/utils/loading_indicator.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
+import 'package:bbnaf/utils/excel/coach_import_export.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,12 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
 
 class EditParticipantsWidget extends StatefulWidget {
-  final Tournament tournament;
-  final TournamentBloc tournyBloc;
-
-  EditParticipantsWidget(
-      {Key? key, required this.tournament, required this.tournyBloc})
-      : super(key: key);
+  EditParticipantsWidget({Key? key}) : super(key: key);
 
   @override
   State<EditParticipantsWidget> createState() {
@@ -29,15 +23,17 @@ class EditParticipantsWidget extends StatefulWidget {
 class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   late List<Coach> _coaches = [];
 
-  late TournamentBloc _tournyBloc;
-
-  List<DataColumn> _coachCols = [];
+  List<DataColumn2> _coachCols = [];
 
   late CoachesDataSource _coachSource;
 
-  late DataTable _coachDataTable;
+  late DataTable2 _coachDataTable;
 
   late FToast fToast;
+
+  late Tournament _tournament;
+
+  bool initCoaches = true;
 
   @override
   void initState() {
@@ -45,41 +41,42 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
     fToast = FToast();
     fToast.init(context);
-
-    _tournyBloc = BlocProvider.of<TournamentBloc>(context);
-
-    _initFromTournament(widget.tournament);
   }
 
-  void _initFromTournament(Tournament t) {
-    _coaches = List.from(t.getCoaches());
-
+  void _initFromTournament() {
     _coachCols = [
-      DataColumn(label: Text("Name")),
-      DataColumn(label: Text("Naf Name")),
-      DataColumn(label: Text("Naf #")),
-      DataColumn(label: Text("Race")),
+      DataColumn2(label: Text("Name")),
+      DataColumn2(label: Text("Naf Name")),
+      DataColumn2(label: Text("Naf #")),
+      DataColumn2(label: Text("Race")),
     ];
 
-    if (t.useSquads() || t.useSquadsForInitOnly()) {
-      _coachCols.add(DataColumn(label: Text("Squad")));
+    if (_tournament.useSquads() || _tournament.useSquadsForInitOnly()) {
+      _coachCols.add(DataColumn2(label: Text("Squad")));
     }
 
     _coachCols.addAll([
-      DataColumn(label: Text("Team")),
-      DataColumn(label: Text("Active")),
-      DataColumn(label: Text("")), // For add/remove rows
+      DataColumn2(label: Text("Team")),
+      DataColumn2(label: Text("Active")),
+      DataColumn2(label: Text("")), // For add/remove rows
     ]);
   }
 
   @override
   void dispose() {
-    _tournyBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+    _initFromTournament();
+
+    if (initCoaches) {
+      _coaches = List.from(_tournament.getCoaches());
+    }
+
     return Expanded(
         child: Column(children: [
       TitleBar(title: "Edit Tournament Participants"),
@@ -119,7 +116,8 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  _coaches = List.from(widget.tournament.getCoaches());
+                  _coaches = List.from(_tournament.getCoaches());
+                  initCoaches = false;
                 });
               },
               child: const Text('Discard'),
@@ -136,17 +134,63 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
                   List<RenameNafName> renames =
                       _coachSource.coachIdxNafRenames.values.toList();
 
-                  LoadingIndicatorDialog().show(context);
-                  bool success = await _tournyBloc.overwriteCoaches(
-                      widget.tournament.info, _coaches, renames);
-                  LoadingIndicatorDialog().dismiss();
+                  context
+                      .read<AppBloc>()
+                      .add(UpdateCoaches(_tournament.info, _coaches, renames));
+                  // LoadingIndicatorDialog().show(context);
+                  // bool success = await _tournyBloc.overwriteCoaches(
+                  //     _tournament.info, _coaches, renames);
+                  // LoadingIndicatorDialog().dismiss();
 
-                  _showSuccessFailToast(success);
+                  // _showSuccessFailToast(success);
                 };
 
                 _showDialogToConfirmOverwrite(context, callback);
               },
               child: const Text('Update'),
+            ),
+            SizedBox(width: 20),
+            ElevatedButton(
+              onPressed: () {
+                CoachImportExport coachImportExport = CoachImportExport();
+                coachImportExport.import().then((importedCoaches) {
+                  if (importedCoaches.isEmpty) {
+                    ToastUtils.show(
+                        fToast, "Failed to import coaches (NumberFound: 0)");
+                    return;
+                  }
+
+                  StringBuffer sb = new StringBuffer();
+
+                  sb.writeln(
+                      "Warning this will overwrite existing coach data. Not recommended once tournament has begun! Please confirm!");
+                  sb.writeln("");
+
+                  sb.writeln("Imported NumCoaches: " +
+                      importedCoaches.length.toString() +
+                      " (Active: " +
+                      _coaches
+                          .where((element) => element.active)
+                          .length
+                          .toString() +
+                      ")");
+
+                  showOkCancelAlertDialog(
+                          context: context,
+                          title: "Import Coaches",
+                          message: sb.toString(),
+                          okLabel: "Import",
+                          cancelLabel: "Dismiss")
+                      .then((value) => {
+                            if (value == OkCancelResult.ok)
+                              {
+                                context.read<AppBloc>().add(UpdateCoaches(
+                                    _tournament.info, importedCoaches, []))
+                              }
+                          });
+                });
+              },
+              child: const Text('Import from File'),
             )
           ]),
         ]));
@@ -155,6 +199,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   void _addNewCoach() {
     setState(() {
       _coaches.add(Coach("", "", "", Race.Unknown, "", 0));
+      initCoaches = false;
     });
   }
 
@@ -167,32 +212,34 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
       SizedBox(height: 10),
       Container(
           height: MediaQuery.of(context).size.height * 0.6,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: _coachDataTable,
-          ))
+          child: _coachDataTable)
     ];
   }
 
   void _initCoaches() {
     _coachSource = CoachesDataSource(
-        useSquad: widget.tournament.useSquads() ||
-            widget.tournament.useSquadsForInitOnly(),
+        useSquad: _tournament.useSquads() || _tournament.useSquadsForInitOnly(),
         coaches: _coaches,
         activeCallback: (cIdx, active) {
           setState(() {
             _coaches[cIdx].active = active;
+            initCoaches = false;
           });
         },
-        removeItemCallback: (cIdx) {
+        removeItemCallback: (nafName) {
+          _coaches.removeWhere((c) => c.nafName == nafName);
           setState(() {
-            _coaches.removeAt(cIdx);
+            _coaches = _coaches;
+            initCoaches = false;
           });
         });
 
-    _coachDataTable = DataTable(
+    _coachDataTable = DataTable2(
       columns: _coachCols,
       rows: _getCoachRows(),
+      fixedTopRows: 1,
+      isHorizontalScrollBarVisible: true,
+      isVerticalScrollBarVisible: true,
     );
   }
 
@@ -229,11 +276,11 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
     }
   }
 
-  List<DataRow> _getCoachRows() {
-    List<DataRow> rows = [];
+  List<DataRow2> _getCoachRows() {
+    List<DataRow2> rows = [];
 
     _coachSource.coaches.forEachIndexed((index, element) {
-      DataRow? row = _coachSource.getRow(index);
+      DataRow2? row = _coachSource.getRow(index);
       if (row != null) {
         rows.add(row);
       }
@@ -253,7 +300,7 @@ class CoachesDataSource extends DataTableSource {
   bool useSquad;
   late List<Coach> coaches;
   Function(int, bool)? activeCallback;
-  Function(int)? removeItemCallback;
+  Function(String)? removeItemCallback;
 
   Map<int, RenameNafName> coachIdxNafRenames = {};
 
@@ -264,7 +311,7 @@ class CoachesDataSource extends DataTableSource {
       this.removeItemCallback});
 
   @override
-  DataRow? getRow(int index) {
+  DataRow2? getRow(int index) {
     Coach c = coaches[index];
 
     print("c_idx: " + index.toString() + " -> " + c.coachName);
@@ -338,9 +385,11 @@ class CoachesDataSource extends DataTableSource {
 
     ElevatedButton removeBtn = ElevatedButton(
       onPressed: () {
+        Coach c = coaches[index];
+        String nafName = c.nafName;
         coaches.removeAt(index);
         if (removeItemCallback != null) {
-          removeItemCallback!(index);
+          removeItemCallback!(nafName);
         }
       },
       child: const Text('-'),
@@ -363,7 +412,7 @@ class CoachesDataSource extends DataTableSource {
       DataCell(removeBtn),
     ]);
 
-    return DataRow(cells: cells);
+    return DataRow2(cells: cells);
   }
 
   @override

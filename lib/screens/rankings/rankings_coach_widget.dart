@@ -1,9 +1,10 @@
-import 'package:bbnaf/models/squad.dart';
-import 'package:bbnaf/models/tournament/tournament.dart';
+import 'package:authentication_repository/authentication_repository.dart';
+import 'package:bbnaf/app/bloc/app_bloc.dart';
+import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:bbnaf/models/coach.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 enum CoachRankingFields {
   Pts,
@@ -23,16 +24,9 @@ enum CoachRankingFields {
 }
 
 class RankingCoachPage extends StatefulWidget {
-  final Tournament tournament;
-  final AuthUser authUser;
   final List<CoachRankingFields> fields;
 
-  RankingCoachPage(
-      {Key? key,
-      required this.tournament,
-      required this.authUser,
-      required this.fields})
-      : super(key: key);
+  RankingCoachPage({Key? key, required this.fields}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -41,7 +35,10 @@ class RankingCoachPage extends StatefulWidget {
 }
 
 class _RankingCoachPage extends State<RankingCoachPage> {
-  late int _sortColumnIndex = widget.tournament.useSquads() ? 4 : 3;
+  late Tournament _tournament;
+  late User _user;
+
+  late int _sortColumnIndex;
   late CoachRankingFields _sortField = widget.fields.first;
   bool _sortAscending = false;
 
@@ -50,13 +47,14 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   @override
   void initState() {
     super.initState();
-    _refreshState();
   }
 
   void _refreshState() {
-    _items = List.from(widget.tournament
+    _sortColumnIndex = _tournament.useSquads() ? 4 : 3;
+
+    _items = List.from(_tournament
         .getCoaches()
-        .where((a) => a.isActive(widget.tournament) || a.gamesPlayed() > 0));
+        .where((a) => a.isActive(_tournament) || a.gamesPlayed() > 0));
 
     _items.sort((Coach a, Coach b) {
       final double aValue = _getSortingValue(a, _sortField);
@@ -87,7 +85,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       DataColumn(label: Text('Naf Name')),
     );
 
-    if (widget.tournament.useSquads()) {
+    if (_tournament.useSquads()) {
       columns.add(DataColumn(
         label: Text('Squad'),
       ));
@@ -128,16 +126,16 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
     int rank = 1;
     _items.forEach((coach) {
-      String nafname = widget.authUser.getNafName();
+      String nafname = _user.getNafName();
 
       bool primaryHighlight =
           coach.nafName.toLowerCase() == nafname.toLowerCase();
 
       // Check if coach is on squad of the logged-in user
-      Squad? squad =
-          !primaryHighlight && widget.tournament.useSquads() && nafname != null
-              ? widget.tournament.getCoachSquad(nafname)
-              : null;
+      Squad? squad = !primaryHighlight && _tournament.useSquads()
+          ? _tournament.getCoachSquad(nafname)
+          : null;
+
       bool secondaryHighlight = squad != null && squad.hasCoach(coach.nafName);
 
       TextStyle? textStyle = primaryHighlight
@@ -150,7 +148,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
       cells.add(_createDataCell(coach.nafName, textStyle));
 
-      if (widget.tournament.useSquads()) {
+      if (_tournament.useSquads()) {
         cells.add(_createDataCell(coach.squadName, textStyle));
       }
 
@@ -174,6 +172,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _tournament = appState.tournamentState.tournament;
+    _user = appState.authenticationState.user;
+
     _refreshState();
 
     return Scaffold(
