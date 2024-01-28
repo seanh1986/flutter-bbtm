@@ -93,7 +93,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   final double titleFontSize = kIsWeb ? 16.0 : 10.0;
   final double subTitleFontSize = kIsWeb ? 11.0 : 9.0;
 
-  final double fabSize = kIsWeb ? 25.0 : 15.0;
+  final double fabSize = kIsWeb ? 32.0 : 20.0;
   final double raceIconSize = kIsWeb ? 50.0 : 30.0;
 
   late FToast fToast;
@@ -131,17 +131,17 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           _itemHeadline(_participant, widget.showHome),
-          _itemEditMatchDetails(_participant),
+          _itemEditMatchDetails(context, _participant),
         ]);
   }
 
   Widget _itemHeadline(IMatchupParticipant participant, bool isHome) {
+    final theme = Theme.of(context);
+
     return Card(
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 2.0, vertical: 6.0),
-        color: isHome
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.secondary,
+        color: isHome ? theme.secondaryHeaderColor : theme.secondaryHeaderColor,
         child: _itemHeader(participant));
   }
 
@@ -264,12 +264,13 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     return result;
   }
 
-  Widget _itemEditMatchDetails(IMatchupParticipant participant) {
+  Widget _itemEditMatchDetails(
+      BuildContext context, IMatchupParticipant participant) {
     List<Widget> widgets = [
       SizedBox(height: 10),
-      _itemCounter(widget._tdName),
+      _itemCounter(context, widget._tdName),
       SizedBox(height: 10),
-      _itemCounter(widget._casName),
+      _itemCounter(context, widget._casName),
       SizedBox(height: 10)
     ];
 
@@ -281,7 +282,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
     return Card(
         elevation: 8.0,
-        margin: EdgeInsets.symmetric(horizontal: 2.0, vertical: 6.0),
+        margin: EdgeInsets.symmetric(horizontal: 1.0, vertical: 6.0),
         child: Wrap(
           alignment: WrapAlignment.center,
           children: widgets,
@@ -319,7 +320,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
           });
 
           widget.tounamentInfo.scoringDetails.bonusPts.forEach((element) {
-            widgets.add(_itemCounterCallback(element.name, () {
+            widgets.add(_itemCounterCallback(context, element.name, () {
               callback();
             }));
             widgets.add(SizedBox(height: 10));
@@ -349,32 +350,34 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     );
   }
 
-  Widget _itemCounter(String name) {
-    return _itemCounterCallback(name, null);
+  Widget _itemCounter(BuildContext context, String name) {
+    return _itemCounterCallback(context, name, null);
   }
 
-  Widget _itemCounterCallback(String name, VoidCallback? callback) {
+  Widget _itemCounterCallback(
+      BuildContext context, String name, VoidCallback? callback) {
+    final theme = Theme.of(context);
+
     int? num = widget.counts[name];
     String numStr = num != null ? num.toString() : "?";
 
     bool showFabs = !_hideFabs();
 
     List<Widget> widgets = [
-      Text(numStr, style: TextStyle(fontSize: titleFontSize))
+      Text(numStr,
+          style:
+              theme.textTheme.bodyLarge) // TextStyle(fontSize: titleFontSize))
     ];
 
     if (showFabs) {
-      widgets.add(Container(
-          child: Wrap(
+      widgets.add(Wrap(
         children: [
           RawMaterialButton(
+            constraints: BoxConstraints.tight(Size(fabSize, fabSize)),
             shape: CircleBorder(),
             fillColor: _getFillColor(),
             elevation: 0.0,
-            child: Icon(
-              Icons.add,
-              color: Colors.black,
-            ),
+            child: Icon(Icons.add, color: Colors.black, size: fabSize / 2.0),
             onPressed: _editableState() // only click-able in editing mode
                 ? () {
                     if (widget.counts.containsKey(name)) {
@@ -392,23 +395,23 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
                 : null,
           )
         ],
-      )));
+      ));
     }
 
-    widgets.add(Text(name, style: TextStyle(fontSize: titleFontSize)));
+    widgets.add(Text(name,
+        style: theme
+            .textTheme.bodyLarge)); // TextStyle(fontSize: titleFontSize)));
 
     if (showFabs) {
       widgets.add(Container(
           child: Wrap(
         children: [
           RawMaterialButton(
+            constraints: BoxConstraints.tight(Size(fabSize, fabSize)),
             shape: CircleBorder(),
             fillColor: _getFillColor(),
             elevation: 0.0,
-            child: Icon(
-              Icons.remove,
-              color: Colors.black,
-            ),
+            child: Icon(Icons.remove, color: Colors.black, size: fabSize / 2.0),
             onPressed: _editableState() // only click-able in editing mode
                 ? () {
                     if (widget.counts.containsKey(name) &&
@@ -432,11 +435,13 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
     // Wrap width, Match height ?
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 1.0, vertical: 5.0),
-      child: Column(mainAxisSize: MainAxisSize.max, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: widgets)
-      ]),
-    );
+        margin: EdgeInsets.symmetric(horizontal: 0.5, vertical: 5.0),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: widgets)
+        // Column(mainAxisSize: MainAxisSize.max, children: [
+        //   Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: widgets)
+        // ]),
+        );
   }
 
   bool _editableState() {
@@ -465,7 +470,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
       case UploadState.Editing:
       case UploadState.CanConfirm:
       default:
-        return Theme.of(context).primaryColorLight;
+        return Colors.white;
     }
   }
 }

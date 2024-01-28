@@ -158,6 +158,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   Widget? _getBestSportWidget(BuildContext context) {
+    final theme = Theme.of(context);
+
     // bool enableEditing =
     //     _state == UploadState.Editing || _state == UploadState.Error;
 
@@ -175,12 +177,12 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     if (_matchup.isHome(nafName)) {
       result = _matchup.homeReportedResults;
       opponent = _tournament.getCoach(_matchup.awayNafName);
-      color = Theme.of(context).colorScheme.primary;
+      // color = Theme.of(context).colorScheme.primary;
       alignment = Alignment.centerLeft;
     } else if (_matchup.isAway(nafName)) {
       result = _matchup.awayReportedResults;
       opponent = _tournament.getCoach(_matchup.homeNafName);
-      color = Theme.of(context).colorScheme.secondary;
+      // color = Theme.of(context).colorScheme.secondary;
       alignment = Alignment.centerRight;
     }
 
@@ -194,14 +196,13 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           child: Align(
               alignment: alignment,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: color,
-                ),
+                style: theme.elevatedButtonTheme.style,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 10.0),
                   child: Text(
                     'Rate opponent\'s sportsmanship',
-                    style: TextStyle(color: Colors.black),
+                    style: theme.textTheme.bodyMedium,
+                    // TextStyle(color: Colors.black)
                   ),
                 ),
                 onPressed: () {
@@ -242,7 +243,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                           padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 10.0),
                           child: Text(
                             'Confirm',
-                            style: TextStyle(color: Colors.black),
+                            style: theme.textTheme
+                                .bodyMedium, // TextStyle(color: Colors.black),
                           ),
                         ),
                         onPressed: () {
@@ -306,6 +308,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   Widget _getVsAndTableWidget(BuildContext context) {
+    final theme = Theme.of(context);
+
     List<Widget> tableVsDetails = [];
 
     if (!_hideItemUploadBtn()) {
@@ -340,10 +344,12 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           .add(SizedBox(width: uploadIconSize, height: uploadIconSize));
     }
 
-    tableVsDetails
-        .add(Text(' vs. ', style: TextStyle(fontSize: subTitleFontSize)));
+    tableVsDetails.add(Text(' vs. ',
+        style: theme
+            .textTheme.labelSmall)); //TextStyle(fontSize: subTitleFontSize)));
     tableVsDetails.add(Text('T#' + _matchup.tableNum.toString(),
-        style: TextStyle(fontSize: subTitleFontSize)));
+        style: theme
+            .textTheme.labelSmall)); // TextStyle(fontSize: subTitleFontSize)));
 
     return SizedBox(
         width: vsTableNumWidth,
@@ -447,10 +453,13 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
+        final theme = Theme.of(context);
+
         return AlertDialog(
           title: Text(
             title,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: theme.textTheme
+                .titleMedium, // TextStyle(fontWeight: FontWeight.bold),
           ),
           content: SingleChildScrollView(
             child: ListBody(

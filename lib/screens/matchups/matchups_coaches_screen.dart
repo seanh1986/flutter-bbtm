@@ -62,7 +62,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     }
 
     if (_matchups.isEmpty) {
-      return _noMatchUpsYet();
+      return _noMatchUpsYet(context);
     }
 
     if (widget.refreshState) {
@@ -76,8 +76,8 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     }
 
     return selectedMatchups.isNotEmpty
-        ? _coachMatchupListUi(selectedMatchups)
-        : _coachMatchupListUi(_matchups);
+        ? _coachMatchupListUi(context, selectedMatchups)
+        : _coachMatchupListUi(context, _matchups);
   }
 
   void initSelectedMatchupState() {
@@ -118,31 +118,11 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     }
   }
 
-  // Widget _selectedCoachMatchupUi(CoachMatchup m) {
-  //   List<Widget> matchupWidgets = [
-  //     SizedBox(height: 2),
-  //     _getRoundTitle(),
-  //     SizedBox(height: 10),
-  //   ];
-
-  //   matchupWidgets.add(MatchupCoachWidget(
-  //     tournament: _tournament,
-  //     authUser: _authUser,
-  //     matchup: m,
-  //     refreshState: widget.refreshState,
-  //   ));
-
-  //   return Expanded(
-  //       child: ListView(
-  //           children: matchupWidgets,
-  //           shrinkWrap: true,
-  //           scrollDirection: Axis.vertical));
-  // }
-
-  Widget _coachMatchupListUi(List<CoachMatchup> matchupsToShow) {
+  Widget _coachMatchupListUi(
+      BuildContext context, List<CoachMatchup> matchupsToShow) {
     List<Widget> matchupWidgets = [
       SizedBox(height: 2),
-      _getRoundTitle(),
+      _getRoundTitle(context),
       SizedBox(height: 10)
     ];
 
@@ -152,37 +132,50 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
         )));
 
     return Expanded(
-        child: ListView(
-            children: matchupWidgets,
-            shrinkWrap: true,
-            scrollDirection: Axis.vertical));
+        child:
+            // ListView.builder(
+            //     shrinkWrap: true,
+            //     scrollDirection: Axis.vertical,
+            //     itemCount: matchupWidgets.length,
+            //     itemBuilder: (context, idx) {
+            //       return ListTile(title: matchupWidgets[idx]);
+            //     })
+            ListView(
+                children: matchupWidgets,
+                shrinkWrap: true,
+                scrollDirection: Axis.vertical));
   }
 
-  Widget _getRoundTitle() {
+  Widget _getRoundTitle(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Wrap(alignment: WrapAlignment.center, children: [
       Card(
           child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text("Round #" + _tournament.curRoundNumber().toString(),
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+              textAlign: TextAlign.center, style: theme.textTheme.titleMedium)
         ]),
       ))
     ]);
   }
 
-  Widget _noMatchUpsYet() {
+  Widget _noMatchUpsYet(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
         margin: EdgeInsets.fromLTRB(20, 2, 20, 2), // EdgeInsets.all(20),
         width: double.infinity,
         child: Card(
+          color: Colors.transparent,
           margin: EdgeInsets.all(10),
           child: Container(
+              color: Colors.transparent,
               padding: EdgeInsets.all(2),
               child: Text(
                 'Matchups not available yet',
-                style: TextStyle(fontSize: 20),
+                style: theme.textTheme.titleLarge,
               )),
         ));
   }
