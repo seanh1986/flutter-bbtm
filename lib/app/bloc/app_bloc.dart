@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:authentication_repository/authentication_repository.dart';
-import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
+import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/tournament_repository/src/tournament_repository.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';

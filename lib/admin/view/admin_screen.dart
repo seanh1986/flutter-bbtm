@@ -1,7 +1,4 @@
-import 'package:bbnaf/screens/admin/download_files_widget.dart';
-import 'package:bbnaf/screens/admin/round_management_widget.dart';
-import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
-import 'package:bbnaf/screens/admin/edit_tourny_info_widget.dart';
+import 'package:bbnaf/admin/admin.dart';
 import 'package:flutter/material.dart';
 
 class AdminScreen extends StatefulWidget {

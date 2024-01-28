@@ -1,8 +1,8 @@
 import 'dart:collection';
 import 'package:authentication_repository/authentication_repository.dart';
+import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
-import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/tournament_repository/src/models/tournament_info.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';

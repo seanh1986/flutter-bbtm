@@ -1,6 +1,6 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
-import 'package:bbnaf/screens/admin/edit_tourny_info_widget.dart';
+import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:flutter/material.dart';

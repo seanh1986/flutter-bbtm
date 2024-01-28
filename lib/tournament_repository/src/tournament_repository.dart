@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:bbnaf/screens/admin/edit_participants_widget.dart';
+import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:cache/cache.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

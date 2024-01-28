@@ -1,7 +1,7 @@
 import 'package:authentication_repository/authentication_repository.dart';
+import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/screens/admin/admin_screen.dart';
 import 'package:bbnaf/screens/matchups/matchups_screen.dart';
 import 'package:bbnaf/home/view/overview_screen.dart';
 import 'package:bbnaf/screens/rankings/rankings_screen.dart';
