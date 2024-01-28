@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:checkbox_formfield/checkbox_formfield.dart';
+import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class EditTournamentInfoWidget extends StatefulWidget {
   // Optional can supply tournament object for population (e.g., create tournament)
@@ -33,7 +35,11 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   late CasualtyDetails _casualtyDetails;
   late SquadDetails _squadDetails;
 
+  late DateTime? _startDate;
+  late DateTime? _endDate;
+
   bool refreshFields = true;
+  bool editDates = false;
 
   List<DataColumn> _organizerCols = [
     DataColumn(label: Text("")), // For add/remove rows
@@ -77,13 +83,19 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       _scoringDetails = _tournament.info.scoringDetails;
       _casualtyDetails = _tournament.info.casualtyDetails;
       _squadDetails = _tournament.info.squadDetails;
+      _startDate = _tournament.info.dateTimeStart;
+      _endDate = _tournament.info.dateTimeEnd;
     }
 
     return Column(children: [
       TitleBar(title: "Edit Tournament Info"),
       SizedBox(height: 20),
-      Column(
-          mainAxisAlignment: MainAxisAlignment.center, children: _viewInfos())
+      Container(
+          child: SingleChildScrollView(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: _viewInfos()),
+      )),
     ]);
   }
 
@@ -111,13 +123,9 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         callback: (value) => _location = value,
       ),
       Divider(),
+      _createStartEndDateUi(),
+      Divider(),
       _createOrgaTable(),
-      // CustomDateFormField(
-      //   initialValue: PickerDateRange(
-      //       widget.tournament.info.dateTimeStart,
-      //       widget.tournament.info.dateTimeEnd),
-      //   callback: (arg) => _onDatePickerSelectionChanged,
-      // ),
       Divider(),
       _createScoringDetails("Coach Scoring:", _scoringDetails),
       Divider(),
@@ -162,6 +170,13 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
               info.scoringDetails = _scoringDetails;
               info.casualtyDetails = _casualtyDetails;
               info.squadDetails = _squadDetails;
+
+              if (_startDate != null) {
+                info.dateTimeStart = _startDate!;
+              }
+              if (_endDate != null) {
+                info.dateTimeEnd = _endDate!;
+              }
 
               ToastUtils.show(fToast, "Updating Tournament Info");
 
@@ -243,6 +258,59 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
     );
   }
 
+  Widget _createStartEndDateUi() {
+    bool hasStart = _startDate != null;
+
+    if (editDates || !hasStart) {
+      return _dateSelector();
+    }
+
+    final theme = Theme.of(context);
+
+    bool hasEnd = _endDate != null || _endDate == _startDate;
+
+    DateFormat dateFormat = DateFormat("yyyy-MM-dd");
+
+    return Row(
+      children: [
+        IconButton(
+            onPressed: () {
+              setState(() {
+                editDates = true;
+              });
+            },
+            icon: const Icon(Icons.edit)),
+        Text(hasEnd ? "Dates: " : "Date: ", style: theme.textTheme.bodyMedium),
+        Text(dateFormat.format(_startDate!), style: theme.textTheme.bodyMedium),
+        Text(hasEnd ? " - " + dateFormat.format(_endDate!) : "",
+            style: theme.textTheme.bodyMedium),
+      ],
+    );
+  }
+
+  Widget _dateSelector() {
+    return Column(
+      children: [
+        CustomDateFormField(
+          initialValue: PickerDateRange(_startDate, _endDate),
+          callback: (arg) {
+            _onDatePickerSelectionChanged(arg);
+          },
+        ),
+        TextButton(
+            onPressed: () {
+              setState(() {
+                editDates = false;
+              });
+            },
+            child: Text(
+              "Ok",
+              style: Theme.of(context).textTheme.displaySmall,
+            ))
+      ],
+    );
+  }
+
   Widget _createOrgaTable() {
     return Container(
         padding: const EdgeInsets.all(15),
@@ -274,15 +342,23 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         ]));
   }
 
-  // void _onDatePickerSelectionChanged(DateRangePickerSelectionChangedArgs arg) {
-  //   if (arg.value is PickerDateRange) {
-  //     widget.tournament.info.dateTimeStart = arg.value.startDate;
-  //     widget.tournament.info.dateTimeEnd = arg.value.endDate;
-  //   } else if (arg.value is DateTime) {
-  //     widget.tournament.info.dateTimeStart = arg.value;
-  //     widget.tournament.info.dateTimeEnd = arg.value;
-  //   }
-  // }
+  void _onDatePickerSelectionChanged(DateRangePickerSelectionChangedArgs arg) {
+    if (arg.value is PickerDateRange) {
+      _startDate = arg.value.startDate;
+      _endDate = arg.value.endDate;
+
+      setState(() {
+        refreshFields = false;
+      });
+    } else if (arg.value is DateTime) {
+      _startDate = arg.value;
+      _endDate = arg.value;
+
+      setState(() {
+        refreshFields = false;
+      });
+    }
+  }
 
   Widget _createIndividualScoringDetails(
       String title, IndividualScoringDetails details) {

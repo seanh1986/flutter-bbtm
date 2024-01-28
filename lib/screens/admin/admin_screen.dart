@@ -53,7 +53,11 @@ class _AdminScreenState extends State<AdminScreen> {
       _widgets.add(subScreenWidget);
     }
 
-    return Column(children: _widgets);
+    return new Container(
+        child:
+            new SingleChildScrollView(child: new Column(children: _widgets)));
+
+    // return Column(children: _widgets);
   }
 
   Widget _toggleButtonsList(BuildContext context) {

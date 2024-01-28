@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 // import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class CustomTextFormField extends StatelessWidget {
@@ -39,25 +40,31 @@ class CustomTextFormField extends StatelessWidget {
   }
 }
 
-// class CustomDateFormField extends StatelessWidget {
-//   final DateRangePickerSelectionChangedCallback callback;
-//   final PickerDateRange? initialValue;
+class CustomDateFormField extends StatelessWidget {
+  final DateRangePickerSelectionChangedCallback callback;
+  final PickerDateRange? initialValue;
 
-//   CustomDateFormField({
-//     Key? key,
-//     this.initialValue,
-//     required this.callback,
-//   }) : super(key: key);
+  CustomDateFormField({
+    Key? key,
+    this.initialValue,
+    required this.callback,
+  }) : super(key: key);
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.all(8.0),
-//       child: SfDateRangePicker(
-//         initialSelectedRange: initialValue,
-//         selectionMode: DateRangePickerSelectionMode.range,
-//         onSelectionChanged: callback,
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SfDateRangePicker(
+          initialSelectedRange: initialValue,
+          selectionMode: DateRangePickerSelectionMode.range,
+          enablePastDates: false,
+          onSelectionChanged: (arg) {
+            callback(arg);
+          },
+          initialDisplayDate:
+              (initialValue != null && initialValue!.startDate != null)
+                  ? initialValue!.startDate!
+                  : null),
+    );
+  }
+}

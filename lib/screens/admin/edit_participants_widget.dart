@@ -77,14 +77,13 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
       _coaches = List.from(_tournament.getCoaches());
     }
 
-    return Expanded(
-        child: Column(children: [
+    return Column(children: [
       TitleBar(title: "Edit Tournament Participants"),
       SizedBox(height: 20),
       Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: _viewCoaches(context))
-    ]));
+    ]);
   }
 
   Widget _createCoachTableHeadline() {
