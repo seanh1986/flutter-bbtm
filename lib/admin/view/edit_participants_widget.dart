@@ -35,6 +35,8 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   bool initCoaches = true;
 
+  int? editIdx;
+
   @override
   void initState() {
     super.initState();
@@ -45,10 +47,12 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   void _initFromTournament() {
     _coachCols = [
+      DataColumn2(label: Text(""), size: ColumnSize.S), // Edit Button
       DataColumn2(label: Text("Name")),
-      DataColumn2(label: Text("Naf Name")),
-      DataColumn2(label: Text("Naf #")),
-      DataColumn2(label: Text("Race")),
+      DataColumn2(label: Text("Naf")),
+      DataColumn2(label: Text("Team")),
+      // DataColumn2(label: Text("Naf #")),
+      // DataColumn2(label: Text("Race")),
     ];
 
     if (_tournament.useSquads() || _tournament.useSquadsForInitOnly()) {
@@ -56,9 +60,8 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
     }
 
     _coachCols.addAll([
-      DataColumn2(label: Text("Team")),
-      DataColumn2(label: Text("Active")),
-      DataColumn2(label: Text("")), // For add/remove rows
+      DataColumn2(label: Text("Active"), size: ColumnSize.S),
+      // DataColumn2(label: Text("")), // For add/remove rows
     ]);
   }
 
@@ -197,6 +200,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   void _addNewCoach() {
     setState(() {
+      editIdx = _coaches.length; // soon to be added last one
       _coaches.add(Coach("", "", "", Race.Unknown, "", 0));
       initCoaches = false;
     });
@@ -216,9 +220,23 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   }
 
   void _initCoaches() {
+    final theme = Theme.of(context);
+
     _coachSource = CoachesDataSource(
+        theme: theme,
         useSquad: _tournament.useSquads() || _tournament.useSquadsForInitOnly(),
         coaches: _coaches,
+        editIdx: editIdx,
+        editCallback: (cIdx, doneEdit) {
+          setState(() {
+            initCoaches = false;
+            if (doneEdit) {
+              editIdx = null;
+            } else {
+              editIdx = cIdx;
+            }
+          });
+        },
         activeCallback: (cIdx, active) {
           setState(() {
             _coaches[cIdx].active = active;
@@ -234,11 +252,27 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
         });
 
     _coachDataTable = DataTable2(
-      columns: _coachCols,
-      rows: _getCoachRows(),
-      fixedTopRows: 1,
+      headingRowColor:
+          MaterialStateColor.resolveWith((states) => Colors.grey[850]!),
+      headingTextStyle: const TextStyle(color: Colors.white),
+      headingCheckboxTheme: const CheckboxThemeData(
+          side: BorderSide(color: Colors.white, width: 2.0)),
       isHorizontalScrollBarVisible: true,
       isVerticalScrollBarVisible: true,
+      columnSpacing: 12,
+      horizontalMargin: 12,
+      border: TableBorder.all(),
+      dividerThickness: 1, // this one will be ignored if [border] is set above
+      fixedTopRows: 1,
+      bottomMargin: 10,
+      minWidth: 900,
+      empty: Center(
+          child: Container(
+              padding: const EdgeInsets.all(20),
+              color: Colors.grey[200],
+              child: const Text('No data yet'))),
+      columns: _coachCols,
+      rows: _getCoachRows(),
     );
   }
 
@@ -298,19 +332,86 @@ class RenameNafName {
 class CoachesDataSource extends DataTableSource {
   bool useSquad;
   late List<Coach> coaches;
+
+  Function(int, bool) editCallback; // true if done with edit mode
   Function(int, bool)? activeCallback;
   Function(String)? removeItemCallback;
 
+  int? editIdx;
+
   Map<int, RenameNafName> coachIdxNafRenames = {};
+
+  ThemeData? theme;
 
   CoachesDataSource(
       {required this.useSquad,
       required this.coaches,
+      required this.editCallback,
       this.activeCallback,
-      this.removeItemCallback});
+      this.removeItemCallback,
+      this.theme,
+      this.editIdx});
 
   @override
   DataRow2? getRow(int index) {
+    Coach c = coaches[index];
+
+    print("c_idx: " + index.toString() + " -> " + c.coachName);
+
+    Checkbox activeCheckbox = Checkbox(
+      value: c.active,
+      onChanged: (value) {
+        if (value != null && activeCallback != null) {
+          activeCallback!(index, value);
+        }
+      },
+    );
+
+    final bool isInEditMode = editIdx == index;
+
+    List<DataCell> cells = [
+      DataCell(
+        IconButton(
+            onPressed: () {
+              bool exitEditMode = isInEditMode;
+              editCallback(index, exitEditMode);
+            },
+            icon: Icon(isInEditMode ? Icons.save : Icons.edit)),
+      ),
+      DataCell(_getName(c, isInEditMode)),
+      DataCell(_getNaf(c, index, isInEditMode)),
+      DataCell(_getTeam(c, isInEditMode)),
+    ];
+
+    if (useSquad) {
+      cells.add(DataCell(Text(c.squadName)));
+    }
+
+    cells.addAll([
+      DataCell(activeCheckbox),
+    ]);
+
+    return DataRow2(
+      cells: cells,
+      specificRowHeight: isInEditMode ? 150 : null,
+      color:
+          MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        if (index
+            .isEven) //Change Color if Row is Even, this is for Stripped Table
+          return (theme != null &&
+                  theme!.listTileTheme.selectedTileColor != null)
+              ? theme!.listTileTheme.selectedTileColor!
+              : Color.fromRGBO(235, 241, 244, 1);
+        else
+          return (theme != null && theme!.listTileTheme.tileColor != null)
+              ? theme!.listTileTheme.tileColor!
+              : Colors.white;
+      }),
+    );
+  }
+
+  @override
+  DataRow2? getRowOld(int index) {
     Coach c = coaches[index];
 
     print("c_idx: " + index.toString() + " -> " + c.coachName);
@@ -412,6 +513,102 @@ class CoachesDataSource extends DataTableSource {
     ]);
 
     return DataRow2(cells: cells);
+  }
+
+  Widget _getName(Coach c, bool isInEditMode) {
+    if (!isInEditMode) {
+      return Text(c.coachName);
+    }
+
+    TextEditingController coachNameController =
+        TextEditingController(text: c.coachName);
+
+    return Expanded(
+        child: TextFormField(
+            controller: coachNameController,
+            onChanged: (value) => {c.coachName = coachNameController.text}));
+  }
+
+  Widget _getNaf(Coach c, int index, bool isInEditMode) {
+    if (!isInEditMode) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [Text(c.nafName), Text(c.nafNumber.toString())],
+      );
+    }
+
+    ValueChanged<String> nafNameCallback = (value) {
+      RenameNafName? renameNafName = coachIdxNafRenames[index];
+      if (renameNafName == null) {
+        coachIdxNafRenames.putIfAbsent(
+            index, () => RenameNafName(c.nafName, value));
+      } else {
+        coachIdxNafRenames.update(
+            index, (old) => RenameNafName(c.nafName, value));
+      }
+    };
+
+    TextEditingController nafNameController =
+        TextEditingController(text: c.nafName);
+    TextFormField nafNameField = TextFormField(
+        controller: nafNameController,
+        onChanged: (value) {
+          nafNameCallback(value);
+        });
+
+    TextEditingController nafNumberController =
+        TextEditingController(text: c.nafNumber.toString());
+    TextFormField nafNumberField = TextFormField(
+        controller: nafNumberController,
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) =>
+            {c.nafNumber = int.parse(nafNumberController.text)});
+
+    return Expanded(
+        child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [nafNameField, nafNumberField],
+    ));
+  }
+
+  Widget _getTeam(Coach c, bool isInEditMode) {
+    if (!isInEditMode) {
+      return c.teamName.isNotEmpty
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [Text(c.teamName), Text(c.raceName())])
+          : Text(c.raceName());
+    }
+
+    TextEditingController teamNameController =
+        TextEditingController(text: c.teamName);
+    TextFormField teamNameField = TextFormField(
+        controller: teamNameController,
+        onChanged: (value) => {c.teamName = teamNameController.text});
+
+    List<DropdownMenuItem> raceDropDown = Race.values
+        .map((Race r) => RaceUtils.getName(r))
+        .map((String r) => DropdownMenuItem(value: r, child: Text(r)))
+        .toList();
+
+    DropdownButtonFormField raceField = DropdownButtonFormField(
+      value: c.raceName(),
+      items: raceDropDown,
+      onChanged: (value) {
+        c.race = RaceUtils.getRace(value);
+      },
+    );
+
+    return Expanded(
+        child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [teamNameField, raceField],
+    ));
   }
 
   @override

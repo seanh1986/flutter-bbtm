@@ -187,7 +187,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
 
   void _updateTournamentInfo(
       UpdateTournamentInfo event, Emitter<AppState> emit) {
-    BuildContext context = event.context;
+    // BuildContext context = event.context;
     TournamentInfo info = event.tournamentInfo;
     // LoadingIndicatorDialog().show(context);
     print("AppBloc: updateTournamentInfo: " + info.name + "(" + info.id + ")");

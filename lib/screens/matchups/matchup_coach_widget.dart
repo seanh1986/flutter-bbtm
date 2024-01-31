@@ -4,7 +4,6 @@ import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:bbnaf/models/matchup/reported_match_result.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/screens/matchups/matchup_report_widget.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';

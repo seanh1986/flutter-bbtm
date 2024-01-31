@@ -2,7 +2,6 @@ import 'dart:collection';
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/models/matchup/squad_matchup.dart';
-import 'package:bbnaf/repos/auth/auth_user.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/tournament_repository/src/models/tournament_info.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
@@ -62,16 +61,27 @@ class Tournament {
 
     // Rename all coaches if necesssary
     renames.forEach((r) {
+      // If rename was already applied
       Coach? coach = newCoaches.firstWhereOrNull((element) =>
           element.nafName.toLowerCase() == r.newNafName.toLowerCase());
+
+      // Check if rename was not yet applied -> apply it
+      if (coach == null) {
+        coach = newCoaches.firstWhereOrNull((element) =>
+            element.nafName.toLowerCase() == r.oldNafName.toLowerCase());
+
+        if (coach != null) {
+          coach.nafName = r.newNafName;
+        }
+      }
 
       if (coach != null) {
         coachRounds.forEach((cr) {
           cr.matches.forEach((m) {
             if (m.isHome(r.oldNafName)) {
-              m.homeNafName = coach.nafName;
+              m.homeNafName = coach!.nafName;
             } else if (m.isAway(r.oldNafName)) {
-              m.awayNafName = coach.nafName;
+              m.awayNafName = coach!.nafName;
             }
           });
         });
