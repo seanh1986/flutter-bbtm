@@ -3,6 +3,7 @@ import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/excel/coach_import_export.dart';
 import 'package:bbnaf/utils/toast.dart';
+import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
@@ -524,9 +525,10 @@ class CoachesDataSource extends DataTableSource {
         TextEditingController(text: c.coachName);
 
     return Expanded(
-        child: TextFormField(
+        child: CustomTextFormField(
+            title: "Name",
             controller: coachNameController,
-            onChanged: (value) => {c.coachName = coachNameController.text}));
+            callback: (value) => {c.coachName = coachNameController.text}));
   }
 
   Widget _getNaf(Coach c, int index, bool isInEditMode) {
@@ -551,26 +553,28 @@ class CoachesDataSource extends DataTableSource {
 
     TextEditingController nafNameController =
         TextEditingController(text: c.nafName);
-    TextFormField nafNameField = TextFormField(
+    CustomTextFormField nafNameField = CustomTextFormField(
+        title: "Naf Name",
         controller: nafNameController,
-        onChanged: (value) {
+        callback: (value) {
           nafNameCallback(value);
         });
 
     TextEditingController nafNumberController =
         TextEditingController(text: c.nafNumber.toString());
-    TextFormField nafNumberField = TextFormField(
+    CustomTextFormField nafNumberField = CustomTextFormField(
+        title: "Naf Number",
         controller: nafNumberController,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onChanged: (value) =>
+        callback: (value) =>
             {c.nafNumber = int.parse(nafNumberController.text)});
 
     return Expanded(
         child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [nafNameField, nafNumberField],
+      children: [nafNameField, SizedBox(height: 10), nafNumberField],
     ));
   }
 
@@ -586,9 +590,10 @@ class CoachesDataSource extends DataTableSource {
 
     TextEditingController teamNameController =
         TextEditingController(text: c.teamName);
-    TextFormField teamNameField = TextFormField(
+    CustomTextFormField teamNameField = CustomTextFormField(
+        title: "Team Name",
         controller: teamNameController,
-        onChanged: (value) => {c.teamName = teamNameController.text});
+        callback: (value) => {c.teamName = teamNameController.text});
 
     List<DropdownMenuItem> raceDropDown = Race.values
         .map((Race r) => RaceUtils.getName(r))
@@ -601,6 +606,7 @@ class CoachesDataSource extends DataTableSource {
       onChanged: (value) {
         c.race = RaceUtils.getRace(value);
       },
+      decoration: InputDecoration(labelText: "Race"),
     );
 
     return Expanded(
