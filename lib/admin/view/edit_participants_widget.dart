@@ -416,7 +416,7 @@ class CoachesDataSource extends DataTableSource {
 
     return DataRow2(
       cells: cells,
-      specificRowHeight: isInEditMode ? 150 : null,
+      specificRowHeight: isInEditMode ? 160 : null,
       color:
           MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
         if (index
