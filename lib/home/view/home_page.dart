@@ -1,10 +1,10 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
+import 'package:bbnaf/rankings/rankings.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/screens/matchups/matchups_screen.dart';
 import 'package:bbnaf/home/view/overview_screen.dart';
-import 'package:bbnaf/screens/rankings/rankings_screen.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
