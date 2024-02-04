@@ -1,4 +1,6 @@
 import 'package:bbnaf/admin/admin.dart';
+import 'package:bbnaf/widgets/toggle_widget/models/toggle_widget_item.dart';
+import 'package:bbnaf/widgets/toggle_widget/view/toggle_widget.dart';
 import 'package:flutter/material.dart';
 
 class AdminScreen extends StatefulWidget {
@@ -25,7 +27,6 @@ class _AdminScreenState extends State<AdminScreen> {
     AdminSubScreens.ROUND_MANAGEMENT,
     AdminSubScreens.DOWNLOAD_FILES,
   ];
-  AdminSubScreens subScreen = AdminSubScreens.EDIT_INFO;
 
   @override
   void initState() {
@@ -39,58 +40,20 @@ class _AdminScreenState extends State<AdminScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> _widgets = [
-      _toggleButtonsList(context),
-      SizedBox(height: 20),
-    ];
-
-    Widget? subScreenWidget = _getSubScreen();
-
-    if (subScreenWidget != null) {
-      _widgets.add(subScreenWidget);
-    }
-
-    return new Container(
-        child:
-            new SingleChildScrollView(child: new Column(children: _widgets)));
-
-    // return Column(children: _widgets);
-  }
-
-  Widget _toggleButtonsList(BuildContext context) {
-    List<Widget> toggleWidgets = [];
-
-    final theme = Theme.of(context);
+    List<ToggleWidgetItem> items = [];
 
     adminSubScreens.forEach((element) {
-      bool clickable = subScreen != element;
-
-      toggleWidgets.add(ElevatedButton(
-        style: theme.elevatedButtonTheme.style,
-        child: Text(element.name.replaceAll("_", " ")),
-        onPressed: clickable
-            ? () {
-                setState(() {
-                  subScreen = element;
-                });
-              }
-            : null,
-      ));
-
-      toggleWidgets.add(SizedBox(width: 10));
+      WidgetBuilder? widgetBuilder = _getSubScreenBuilder(element);
+      if (widgetBuilder != null) {
+        items.add(
+            ToggleWidgetItem(element.name.replaceAll("_", " "), widgetBuilder));
+      }
     });
 
-    return Container(
-        height: 60,
-        alignment: Alignment.center,
-        padding: EdgeInsets.all(10),
-        child: ListView(
-            scrollDirection: Axis.horizontal,
-            shrinkWrap: true,
-            children: toggleWidgets));
+    return ToggleWidget(items: items);
   }
 
-  Widget? _getSubScreen() {
+  Widget? _getSubScreen(AdminSubScreens subScreen) {
     switch (subScreen) {
       case AdminSubScreens.EDIT_INFO:
         return EditTournamentInfoWidget();
@@ -102,6 +65,23 @@ class _AdminScreenState extends State<AdminScreen> {
         return RoundManagementWidget();
       case AdminSubScreens.DOWNLOAD_FILES:
         return DownloadFilesWidget();
+      default:
+        return null;
+    }
+  }
+
+  WidgetBuilder? _getSubScreenBuilder(AdminSubScreens subScreen) {
+    switch (subScreen) {
+      case AdminSubScreens.EDIT_INFO:
+        return (context) => EditTournamentInfoWidget();
+      case AdminSubScreens.EDIT_SQUADS:
+        return null; // TODO...
+      case AdminSubScreens.EDIT_PARTICIPANTS:
+        return (context) => EditParticipantsWidget();
+      case AdminSubScreens.ROUND_MANAGEMENT:
+        return (context) => RoundManagementWidget();
+      case AdminSubScreens.DOWNLOAD_FILES:
+        return (context) => DownloadFilesWidget();
       default:
         return null;
     }

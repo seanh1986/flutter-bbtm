@@ -177,41 +177,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
     _refreshState();
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          verticalDirection: VerticalDirection.down,
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                child: ScrollConfiguration(
-                    behavior:
-                        ScrollConfiguration.of(context).copyWith(dragDevices: {
-                      PointerDeviceKind.touch,
-                      PointerDeviceKind.mouse,
-                    }),
-                    child: dataBody()),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.all(20.0),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(20.0),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+    return dataBody();
   }
 
   SingleChildScrollView dataBody() {

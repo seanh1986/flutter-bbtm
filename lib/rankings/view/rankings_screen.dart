@@ -2,6 +2,8 @@ import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/rankings/rankings.dart';
+import 'package:bbnaf/widgets/toggle_widget/models/toggle_widget_item.dart';
+import 'package:bbnaf/widgets/toggle_widget/view/toggle_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -78,99 +80,148 @@ class _RankingsPage extends State<RankingsPage> {
   }
 
   Widget _coachRankingsWithToggles() {
-    int tabLength;
-    List<Widget> topBar;
-    List<Widget> views;
+    // int tabLength;
+    // List<Widget> topBar;
+    // List<Widget> views;
 
-    if (_tournament.isUserAdmin(_user)) {
-      tabLength = 4;
-      topBar = [
-        Tab(text: "Combined"),
-        Tab(text: "Td"),
-        Tab(text: "Cas"),
-        Tab(text: "Sport")
-      ];
-      views = [
-        RankingCoachPage(fields: _getCoachRankingFieldsCombinedAdmin()),
-        RankingCoachPage(fields: [
-          CoachRankingFields.Td,
-          CoachRankingFields.OppTd,
-          CoachRankingFields.DeltaTd
-        ]),
-        RankingCoachPage(fields: [
-          CoachRankingFields.Cas,
-          CoachRankingFields.OppCas,
-          CoachRankingFields.DeltaCas
-        ]),
-        RankingCoachPage(fields: [CoachRankingFields.BestSport])
-      ];
-    } else {
-      tabLength = 3;
-      topBar = [Tab(text: "Combined"), Tab(text: "Td"), Tab(text: "Cas")];
-      views = [
-        RankingCoachPage(fields: _getCoachRankingFieldsCombined()),
-        RankingCoachPage(fields: [
-          CoachRankingFields.Td,
-          CoachRankingFields.OppTd,
-          CoachRankingFields.DeltaTd
-        ]),
-        RankingCoachPage(fields: [
-          CoachRankingFields.Cas,
-          CoachRankingFields.OppCas,
-          CoachRankingFields.DeltaCas
-        ])
-      ];
+    // if (_tournament.isUserAdmin(_user)) {
+    //   tabLength = 4;
+    //   topBar = [
+    //     Tab(text: "Combined"),
+    //     Tab(text: "Td"),
+    //     Tab(text: "Cas"),
+    //     Tab(text: "Sport")
+    //   ];
+    //   views = [
+    //     RankingCoachPage(fields: _getCoachRankingFieldsCombinedAdmin()),
+    //     RankingCoachPage(fields: [
+    //       CoachRankingFields.Td,
+    //       CoachRankingFields.OppTd,
+    //       CoachRankingFields.DeltaTd
+    //     ]),
+    //     RankingCoachPage(fields: [
+    //       CoachRankingFields.Cas,
+    //       CoachRankingFields.OppCas,
+    //       CoachRankingFields.DeltaCas
+    //     ]),
+    //     RankingCoachPage(fields: [CoachRankingFields.BestSport])
+    //   ];
+    // } else {
+    //   tabLength = 3;
+    //   topBar = [Tab(text: "Combined"), Tab(text: "Td"), Tab(text: "Cas")];
+    //   views = [
+    //     RankingCoachPage(fields: _getCoachRankingFieldsCombined()),
+    //     RankingCoachPage(fields: [
+    //       CoachRankingFields.Td,
+    //       CoachRankingFields.OppTd,
+    //       CoachRankingFields.DeltaTd
+    //     ]),
+    //     RankingCoachPage(fields: [
+    //       CoachRankingFields.Cas,
+    //       CoachRankingFields.OppCas,
+    //       CoachRankingFields.DeltaCas
+    //     ])
+    //   ];
+    // }
+
+    bool showAdminDetails = _tournament.isUserAdmin(_user);
+
+    List<ToggleWidgetItem> items = [
+      ToggleWidgetItem("Combined", (context) {
+        return RankingCoachPage(
+            fields: showAdminDetails
+                ? _getCoachRankingFieldsCombinedAdmin()
+                : _getCoachRankingFieldsCombined());
+      }),
+      ToggleWidgetItem(
+          "Td",
+          (context) => RankingCoachPage(fields: [
+                CoachRankingFields.Td,
+                CoachRankingFields.OppTd,
+                CoachRankingFields.DeltaTd
+              ])),
+      ToggleWidgetItem(
+          "Cas",
+          (context) => RankingCoachPage(fields: [
+                CoachRankingFields.Cas,
+                CoachRankingFields.OppCas,
+                CoachRankingFields.DeltaCas
+              ])),
+    ];
+
+    if (showAdminDetails) {
+      items.add(ToggleWidgetItem(
+          "Sport",
+          (context) =>
+              RankingCoachPage(fields: [CoachRankingFields.BestSport])));
     }
 
-    return DefaultTabController(
-        length: tabLength,
-        child: Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              flexibleSpace: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TabBar(
-                    tabs: topBar,
-                  )
-                ],
-              ),
-            ),
-            body: TabBarView(
-              children: views,
-              // physics: AlwaysScrollableScrollPhysics(),
-              physics: NeverScrollableScrollPhysics(),
-            )));
+    return ToggleWidget(items: items);
+
+    // return DefaultTabController(
+    //     length: tabLength,
+    //     child: Scaffold(
+    //         appBar: AppBar(
+    //           automaticallyImplyLeading: false,
+    //           flexibleSpace: Column(
+    //             mainAxisAlignment: MainAxisAlignment.end,
+    //             children: [
+    //               TabBar(
+    //                 tabs: topBar,
+    //               )
+    //             ],
+    //           ),
+    //         ),
+    //         body: TabBarView(
+    //           children: views,
+    //           // physics: AlwaysScrollableScrollPhysics(),
+    //           physics: NeverScrollableScrollPhysics(),
+    //         )));
   }
 
   Widget _squadAndCoachTabs() {
-    return DefaultTabController(
-        length: 2,
-        child: Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              flexibleSpace: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TabBar(
-                    tabs: <Widget>[
-                      Tab(
-                        text: "Squad Rankings",
-                      ),
-                      Tab(
-                        text: "Coach Ranking",
-                      )
-                    ],
-                  )
-                ],
-              ),
-            ),
-            body: TabBarView(
-              physics: NeverScrollableScrollPhysics(),
-              children: <Widget>[
-                RankingSquadsPage(fields: _getSquadRankingFieldsCombined()),
-                _coachRankingsWithToggles(),
-              ],
-            )));
+    List<ToggleWidgetItem> items = [
+      ToggleWidgetItem("Squad Rankings", (context) {
+        return RankingSquadsPage(fields: _getSquadRankingFieldsCombined());
+      }),
+      ToggleWidgetItem("Coach Rankings", (context) {
+        return Column(children: [
+          SizedBox(height: 1),
+          _coachRankingsWithToggles(),
+        ]);
+      }),
+    ];
+
+    return ToggleWidget(items: items);
+
+    //   return DefaultTabController(
+    //       length: 2,
+    //       child: Scaffold(
+    //           appBar: AppBar(
+    //             automaticallyImplyLeading: false,
+    //             flexibleSpace: Column(
+    //               mainAxisAlignment: MainAxisAlignment.end,
+    //               children: [
+    //                 TabBar(
+    //                   tabs: <Widget>[
+    //                     Tab(
+    //                       text: "Squad Rankings",
+    //                     ),
+    //                     Tab(
+    //                       text: "Coach Ranking",
+    //                     )
+    //                   ],
+    //                 )
+    //               ],
+    //             ),
+    //           ),
+    //           body: TabBarView(
+    //             physics: NeverScrollableScrollPhysics(),
+    //             children: <Widget>[
+    //               RankingSquadsPage(fields: _getSquadRankingFieldsCombined()),
+    //               _coachRankingsWithToggles(),
+    //             ],
+    //           )));
+    // }
   }
 }
