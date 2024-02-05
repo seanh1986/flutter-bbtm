@@ -1,4 +1,4 @@
-import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 
 /// Download tournament backup file

@@ -1,8 +1,7 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/screens/matchups/matchups_coaches_screen.dart';
-import 'package:bbnaf/screens/matchups/matchups_squad_screen.dart';
+import 'package:bbnaf/matchups/matchups.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

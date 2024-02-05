@@ -1,6 +1,4 @@
-import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/matchup/i_matchup.dart';
-import 'package:bbnaf/models/matchup/squad_matchup.dart';
+import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 
 abstract class RoundMatching {

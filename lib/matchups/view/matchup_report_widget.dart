@@ -1,9 +1,7 @@
 import 'dart:collection';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
-import 'package:bbnaf/models/matchup/i_matchup.dart';
-import 'package:bbnaf/models/matchup/reported_match_result.dart';
+import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/screens/matchups/matchup_coach_widget.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

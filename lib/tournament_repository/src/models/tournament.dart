@@ -1,11 +1,9 @@
 import 'dart:collection';
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/admin/admin.dart';
-import 'package:bbnaf/models/matchup/squad_matchup.dart';
+import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/tournament_repository/src/models/tournament_info.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
-import 'package:bbnaf/models/matchup/coach_matchup.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:xml/xml.dart';

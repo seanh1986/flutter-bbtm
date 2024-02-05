@@ -16,7 +16,7 @@ import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class EditTournamentInfoWidget extends StatefulWidget {
   // Optional can supply tournament object for population (e.g., create tournament)
-  Tournament? tournament;
+  final Tournament? tournament;
 
   EditTournamentInfoWidget({Key? key, this.tournament}) : super(key: key);
 

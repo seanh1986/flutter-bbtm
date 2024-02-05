@@ -1,13 +1,9 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
-import 'package:bbnaf/models/matchup/coach_matchup.dart';
-import 'package:bbnaf/models/matchup/reported_match_result.dart';
-import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/screens/matchups/matchup_report_widget.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';
-import 'package:bbnaf/screens/matchups/best_sport_widget.dart';
+import 'package:bbnaf/matchups/matchups.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
