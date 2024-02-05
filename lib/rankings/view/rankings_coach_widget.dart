@@ -62,19 +62,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   List<DataColumn2> _getColumns() {
     List<DataColumn2> columns = [];
 
-    columns.add(
-      DataColumn2(label: Center(child: Text('#')), fixedWidth: 25),
-    );
+    columns.add(DataColumn2(label: Center(child: Text('#')), fixedWidth: 25));
 
-    columns.add(
-      DataColumn2(label: Center(child: Text('Naf Name'))),
-    );
-
-    if (_tournament.useSquads()) {
-      columns.add(DataColumn2(label: Center(child: Text('Squad'))));
-    }
-
-    columns.add(DataColumn2(label: Center(child: Text('Race'))));
+    columns
+        .add(DataColumn2(label: Center(child: Text('Coach')), fixedWidth: 200));
 
     widget.fields.forEach((f) {
       String name = _getColumnName(f);
@@ -116,6 +107,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       case CoachRankingFields.Cas:
       case CoachRankingFields.OppTd:
       case CoachRankingFields.OppCas:
+      case CoachRankingFields.DeltaTd:
+      case CoachRankingFields.DeltaCas:
         return 70;
       default:
         return null;
@@ -123,6 +116,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   }
 
   List<DataRow2> _getRows() {
+    final theme = Theme.of(context);
+
     List<DataRow2> rows = [];
 
     int rank = 1;
@@ -133,9 +128,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
           coach.nafName.toLowerCase() == nafname.toLowerCase();
 
       // Check if coach is on squad of the logged-in user
-      Squad? squad = !primaryHighlight && _tournament.useSquads()
-          ? _tournament.getCoachSquad(nafname)
-          : null;
+      Squad? squad = _tournament.getCoachSquad(nafname);
 
       bool secondaryHighlight = squad != null && squad.hasCoach(coach.nafName);
 
@@ -147,13 +140,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
       cells.add(_createDataCell(rank.toString(), textStyle));
 
-      cells.add(_createDataCell(coach.nafName, textStyle));
-
-      if (_tournament.useSquads()) {
-        cells.add(_createDataCell(coach.squadName, textStyle));
-      }
-
-      cells.add(_createDataCell(coach.raceName(), textStyle));
+      cells.add(_createCoachDataCell(coach, squad, textStyle?.color));
 
       widget.fields.forEach((f) {
         String name = _getColumnName(f);
@@ -163,7 +150,19 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         }
       });
 
-      rows.add(DataRow2(cells: cells));
+      double? sizeNafName = theme.textTheme.bodyMedium?.fontSize;
+      double? sizeSquadName =
+          squad != null ? theme.textTheme.bodySmall?.fontSize : 0;
+      double? sizeRace = theme.textTheme.bodySmall?.fontSize;
+
+      int buffers = 10 * (squad != null ? 3 : 2);
+
+      double? sizeRowHeight =
+          (sizeNafName != null && sizeSquadName != null && sizeRace != null)
+              ? sizeNafName + sizeRace + sizeSquadName + buffers
+              : null;
+
+      rows.add(DataRow2(cells: cells, specificRowHeight: sizeRowHeight));
 
       rank++;
     });
@@ -238,7 +237,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       idx = 0;
     }
 
-    int skipIndices = _tournament.useSquads() ? 4 : 3;
+    int skipIndices = 2;
 
     return skipIndices + idx;
   }
@@ -335,6 +334,36 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       default:
         return 0.0;
     }
+  }
+
+  DataCell _createCoachDataCell(Coach coach, Squad? squad, Color? c) {
+    final theme = Theme.of(context);
+
+    TextStyle nafNameStyle =
+        TextStyle(color: c, fontSize: theme.textTheme.bodyMedium?.fontSize);
+
+    TextStyle squadRaceStyle =
+        TextStyle(color: c, fontSize: theme.textTheme.bodySmall?.fontSize);
+
+    List<Widget> cellWidgets = [
+      Text(coach.nafName, overflow: TextOverflow.ellipsis, style: nafNameStyle),
+    ];
+
+    if (squad != null) {
+      cellWidgets.add(Text("    " + squad.name(),
+          overflow: TextOverflow.ellipsis, style: squadRaceStyle));
+    }
+
+    cellWidgets.add(Text("    " + coach.raceName(),
+        overflow: TextOverflow.ellipsis, style: squadRaceStyle));
+
+    return DataCell(ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 200),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: cellWidgets,
+        )));
   }
 
   DataCell _createDataCell(String text, TextStyle? textStyle) {

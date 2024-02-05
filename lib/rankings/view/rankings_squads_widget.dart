@@ -69,8 +69,6 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     columns.add(DataColumn2(
         label: Center(child: Text('Squad  |  Coaches')), fixedWidth: 200));
 
-    // columns.add(DataColumn2(label: Center(child: Text('Coaches'))));
-
     widget.fields.forEach((f) {
       String name = _getColumnName(f);
 
@@ -128,11 +126,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
       List<DataCell> cells = [];
 
-      cells.add(_createDataCell(rank.toString(), textStyle, true));
-
-      // cells.add(_createDataCell(squad.name(), textStyle, false));
-
-      // cells.add(_createDataCell(squad.getCoachesLabel(), textStyle, false));
+      cells.add(_createDataCell(rank.toString(), textStyle));
 
       cells.add(_createSquadCoachesDataCell(squad, textStyle?.color));
 
@@ -140,7 +134,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         String name = _getColumnName(f);
 
         if (name.isNotEmpty) {
-          cells.add(_createDataCell(_getCellValue(squad, f), textStyle, true));
+          cells.add(_createDataCell(_getCellValue(squad, f), textStyle));
         }
       });
 
@@ -188,13 +182,13 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         )));
   }
 
-  DataCell _createDataCell(String text, TextStyle? textStyle, bool center) {
+  DataCell _createDataCell(String text, TextStyle? textStyle) {
     Text textWidget =
         Text(text, overflow: TextOverflow.ellipsis, style: textStyle);
 
     return DataCell(ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 200),
-        child: center ? Center(child: textWidget) : textWidget));
+        child: Center(child: textWidget)));
   }
 
   @override
