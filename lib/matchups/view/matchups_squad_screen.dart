@@ -119,18 +119,6 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
         itemBuilder: (context, idx) {
           return ListTile(title: matchupWidgets[idx]);
         });
-
-    // return Expanded(
-    //     child: ListView(
-    //         children: matchupWidgets,
-    //         shrinkWrap: true,
-    //         scrollDirection: Axis.vertical));
-
-    // return Expanded(
-    //     child: ListView(
-    //         children: matchupWidgets,
-    //         shrinkWrap: true,
-    //         scrollDirection: Axis.vertical));
   }
 
   Widget _squadMatchupListUi() {
@@ -162,12 +150,6 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
         itemBuilder: (context, idx) {
           return ListTile(title: matchupWidgets[idx]);
         });
-
-    // return Expanded(
-    //     child: ListView(
-    //         children: matchupWidgets,
-    //         shrinkWrap: true,
-    //         scrollDirection: Axis.vertical));
   }
 
   Widget _getSquadListRoundTitle() {

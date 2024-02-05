@@ -99,13 +99,17 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
         " -> " +
         _state.toString());
 
+    Color? homeColor = _getColor(true);
+    Color? awayColor = _getColor(false);
+
     homeReportWidget = MatchupReportWidget(
         tounamentInfo: _tournament.info,
         reportedMatch: _reportWithStatus,
         participant: _matchup.home(_tournament),
         showHome: true,
         state: _state,
-        refreshState: widget.refreshState);
+        refreshState: widget.refreshState,
+        titleColor: homeColor);
 
     awayReportWidget = MatchupReportWidget(
         tounamentInfo: _tournament.info,
@@ -113,7 +117,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
         participant: _matchup.away(_tournament),
         showHome: false,
         state: _state,
-        refreshState: widget.refreshState);
+        refreshState: widget.refreshState,
+        titleColor: awayColor);
 
     return Container(
         alignment: FractionalOffset.center,
@@ -744,6 +749,36 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                 authorization == Authorization.Admin
             ? UploadState.CanEdit
             : UploadState.CanConfirm;
+    }
+  }
+
+  Color? _getColor(bool home) {
+    ReportedMatchResult? result;
+
+    ReportedMatchResult homeResult = _matchup.homeReportedResults;
+    ReportedMatchResult awayResult = _matchup.awayReportedResults;
+
+    if (homeResult.reported && awayResult.reported) {
+      bool areSameOutcome = homeResult.homeTds == awayResult.homeTds &&
+          homeResult.awayTds == awayResult.awayTds;
+
+      if (areSameOutcome) {
+        result = homeResult;
+      }
+    } else if (homeResult.reported) {
+      result = homeResult;
+    } else if (awayResult.reported) {
+      result = awayResult;
+    }
+
+    if (result == null) {
+      return null;
+    } else if (result.homeTds > result.awayTds) {
+      return home ? Colors.green : Colors.red;
+    } else if (result.homeTds < result.awayTds) {
+      return home ? Colors.red : Colors.green;
+    } else {
+      return Colors.orange;
     }
   }
 }

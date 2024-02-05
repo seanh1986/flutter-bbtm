@@ -26,6 +26,8 @@ class MatchupReportWidget extends StatefulWidget {
 
   final bool refreshState;
 
+  final Color? titleColor;
+
   MatchupReportWidget(
       {Key? key,
       required this.tounamentInfo,
@@ -33,7 +35,8 @@ class MatchupReportWidget extends StatefulWidget {
       required this.participant,
       required this.showHome,
       required this.state,
-      required this.refreshState})
+      required this.refreshState,
+      this.titleColor})
       : super(key: key) {
     if (reportedMatch != null) {
       counts.putIfAbsent(_tdName,
@@ -96,6 +99,8 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   late FToast fToast;
 
+  late Color? _titleColor;
+
   String _rosterFileName = "";
   bool isDownloaded = false;
 
@@ -117,6 +122,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   void _refreshState() {
     _participant = widget.participant;
     _state = widget.state;
+    _titleColor = widget.titleColor;
   }
 
   @override
@@ -136,10 +142,13 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   Widget _itemHeadline(IMatchupParticipant participant, bool isHome) {
     final theme = Theme.of(context);
 
+    Color color =
+        _titleColor != null ? _titleColor! : theme.secondaryHeaderColor;
+
     return Card(
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 2.0, vertical: 6.0),
-        color: isHome ? theme.secondaryHeaderColor : theme.secondaryHeaderColor,
+        color: color,
         child: _itemHeader(participant));
   }
 
@@ -228,6 +237,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
             style: TextStyle(fontSize: subTitleFontSize)),
         trailing: roster,
         isThreeLine: false,
+        tileColor: _titleColor,
       );
     } else {
       List<Widget> iconWidgets = [];
