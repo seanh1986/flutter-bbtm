@@ -53,23 +53,6 @@ class _AdminScreenState extends State<AdminScreen> {
     return ToggleWidget(items: items);
   }
 
-  Widget? _getSubScreen(AdminSubScreens subScreen) {
-    switch (subScreen) {
-      case AdminSubScreens.EDIT_INFO:
-        return EditTournamentInfoWidget();
-      case AdminSubScreens.EDIT_SQUADS:
-        return null; // TODO...
-      case AdminSubScreens.EDIT_PARTICIPANTS:
-        return EditParticipantsWidget();
-      case AdminSubScreens.ROUND_MANAGEMENT:
-        return RoundManagementWidget();
-      case AdminSubScreens.DOWNLOAD_FILES:
-        return DownloadFilesWidget();
-      default:
-        return null;
-    }
-  }
-
   WidgetBuilder? _getSubScreenBuilder(AdminSubScreens subScreen) {
     switch (subScreen) {
       case AdminSubScreens.EDIT_INFO:

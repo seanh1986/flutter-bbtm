@@ -30,17 +30,13 @@ class _RankingsPage extends State<RankingsPage> {
     super.dispose();
   }
 
-  void _refreshState() {
-    _tournament.reProcessAllRounds();
-  }
-
   @override
   Widget build(BuildContext context) {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
 
-    _refreshState();
+    _tournament.reProcessAllRounds();
 
     if (_tournament.useSquads()) {
       return _squadAndCoachTabs();
@@ -89,27 +85,26 @@ class _RankingsPage extends State<RankingsPage> {
                 ? _getCoachRankingFieldsCombinedAdmin()
                 : _getCoachRankingFieldsCombined());
       }),
-      ToggleWidgetItem(
-          "Td",
-          (context) => RankingCoachPage(fields: [
-                CoachRankingFields.Td,
-                CoachRankingFields.OppTd,
-                CoachRankingFields.DeltaTd
-              ])),
-      ToggleWidgetItem(
-          "Cas",
-          (context) => RankingCoachPage(fields: [
-                CoachRankingFields.Cas,
-                CoachRankingFields.OppCas,
-                CoachRankingFields.DeltaCas
-              ])),
+      ToggleWidgetItem("Td", (context) {
+        return RankingCoachPage(fields: [
+          CoachRankingFields.Td,
+          CoachRankingFields.OppTd,
+          CoachRankingFields.DeltaTd
+        ]);
+      }),
+      ToggleWidgetItem("Cas", (context) {
+        return RankingCoachPage(fields: [
+          CoachRankingFields.Cas,
+          CoachRankingFields.OppCas,
+          CoachRankingFields.DeltaCas
+        ]);
+      }),
     ];
 
     if (showAdminDetails) {
-      items.add(ToggleWidgetItem(
-          "Sport",
-          (context) =>
-              RankingCoachPage(fields: [CoachRankingFields.BestSport])));
+      items.add(ToggleWidgetItem("Sport", (context) {
+        return RankingCoachPage(fields: [CoachRankingFields.BestSport]);
+      }));
     }
 
     return ToggleWidget(items: items);

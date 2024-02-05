@@ -1,6 +1,7 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,54 +39,36 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   late Tournament _tournament;
   late User _user;
 
-  int _sortColumnIndex = 3;
-  late SquadRankingFields _sortField = widget.fields.first;
+  SquadRankingFields? _sortField;
   bool _sortAscending = false;
+
+  bool _reset = true;
 
   List<Squad> _items = [];
 
   @override
   void initState() {
     super.initState();
+    _reset = true;
+    _sortAscending = false;
   }
 
-  void _refreshState() {
-    _items = List.from(_tournament
-        .getSquads()
-        .where((a) => a.isActive(_tournament) || a.gamesPlayed() > 0));
-
-    _items.sort((Squad a, Squad b) {
-      final double aValue = _getSortingValue(a, _sortField);
-      final double bValue = _getSortingValue(b, _sortField);
-
-      int multiplier = _sortAscending ? 1 : -1;
-
-      return multiplier * Comparable.compare(aValue, bValue);
-    });
-  }
-
-  void _sort<T>(SquadRankingFields field, int columnIndex, bool ascending) {
+  void _sort<T>(SquadRankingFields field, bool ascending) {
     setState(() {
-      _sortColumnIndex = columnIndex;
+      _reset = false;
       _sortField = field;
       _sortAscending = ascending;
     });
   }
 
-  List<DataColumn> _getColumns() {
-    List<DataColumn> columns = [];
+  List<DataColumn2> _getColumns() {
+    List<DataColumn2> columns = [];
 
-    columns.add(
-      DataColumn(label: Text('#')),
-    );
+    columns.add(DataColumn2(label: Text('#'), fixedWidth: 25));
 
-    columns.add(
-      DataColumn(label: Text('Squad')),
-    );
+    columns.add(DataColumn2(label: Center(child: Text('Squad'))));
 
-    columns.add(DataColumn(
-      label: Text('Coaches'),
-    ));
+    columns.add(DataColumn2(label: Center(child: Text('Coaches'))));
 
     widget.fields.forEach((f) {
       String name = _getColumnName(f);
@@ -97,24 +80,39 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
             sorter = null;
             break;
           default:
-            sorter = (columnIndex, ascending) =>
-                _sort<num>(f, columnIndex, ascending);
+            sorter = (columnIndex, ascending) {
+              bool shouldAscend = f != _sortField ? false : ascending;
+              return _sort<num>(f, shouldAscend);
+            };
             break;
         }
 
-        columns.add(DataColumn(
-          label: Text(name),
-          numeric: true,
-          onSort: sorter,
-        ));
+        columns.add(DataColumn2(
+            label: Center(child: Text(name)),
+            numeric: true,
+            onSort: sorter,
+            fixedWidth: _getColumnWidth(f)));
       }
     });
 
     return columns;
   }
 
-  List<DataRow> _getRows() {
-    List<DataRow> rows = [];
+  double? _getColumnWidth(SquadRankingFields f) {
+    switch (f) {
+      case SquadRankingFields.OppScore:
+      case SquadRankingFields.SumIndividualScore:
+      case SquadRankingFields.W_T_L:
+        return 90;
+      case SquadRankingFields.Pts:
+        return 70;
+      default:
+        return null;
+    }
+  }
+
+  List<DataRow2> _getRows() {
+    List<DataRow2> rows = [];
 
     int rank = 1;
     _items.forEach((squad) {
@@ -126,21 +124,21 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
       List<DataCell> cells = [];
 
-      cells.add(_createDataCell(rank.toString(), textStyle));
+      cells.add(_createDataCell(rank.toString(), textStyle, true));
 
-      cells.add(_createDataCell(squad.name(), textStyle));
+      cells.add(_createDataCell(squad.name(), textStyle, false));
 
-      cells.add(_createDataCell(squad.getCoachesLabel(), textStyle));
+      cells.add(_createDataCell(squad.getCoachesLabel(), textStyle, false));
 
       widget.fields.forEach((f) {
         String name = _getColumnName(f);
 
         if (name.isNotEmpty) {
-          cells.add(_createDataCell(_getCellValue(squad, f), textStyle));
+          cells.add(_createDataCell(_getCellValue(squad, f), textStyle, true));
         }
       });
 
-      rows.add(DataRow(cells: cells));
+      rows.add(DataRow2(cells: cells));
 
       rank++;
     });
@@ -148,10 +146,13 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     return rows;
   }
 
-  DataCell _createDataCell(String text, TextStyle? textStyle) {
+  DataCell _createDataCell(String text, TextStyle? textStyle, bool center) {
+    Text textWidget =
+        Text(text, overflow: TextOverflow.ellipsis, style: textStyle);
+
     return DataCell(ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 200),
-        child: Text(text, overflow: TextOverflow.ellipsis, style: textStyle)));
+        child: center ? Center(child: textWidget) : textWidget));
   }
 
   @override
@@ -160,31 +161,70 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
 
-    _refreshState();
+    if (_reset || _sortField == null) {
+      _sortField = widget.fields.first;
+      _sortAscending = false;
+    }
 
-    return dataBody();
+    // so that when it reloads, it will reset
+    // This will get reset if setState is called again
+    _reset = true;
+
+    _items = List.from(_tournament
+        .getSquads()
+        .where((a) => a.isActive(_tournament) || a.gamesPlayed() > 0));
+
+    _items.sort((Squad a, Squad b) {
+      final double aValue = _getSortingValue(a, _sortField!);
+      final double bValue = _getSortingValue(b, _sortField!);
+
+      int multiplier = _sortAscending ? 1 : -1;
+
+      return multiplier * Comparable.compare(aValue, bValue);
+    });
+
+    return Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: getDataTable());
   }
 
-  SingleChildScrollView dataBody() {
-    return SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            columnSpacing: 30,
-            columns: _getColumns(),
-            rows: _getRows(),
-            sortAscending: _sortAscending,
-            sortColumnIndex: _sortColumnIndex,
-            headingRowColor: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) {
-              if (states.contains(MaterialState.hovered)) {
-                return Colors.greenAccent.withOpacity(0.75);
-              }
-              return Colors.greenAccent.withOpacity(0.6);
-            }),
-          ),
-        ));
+  DataTable2 getDataTable() {
+    return DataTable2(
+        headingRowColor:
+            MaterialStateColor.resolveWith((states) => Colors.grey[850]!),
+        headingTextStyle: const TextStyle(color: Colors.white),
+        headingCheckboxTheme: const CheckboxThemeData(
+            side: BorderSide(color: Colors.white, width: 2.0)),
+        isHorizontalScrollBarVisible: true,
+        isVerticalScrollBarVisible: true,
+        columnSpacing: 12,
+        horizontalMargin: 12,
+        border: TableBorder.all(),
+        dividerThickness:
+            1, // this one will be ignored if [border] is set above
+        fixedTopRows: 1,
+        bottomMargin: 10,
+        minWidth: 900,
+        empty: Center(
+            child: Container(
+                padding: const EdgeInsets.all(20),
+                color: Colors.grey[200],
+                child: const Text('No data yet'))),
+        columns: _getColumns(),
+        rows: _getRows(),
+        sortAscending: _sortAscending,
+        sortColumnIndex: _getSortColumnIndex());
+  }
+
+  int _getSortColumnIndex() {
+    int idx = widget.fields.indexOf(_sortField!);
+    if (idx < 0) {
+      idx = 0;
+    }
+
+    int skipIndices = 3;
+
+    return skipIndices + idx;
   }
 
   String _getColumnName(SquadRankingFields f) {

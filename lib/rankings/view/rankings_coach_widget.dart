@@ -1,6 +1,7 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -39,40 +40,41 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   CoachRankingFields? _sortField;
   bool _sortAscending = false;
 
+  bool _reset = true;
+
   List<Coach> _items = [];
 
   @override
   void initState() {
     super.initState();
+    _reset = true;
+    _sortAscending = false;
   }
 
   void _sort<T>(CoachRankingFields field, bool ascending) {
     setState(() {
+      _reset = false;
       _sortField = field;
       _sortAscending = ascending;
     });
   }
 
-  List<DataColumn> _getColumns() {
-    List<DataColumn> columns = [];
+  List<DataColumn2> _getColumns() {
+    List<DataColumn2> columns = [];
 
     columns.add(
-      DataColumn(label: Text('#')),
+      DataColumn2(label: Center(child: Text('#')), fixedWidth: 25),
     );
 
     columns.add(
-      DataColumn(label: Text('Naf Name')),
+      DataColumn2(label: Center(child: Text('Naf Name'))),
     );
 
     if (_tournament.useSquads()) {
-      columns.add(DataColumn(
-        label: Text('Squad'),
-      ));
+      columns.add(DataColumn2(label: Center(child: Text('Squad'))));
     }
 
-    columns.add(DataColumn(
-      label: Text('Race'),
-    ));
+    columns.add(DataColumn2(label: Center(child: Text('Race'))));
 
     widget.fields.forEach((f) {
       String name = _getColumnName(f);
@@ -91,19 +93,37 @@ class _RankingCoachPage extends State<RankingCoachPage> {
             break;
         }
 
-        columns.add(DataColumn(
-          label: Text(name),
-          numeric: true,
-          onSort: sorter,
-        ));
+        columns.add(DataColumn2(
+            label: Center(child: Text(name)),
+            numeric: true,
+            onSort: sorter,
+            fixedWidth: _getColumnWidth(f)));
       }
     });
 
     return columns;
   }
 
-  List<DataRow> _getRows() {
-    List<DataRow> rows = [];
+  double? _getColumnWidth(CoachRankingFields f) {
+    switch (f) {
+      case CoachRankingFields.OppScore:
+        return 110;
+      case CoachRankingFields.W_T_L:
+      case CoachRankingFields.BestSport:
+        return 90;
+      case CoachRankingFields.Pts:
+      case CoachRankingFields.Td:
+      case CoachRankingFields.Cas:
+      case CoachRankingFields.OppTd:
+      case CoachRankingFields.OppCas:
+        return 70;
+      default:
+        return null;
+    }
+  }
+
+  List<DataRow2> _getRows() {
+    List<DataRow2> rows = [];
 
     int rank = 1;
     _items.forEach((coach) {
@@ -143,7 +163,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         }
       });
 
-      rows.add(DataRow(cells: cells));
+      rows.add(DataRow2(cells: cells));
 
       rank++;
     });
@@ -157,9 +177,14 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
 
-    if (_sortField == null) {
+    if (_reset || _sortField == null) {
       _sortField = widget.fields.first;
+      _sortAscending = false;
     }
+
+    // so that when it reloads, it will reset
+    // This will get reset if setState is called again
+    _reset = true;
 
     _items = List.from(_tournament
         .getCoaches()
@@ -174,28 +199,37 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       return multiplier * Comparable.compare(aValue, bValue);
     });
 
-    return dataBody();
+    return Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: getDataTable());
   }
 
-  SingleChildScrollView dataBody() {
-    return SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            columns: _getColumns(),
-            rows: _getRows(),
-            sortAscending: _sortAscending,
-            sortColumnIndex: _getSortColumnIndex(),
-            headingRowColor: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) {
-              if (states.contains(MaterialState.hovered)) {
-                return Colors.greenAccent.withOpacity(0.75);
-              }
-              return Colors.greenAccent.withOpacity(0.6);
-            }),
-          ),
-        ));
+  DataTable2 getDataTable() {
+    return DataTable2(
+        headingRowColor:
+            MaterialStateColor.resolveWith((states) => Colors.grey[850]!),
+        headingTextStyle: const TextStyle(color: Colors.white),
+        headingCheckboxTheme: const CheckboxThemeData(
+            side: BorderSide(color: Colors.white, width: 2.0)),
+        isHorizontalScrollBarVisible: true,
+        isVerticalScrollBarVisible: true,
+        columnSpacing: 12,
+        horizontalMargin: 12,
+        border: TableBorder.all(),
+        dividerThickness:
+            1, // this one will be ignored if [border] is set above
+        fixedTopRows: 1,
+        bottomMargin: 10,
+        minWidth: 900,
+        empty: Center(
+            child: Container(
+                padding: const EdgeInsets.all(20),
+                color: Colors.grey[200],
+                child: const Text('No data yet'))),
+        columns: _getColumns(),
+        rows: _getRows(),
+        sortAscending: _sortAscending,
+        sortColumnIndex: _getSortColumnIndex());
   }
 
   int _getSortColumnIndex() {
@@ -261,6 +295,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     switch (f) {
       case CoachRankingFields.Pts:
         return c.pointsWithTieBreakersBuiltIn();
+      case CoachRankingFields.Td:
+        return 1000.0 * c.tds + c.deltaTd();
+      case CoachRankingFields.Cas:
+        return 1000.0 * c.cas + c.deltaCas();
       default:
         return _getViewValue(c, f);
     }

@@ -54,18 +54,11 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
       DataColumn2(label: Text("Name")),
       DataColumn2(label: Text("Naf")),
       DataColumn2(label: Text("Team")),
-      // DataColumn2(label: Text("Naf #")),
-      // DataColumn2(label: Text("Race")),
     ];
 
     if (_tournament.useSquads() || _tournament.useSquadsForInitOnly()) {
       _coachCols.add(DataColumn2(label: Text("Squad")));
     }
-
-    // _coachCols.addAll([
-    //   DataColumn2(label: Text("Active"), size: ColumnSize.S),
-    //   // DataColumn2(label: Text("")), // For add/remove rows
-    // ]);
   }
 
   @override
@@ -409,10 +402,6 @@ class CoachesDataSource extends DataTableSource {
     if (useSquad) {
       cells.add(DataCell(_getSquad(c, isInEditMode)));
     }
-
-    // cells.addAll([
-    //   DataCell(activeCheckbox),
-    // ]);
 
     return DataRow2(
       cells: cells,
