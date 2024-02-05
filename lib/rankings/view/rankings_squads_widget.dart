@@ -66,9 +66,10 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
     columns.add(DataColumn2(label: Text('#'), fixedWidth: 25));
 
-    columns.add(DataColumn2(label: Center(child: Text('Squad'))));
+    columns.add(DataColumn2(
+        label: Center(child: Text('Squad  |  Coaches')), fixedWidth: 200));
 
-    columns.add(DataColumn2(label: Center(child: Text('Coaches'))));
+    // columns.add(DataColumn2(label: Center(child: Text('Coaches'))));
 
     widget.fields.forEach((f) {
       String name = _getColumnName(f);
@@ -101,6 +102,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   double? _getColumnWidth(SquadRankingFields f) {
     switch (f) {
       case SquadRankingFields.OppScore:
+        return 100;
       case SquadRankingFields.SumIndividualScore:
       case SquadRankingFields.W_T_L:
         return 90;
@@ -112,6 +114,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   }
 
   List<DataRow2> _getRows() {
+    final theme = Theme.of(context);
+
     List<DataRow2> rows = [];
 
     int rank = 1;
@@ -126,9 +130,11 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
       cells.add(_createDataCell(rank.toString(), textStyle, true));
 
-      cells.add(_createDataCell(squad.name(), textStyle, false));
+      // cells.add(_createDataCell(squad.name(), textStyle, false));
 
-      cells.add(_createDataCell(squad.getCoachesLabel(), textStyle, false));
+      // cells.add(_createDataCell(squad.getCoachesLabel(), textStyle, false));
+
+      cells.add(_createSquadCoachesDataCell(squad, textStyle?.color));
 
       widget.fields.forEach((f) {
         String name = _getColumnName(f);
@@ -138,12 +144,48 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         }
       });
 
-      rows.add(DataRow2(cells: cells));
+      double? sizeSquadName = theme.textTheme.bodyMedium?.fontSize;
+      double? sizeCoachName = theme.textTheme.bodySmall?.fontSize;
+      int buffer = 10;
+      double? sizeRowHeight = (sizeSquadName != null && sizeCoachName != null)
+          ? sizeSquadName +
+              buffer +
+              (sizeCoachName + buffer) * squad.getCoaches().length
+          : null;
+
+      rows.add(DataRow2(cells: cells, specificRowHeight: sizeRowHeight));
 
       rank++;
     });
 
     return rows;
+  }
+
+  DataCell _createSquadCoachesDataCell(Squad squad, Color? c) {
+    final theme = Theme.of(context);
+
+    TextStyle squadStyle =
+        TextStyle(color: c, fontSize: theme.textTheme.bodyMedium?.fontSize);
+
+    TextStyle coachStyle =
+        TextStyle(color: c, fontSize: theme.textTheme.bodySmall?.fontSize);
+
+    List<Widget> cellWidgets = [
+      Text(squad.name(), overflow: TextOverflow.ellipsis, style: squadStyle),
+    ];
+
+    squad.getCoaches().forEach((c) {
+      cellWidgets.add(
+          Text("    " + c, overflow: TextOverflow.ellipsis, style: coachStyle));
+    });
+
+    return DataCell(ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 200),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: cellWidgets,
+        )));
   }
 
   DataCell _createDataCell(String text, TextStyle? textStyle, bool center) {
@@ -184,7 +226,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     });
 
     return Container(
-        height: MediaQuery.of(context).size.height * 0.6,
+        height: MediaQuery.of(context).size.height * 0.75,
         child: getDataTable());
   }
 
@@ -222,7 +264,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
       idx = 0;
     }
 
-    int skipIndices = 3;
+    int skipIndices = 2;
 
     return skipIndices + idx;
   }
