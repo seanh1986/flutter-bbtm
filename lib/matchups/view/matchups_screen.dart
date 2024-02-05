@@ -2,6 +2,8 @@ import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/matchups/matchups.dart';
+import 'package:bbnaf/widgets/toggle_widget/models/toggle_widget_item.dart';
+import 'package:bbnaf/widgets/toggle_widget/view/toggle_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -25,12 +27,6 @@ class _MatchupsPage extends State<MatchupsPage> {
   late Tournament _tournament;
   late User _user;
 
-  late MatchupSubScreens _subScreen;
-
-  bool refreshSubScreen = true;
-
-  List<MatchupSubScreens> _subScreensAllowed = [];
-
   @override
   void initState() {
     super.initState();
@@ -41,9 +37,11 @@ class _MatchupsPage extends State<MatchupsPage> {
     super.dispose();
   }
 
-  void _initSubScreen() {
+  List<MatchupSubScreens> _getAllowedSubScreen() {
     bool allowMyMatchup = false;
     bool allowMySquad = false;
+
+    List<MatchupSubScreens> subScreensAllowed = [];
 
     String nafName = _user.getNafName();
 
@@ -57,27 +55,21 @@ class _MatchupsPage extends State<MatchupsPage> {
       allowMySquad = true;
     }
 
-    _subScreensAllowed.clear();
     if (allowMyMatchup) {
-      _subScreensAllowed.add(MatchupSubScreens.MY_MATCHUP);
+      subScreensAllowed.add(MatchupSubScreens.MY_MATCHUP);
     }
-    if (allowMySquad) {
-      _subScreensAllowed.add(MatchupSubScreens.MY_SQUAD);
-    }
-    if (_tournament.useSquadVsSquad()) {
-      _subScreensAllowed.add(MatchupSubScreens.SQUAD_MATCHUPS);
-    }
-    _subScreensAllowed.add(MatchupSubScreens.COACH_MATCHUPS);
 
-    if (refreshSubScreen) {
-      if (allowMyMatchup) {
-        _subScreen = MatchupSubScreens.MY_MATCHUP;
-      } else if (_tournament.useSquadVsSquad()) {
-        _subScreen = MatchupSubScreens.SQUAD_MATCHUPS;
-      } else {
-        _subScreen = MatchupSubScreens.COACH_MATCHUPS;
-      }
+    if (allowMySquad) {
+      subScreensAllowed.add(MatchupSubScreens.MY_SQUAD);
     }
+
+    if (_tournament.useSquadVsSquad()) {
+      subScreensAllowed.add(MatchupSubScreens.SQUAD_MATCHUPS);
+    }
+
+    subScreensAllowed.add(MatchupSubScreens.COACH_MATCHUPS);
+
+    return subScreensAllowed;
   }
 
   @override
@@ -86,91 +78,50 @@ class _MatchupsPage extends State<MatchupsPage> {
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
 
-    _initSubScreen();
+    List<ToggleWidgetItem> items = [];
 
-    List<Widget> _widgets = [
-      _toggleButtonsList(context),
-      SizedBox(height: 20),
-    ];
+    List<MatchupSubScreens> subScreensAllowed = _getAllowedSubScreen();
 
-    Widget? subScreenWidget = _getSubScreen();
+    subScreensAllowed.forEach((subScreen) {
+      items.add(ToggleWidgetItem(subScreen.name.replaceAll("_", " "),
+          _getSubScreenBuilder(subScreen)));
+    });
 
-    if (subScreenWidget != null) {
-      _widgets.add(subScreenWidget);
-    }
-
-    return Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(
-                './assets/images/background/background_football_field.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: Column(children: _widgets),
-        ));
+    return ToggleWidget(items: items);
   }
 
-  Widget _toggleButtonsList(BuildContext context) {
-    final theme = Theme.of(context);
-
-    List<Widget> toggleWidgets = [];
-
-    if (_subScreensAllowed.length > 1) {
-      _subScreensAllowed.forEach((element) {
-        bool clickable = _subScreen != element;
-
-        toggleWidgets.add(ElevatedButton(
-          style: theme.elevatedButtonTheme.style,
-          child: Text(element.name.replaceAll("_", " ")),
-          onPressed: clickable
-              ? () {
-                  setState(() {
-                    refreshSubScreen = false;
-                    _subScreen = element;
-                  });
-                }
-              : null,
-        ));
-
-        toggleWidgets.add(SizedBox(width: 10));
-      });
-    }
-
-    return Container(
-        height: toggleWidgets.isNotEmpty ? 60 : 0,
-        alignment: Alignment.center,
-        padding: EdgeInsets.all(10),
-        child: ListView(
-            scrollDirection: Axis.horizontal,
-            shrinkWrap: true,
-            children: toggleWidgets));
-  }
-
-  Widget? _getSubScreen() {
-    switch (_subScreen) {
+  WidgetBuilder _getSubScreenBuilder(MatchupSubScreens subScreen) {
+    switch (subScreen) {
       case MatchupSubScreens.MY_SQUAD:
         if (_tournament.useSquadVsSquad()) {
-          return SquadMatchupsPage(
-              autoSelectAuthUserMatchup: true, refreshState: true);
+          return (context) {
+            return SquadMatchupsPage(
+                autoSelectAuthUserMatchup: true, refreshState: true);
+          };
         } else {
-          return CoachMatchupsPage(
-              autoSelectOption: AutoSelectOption.AUTH_USER_SQUAD,
-              refreshState: true);
+          return (context) {
+            return CoachMatchupsPage(
+                autoSelectOption: AutoSelectOption.AUTH_USER_SQUAD,
+                refreshState: true);
+          };
         }
       case MatchupSubScreens.SQUAD_MATCHUPS:
-        return SquadMatchupsPage(
-            autoSelectAuthUserMatchup: false, refreshState: true);
+        return (context) {
+          return SquadMatchupsPage(
+              autoSelectAuthUserMatchup: false, refreshState: true);
+        };
       case MatchupSubScreens.COACH_MATCHUPS:
-        return CoachMatchupsPage(
-            autoSelectOption: AutoSelectOption.NONE, refreshState: true);
+        return (context) {
+          return CoachMatchupsPage(
+              autoSelectOption: AutoSelectOption.NONE, refreshState: true);
+        };
       case MatchupSubScreens.MY_MATCHUP:
       default:
-        return CoachMatchupsPage(
-            autoSelectOption: AutoSelectOption.AUTH_USER_MATCHUP,
-            refreshState: true);
+        return (context) {
+          return CoachMatchupsPage(
+              autoSelectOption: AutoSelectOption.AUTH_USER_MATCHUP,
+              refreshState: true);
+        };
     }
   }
 }

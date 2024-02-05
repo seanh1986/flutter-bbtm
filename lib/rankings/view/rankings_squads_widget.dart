@@ -2,10 +2,8 @@ import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:data_table_2/data_table_2.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:flutter/paginated_data_table.dart';
 
 enum SquadRankingFields {
   Pts,

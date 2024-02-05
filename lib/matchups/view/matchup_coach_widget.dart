@@ -1,6 +1,7 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
+import 'package:bbnaf/tournament_repository/tournament_repository.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/matchups/matchups.dart';

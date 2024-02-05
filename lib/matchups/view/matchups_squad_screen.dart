@@ -32,6 +32,8 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   late bool _autoSelectAuthUserMatchup;
   SquadMatchup? selectedMatchup;
 
+  bool _reset = true;
+
   FToast? fToast;
 
   @override
@@ -40,6 +42,8 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
     fToast = FToast();
     fToast!.init(context);
+
+    _reset = true;
   }
 
   @override
@@ -53,8 +57,6 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
 
-    _autoSelectAuthUserMatchup = widget.autoSelectAuthUserMatchup;
-
     if (_tournament.squadRounds.isNotEmpty) {
       _matchups = List.from(_tournament.squadRounds.last.matches);
     }
@@ -63,12 +65,21 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
       return _noMatchUpsYet();
     }
 
-    // Allow for auto selection if not already selected
-    if (selectedMatchup == null && _autoSelectAuthUserMatchup) {
-      selectedMatchup = findAutoSelectedMatchup();
+    if (_reset) {
+      _autoSelectAuthUserMatchup = widget.autoSelectAuthUserMatchup;
+      // Allow for auto selection if not already selected
+      if (_autoSelectAuthUserMatchup) {
+        selectedMatchup = findAutoSelectedMatchup();
+      }
     }
 
-    return selectedMatchup != null
+    // so that when it reloads, it will reset
+    // This will get reset if setState is called again
+    _reset = true;
+
+    bool selectMatchup = selectedMatchup != null && _autoSelectAuthUserMatchup;
+
+    return selectMatchup
         ? _selectedSquadMatchupUi(context, selectedMatchup!)
         : _squadMatchupListUi();
   }
@@ -101,11 +112,19 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
           refreshState: widget.refreshState,
         )));
 
-    return Expanded(
-        child: ListView(
-            children: matchupWidgets,
-            shrinkWrap: true,
-            scrollDirection: Axis.vertical));
+    return ListView.builder(
+        shrinkWrap: true,
+        scrollDirection: Axis.vertical,
+        itemCount: matchupWidgets.length,
+        itemBuilder: (context, idx) {
+          return ListTile(title: matchupWidgets[idx]);
+        });
+
+    // return Expanded(
+    //     child: ListView(
+    //         children: matchupWidgets,
+    //         shrinkWrap: true,
+    //         scrollDirection: Axis.vertical));
 
     // return Expanded(
     //     child: ListView(
@@ -128,17 +147,27 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
           ),
           onTap: () {
             setState(() {
+              _autoSelectAuthUserMatchup = true;
               selectedMatchup = m;
+              _reset = false;
             });
           });
       matchupWidgets.add(inkWell);
     });
 
-    return Expanded(
-        child: ListView(
-            children: matchupWidgets,
-            shrinkWrap: true,
-            scrollDirection: Axis.vertical));
+    return ListView.builder(
+        shrinkWrap: true,
+        scrollDirection: Axis.vertical,
+        itemCount: matchupWidgets.length,
+        itemBuilder: (context, idx) {
+          return ListTile(title: matchupWidgets[idx]);
+        });
+
+    // return Expanded(
+    //     child: ListView(
+    //         children: matchupWidgets,
+    //         shrinkWrap: true,
+    //         scrollDirection: Axis.vertical));
   }
 
   Widget _getSquadListRoundTitle() {
@@ -192,7 +221,9 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
           color: theme.appBarTheme.iconTheme!.color,
           onPressed: () {
             setState(() {
+              _autoSelectAuthUserMatchup = false;
               selectedMatchup = null;
+              _reset = false;
             });
           },
           icon: Icon(Icons.arrow_back_rounded)),

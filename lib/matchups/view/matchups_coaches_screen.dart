@@ -1,8 +1,7 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
-import 'package:bbnaf/models/matchup/coach_matchup.dart';
+import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/screens/matchups/matchup_coach_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -121,9 +120,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   Widget _coachMatchupListUi(
       BuildContext context, List<CoachMatchup> matchupsToShow) {
     List<Widget> matchupWidgets = [
-      SizedBox(height: 2),
       _getRoundTitle(context),
-      SizedBox(height: 10)
     ];
 
     matchupsToShow.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
@@ -131,19 +128,13 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
           refreshState: widget.refreshState,
         )));
 
-    return Expanded(
-        child:
-            // ListView.builder(
-            //     shrinkWrap: true,
-            //     scrollDirection: Axis.vertical,
-            //     itemCount: matchupWidgets.length,
-            //     itemBuilder: (context, idx) {
-            //       return ListTile(title: matchupWidgets[idx]);
-            //     })
-            ListView(
-                children: matchupWidgets,
-                shrinkWrap: true,
-                scrollDirection: Axis.vertical));
+    return ListView.builder(
+        shrinkWrap: true,
+        scrollDirection: Axis.vertical,
+        itemCount: matchupWidgets.length,
+        itemBuilder: (context, idx) {
+          return ListTile(title: matchupWidgets[idx]);
+        });
   }
 
   Widget _getRoundTitle(BuildContext context) {

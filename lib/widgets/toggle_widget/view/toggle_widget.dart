@@ -33,18 +33,6 @@ class _ToggleWidget extends State<ToggleWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // List<Widget> _widgets = [
-    //   _toggleButtonsList(context),
-    //   SizedBox(height: 20),
-    // ];
-
-    // Widget subScreenWidget = _items[_selectedIdx].builder();
-    // _widgets.add(subScreenWidget);
-
-    // return new Container(
-    //     child:
-    //         new SingleChildScrollView(child: new Column(children: _widgets)));
-
     ToggleWidgetItem item = _items[_selectedIdx];
 
     return Container(
