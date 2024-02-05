@@ -80,50 +80,6 @@ class _RankingsPage extends State<RankingsPage> {
   }
 
   Widget _coachRankingsWithToggles() {
-    // int tabLength;
-    // List<Widget> topBar;
-    // List<Widget> views;
-
-    // if (_tournament.isUserAdmin(_user)) {
-    //   tabLength = 4;
-    //   topBar = [
-    //     Tab(text: "Combined"),
-    //     Tab(text: "Td"),
-    //     Tab(text: "Cas"),
-    //     Tab(text: "Sport")
-    //   ];
-    //   views = [
-    //     RankingCoachPage(fields: _getCoachRankingFieldsCombinedAdmin()),
-    //     RankingCoachPage(fields: [
-    //       CoachRankingFields.Td,
-    //       CoachRankingFields.OppTd,
-    //       CoachRankingFields.DeltaTd
-    //     ]),
-    //     RankingCoachPage(fields: [
-    //       CoachRankingFields.Cas,
-    //       CoachRankingFields.OppCas,
-    //       CoachRankingFields.DeltaCas
-    //     ]),
-    //     RankingCoachPage(fields: [CoachRankingFields.BestSport])
-    //   ];
-    // } else {
-    //   tabLength = 3;
-    //   topBar = [Tab(text: "Combined"), Tab(text: "Td"), Tab(text: "Cas")];
-    //   views = [
-    //     RankingCoachPage(fields: _getCoachRankingFieldsCombined()),
-    //     RankingCoachPage(fields: [
-    //       CoachRankingFields.Td,
-    //       CoachRankingFields.OppTd,
-    //       CoachRankingFields.DeltaTd
-    //     ]),
-    //     RankingCoachPage(fields: [
-    //       CoachRankingFields.Cas,
-    //       CoachRankingFields.OppCas,
-    //       CoachRankingFields.DeltaCas
-    //     ])
-    //   ];
-    // }
-
     bool showAdminDetails = _tournament.isUserAdmin(_user);
 
     List<ToggleWidgetItem> items = [
@@ -157,26 +113,6 @@ class _RankingsPage extends State<RankingsPage> {
     }
 
     return ToggleWidget(items: items);
-
-    // return DefaultTabController(
-    //     length: tabLength,
-    //     child: Scaffold(
-    //         appBar: AppBar(
-    //           automaticallyImplyLeading: false,
-    //           flexibleSpace: Column(
-    //             mainAxisAlignment: MainAxisAlignment.end,
-    //             children: [
-    //               TabBar(
-    //                 tabs: topBar,
-    //               )
-    //             ],
-    //           ),
-    //         ),
-    //         body: TabBarView(
-    //           children: views,
-    //           // physics: AlwaysScrollableScrollPhysics(),
-    //           physics: NeverScrollableScrollPhysics(),
-    //         )));
   }
 
   Widget _squadAndCoachTabs() {
@@ -193,35 +129,5 @@ class _RankingsPage extends State<RankingsPage> {
     ];
 
     return ToggleWidget(items: items);
-
-    //   return DefaultTabController(
-    //       length: 2,
-    //       child: Scaffold(
-    //           appBar: AppBar(
-    //             automaticallyImplyLeading: false,
-    //             flexibleSpace: Column(
-    //               mainAxisAlignment: MainAxisAlignment.end,
-    //               children: [
-    //                 TabBar(
-    //                   tabs: <Widget>[
-    //                     Tab(
-    //                       text: "Squad Rankings",
-    //                     ),
-    //                     Tab(
-    //                       text: "Coach Ranking",
-    //                     )
-    //                   ],
-    //                 )
-    //               ],
-    //             ),
-    //           ),
-    //           body: TabBarView(
-    //             physics: NeverScrollableScrollPhysics(),
-    //             children: <Widget>[
-    //               RankingSquadsPage(fields: _getSquadRankingFieldsCombined()),
-    //               _coachRankingsWithToggles(),
-    //             ],
-    //           )));
-    // }
   }
 }

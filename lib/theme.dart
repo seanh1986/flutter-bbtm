@@ -27,9 +27,8 @@ ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
       tileColor: isDarkTheme
           ? const Color.fromARGB(255, 106, 101, 101)
           : Color.fromARGB(255, 58, 21, 21),
-      selectedTileColor: isDarkTheme
-          ? const Color.fromARGB(255, 184, 177, 177)
-          : const Color.fromARGB(255, 106, 101, 101),
+      selectedTileColor:
+          isDarkTheme ? Colors.black : const Color.fromARGB(255, 106, 101, 101),
       textColor: isDarkTheme ? Colors.white : Colors.black,
     ),
     appBarTheme: AppBarTheme(

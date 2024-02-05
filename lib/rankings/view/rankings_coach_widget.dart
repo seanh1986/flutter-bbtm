@@ -1,7 +1,6 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -37,8 +36,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   late Tournament _tournament;
   late User _user;
 
-  late int _sortColumnIndex;
-  late CoachRankingFields _sortField = widget.fields.first;
+  CoachRankingFields? _sortField;
   bool _sortAscending = false;
 
   List<Coach> _items = [];
@@ -48,26 +46,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     super.initState();
   }
 
-  void _refreshState() {
-    _sortColumnIndex = _tournament.useSquads() ? 4 : 3;
-
-    _items = List.from(_tournament
-        .getCoaches()
-        .where((a) => a.isActive(_tournament) || a.gamesPlayed() > 0));
-
-    _items.sort((Coach a, Coach b) {
-      final double aValue = _getSortingValue(a, _sortField);
-      final double bValue = _getSortingValue(b, _sortField);
-
-      int multiplier = _sortAscending ? 1 : -1;
-
-      return multiplier * Comparable.compare(aValue, bValue);
-    });
-  }
-
-  void _sort<T>(CoachRankingFields field, int columnIndex, bool ascending) {
+  void _sort<T>(CoachRankingFields field, bool ascending) {
     setState(() {
-      _sortColumnIndex = columnIndex;
       _sortField = field;
       _sortAscending = ascending;
     });
@@ -104,8 +84,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
             sorter = null;
             break;
           default:
-            sorter = (columnIndex, ascending) =>
-                _sort<num>(f, columnIndex, ascending);
+            sorter = (columnIndex, ascending) {
+              bool shouldAscend = f != _sortField ? false : ascending;
+              return _sort<num>(f, shouldAscend);
+            };
             break;
         }
 
@@ -175,7 +157,22 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
 
-    _refreshState();
+    if (_sortField == null) {
+      _sortField = widget.fields.first;
+    }
+
+    _items = List.from(_tournament
+        .getCoaches()
+        .where((a) => a.isActive(_tournament) || a.gamesPlayed() > 0));
+
+    _items.sort((Coach a, Coach b) {
+      final double aValue = _getSortingValue(a, _sortField!);
+      final double bValue = _getSortingValue(b, _sortField!);
+
+      int multiplier = _sortAscending ? 1 : -1;
+
+      return multiplier * Comparable.compare(aValue, bValue);
+    });
 
     return dataBody();
   }
@@ -189,7 +186,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
             columns: _getColumns(),
             rows: _getRows(),
             sortAscending: _sortAscending,
-            sortColumnIndex: _sortColumnIndex,
+            sortColumnIndex: _getSortColumnIndex(),
             headingRowColor: MaterialStateProperty.resolveWith<Color?>(
                 (Set<MaterialState> states) {
               if (states.contains(MaterialState.hovered)) {
@@ -199,6 +196,17 @@ class _RankingCoachPage extends State<RankingCoachPage> {
             }),
           ),
         ));
+  }
+
+  int _getSortColumnIndex() {
+    int idx = widget.fields.indexOf(_sortField!);
+    if (idx < 0) {
+      idx = 0;
+    }
+
+    int skipIndices = _tournament.useSquads() ? 4 : 3;
+
+    return skipIndices + idx;
   }
 
   String _getColumnName(CoachRankingFields f) {
