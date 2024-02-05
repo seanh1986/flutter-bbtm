@@ -128,13 +128,15 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
           refreshState: widget.refreshState,
         )));
 
-    return ListView.builder(
-        shrinkWrap: true,
-        scrollDirection: Axis.vertical,
-        itemCount: matchupWidgets.length,
-        itemBuilder: (context, idx) {
-          return ListTile(title: matchupWidgets[idx]);
-        });
+    return SingleChildScrollView(
+        child: ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            scrollDirection: Axis.vertical,
+            itemCount: matchupWidgets.length,
+            itemBuilder: (context, idx) {
+              return ListTile(title: matchupWidgets[idx]);
+            }));
   }
 
   Widget _getRoundTitle(BuildContext context) {
