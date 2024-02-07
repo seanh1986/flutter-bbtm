@@ -411,39 +411,38 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   // }
 
   Widget _createScoringDetails(String title, ScoringDetails details) {
-    Row winTieLossPts = Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          SizedBox(width: 10.0),
-          Text(title),
-          SizedBox(width: 10.0),
-          Expanded(
-              child: CustomTextFormField(
-            initialValue: details.winPts.toString(),
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            keyboardType: TextInputType.number,
-            title: 'Wins',
-            callback: (value) => details.winPts = double.parse(value),
-          )),
-          SizedBox(width: 10.0),
-          Expanded(
-              child: CustomTextFormField(
-            initialValue: details.tiePts.toString(),
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            keyboardType: TextInputType.number,
-            title: 'Ties',
-            callback: (value) => details.tiePts = double.parse(value),
-          )),
-          SizedBox(width: 10.0),
-          Expanded(
-              child: CustomTextFormField(
-            initialValue: details.lossPts.toString(),
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            keyboardType: TextInputType.number,
-            title: 'Losses',
-            callback: (value) => details.tiePts = double.parse(value),
-          ))
-        ]);
+    Row winTieLossPts =
+        Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+      SizedBox(width: 10.0),
+      Text(title),
+      SizedBox(width: 10.0),
+      Expanded(
+          child: CustomTextFormField(
+        initialValue: details.winPts.toString(),
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        keyboardType: TextInputType.number,
+        title: 'Wins',
+        callback: (value) => details.winPts = double.parse(value),
+      )),
+      SizedBox(width: 10.0),
+      Expanded(
+          child: CustomTextFormField(
+        initialValue: details.tiePts.toString(),
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        keyboardType: TextInputType.number,
+        title: 'Ties',
+        callback: (value) => details.tiePts = double.parse(value),
+      )),
+      SizedBox(width: 10.0),
+      Expanded(
+          child: CustomTextFormField(
+        initialValue: details.lossPts.toString(),
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        keyboardType: TextInputType.number,
+        title: 'Losses',
+        callback: (value) => details.tiePts = double.parse(value),
+      ))
+    ]);
 
     List<Widget> bonusPtsWidgets = [
       ElevatedButton(
@@ -505,6 +504,8 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   }
 
   Widget _createCasulatyDetails() {
+    final theme = Theme.of(context);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
@@ -513,7 +514,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         SizedBox(width: 10.0),
         Expanded(
             child: CheckboxListTileFormField(
-                title: Text('Spp'),
+                title: Text('Spp', style: theme.textTheme.labelMedium),
                 initialValue: _casualtyDetails.spp,
                 onChanged: (value) {
                   _casualtyDetails.spp = value;
@@ -523,7 +524,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         SizedBox(width: 10.0),
         Expanded(
             child: CheckboxListTileFormField(
-          title: Text('Foul'),
+          title: Text('Foul', style: theme.textTheme.labelMedium),
           initialValue: _casualtyDetails.foul,
           onChanged: (value) {
             _casualtyDetails.foul = value;
@@ -534,7 +535,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         SizedBox(width: 10.0),
         Expanded(
             child: CheckboxListTileFormField(
-          title: Text('Surf'),
+          title: Text('Surf', style: theme.textTheme.labelMedium),
           initialValue: _casualtyDetails.surf,
           onChanged: (value) {
             _casualtyDetails.surf = value;
@@ -545,7 +546,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         SizedBox(width: 10.0),
         Expanded(
             child: CheckboxListTileFormField(
-          title: Text('Weapon'),
+          title: Text('Weapon', style: theme.textTheme.labelMedium),
           initialValue: _casualtyDetails.weapon,
           onChanged: (value) {
             _casualtyDetails.weapon = value;
@@ -556,7 +557,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         SizedBox(width: 10.0),
         Expanded(
             child: CheckboxListTileFormField(
-          title: Text('Dodge'),
+          title: Text('Dodge', style: theme.textTheme.labelMedium),
           initialValue: _casualtyDetails.dodge,
           onChanged: (value) {
             _casualtyDetails.dodge = value;
@@ -569,6 +570,8 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   }
 
   Widget _createSquadDetails() {
+    final theme = Theme.of(context);
+
     List<String> squadUsageTypes = EnumToString.toList(SquadUsage.values);
 
     List<DropdownMenuItem<String>> squadUsageTypesDropDown = squadUsageTypes
@@ -581,6 +584,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       SizedBox(width: 10.0),
       Expanded(
           child: DropdownButtonFormField<String>(
+        style: theme.textTheme.labelMedium,
         value: EnumToString.convertToString(_squadDetails.type),
         items: squadUsageTypesDropDown,
         onChanged: (value) {
@@ -655,6 +659,8 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   }
 
   Row _getSquadScoringSelection() {
+    final theme = Theme.of(context);
+
     // Create Row for Squad Scoring
     List<String> squadScoringTypes = EnumToString.toList(SquadScoring.values);
 
@@ -668,6 +674,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       SizedBox(width: 10.0),
       Expanded(
           child: DropdownButtonFormField<String>(
+        style: theme.textTheme.labelMedium,
         value: EnumToString.convertToString(_squadDetails.scoringType),
         items: squadScoringTypesDropDown,
         onChanged: (value) {
@@ -691,6 +698,8 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   }
 
   Row _getSquadMatchingSelection() {
+    final theme = Theme.of(context);
+
     // Create Row for Squad Scoring
     List<String> squadMatchMakingTypes =
         EnumToString.toList(SquadMatchMaking.values);
@@ -708,6 +717,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       Expanded(
           child: DropdownButtonFormField<String>(
         value: EnumToString.convertToString(_squadDetails.matchMaking),
+        style: theme.textTheme.labelMedium,
         items: squadMatchMakingTypesDropDown,
         onChanged: (value) {
           SquadMatchMaking? matchMakingType = value is String
