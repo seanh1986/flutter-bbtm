@@ -54,8 +54,10 @@ class _TournamentCreationPage extends State<TournamentCreationPage> {
 
     // return AdminScreen(tournament: _tournament, authUser: widget.authUser);
     return Material(
-        child: EditTournamentInfoWidget(
+        child: Container(
+            child: SingleChildScrollView(
+                child: EditTournamentInfoWidget(
       tournament: _tournament,
-    ));
+    ))));
   }
 }

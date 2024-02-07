@@ -127,12 +127,16 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       CustomTextFormField(
         initialValue: _name,
         title: 'Tournament Name',
-        callback: (value) => _name = value,
+        callback: (value) {
+          _name = value;
+        },
       ),
       CustomTextFormField(
         initialValue: _location,
         title: 'Tournament Location (City, Province)',
-        callback: (value) => _location = value,
+        callback: (value) {
+          _location = value;
+        },
       ),
       Divider(),
       _createStartEndDateUi(),
