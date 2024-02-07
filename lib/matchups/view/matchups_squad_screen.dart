@@ -108,9 +108,8 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
   Widget _selectedSquadMatchupUi(BuildContext context, SquadMatchup m) {
     List<Widget> matchupWidgets = [
-      SizedBox(height: 10),
-      _getSquadVsSquadTitle(context, m),
-      SizedBox(height: 10),
+      _getSquadListRoundTitle(),
+      _getSquadVsSquadTitle(context, m)
     ];
 
     m.coachMatchups.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
@@ -212,15 +211,13 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   Widget _getSquadVsSquadTitle(BuildContext context, SquadMatchup m) {
     final theme = Theme.of(context);
 
-    StringBuffer sb = StringBuffer();
-    sb.writeln("Round #" + _tournament.curRoundNumber().toString() + ":");
-
     Squad? homeSquad = _tournament.getSquad(m.homeSquadName);
     Squad? awaySquad = _tournament.getSquad(m.awaySquadName);
 
-    sb.write(m.homeSquadName + " ");
+    StringBuffer sbHome = StringBuffer();
+    sbHome.write(m.homeSquadName + "\n");
     if (homeSquad != null) {
-      sb.write("(" +
+      sbHome.write("(" +
           homeSquad.wins().toString() +
           "/" +
           homeSquad.ties().toString() +
@@ -228,11 +225,11 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
           homeSquad.losses().toString() +
           ")");
     }
-    sb.writeln("");
 
-    sb.write(m.awaySquadName + " ");
+    StringBuffer sbAway = StringBuffer();
+    sbAway.write(m.awaySquadName + "\n");
     if (awaySquad != null) {
-      sb.write("(" +
+      sbAway.write("(" +
           awaySquad.wins().toString() +
           "/" +
           awaySquad.ties().toString() +
@@ -241,21 +238,52 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
           ")");
     }
 
-    return Column(children: [
-      IconButton(
-          color: theme.appBarTheme.iconTheme!.color,
-          onPressed: () {
-            setState(() {
-              _autoSelectAuthUserMatchup = false;
-              selectedMatchup = null;
-              _roundIdx = _roundIdx;
-              _reset = false;
-            });
-          },
-          icon: Icon(Icons.arrow_back_rounded)),
-      SizedBox(height: 10),
-      TitleBar(title: sb.toString())
+    List<Widget> squadVsSquadTitleWidgets = [
+      Expanded(
+          child: Card(
+              child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(sbHome.toString(),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.displaySmall)))),
+      Text("vs.", style: theme.textTheme.displaySmall),
+      Expanded(
+          child: Card(
+              child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(sbAway.toString(),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.displaySmall)))),
+    ];
+
+    return Wrap(alignment: WrapAlignment.center, children: [
+      Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: squadVsSquadTitleWidgets,
+            )
+          ]),
     ]);
+
+    // return Column(children: [
+    //   IconButton(
+    //       color: theme.appBarTheme.iconTheme!.color,
+    //       onPressed: () {
+    //         setState(() {
+    //           _autoSelectAuthUserMatchup = false;
+    //           selectedMatchup = null;
+    //           _roundIdx = _roundIdx;
+    //           _reset = false;
+    //         });
+    //       },
+    //       icon: Icon(Icons.arrow_back_rounded)),
+    //   SizedBox(height: 10),
+    //   TitleBar(title: sb.toString())
+    // ]);
   }
 
   Widget _noMatchUpsYet() {
