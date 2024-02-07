@@ -35,6 +35,8 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   late AutoSelectOption _autoSelectOption;
   List<CoachMatchup> selectedMatchups = [];
 
+  int? _roundIdx;
+
   FToast? fToast;
 
   @override
@@ -56,8 +58,12 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
 
+    if (_roundIdx == null) {
+      _roundIdx = _tournament.curRoundIdx();
+    }
+
     if (_tournament.coachRounds.isNotEmpty) {
-      _matchups = List.from(_tournament.coachRounds.last.matches);
+      _matchups = List.from(_tournament.coachRounds[_roundIdx!].matches);
     }
 
     if (_matchups.isEmpty) {
@@ -125,6 +131,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
 
     matchupsToShow.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
           matchup: m,
+          roundIdx: _roundIdx!,
           refreshState: widget.refreshState,
         )));
 
@@ -142,13 +149,45 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   Widget _getRoundTitle(BuildContext context) {
     final theme = Theme.of(context);
 
+    bool hasPrevRound = _roundIdx! > 0;
+    bool hasNextRound = _roundIdx! < _tournament.curRoundIdx();
+
+    List<Widget> titleRoundWidgets = [];
+
+    titleRoundWidgets.add(IconButton(
+        color: !hasPrevRound ? Colors.transparent : null,
+        onPressed: hasPrevRound
+            ? () {
+                setState(() {
+                  _roundIdx = _roundIdx! - 1;
+                });
+              }
+            : null,
+        icon: hasPrevRound ? Icon(Icons.chevron_left) : Text("")));
+
+    titleRoundWidgets.add(Text("Round #" + (_roundIdx! + 1).toString(),
+        textAlign: TextAlign.center, style: theme.textTheme.titleMedium));
+
+    titleRoundWidgets.add(IconButton(
+        color: !hasNextRound ? Colors.transparent : null,
+        onPressed: hasNextRound
+            ? () {
+                setState(() {
+                  _roundIdx = _roundIdx! + 1;
+                });
+              }
+            : null,
+        icon: hasNextRound ? Icon(Icons.chevron_right) : Text("")));
+
     return Wrap(alignment: WrapAlignment.center, children: [
       Card(
           child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text("Round #" + _tournament.curRoundNumber().toString(),
-              textAlign: TextAlign.center, style: theme.textTheme.titleMedium)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: titleRoundWidgets,
+          )
         ]),
       ))
     ]);

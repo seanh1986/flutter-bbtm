@@ -34,6 +34,8 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
   bool _reset = true;
 
+  int? _roundIdx;
+
   FToast? fToast;
 
   @override
@@ -57,8 +59,12 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
 
+    if (_roundIdx == null) {
+      _roundIdx = _tournament.curRoundIdx();
+    }
+
     if (_tournament.squadRounds.isNotEmpty) {
-      _matchups = List.from(_tournament.squadRounds.last.matches);
+      _matchups = List.from(_tournament.squadRounds[_roundIdx!].matches);
     }
 
     if (_matchups.isEmpty) {
@@ -109,6 +115,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
     m.coachMatchups.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
           matchup: m,
+          roundIdx: _roundIdx!,
           refreshState: widget.refreshState,
         )));
 
@@ -124,21 +131,20 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   }
 
   Widget _squadMatchupListUi() {
-    List<Widget> matchupWidgets = [
-      SizedBox(height: 10),
-      _getSquadListRoundTitle(),
-      SizedBox(height: 10),
-    ];
+    List<Widget> matchupWidgets = [_getSquadListRoundTitle()];
 
     _matchups.forEach((m) {
       InkWell inkWell = InkWell(
           child: MatchupSquadWidget(
+            refreshState: true,
             matchup: m,
+            roundIdx: _roundIdx!,
           ),
           onTap: () {
             setState(() {
               _autoSelectAuthUserMatchup = true;
               selectedMatchup = m;
+              _roundIdx = _roundIdx;
               _reset = false;
             });
           });
@@ -157,14 +163,47 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   }
 
   Widget _getSquadListRoundTitle() {
+    final theme = Theme.of(context);
+
+    bool hasPrevRound = _roundIdx! > 0;
+    bool hasNextRound = _roundIdx! < _tournament.curRoundIdx();
+
+    List<Widget> titleRoundWidgets = [];
+
+    titleRoundWidgets.add(IconButton(
+        color: !hasPrevRound ? Colors.transparent : null,
+        onPressed: hasPrevRound
+            ? () {
+                setState(() {
+                  _roundIdx = _roundIdx! - 1;
+                });
+              }
+            : null,
+        icon: hasPrevRound ? Icon(Icons.chevron_left) : Text("")));
+
+    titleRoundWidgets.add(Text("Round #" + (_roundIdx! + 1).toString(),
+        textAlign: TextAlign.center, style: theme.textTheme.titleMedium));
+
+    titleRoundWidgets.add(IconButton(
+        color: !hasNextRound ? Colors.transparent : null,
+        onPressed: hasNextRound
+            ? () {
+                setState(() {
+                  _roundIdx = _roundIdx! + 1;
+                });
+              }
+            : null,
+        icon: hasNextRound ? Icon(Icons.chevron_right) : Text("")));
+
     return Wrap(alignment: WrapAlignment.center, children: [
       Card(
           child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text("Round #" + _tournament.curRoundNumber().toString(),
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: titleRoundWidgets,
+          )
         ]),
       ))
     ]);
@@ -209,6 +248,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
             setState(() {
               _autoSelectAuthUserMatchup = false;
               selectedMatchup = null;
+              _roundIdx = _roundIdx;
               _reset = false;
             });
           },

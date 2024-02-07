@@ -133,6 +133,10 @@ class Tournament {
     return coachRounds.length;
   }
 
+  int curRoundIdx() {
+    return coachRounds.length - 1;
+  }
+
   bool useSquads() {
     return info.squadDetails.type == SquadUsage.SQUADS;
   }

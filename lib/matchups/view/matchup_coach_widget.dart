@@ -12,10 +12,14 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class MatchupCoachWidget extends StatefulWidget {
   final CoachMatchup matchup;
+  final int roundIdx;
   final bool refreshState;
 
   MatchupCoachWidget(
-      {Key? key, required this.matchup, required this.refreshState})
+      {Key? key,
+      required this.matchup,
+      required this.roundIdx,
+      required this.refreshState})
       : super(key: key);
 
   @override
@@ -87,8 +91,9 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
     _reportWithStatus = _matchup.getReportedMatchStatus();
 
-    Authorization authorization =
-        _tournament.getMatchAuthorization(_matchup, _user);
+    Authorization authorization = widget.roundIdx == _tournament.curRoundIdx()
+        ? _tournament.getMatchAuthorization(_matchup, _user)
+        : Authorization.Unauthorized;
 
     _state = _getMatchUploadState(_reportWithStatus, authorization);
 

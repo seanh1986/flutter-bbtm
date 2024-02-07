@@ -6,8 +6,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MatchupSquadWidget extends StatefulWidget {
   final SquadMatchup matchup;
+  final int roundIdx;
+  final bool refreshState;
 
-  MatchupSquadWidget({Key? key, required this.matchup}) : super(key: key);
+  MatchupSquadWidget(
+      {Key? key,
+      required this.matchup,
+      required this.roundIdx,
+      required this.refreshState})
+      : super(key: key);
 
   @override
   State<MatchupSquadWidget> createState() {
@@ -27,10 +34,18 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
     _matchup = widget.matchup;
   }
 
+  void _refreshState() {
+    _matchup = widget.matchup;
+  }
+
   @override
   Widget build(BuildContext context) {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
+
+    if (widget.refreshState) {
+      _refreshState();
+    }
 
     return Container(
         alignment: FractionalOffset.center, child: _squadMatchupWidget());
