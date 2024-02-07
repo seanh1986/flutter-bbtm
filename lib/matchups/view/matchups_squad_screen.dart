@@ -145,14 +145,15 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
       matchupWidgets.add(inkWell);
     });
 
-    return ListView.builder(
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        scrollDirection: Axis.vertical,
-        itemCount: matchupWidgets.length,
-        itemBuilder: (context, idx) {
-          return ListTile(title: matchupWidgets[idx]);
-        });
+    return SingleChildScrollView(
+        child: ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            scrollDirection: Axis.vertical,
+            itemCount: matchupWidgets.length,
+            itemBuilder: (context, idx) {
+              return ListTile(title: matchupWidgets[idx]);
+            }));
   }
 
   Widget _getSquadListRoundTitle() {
