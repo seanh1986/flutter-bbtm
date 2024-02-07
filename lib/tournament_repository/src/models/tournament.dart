@@ -114,8 +114,8 @@ class Tournament {
     return squad1.name().toLowerCase() == squad2.name().toLowerCase();
   }
 
-  bool isSquadCaptainFor(String c, String memberNafName) {
-    Squad? squad1 = getCoachSquad(memberNafName);
+  bool isSquadCaptainFor(String captain, String memberNafName) {
+    Squad? squad1 = getCoachSquad(captain);
     Squad? squad2 = getCoachSquad(memberNafName);
 
     if (squad1 == null || squad2 == null) {
@@ -305,9 +305,9 @@ class Tournament {
     String nafName = user.getNafName();
 
     // User is in matchup
-    if (matchup.awayNafName.toLowerCase() == nafName.toLowerCase()) {
+    if (matchup.isAway(nafName)) {
       return Authorization.AwayCoach;
-    } else if (matchup.homeNafName.toLowerCase() == nafName.toLowerCase()) {
+    } else if (matchup.isHome(nafName)) {
       return Authorization.HomeCoach;
     }
 
