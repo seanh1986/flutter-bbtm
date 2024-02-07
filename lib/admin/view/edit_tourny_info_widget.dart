@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
@@ -12,7 +13,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:checkbox_formfield/checkbox_formfield.dart';
 import 'package:intl/intl.dart';
+// import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 
 class EditTournamentInfoWidget extends StatefulWidget {
   // Optional can supply tournament object for population (e.g., create tournament)
@@ -54,12 +57,20 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
   late Tournament _tournament;
 
+  QuillController _richTextSpecialRulesController = QuillController.basic();
+  QuillController _richTextWeatherController = QuillController.basic();
+  QuillController _richTextKickOffController = QuillController.basic();
+
+  // late QuillEditorController _richTextSpecialRulesController;
+
   @override
   void initState() {
     super.initState();
 
     fToast = FToast();
     fToast.init(context);
+
+    _tryReloadRichText();
   }
 
   @override
@@ -85,6 +96,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       _squadDetails = _tournament.info.squadDetails;
       _startDate = _tournament.info.dateTimeStart;
       _endDate = _tournament.info.dateTimeEnd;
+      _tryReloadRichText();
     }
 
     return Column(children: [
@@ -133,6 +145,12 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       Divider(),
       _createSquadDetails(),
       Divider(),
+      _getRichTextEditor("Special Rules", _richTextSpecialRulesController),
+      Divider(),
+      _getRichTextEditor("Kick-Off Rules", _richTextKickOffController),
+      Divider(),
+      _getRichTextEditor("Weather Rules", _richTextWeatherController),
+      Divider(),
     ];
   }
 
@@ -147,6 +165,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
               _name = _tournament.info.name;
               _location = _tournament.info.location;
               _organizers = _tournament.info.organizers;
+              _tryReloadRichText();
             });
           },
           child: const Text('Discard'),
@@ -177,6 +196,8 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
               if (_endDate != null) {
                 info.dateTimeEnd = _endDate!;
               }
+
+              _trySaveRichText();
 
               ToastUtils.show(fToast, "Updating Tournament Info");
 
@@ -733,6 +754,69 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: squadMatchMakingRow);
+  }
+
+  Widget _getRichTextEditor(String title, QuillController controller) {
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        Text(title, style: theme.textTheme.bodyLarge),
+        QuillToolbar.simple(
+          configurations: QuillSimpleToolbarConfigurations(
+            controller: controller,
+            sharedConfigurations: const QuillSharedConfigurations(
+              locale: Locale('en'),
+            ),
+          ),
+        ),
+        QuillEditor.basic(
+          configurations: QuillEditorConfigurations(
+            controller: controller,
+            readOnly: false,
+            sharedConfigurations: const QuillSharedConfigurations(
+              locale: Locale('en'),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _tryReloadRichText() {
+    try {
+      final json = jsonDecode(_tournament.info.detailsSpecialRules);
+      final doc = Document.fromJson(json);
+      _richTextSpecialRulesController = QuillController(
+          document: doc, selection: TextSelection.collapsed(offset: 0));
+    } catch (_) {}
+
+    try {
+      final json = jsonDecode(_tournament.info.detailsKickOff);
+      final doc = Document.fromJson(json);
+      _richTextKickOffController = QuillController(
+          document: doc, selection: TextSelection.collapsed(offset: 0));
+    } catch (_) {}
+
+    try {
+      final json = jsonDecode(_tournament.info.detailsWeather);
+      final doc = Document.fromJson(json);
+      _richTextWeatherController = QuillController(
+          document: doc, selection: TextSelection.collapsed(offset: 0));
+    } catch (_) {}
+  }
+
+  void _trySaveRichText() {
+    var jsonSpecialRules =
+        jsonEncode(_richTextSpecialRulesController.document.toDelta().toJson());
+    var jsonKickOff =
+        jsonEncode(_richTextKickOffController.document.toDelta().toJson());
+    var jsonWeather =
+        jsonEncode(_richTextWeatherController.document.toDelta().toJson());
+
+    _tournament.info.detailsSpecialRules = jsonSpecialRules;
+    _tournament.info.detailsKickOff = jsonKickOff;
+    _tournament.info.detailsWeather = jsonWeather;
   }
 
   void _showDialogToConfirmOverwrite(

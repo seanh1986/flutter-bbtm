@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 class OverviewScreen extends StatefulWidget {
@@ -94,7 +97,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Widget? _customWeatherTable(TournamentInfo t) {
-    if (t.detailsWeather.isEmpty) {
+    Widget? widget = _parseQuillOrHtml(t.detailsWeather);
+    if (widget == null) {
       return null;
     }
 
@@ -103,13 +107,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
         "Weather Table",
         style: TextStyle(fontSize: 16, decoration: TextDecoration.underline),
       ),
-      Text(""),
-      HtmlWidget(t.detailsWeather),
+      widget,
     ]);
   }
 
   Widget? _customKickOffTable(TournamentInfo t) {
-    if (t.detailsKickOff.isEmpty) {
+    Widget? widget = _parseQuillOrHtml(t.detailsKickOff);
+    if (widget == null) {
       return null;
     }
 
@@ -118,13 +122,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
         "Kick-Off Table",
         style: TextStyle(fontSize: 16, decoration: TextDecoration.underline),
       ),
-      Text(""),
-      HtmlWidget(t.detailsKickOff),
+      widget,
     ]);
   }
 
   Widget? _customSpecialRules(TournamentInfo t) {
-    if (t.detailsSpecialRules.isEmpty) {
+    Widget? widget = _parseQuillOrHtml(t.detailsSpecialRules);
+    if (widget == null) {
       return null;
     }
 
@@ -133,9 +137,43 @@ class _OverviewScreenState extends State<OverviewScreen> {
         "Special Rules",
         style: TextStyle(fontSize: 16, decoration: TextDecoration.underline),
       ),
-      Text(""),
-      HtmlWidget(t.detailsSpecialRules),
+      widget,
     ]);
+  }
+
+  Widget? _parseQuillOrHtml(String input) {
+    try {
+      // Try parsing using quill
+      QuillController controller = QuillController.basic();
+      final json = jsonDecode(input);
+
+      // Check for empty quill
+      if (json.length <= 1) {
+        final tJson = json[0] as dynamic;
+        final tInsert = tJson["insert"] as dynamic;
+        if (tInsert == "\n") {
+          return null;
+        }
+      }
+
+      controller.document = Document.fromJson(json);
+      return QuillEditor.basic(
+        configurations: QuillEditorConfigurations(
+          controller: controller,
+          readOnly: true,
+        ),
+      );
+    } catch (_) {
+      try {
+        if (input.isEmpty) {
+          return null;
+        }
+
+        return HtmlWidget(input);
+      } catch (_) {}
+    }
+
+    return Text("");
   }
 
   Widget _getScoringPointsTiebreakerDetails(TournamentInfo t) {
