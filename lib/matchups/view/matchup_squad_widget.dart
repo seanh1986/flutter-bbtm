@@ -63,13 +63,16 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
                     children: <Widget>[
                       Expanded(
                           child: Container(
-                        child: Column(
-                          children: [
-                            Text(_matchup.homeSquadName,
-                                style: TextStyle(fontSize: titleFontSize)),
-                            Text(_matchup.home(_tournament).showRecord(),
-                                style: TextStyle(fontSize: subTitleFontSize)),
-                          ],
+                        child: Card(
+                          color: _getColor(_matchup, true),
+                          child: Column(
+                            children: [
+                              Text(_matchup.homeSquadName,
+                                  style: TextStyle(fontSize: titleFontSize)),
+                              Text(_matchup.home(_tournament).showRecord(),
+                                  style: TextStyle(fontSize: subTitleFontSize)),
+                            ],
+                          ),
                         ),
                       )),
                       Text(
@@ -78,15 +81,39 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
                       ),
                       Expanded(
                           child: Container(
-                        child: Column(
-                          children: [
-                            Text(_matchup.awaySquadName,
-                                style: TextStyle(fontSize: titleFontSize)),
-                            Text(_matchup.away(_tournament).showRecord(),
-                                style: TextStyle(fontSize: subTitleFontSize)),
-                          ],
+                        child: Card(
+                          color: _getColor(_matchup, false),
+                          child: Column(
+                            children: [
+                              Text(_matchup.awaySquadName,
+                                  style: TextStyle(fontSize: titleFontSize)),
+                              Text(_matchup.away(_tournament).showRecord(),
+                                  style: TextStyle(fontSize: subTitleFontSize)),
+                            ],
+                          ),
                         ),
                       )),
                     ]))));
+  }
+
+  Color? _getColor(SquadMatchup m, bool home) {
+    if (!m.hasResult()) {
+      return null;
+    }
+
+    MatchResult result = m.getResult();
+
+    switch (result) {
+      case MatchResult.HomeWon:
+        return home ? Colors.green : Colors.red;
+      case MatchResult.AwayWon:
+        return home ? Colors.red : Colors.green;
+      case MatchResult.Draw:
+        return Colors.orange;
+      case MatchResult.Conflict:
+      case MatchResult.NoResult:
+      default:
+        return null;
+    }
   }
 }

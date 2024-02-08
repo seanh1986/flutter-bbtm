@@ -246,7 +246,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(sbHome.toString(),
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.displaySmall)))),
+                      style: theme.textTheme.bodyLarge)))),
       Text("vs.", style: theme.textTheme.displaySmall),
       Expanded(
           child: Card(
@@ -255,7 +255,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(sbAway.toString(),
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.displaySmall)))),
+                      style: theme.textTheme.bodyLarge)))),
     ];
 
     return Wrap(alignment: WrapAlignment.center, children: [
@@ -264,7 +264,12 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: squadVsSquadTitleWidgets,
-        )
+        ),
+        SizedBox(height: 2),
+        Divider(
+          height: 20,
+          thickness: 3,
+        ),
       ]),
     ]);
   }
