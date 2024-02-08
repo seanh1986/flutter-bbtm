@@ -54,7 +54,6 @@ dependencies:
   syncfusion_flutter_datepicker: ^24.1.47
   uni_links: ^0.5.1
   uuid: ^4.0.0
-  quill_html_editor: ^2.2.7
   xml: ^6.5.0
 
 

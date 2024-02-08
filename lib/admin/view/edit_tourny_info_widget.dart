@@ -13,7 +13,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:checkbox_formfield/checkbox_formfield.dart';
 import 'package:intl/intl.dart';
-// import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
@@ -60,8 +59,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   QuillController _richTextSpecialRulesController = QuillController.basic();
   QuillController _richTextWeatherController = QuillController.basic();
   QuillController _richTextKickOffController = QuillController.basic();
-
-  // late QuillEditorController _richTextSpecialRulesController;
 
   @override
   void initState() {

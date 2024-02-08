@@ -241,6 +241,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     List<Widget> squadVsSquadTitleWidgets = [
       Expanded(
           child: Card(
+              color: _getColor(m, true),
               child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(sbHome.toString(),
@@ -249,6 +250,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
       Text("vs.", style: theme.textTheme.displaySmall),
       Expanded(
           child: Card(
+              color: _getColor(m, false),
               child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(sbAway.toString(),
@@ -257,33 +259,35 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     ];
 
     return Wrap(alignment: WrapAlignment.center, children: [
-      Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          // crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: squadVsSquadTitleWidgets,
-            )
-          ]),
+      Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: squadVsSquadTitleWidgets,
+        )
+      ]),
     ]);
+  }
 
-    // return Column(children: [
-    //   IconButton(
-    //       color: theme.appBarTheme.iconTheme!.color,
-    //       onPressed: () {
-    //         setState(() {
-    //           _autoSelectAuthUserMatchup = false;
-    //           selectedMatchup = null;
-    //           _roundIdx = _roundIdx;
-    //           _reset = false;
-    //         });
-    //       },
-    //       icon: Icon(Icons.arrow_back_rounded)),
-    //   SizedBox(height: 10),
-    //   TitleBar(title: sb.toString())
-    // ]);
+  Color? _getColor(SquadMatchup m, bool home) {
+    if (!m.hasResult()) {
+      return null;
+    }
+
+    MatchResult result = m.getResult();
+
+    switch (result) {
+      case MatchResult.HomeWon:
+        return home ? Colors.green : Colors.red;
+      case MatchResult.AwayWon:
+        return home ? Colors.red : Colors.green;
+      case MatchResult.Draw:
+        return Colors.orange;
+      case MatchResult.Conflict:
+      case MatchResult.NoResult:
+      default:
+        return null;
+    }
   }
 
   Widget _noMatchUpsYet() {
