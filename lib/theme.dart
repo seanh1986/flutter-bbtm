@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+int idx = 0;
+
 ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
   return ThemeData(
       brightness: isDarkTheme ? Brightness.dark : Brightness.light,
@@ -68,16 +70,15 @@ ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
         selectedItemColor: Colors.red,
         unselectedItemColor: isDarkTheme ? Colors.grey : Colors.black,
       ),
-      dataTableTheme: DataTableThemeData(
-        headingRowColor: MaterialStateColor.resolveWith((states) {
-          return isDarkTheme ? Colors.grey[850]! : Colors.grey;
-        }),
-        //   dataRowColor: MaterialStateColor.resolveWith((states) {
-        //     if (states.iterator.current.index.isEven) {
-        //       return isDarkTheme ? Colors.grey[850]! : Colors.grey;
-        //     } else {
-        //       return isDarkTheme ? Colors.grey : Colors.grey[850]!;
-        //     }
-        //   }),
-      ));
+      dataTableTheme: DataTableThemeData(headingRowColor:
+          MaterialStateColor.resolveWith((states) {
+        return isDarkTheme ? Colors.grey[850]! : Colors.grey;
+      }), dataRowColor:
+          MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        if ((idx++)
+            .isEven) //Change Color if Row is Even, this is for Stripped Table
+          return isDarkTheme ? Colors.grey[600]! : Colors.grey;
+        else
+          return isDarkTheme ? Colors.grey : Colors.grey[600]!;
+      })));
 }

@@ -115,6 +115,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     List<DataRow2> rows = [];
 
     int rank = 1;
+    int idx = 0;
     _items.forEach((squad) {
       String nafName = _user.getNafName();
 
@@ -145,7 +146,10 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
               (sizeCoachName + buffer) * squad.getCoaches().length
           : null;
 
-      rows.add(DataRow2(cells: cells, specificRowHeight: sizeRowHeight));
+      rows.add(DataRow2(
+        cells: cells,
+        specificRowHeight: sizeRowHeight,
+      ));
 
       rank++;
     });

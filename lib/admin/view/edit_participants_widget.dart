@@ -249,11 +249,6 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
         });
 
     _coachDataTable = DataTable2(
-      headingRowColor:
-          MaterialStateColor.resolveWith((states) => Colors.grey[850]!),
-      headingTextStyle: const TextStyle(color: Colors.white),
-      headingCheckboxTheme: const CheckboxThemeData(
-          side: BorderSide(color: Colors.white, width: 2.0)),
       isHorizontalScrollBarVisible: true,
       isVerticalScrollBarVisible: true,
       columnSpacing: 12,
@@ -406,19 +401,6 @@ class CoachesDataSource extends DataTableSource {
     return DataRow2(
       cells: cells,
       specificRowHeight: isInEditMode ? 160 : null,
-      color:
-          MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-        if (index
-            .isEven) //Change Color if Row is Even, this is for Stripped Table
-          return (theme != null &&
-                  theme!.listTileTheme.selectedTileColor != null)
-              ? theme!.listTileTheme.selectedTileColor!
-              : Color.fromRGBO(235, 241, 244, 1);
-        else
-          return (theme != null && theme!.listTileTheme.tileColor != null)
-              ? theme!.listTileTheme.tileColor!
-              : Colors.white;
-      }),
     );
   }
 
@@ -440,7 +422,7 @@ class CoachesDataSource extends DataTableSource {
   Widget _getNaf(Coach c, int index, bool isInEditMode) {
     if (!isInEditMode) {
       return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [Text(c.nafName), Text(c.nafNumber.toString())],
       );

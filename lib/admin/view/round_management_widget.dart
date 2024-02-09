@@ -10,6 +10,7 @@ import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:bbnaf/widgets/toggle_widget/models/toggle_widget_item.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:collection/collection.dart';
 
 class RoundManagementWidget extends StatefulWidget {
   RoundManagementWidget({Key? key}) : super(key: key);
@@ -32,12 +34,18 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   late FToast fToast;
 
   bool updateRoundIdx = true;
+  bool updateCoachRound = true;
 
   int _selectedRoundIdx = -1;
-  List<CoachRound> _coachRounds = [];
+  late List<CoachRound> _coachRounds;
 
-  late List<DataColumn> _roundSummaryCols;
+  late List<DataColumn2> _roundSummaryCols;
   bool useBonus = false;
+
+  // CoachRoundDataSource? _dataSource;
+
+  int? editIdx;
+  Set<int>? _editedMatchIndices;
 
   @override
   void initState() {
@@ -52,24 +60,27 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     super.dispose();
   }
 
-  List<DataColumn> _getRoundSummaryCols() {
-    List<DataColumn> cols = [
-      DataColumn(label: Text("Table")),
-      DataColumn(label: Text("Home")),
-      DataColumn(label: Text("Away")),
-      DataColumn(label: Text("Status")),
-      DataColumn(label: Text("H TD")),
-      DataColumn(label: Text("A TD")),
-      DataColumn(label: Text("H Cas")),
-      DataColumn(label: Text("A Cas")),
+  List<DataColumn2> _getRoundSummaryCols() {
+    List<DataColumn2> cols = [
+      DataColumn2(
+          label: Center(child: Text("Edit | Table")), size: ColumnSize.S),
+      DataColumn2(
+          label: Center(child: Text("Home | Away")),
+          fixedWidth: 200,
+          size: ColumnSize.L),
+      DataColumn2(label: Center(child: Text("Status"))),
+      DataColumn2(label: Center(child: Text("H TD"))),
+      DataColumn2(label: Center(child: Text("A TD"))),
+      DataColumn2(label: Center(child: Text("H Cas"))),
+      DataColumn2(label: Center(child: Text("A Cas"))),
     ];
 
     if (_tournament.info.scoringDetails.bonusPts.isNotEmpty) {
       useBonus = true;
-      cols.add(DataColumn(label: Text("Bonus")));
+      cols.add(DataColumn2(label: Center(child: Text("Bonus"))));
     }
 
-    cols.add(DataColumn(label: Text("Sport")));
+    cols.add(DataColumn2(label: Center(child: Text("Sport"))));
 
     return cols;
   }
@@ -79,7 +90,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
 
-    _coachRounds = _tournament.coachRounds;
+    if (updateCoachRound) {
+      _coachRounds =
+          _tournament.coachRounds.map((m) => CoachRound.from(m)).toList();
+    }
 
     if (updateRoundIdx && _coachRounds.isNotEmpty) {
       _selectedRoundIdx = _coachRounds.length - 1;
@@ -151,6 +165,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                   setState(() {
                     updateRoundIdx = false;
                     _selectedRoundIdx = i;
+                    updateCoachRound = false;
                   });
                 }
               : null));
@@ -176,11 +191,50 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
     CoachRound coachRound = _coachRounds[roundIdx];
 
     CoachRoundDataSource dataSource = CoachRoundDataSource(
-        context: context, info: _tournament.info, coachRound: coachRound);
+      context: context,
+      info: _tournament.info,
+      coachRound: coachRound,
+      editedMatchIndices: _editedMatchIndices,
+      editIdx: editIdx,
+      editCallback: (mIdx, doneEdit, editedMatchIndices) {
+        setState(() {
+          if (doneEdit) {
+            editIdx = null;
+          } else {
+            editIdx = mIdx;
+          }
+          _editedMatchIndices = editedMatchIndices;
+          updateCoachRound = false;
+        });
+      },
+    );
 
-    PaginatedDataTable roundDataTable = PaginatedDataTable(
+    List<DataRow2> rows = [];
+
+    dataSource.coachRound.matches.forEachIndexed((index, element) {
+      DataRow2? row = dataSource.getRow(index);
+      if (row != null) {
+        rows.add(row);
+      }
+    });
+
+    DataTable2 roundDataTable = DataTable2(
+      isHorizontalScrollBarVisible: true,
+      isVerticalScrollBarVisible: true,
+      columnSpacing: 12,
+      horizontalMargin: 12,
+      border: TableBorder.all(),
+      dividerThickness: 1, // this one will be ignored if [border] is set above
+      fixedTopRows: 1,
+      bottomMargin: 10,
+      minWidth: 900,
+      empty: Center(
+          child: Container(
+              padding: const EdgeInsets.all(20),
+              color: Colors.grey[200],
+              child: const Text('No data yet'))),
       columns: _roundSummaryCols,
-      source: dataSource,
+      rows: rows,
     );
 
     return Column(children: [
@@ -188,7 +242,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
         ElevatedButton(
           onPressed: () {
             setState(() {
-              _coachRounds = _tournament.coachRounds;
+              // _coachRounds = _tournament.coachRounds;
+              editIdx = null;
+              _editedMatchIndices!.clear();
+              updateCoachRound = true;
             });
           },
           child: const Text('Discard'),
@@ -228,10 +285,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
       ]),
       Container(
           height: MediaQuery.of(context).size.height * 0.6,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: roundDataTable,
-          ))
+          child: roundDataTable)
     ]);
   }
 
@@ -524,31 +578,168 @@ class CoachRoundDataSource extends DataTableSource {
   TournamentInfo info;
   CoachRound coachRound;
 
+  Function(int, bool, Set<int>)
+      editCallback; // true if done with edit mode, edited match indices
+  int? editIdx;
+
   Set<int> editedMatchIndices = {};
 
   CoachRoundDataSource(
-      {required this.context, required this.info, required this.coachRound});
+      {required this.context,
+      required this.info,
+      required this.coachRound,
+      required this.editCallback,
+      this.editIdx,
+      Set<int>? editedMatchIndices})
+      : editedMatchIndices = editedMatchIndices ?? {};
 
-  String _convertToString(ReportedMatchResultWithStatus r) {
-    switch (r.status) {
-      case ReportedMatchStatus.NoReportsYet:
-        return "None";
+  Widget _getTd(CoachMatchup m, int index, bool isInEditMode, bool homeTds) {
+    ReportedMatchResultWithStatus report = m.getReportedMatchStatus();
+
+    TextStyle? tdStyle = _getTextStyle(
+        report.status,
+        homeTds ? m.homeReportedResults.homeTds : m.homeReportedResults.awayTds,
+        homeTds
+            ? m.awayReportedResults.homeTds
+            : m.awayReportedResults.awayTds);
+
+    if (!isInEditMode) {
+      return Center(
+          child: Text(
+              _getValue(
+                  report.status,
+                  homeTds
+                      ? m.homeReportedResults.homeTds
+                      : m.homeReportedResults.awayTds,
+                  homeTds
+                      ? m.awayReportedResults.homeTds
+                      : m.awayReportedResults.awayTds),
+              style: tdStyle,
+              textAlign: TextAlign.center));
+    }
+
+    TextEditingController tdController = TextEditingController(
+        text: _getValue(
+            report.status,
+            homeTds
+                ? m.homeReportedResults.homeTds
+                : m.homeReportedResults.awayTds,
+            homeTds
+                ? m.awayReportedResults.homeTds
+                : m.awayReportedResults.awayTds));
+
+    ValueChanged<String> tdCallback = (value) {
+      int td = int.parse(tdController.text);
+
+      if (homeTds) {
+        m.homeReportedResults.homeTds = td;
+        m.awayReportedResults.homeTds = td;
+      } else {
+        m.homeReportedResults.awayTds = td;
+        m.awayReportedResults.awayTds = td;
+      }
+
+      m.homeReportedResults.reported = true;
+      m.awayReportedResults.reported = true;
+      editedMatchIndices.add(index);
+    };
+
+    return Center(
+        child: TextFormField(
+            controller: tdController,
+            style: tdStyle,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onChanged: tdCallback));
+  }
+
+  Widget _getCas(CoachMatchup m, int index, bool isInEditMode, bool homeCas) {
+    ReportedMatchResultWithStatus report = m.getReportedMatchStatus();
+
+    TextStyle? casStyle = _getTextStyle(
+        report.status,
+        homeCas ? m.homeReportedResults.homeCas : m.homeReportedResults.awayCas,
+        homeCas
+            ? m.awayReportedResults.homeCas
+            : m.awayReportedResults.awayCas);
+
+    if (!isInEditMode) {
+      return Center(
+          child: Text(
+              _getValue(
+                  report.status,
+                  homeCas
+                      ? m.homeReportedResults.homeCas
+                      : m.homeReportedResults.awayCas,
+                  homeCas
+                      ? m.awayReportedResults.homeCas
+                      : m.awayReportedResults.awayCas),
+              style: casStyle));
+    }
+
+    TextEditingController casController = TextEditingController(
+        text: _getValue(
+            report.status,
+            homeCas
+                ? m.homeReportedResults.homeCas
+                : m.homeReportedResults.awayCas,
+            homeCas
+                ? m.awayReportedResults.homeCas
+                : m.awayReportedResults.awayCas));
+
+    ValueChanged<String> casCallback = (value) {
+      int cas = int.parse(casController.text);
+
+      if (homeCas) {
+        m.homeReportedResults.homeCas = cas;
+        m.awayReportedResults.homeCas = cas;
+      } else {
+        m.homeReportedResults.awayCas = cas;
+        m.awayReportedResults.awayCas = cas;
+      }
+
+      m.homeReportedResults.reported = true;
+      m.awayReportedResults.reported = true;
+      editedMatchIndices.add(index);
+    };
+
+    return Center(
+        child: TextFormField(
+            controller: casController,
+            style: casStyle,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onChanged: casCallback));
+  }
+
+  Widget _getConfirmed(CoachMatchup m) {
+    ReportedMatchResultWithStatus report = m.getReportedMatchStatus();
+
+    switch (report.status) {
       case ReportedMatchStatus.HomeReported:
-        return "Home Only";
+        return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Text("H"), Icon(Icons.check)]);
       case ReportedMatchStatus.AwayReported:
-        return "Away Only";
+        return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Text("A"), Icon(Icons.check)]);
       case ReportedMatchStatus.BothReportedAgree:
-        return "Confirmed";
+        return Center(child: Icon(Icons.check, color: Colors.green));
       case ReportedMatchStatus.BothReportedConflict:
-        return "Error";
+        return Center(
+            child: Icon(Icons.error_outline_sharp, color: Colors.red));
+      case ReportedMatchStatus.NoReportsYet:
       default:
-        return "N/A";
+        return Center(child: Icon(Icons.question_mark_sharp));
     }
   }
 
   @override
-  DataRow? getRow(int index) {
+  DataRow2? getRow(int index) {
     CoachMatchup m = coachRound.matches[index];
+
+    bool isRowPrevEdited = editedMatchIndices.contains(index);
 
     // print("m_idx: " +
     //     index.toString() +
@@ -557,115 +748,41 @@ class CoachRoundDataSource extends DataTableSource {
     //     " vs. " +
     //     m.awayNafName);
 
-    Text tableNum = Text(m.tableNum.toString());
+    final bool isInEditMode = editIdx == index;
+
+    Text tableNum = Text(m.tableNum.toString(),
+        style: TextStyle(color: isRowPrevEdited ? Colors.orange : null));
+
+    List<Widget> editTableNumRow = [
+      IconButton(
+          onPressed: () {
+            bool exitEditMode = isInEditMode;
+            editCallback(index, exitEditMode, editedMatchIndices);
+          },
+          icon: Icon(isInEditMode ? Icons.check : Icons.edit)),
+      SizedBox(width: 3),
+      tableNum,
+    ];
+
     Text homeNafName = Text(m.homeNafName);
     Text awayNafName = Text(m.awayNafName);
 
+    Column homeAwayNafNames = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [homeNafName, awayNafName],
+    );
+
     ReportedMatchResultWithStatus report = m.getReportedMatchStatus();
 
-    Text textStatus = Text(_convertToString(report));
-
-    TextEditingController homeTdController = TextEditingController(
-        text: _getValue(report.status, m.homeReportedResults.homeTds,
-            m.awayReportedResults.homeTds));
-
-    TextStyle? homeTdStyle = _getTextStyle(report.status,
-        m.homeReportedResults.homeTds, m.awayReportedResults.homeTds);
-
-    ValueChanged<String> homeTdCallback = (value) {
-      int td = int.parse(homeTdController.text);
-      m.homeReportedResults.homeTds = td;
-      m.awayReportedResults.homeTds = td;
-      m.homeReportedResults.reported = true;
-      m.awayReportedResults.reported = true;
-      editedMatchIndices.add(index);
-    };
-
-    TextFormField homeTdField = TextFormField(
-        controller: homeTdController,
-        style: homeTdStyle,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onChanged: homeTdCallback);
-
-    TextEditingController awayTdController = TextEditingController(
-        text: _getValue(report.status, m.homeReportedResults.awayTds,
-            m.awayReportedResults.awayTds));
-
-    TextStyle? awayTdStyle = _getTextStyle(report.status,
-        m.homeReportedResults.awayTds, m.awayReportedResults.awayTds);
-
-    ValueChanged<String> awayTdCallback = (value) {
-      int td = int.parse(awayTdController.text);
-      m.homeReportedResults.awayTds = td;
-      m.awayReportedResults.awayTds = td;
-      m.homeReportedResults.reported = true;
-      m.awayReportedResults.reported = true;
-      editedMatchIndices.add(index);
-    };
-
-    TextFormField awayTdField = TextFormField(
-        controller: awayTdController,
-        style: awayTdStyle,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onChanged: awayTdCallback);
-
-    TextEditingController homeCasController = TextEditingController(
-        text: _getValue(report.status, m.homeReportedResults.homeCas,
-            m.awayReportedResults.homeCas));
-
-    TextStyle? homeCasStyle = _getTextStyle(report.status,
-        m.homeReportedResults.homeCas, m.awayReportedResults.homeCas);
-
-    ValueChanged<String> homeCasCallback = (value) {
-      int cas = int.parse(homeCasController.text);
-      m.homeReportedResults.homeCas = cas;
-      m.awayReportedResults.homeCas = cas;
-      m.homeReportedResults.reported = true;
-      m.awayReportedResults.reported = true;
-      editedMatchIndices.add(index);
-    };
-
-    TextFormField homeCasField = TextFormField(
-        controller: homeCasController,
-        style: homeCasStyle,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onChanged: homeCasCallback);
-
-    TextEditingController awayCasController = TextEditingController(
-        text: _getValue(report.status, m.homeReportedResults.awayCas,
-            m.awayReportedResults.awayCas));
-
-    TextStyle? awayCasStyle = _getTextStyle(report.status,
-        m.homeReportedResults.awayCas, m.awayReportedResults.awayCas);
-
-    ValueChanged<String> awayCasCallback = (value) {
-      int cas = int.parse(awayCasController.text);
-      m.homeReportedResults.awayCas = cas;
-      m.awayReportedResults.awayCas = cas;
-      m.homeReportedResults.reported = true;
-      m.awayReportedResults.reported = true;
-      editedMatchIndices.add(index);
-    };
-
-    TextFormField awayCasField = TextFormField(
-        controller: awayCasController,
-        style: awayCasStyle,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onChanged: awayCasCallback);
-
     List<DataCell> cellRows = [
-      DataCell(tableNum),
-      DataCell(homeNafName),
-      DataCell(awayNafName),
-      DataCell(textStatus),
-      DataCell(homeTdField),
-      DataCell(awayTdField),
-      DataCell(homeCasField),
-      DataCell(awayCasField),
+      DataCell(Row(children: editTableNumRow)),
+      DataCell(homeAwayNafNames),
+      DataCell(_getConfirmed(m)),
+      DataCell(_getTd(m, index, isInEditMode, true)),
+      DataCell(_getTd(m, index, isInEditMode, false)),
+      DataCell(_getCas(m, index, isInEditMode, true)),
+      DataCell(_getCas(m, index, isInEditMode, false)),
     ];
 
     if (info.scoringDetails.bonusPts.isNotEmpty) {
@@ -674,7 +791,8 @@ class CoachRoundDataSource extends DataTableSource {
 
     cellRows.add(DataCell(_btnBestSport(report, index)));
 
-    return DataRow(cells: cellRows);
+    return DataRow2(
+        cells: cellRows, specificRowHeight: isInEditMode ? 100 : null);
   }
 
   @override

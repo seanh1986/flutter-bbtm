@@ -110,6 +110,9 @@ class CoachRound extends RoundMatching {
       }
     });
   }
+  CoachRound.from(CoachRound cr)
+      : _round = cr._round,
+        matches = cr.matches.map((m) => CoachMatchup.from(m)).toList();
 
   int round() {
     return _round;

@@ -31,6 +31,12 @@ class CoachMatchup extends IMatchup {
   ReportedMatchResult awayReportedResults = ReportedMatchResult();
 
   CoachMatchup(this.homeNafName, this.awayNafName);
+  CoachMatchup.from(CoachMatchup m)
+      : tableNum = m.tableNum,
+        homeNafName = m.homeNafName,
+        homeReportedResults = ReportedMatchResult.from(m.homeReportedResults),
+        awayNafName = m.awayNafName,
+        awayReportedResults = ReportedMatchResult.from(m.awayReportedResults);
 
   @override
   OrgType type() {
