@@ -140,15 +140,10 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   }
 
   Widget _itemHeadline(IMatchupParticipant participant, bool isHome) {
-    final theme = Theme.of(context);
-
-    Color color =
-        _titleColor != null ? _titleColor! : theme.secondaryHeaderColor;
-
     return Card(
         elevation: 8.0,
         margin: EdgeInsets.symmetric(horizontal: 2.0, vertical: 6.0),
-        color: color,
+        color: _titleColor,
         child: _itemHeader(participant));
   }
 
@@ -237,7 +232,8 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
             style: TextStyle(fontSize: subTitleFontSize)),
         trailing: roster,
         isThreeLine: false,
-        tileColor: _titleColor,
+        // tileColor: _titleColor,
+        tileColor: Colors.transparent,
       );
     } else {
       List<Widget> iconWidgets = [];

@@ -222,11 +222,13 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         child: getDataTable());
   }
 
-  DataTable2 getDataTable() {
+  Widget getDataTable() {
+    // final theme = Theme.of(context);
+
     return DataTable2(
-        headingRowColor:
-            MaterialStateColor.resolveWith((states) => Colors.grey[850]!),
-        headingTextStyle: const TextStyle(color: Colors.white),
+        // headingRowColor:
+        //     MaterialStateColor.resolveWith((states) => Colors.grey[850]!),
+        // headingTextStyle: const TextStyle(color: Colors.white),
         headingCheckboxTheme: const CheckboxThemeData(
             side: BorderSide(color: Colors.white, width: 2.0)),
         isHorizontalScrollBarVisible: true,

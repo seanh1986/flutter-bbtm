@@ -203,13 +203,13 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         child: getDataTable());
   }
 
-  DataTable2 getDataTable() {
+  Widget getDataTable() {
     return DataTable2(
-        headingRowColor:
-            MaterialStateColor.resolveWith((states) => Colors.grey[850]!),
-        headingTextStyle: const TextStyle(color: Colors.white),
-        headingCheckboxTheme: const CheckboxThemeData(
-            side: BorderSide(color: Colors.white, width: 2.0)),
+        // headingRowColor:
+        //     MaterialStateColor.resolveWith((states) => Colors.grey[850]!),
+        // headingTextStyle: const TextStyle(color: Colors.white),
+        // headingCheckboxTheme: const CheckboxThemeData(
+        //     side: BorderSide(color: Colors.white, width: 2.0)),
         isHorizontalScrollBarVisible: true,
         isVerticalScrollBarVisible: true,
         columnSpacing: 12,
