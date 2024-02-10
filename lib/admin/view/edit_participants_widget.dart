@@ -356,6 +356,7 @@ class CoachesDataSource extends DataTableSource {
   @override
   DataRow2? getRow(int index) {
     Coach c = newCoaches[index];
+    Coach cOriginal = originalCoaches[index];
 
     print("c_idx: " + index.toString() + " -> " + c.coachName);
 
@@ -398,13 +399,13 @@ class CoachesDataSource extends DataTableSource {
       DataCell(
         Row(children: editRemoveActiveRow),
       ),
-      DataCell(_getName(c, isInEditMode)),
-      DataCell(_getNaf(c, index, isInEditMode)),
-      DataCell(_getTeam(c, isInEditMode)),
+      DataCell(_getName(c, cOriginal, isInEditMode)),
+      DataCell(_getNaf(c, cOriginal, index, isInEditMode)),
+      DataCell(_getTeam(c, cOriginal, isInEditMode)),
     ];
 
     if (useSquad) {
-      cells.add(DataCell(_getSquad(c, isInEditMode)));
+      cells.add(DataCell(_getSquad(c, cOriginal, isInEditMode)));
     }
 
     return DataRow2(
@@ -413,9 +414,12 @@ class CoachesDataSource extends DataTableSource {
     );
   }
 
-  Widget _getName(Coach c, bool isInEditMode) {
+  Widget _getName(Coach c, Coach cOriginal, bool isInEditMode) {
     if (!isInEditMode) {
-      return Text(c.coachName);
+      return Text(c.coachName,
+          style: TextStyle(
+              color:
+                  c.coachName != cOriginal.coachName ? Colors.orange : null));
     }
 
     TextEditingController coachNameController =
@@ -430,12 +434,22 @@ class CoachesDataSource extends DataTableSource {
             }));
   }
 
-  Widget _getNaf(Coach c, int index, bool isInEditMode) {
+  Widget _getNaf(Coach c, Coach cOriginal, int index, bool isInEditMode) {
     if (!isInEditMode) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [Text(c.nafName), Text(c.nafNumber.toString())],
+        children: [
+          Text(c.nafName,
+              style: TextStyle(
+                  color:
+                      c.nafName != cOriginal.nafName ? Colors.orange : null)),
+          Text(c.nafNumber.toString(),
+              style: TextStyle(
+                  color: c.nafNumber != cOriginal.nafNumber
+                      ? Colors.orange
+                      : null))
+        ],
       );
     }
 
@@ -478,14 +492,25 @@ class CoachesDataSource extends DataTableSource {
     ));
   }
 
-  Widget _getTeam(Coach c, bool isInEditMode) {
+  Widget _getTeam(Coach c, Coach cOriginal, bool isInEditMode) {
     if (!isInEditMode) {
+      Text raceText = Text(c.raceName(),
+          style: TextStyle(
+              color: c.race != cOriginal.race ? Colors.orange : null));
+
       return c.teamName.isNotEmpty
           ? Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Text(c.teamName), Text(c.raceName())])
-          : Text(c.raceName());
+              children: [
+                  Text(c.teamName,
+                      style: TextStyle(
+                          color: c.teamName != cOriginal.teamName
+                              ? Colors.orange
+                              : null)),
+                  raceText
+                ])
+          : raceText;
     }
 
     TextEditingController teamNameController =
@@ -517,9 +542,12 @@ class CoachesDataSource extends DataTableSource {
     ));
   }
 
-  Widget _getSquad(Coach c, bool isInEditMode) {
+  Widget _getSquad(Coach c, Coach cOriginal, bool isInEditMode) {
     if (!isInEditMode) {
-      return Text(c.squadName);
+      return Text(c.squadName,
+          style: TextStyle(
+              color:
+                  c.squadName != cOriginal.squadName ? Colors.orange : null));
     }
 
     TextEditingController squadController =
