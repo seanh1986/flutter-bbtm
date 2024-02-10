@@ -97,7 +97,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
     }
 
     return Column(children: [
-      TitleBar(title: "Edit Tournament Info"),
+      TitleBar(title: "Edit Tournament Info (Id: " + _tournament.info.id + ")"),
       SizedBox(height: 20),
       Container(
           child: SingleChildScrollView(

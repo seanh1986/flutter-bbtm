@@ -36,7 +36,8 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   bool initCoaches = true;
 
-  int? editIdx;
+  int? _editIdx;
+  Map<int, RenameNafName>? _coachIdxNafRenames;
 
   @override
   void initState() {
@@ -73,7 +74,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
     _initFromTournament();
 
     if (initCoaches) {
-      _coaches = List.from(_tournament.getCoaches());
+      _coaches = _tournament.getCoaches().map((c) => Coach.from(c)).toList();
     }
 
     return Column(children: [
@@ -196,7 +197,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   void _addNewCoach() {
     setState(() {
-      editIdx = _coaches.length; // soon to be added last one
+      _editIdx = _coaches.length; // soon to be added last one
       _coaches.add(Coach("", "", "", Race.Unknown, "", 0));
       initCoaches = false;
     });
@@ -221,16 +222,19 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
     _coachSource = CoachesDataSource(
         theme: theme,
         useSquad: _tournament.useSquads() || _tournament.useSquadsForInitOnly(),
-        coaches: _coaches,
-        editIdx: editIdx,
-        editCallback: (cIdx, doneEdit) {
+        originalCoaches: _coaches,
+        editIdx: _editIdx,
+        coachIdxNafRenames: _coachIdxNafRenames,
+        editCallback: (cIdx, doneEdit, newCoaches, coachIdxNafRenames) {
           setState(() {
             initCoaches = false;
             if (doneEdit) {
-              editIdx = null;
+              _editIdx = null;
             } else {
-              editIdx = cIdx;
+              _editIdx = cIdx;
             }
+            _coaches = newCoaches;
+            _coachIdxNafRenames = coachIdxNafRenames;
           });
         },
         activeCallback: (cIdx, active) {
@@ -244,7 +248,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
           setState(() {
             _coaches = _coaches;
             initCoaches = false;
-            editIdx = null;
+            _editIdx = null;
           });
         });
 
@@ -304,7 +308,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   List<DataRow2> _getCoachRows() {
     List<DataRow2> rows = [];
 
-    _coachSource.coaches.forEachIndexed((index, element) {
+    _coachSource.newCoaches.forEachIndexed((index, element) {
       DataRow2? row = _coachSource.getRow(index);
       if (row != null) {
         rows.add(row);
@@ -323,9 +327,11 @@ class RenameNafName {
 
 class CoachesDataSource extends DataTableSource {
   bool useSquad;
-  late List<Coach> coaches;
+  List<Coach> originalCoaches;
+  List<Coach> newCoaches;
 
-  Function(int, bool) editCallback; // true if done with edit mode
+  Function(int, bool, List<Coach>, Map<int, RenameNafName>)
+      editCallback; // true if done with edit mode
   Function(int, bool)? activeCallback;
   Function(String)? removeItemCallback;
 
@@ -337,16 +343,19 @@ class CoachesDataSource extends DataTableSource {
 
   CoachesDataSource(
       {required this.useSquad,
-      required this.coaches,
+      required this.originalCoaches,
       required this.editCallback,
       this.activeCallback,
       this.removeItemCallback,
       this.theme,
-      this.editIdx});
+      this.editIdx,
+      Map<int, RenameNafName>? coachIdxNafRenames})
+      : newCoaches = originalCoaches.map((c) => Coach.from(c)).toList(),
+        coachIdxNafRenames = coachIdxNafRenames ?? {};
 
   @override
   DataRow2? getRow(int index) {
-    Coach c = coaches[index];
+    Coach c = newCoaches[index];
 
     print("c_idx: " + index.toString() + " -> " + c.coachName);
 
@@ -365,7 +374,7 @@ class CoachesDataSource extends DataTableSource {
       IconButton(
           onPressed: () {
             bool exitEditMode = isInEditMode;
-            editCallback(index, exitEditMode);
+            editCallback(index, exitEditMode, newCoaches, coachIdxNafRenames);
           },
           icon: Icon(isInEditMode ? Icons.check : Icons.edit)),
     ];
@@ -416,7 +425,9 @@ class CoachesDataSource extends DataTableSource {
         child: CustomTextFormField(
             title: "Name",
             controller: coachNameController,
-            callback: (value) => {c.coachName = coachNameController.text}));
+            callback: (value) {
+              c.coachName = value;
+            }));
   }
 
   Widget _getNaf(Coach c, int index, bool isInEditMode) {
@@ -432,11 +443,12 @@ class CoachesDataSource extends DataTableSource {
       RenameNafName? renameNafName = coachIdxNafRenames[index];
       if (renameNafName == null) {
         coachIdxNafRenames.putIfAbsent(
-            index, () => RenameNafName(c.nafName, value));
+            index, () => RenameNafName(originalCoaches[index].nafName, value));
       } else {
-        coachIdxNafRenames.update(
-            index, (old) => RenameNafName(c.nafName, value));
+        coachIdxNafRenames.update(index,
+            (old) => RenameNafName(originalCoaches[index].nafName, value));
       }
+      c.nafName = value;
     };
 
     TextEditingController nafNameController =
@@ -524,7 +536,7 @@ class CoachesDataSource extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get rowCount => coaches.length;
+  int get rowCount => newCoaches.length;
 
   @override
   int get selectedRowCount => 0;

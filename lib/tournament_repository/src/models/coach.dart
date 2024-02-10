@@ -54,6 +54,9 @@ class Coach extends IMatchupParticipant {
     this.squadName = squadName.trim();
     active = this.nafName.isNotEmpty;
   }
+  Coach.from(Coach c)
+      : this(c.nafName, c.squadName, c.coachName, c.race, c.teamName,
+            c.nafNumber);
 
   @override
   OrgType type() {
