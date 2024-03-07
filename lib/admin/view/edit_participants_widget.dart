@@ -363,8 +363,11 @@ class CoachesDataSource extends DataTableSource {
     Checkbox activeCheckbox = Checkbox(
       value: c.active,
       onChanged: (value) {
-        if (value != null && activeCallback != null) {
-          activeCallback!(index, value);
+        if (value != null) {
+          c.active = value!;
+          if (activeCallback != null) {
+            activeCallback!(index, value);
+          }
         }
       },
     );
@@ -425,13 +428,15 @@ class CoachesDataSource extends DataTableSource {
     TextEditingController coachNameController =
         TextEditingController(text: c.coachName);
 
-    return Expanded(
-        child: CustomTextFormField(
-            title: "Name",
-            controller: coachNameController,
-            callback: (value) {
-              c.coachName = value;
-            }));
+    return Column(children: [
+      Expanded(
+          child: CustomTextFormField(
+              title: "Name",
+              controller: coachNameController,
+              callback: (value) {
+                c.coachName = value;
+              }))
+    ]);
   }
 
   Widget _getNaf(Coach c, Coach cOriginal, int index, bool isInEditMode) {
@@ -484,12 +489,14 @@ class CoachesDataSource extends DataTableSource {
         callback: (value) =>
             {c.nafNumber = int.parse(nafNumberController.text)});
 
-    return Expanded(
-        child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [nafNameField, SizedBox(height: 10), nafNumberField],
-    ));
+    return Column(children: [
+      Expanded(
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [nafNameField, SizedBox(height: 10), nafNumberField],
+      ))
+    ]);
   }
 
   Widget _getTeam(Coach c, Coach cOriginal, bool isInEditMode) {
@@ -534,12 +541,16 @@ class CoachesDataSource extends DataTableSource {
       decoration: InputDecoration(labelText: "Race"),
     );
 
-    return Expanded(
-        child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [teamNameField, raceField],
-    ));
+    return Column(
+      children: [
+        Expanded(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [teamNameField, raceField],
+        ))
+      ],
+    );
   }
 
   Widget _getSquad(Coach c, Coach cOriginal, bool isInEditMode) {
@@ -553,11 +564,15 @@ class CoachesDataSource extends DataTableSource {
     TextEditingController squadController =
         TextEditingController(text: c.squadName);
 
-    return Expanded(
-        child: CustomTextFormField(
-            title: "Squad",
-            controller: squadController,
-            callback: (value) => {c.squadName = squadController.text}));
+    return Column(
+      children: [
+        Expanded(
+            child: CustomTextFormField(
+                title: "Squad",
+                controller: squadController,
+                callback: (value) => {c.squadName = squadController.text}))
+      ],
+    );
   }
 
   @override
