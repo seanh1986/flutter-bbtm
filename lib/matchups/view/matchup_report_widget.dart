@@ -123,6 +123,17 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
     _participant = widget.participant;
     _state = widget.state;
     _titleColor = widget.titleColor;
+
+    if (_participant is Coach) {
+      Coach c = _participant as Coach;
+      if (c.rosterFileName != _rosterFileName) {
+        _rosterFileName = "";
+      }
+    } else {
+      _rosterFileName = "";
+    }
+
+    isDownloaded = false;
   }
 
   @override
