@@ -855,11 +855,13 @@ class CoachRoundDataSource extends DataTableSource {
   }
 
   Widget _btnBestSport(ReportedMatchResultWithStatus report, int index) {
-    return ElevatedButton(
-      onPressed: () {
-        _showBestSportDialog(report, index);
-      },
-      child: Text("Sport"),
+    return Center(
+      child: ElevatedButton(
+        onPressed: () {
+          _showBestSportDialog(report, index);
+        },
+        child: Text("Sport"),
+      ),
     );
   }
 
@@ -968,12 +970,13 @@ class CoachRoundDataSource extends DataTableSource {
   }
 
   Widget _btnBonus(ReportedMatchResultWithStatus report, int index) {
-    return ElevatedButton(
+    return Center(
+        child: ElevatedButton(
       onPressed: () {
         _showBonusDialog(info, index);
       },
       child: Text("Bonus"),
-    );
+    ));
   }
 
   Future<void> _showBonusDialog(TournamentInfo info, int index) async {
@@ -1040,16 +1043,20 @@ class CoachRoundDataSource extends DataTableSource {
         editedMatchIndices.add(index);
       };
 
-      homeWidgets.add(Expanded(
-          child: CustomTextFormField(
-              title: m.homeNafName.toString() + " -> " + bonusTitle,
-              initialValue: homeBonus.toString(),
-              textStyle: homeBonusStyle,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              keyboardType: TextInputType.number,
-              callback: (value) {
-                homeBonusCallback(value);
-              })));
+      homeWidgets.add(Row(
+        children: [
+          Expanded(
+              child: CustomTextFormField(
+                  title: m.homeNafName.toString() + " -> " + bonusTitle,
+                  initialValue: homeBonus.toString(),
+                  textStyle: homeBonusStyle,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  keyboardType: TextInputType.number,
+                  callback: (value) {
+                    homeBonusCallback(value);
+                  }))
+        ],
+      ));
 
       int awayBonusHomeReported = m.homeReportedResults.awayBonusPts[i];
 
@@ -1069,16 +1076,20 @@ class CoachRoundDataSource extends DataTableSource {
         editedMatchIndices.add(index);
       };
 
-      awayWidgets.add(Expanded(
-          child: CustomTextFormField(
-              title: m.awayNafName.toString() + " -> " + bonusTitle,
-              initialValue: awayBonus.toString(),
-              textStyle: awayBonusStyle,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              keyboardType: TextInputType.number,
-              callback: (value) {
-                awayBonusCallback(value);
-              })));
+      awayWidgets.add(Row(
+        children: [
+          Expanded(
+              child: CustomTextFormField(
+                  title: m.awayNafName.toString() + " -> " + bonusTitle,
+                  initialValue: awayBonus.toString(),
+                  textStyle: awayBonusStyle,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  keyboardType: TextInputType.number,
+                  callback: (value) {
+                    awayBonusCallback(value);
+                  }))
+        ],
+      ));
     }
 
     List<Widget> widgets = [];
