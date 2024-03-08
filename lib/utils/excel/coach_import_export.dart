@@ -117,8 +117,8 @@ class CoachImportExport {
           continue;
         }
 
-        coaches.add(
-            Coach(nafName, squadName, coachName, race, teamName, nafNumber));
+        coaches.add(Coach(
+            nafName, squadName, coachName, race, teamName, nafNumber, true));
       }
     }
 

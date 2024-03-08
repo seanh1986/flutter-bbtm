@@ -42,21 +42,15 @@ class Coach extends IMatchupParticipant {
 
   List<CoachMatchup> matches = [];
 
-  Coach(
-    String nafName,
-    String squadName,
-    this.coachName,
-    this.race,
-    this.teamName,
-    this.nafNumber,
-  ) {
+  Coach(String nafName, String squadName, this.coachName, this.race,
+      this.teamName, this.nafNumber, this.active) {
     this.nafName = nafName.trim();
     this.squadName = squadName.trim();
-    active = this.nafName.isNotEmpty;
   }
+
   Coach.from(Coach c)
       : this(c.nafName, c.squadName, c.coachName, c.race, c.teamName,
-            c.nafNumber);
+            c.nafNumber, c.active);
 
   @override
   OrgType type() {

@@ -198,7 +198,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   void _addNewCoach() {
     setState(() {
       _editIdx = _coaches.length; // soon to be added last one
-      _coaches.add(Coach("", "", "", Race.Unknown, "", 0));
+      _coaches.add(Coach("", "", "", Race.Unknown, "", 0, true));
       initCoaches = false;
     });
   }
@@ -364,7 +364,7 @@ class CoachesDataSource extends DataTableSource {
       value: c.active,
       onChanged: (value) {
         if (value != null) {
-          c.active = value!;
+          c.active = value;
           if (activeCallback != null) {
             activeCallback!(index, value);
           }
