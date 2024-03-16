@@ -5,6 +5,7 @@ import 'package:bbnaf/rankings/rankings.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/home/view/overview_screen.dart';
+import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +13,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
+
+  static const String tag = "HomePage";
 
   @override
   State<StatefulWidget> createState() {
@@ -148,7 +151,8 @@ class _HomePageState extends State<HomePage> {
   void _handleBackButton() {
     if (_childIndex == 0) {
       if (_parentIndex == 0) {
-        context.read<AppBloc>().add(AppRequestNavToTournamentList());
+        // context.read<AppBloc>().add(AppRequestNavToTournamentList());
+        context.read<AppBloc>().add(ScreenChange(TournamentSelectionPage.tag));
       } else {
         setState(() {
           _parentIndex = 0;

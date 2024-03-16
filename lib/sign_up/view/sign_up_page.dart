@@ -7,6 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
 
+  static const String tag = "SignUpPage";
+
   static Route<void> route() {
     return MaterialPageRoute<void>(builder: (_) => const SignUpPage());
   }
