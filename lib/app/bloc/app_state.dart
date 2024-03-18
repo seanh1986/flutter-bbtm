@@ -70,10 +70,11 @@ class TournamentState extends Equatable {
 }
 
 class ScreenState extends Equatable {
-  const ScreenState({required this.mainScreen, this.screenDetailsJson = ""});
+  const ScreenState(
+      {required this.mainScreen, this.screenDetailsJson = const {}});
 
   final String mainScreen;
-  final String screenDetailsJson;
+  final Map<String, dynamic> screenDetailsJson;
 
   @override
   List<Object> get props => [

@@ -40,13 +40,10 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     // Tournament List Related
     // on<AppRequestNavToTournamentList>(_requestNavToTournamentList);
     on<AppTournamentListLoaded>(_onTournamentListLoaded);
-    _tournamentListSubscription = _tournamentRepository
-        .getTournamentList()
-        .listen(
-            (tournamentList) => add(AppTournamentListLoaded(tournamentList)));
     on<AppCreateTournament>(_createTournament);
     // Tournament Related
     on<AppTournamentRequested>(_appTournamentRequested);
+    on<AppTournamentLoaded>(_appTournamentLoaded);
     // Update Related
     on<UpdateMatchEvent>(_updateMatchEvent);
     on<UpdateMatchEvents>(_updateMatchEvents);
@@ -61,15 +58,28 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     on<DownloadNafUploadFile>(_downloadNafUploadFile);
     on<DownloadGlamFile>(_downloadGlamFile);
     on<DownloadFile>(_downloadFile);
+
+    // Subscriptions
+    _tournamentListSubscription =
+        _tournamentRepository.getTournamentList().listen((tournamentList) {
+      if (_selectedTournamentId == null) {
+        return add(AppTournamentListLoaded(tournamentList));
+      } else {
+        return add(AppTournamentRequested(_selectedTournamentId!));
+      }
+    });
   }
 
   final AuthenticationRepository _authenticationRepository;
   late final StreamSubscription<User> _userSubscription;
 
   final TournamentRepository _tournamentRepository;
+
   late final StreamSubscription<List<TournamentInfo>>
       _tournamentListSubscription;
-  // late final StreamSubscription<Tournament> _tournamentSubscription;
+
+  String? _selectedTournamentId;
+  StreamSubscription<Tournament>? _tournamentSubscription;
 
   // Do not maintain tournament state when user change occurs!
   void _onUserChanged(_AppUserChanged event, Emitter<AppState> emit) {
@@ -110,7 +120,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     print("AppBloc: ScreenChange: " +
         event.mainScreen +
         (event.screenDetailsJson.isNotEmpty
-            ? " -> " + event.screenDetailsJson
+            ? " -> " + event.screenDetailsJson.toString()
             : ""));
 
     emit(AppState(
@@ -165,35 +175,44 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       AppTournamentRequested event, Emitter<AppState> emit) async {
     print("AppBloc: Request Tournament Download: " + event.tournamentId);
 
-    Tournament tournament =
-        await _tournamentRepository.requestTournament(event.tournamentId);
+    // Setup tournament subscription
+    _setupTournamentSubscription(event.tournamentId);
+  }
 
-    if (tournament.isEmpty()) {
-      return;
+  void _setupTournamentSubscription(String? tournamentId) {
+    _tournamentSubscription?.cancel();
+
+    if (tournamentId == null) {
+      _selectedTournamentId = null;
+      _tournamentSubscription = null;
+    } else {
+      _tournamentSubscription = _tournamentRepository
+          .getTournamentData(tournamentId)
+          .listen((tournament) {
+        return add(AppTournamentLoaded(tournament));
+      });
     }
+  }
 
-    print("AppBloc: Tournament Loaded: " +
-        tournament.info.name +
-        " (" +
-        tournament.info.id.toString() +
-        ")");
-
+  void _appTournamentLoaded(AppTournamentLoaded event, Emitter<AppState> emit) {
     ScreenState screenState = state.screenState;
     if (screenState.mainScreen == TournamentSelectionPage.tag ||
         screenState.mainScreen == LoginPage.tag) {
       screenState = ScreenState(mainScreen: HomePage.tag);
     }
 
+    _selectedTournamentId = event.tournament.info.id;
+
     emit(AppState(
         authenticationState: state.authenticationState,
         tournamentState: TournamentState.selectTournament(
-            state.tournamentState.tournamentList, tournament),
+            state.tournamentState.tournamentList, event.tournament),
         screenState: screenState));
   }
 
   @override
   Future<void> close() {
-    // _tournamentSubscription.cancel();
+    _tournamentSubscription?.cancel();
     _tournamentListSubscription.cancel();
     _userSubscription.cancel();
     return super.close();

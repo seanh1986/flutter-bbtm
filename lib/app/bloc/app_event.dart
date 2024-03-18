@@ -18,10 +18,10 @@ final class _AppUserChanged extends AppEvent {
 
 // Request Navigation to a new page
 final class ScreenChange extends AppEvent {
-  const ScreenChange(this.mainScreen, {this.screenDetailsJson = ""});
+  const ScreenChange(this.mainScreen, {this.screenDetailsJson = const {}});
 
   final String mainScreen;
-  final String screenDetailsJson;
+  final Map<String, dynamic> screenDetailsJson;
 }
 
 // // Request navigation to tournament selection page
