@@ -382,13 +382,13 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
     }
   }
 
-  Widget _createIndividualScoringDetails(
-      String title, IndividualScoringDetails details) {
-    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      _createScoringDetails(title, details),
-      SizedBox(height: 10),
-    ]);
-  }
+  // Widget _createIndividualScoringDetails(
+  //     String title, IndividualScoringDetails details) {
+  //   return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+  //     _createScoringDetails(title, details),
+  //     SizedBox(height: 10),
+  //   ]);
+  // }
 
   // Widget _createIndividualTieBreakers(
   //     String title, IndividualScoringDetails details) {
