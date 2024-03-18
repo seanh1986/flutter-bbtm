@@ -20,6 +20,7 @@ enum SquadRankingFields {
   SumDeltaTd,
   SumDeltaCas,
   OppScore,
+  SumBestSport,
 }
 
 class RankingSquadsPage extends StatefulWidget {
@@ -101,6 +102,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         return 100;
       case SquadRankingFields.SumIndividualScore:
       case SquadRankingFields.W_T_L:
+      case SquadRankingFields.SumBestSport:
         return 90;
       case SquadRankingFields.Pts:
         return 70;
@@ -297,6 +299,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         return "Cas\u0394";
       case SquadRankingFields.OppScore:
         return "OppScore";
+      case SquadRankingFields.SumBestSport:
+        return "Sport";
       default:
         return "";
     }
@@ -352,6 +356,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         return s.sumDeltaCas(_tournament).toDouble();
       case SquadRankingFields.OppScore:
         return s.oppPoints.toDouble();
+      case SquadRankingFields.SumBestSport:
+        return s.sumBestSport(_tournament).toDouble();
       default:
         return 0.0;
     }

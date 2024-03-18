@@ -54,6 +54,20 @@ class _RankingsPage extends State<RankingsPage> {
       SquadRankingFields.W_T_L,
       SquadRankingFields.SumIndividualScore,
       SquadRankingFields.OppScore,
+      SquadRankingFields.SumTd,
+      SquadRankingFields.SumCas,
+    ];
+  }
+
+  List<SquadRankingFields> _getSquadRankingFieldsCombinedAdmin() {
+    return [
+      SquadRankingFields.Pts,
+      SquadRankingFields.W_T_L,
+      SquadRankingFields.SumIndividualScore,
+      SquadRankingFields.OppScore,
+      SquadRankingFields.SumTd,
+      SquadRankingFields.SumCas,
+      SquadRankingFields.SumBestSport,
     ];
   }
 
@@ -113,10 +127,50 @@ class _RankingsPage extends State<RankingsPage> {
     return ToggleWidget(items: items);
   }
 
+  Widget _squadRankingsWithToggles() {
+    bool showAdminDetails = _tournament.isUserAdmin(_user);
+
+    List<ToggleWidgetItem> items = [
+      ToggleWidgetItem("Combined", (context) {
+        return RankingSquadsPage(
+            fields: showAdminDetails
+                ? _getSquadRankingFieldsCombinedAdmin()
+                : _getSquadRankingFieldsCombined());
+      }),
+      ToggleWidgetItem("Td", (context) {
+        return RankingSquadsPage(fields: [
+          SquadRankingFields.SumTd,
+          SquadRankingFields.SumOppTd,
+          SquadRankingFields.SumDeltaTd,
+        ]);
+      }),
+      ToggleWidgetItem("Cas", (context) {
+        return RankingSquadsPage(fields: [
+          SquadRankingFields.SumCas,
+          SquadRankingFields.SumOppCas,
+          SquadRankingFields.SumDeltaCas,
+        ]);
+      }),
+    ];
+
+    if (showAdminDetails) {
+      items.add(ToggleWidgetItem("Sport", (context) {
+        return RankingSquadsPage(fields: [SquadRankingFields.SumBestSport]);
+      }));
+    }
+
+    return ToggleWidget(items: items);
+  }
+
   Widget _squadAndCoachTabs() {
     List<ToggleWidgetItem> items = [
       ToggleWidgetItem("Squad Rankings", (context) {
-        return RankingSquadsPage(fields: _getSquadRankingFieldsCombined());
+        // Material somehow fixed bug with toggling between Squad & Coach
+        return Material(
+            child: Column(children: [
+          SizedBox(height: 1),
+          _squadRankingsWithToggles(),
+        ]));
       }),
       ToggleWidgetItem("Coach Rankings", (context) {
         return Column(children: [
