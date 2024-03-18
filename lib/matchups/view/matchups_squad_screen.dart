@@ -10,8 +10,10 @@ import 'package:collection/collection.dart';
 
 class SquadMatchupsPage extends StatefulWidget {
   final String squadName;
+  final VoidCallback? onBackPressed;
 
-  SquadMatchupsPage({Key? key, required this.squadName}) : super(key: key);
+  SquadMatchupsPage({Key? key, required this.squadName, this.onBackPressed})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -70,7 +72,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
   Widget _selectedSquadMatchupUi(BuildContext context, SquadMatchup m) {
     List<Widget> matchupWidgets = [
-      _getSquadListRoundTitle(),
+      _getRoundTitle(),
       _getSquadVsSquadTitle(context, m)
     ];
 
@@ -91,7 +93,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
             }));
   }
 
-  Widget _getSquadListRoundTitle() {
+  Widget _getRoundTitle() {
     final theme = Theme.of(context);
 
     bool hasPrevRound = _roundIdx! > 0;
@@ -124,16 +126,33 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
             : null,
         icon: hasNextRound ? Icon(Icons.chevron_right) : Text("")));
 
+    List<Widget> rows = [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: titleRoundWidgets,
+      )
+    ];
+
+    if (widget.onBackPressed != null) {
+      rows.add(SizedBox(height: 2));
+      rows.add(Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+              onPressed: () {
+                widget.onBackPressed?.call();
+              },
+              child: Text("View All Squad Matchups"))
+        ],
+      ));
+    }
+
     return Wrap(alignment: WrapAlignment.center, children: [
       Card(
           child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: titleRoundWidgets,
-          )
-        ]),
+        child:
+            Column(mainAxisAlignment: MainAxisAlignment.center, children: rows),
       ))
     ]);
   }

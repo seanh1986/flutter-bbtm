@@ -1,12 +1,9 @@
-import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:collection/collection.dart';
 
 class AllSquadsMatchupsPage extends StatefulWidget {
   AllSquadsMatchupsPage({Key? key}) : super(key: key);
@@ -59,14 +56,20 @@ class _AllSquadsMatchupsPage extends State<AllSquadsMatchupsPage> {
     }
 
     if (_selectedSquadName != null) {
-      return SquadMatchupsPage(squadName: _selectedSquadName!);
+      return SquadMatchupsPage(
+          squadName: _selectedSquadName!,
+          onBackPressed: () {
+            setState(() {
+              _selectedSquadName = null;
+            });
+          });
     }
 
     return _squadMatchupListUi();
   }
 
   Widget _squadMatchupListUi() {
-    List<Widget> matchupWidgets = [_getSquadListRoundTitle()];
+    List<Widget> matchupWidgets = [_getRoundTitle()];
 
     _matchups.forEach((m) {
       InkWell inkWell = InkWell(
@@ -95,7 +98,7 @@ class _AllSquadsMatchupsPage extends State<AllSquadsMatchupsPage> {
             }));
   }
 
-  Widget _getSquadListRoundTitle() {
+  Widget _getRoundTitle() {
     final theme = Theme.of(context);
 
     bool hasPrevRound = _roundIdx! > 0;
