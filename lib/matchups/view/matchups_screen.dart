@@ -1,5 +1,6 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
+import 'package:bbnaf/matchups/view/matchups_all_squads_screen.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/widgets/toggle_widget/models/toggle_widget_item.dart';
@@ -95,8 +96,10 @@ class _MatchupsPage extends State<MatchupsPage> {
       case MatchupSubScreens.MY_SQUAD:
         if (_tournament.useSquadVsSquad()) {
           return (context) {
-            return SquadMatchupsPage(
-                autoSelectAuthUserMatchup: true, refreshState: true);
+            String nafName = _user.getNafName();
+            Squad? squad = _tournament.getCoachSquad(nafName);
+            String squadName = squad != null ? squad.name() : "";
+            return SquadMatchupsPage(squadName: squadName);
           };
         } else {
           return (context) {
@@ -107,8 +110,7 @@ class _MatchupsPage extends State<MatchupsPage> {
         }
       case MatchupSubScreens.SQUAD_MATCHUPS:
         return (context) {
-          return SquadMatchupsPage(
-              autoSelectAuthUserMatchup: false, refreshState: true);
+          return AllSquadsMatchupsPage();
         };
       case MatchupSubScreens.COACH_MATCHUPS:
         return (context) {

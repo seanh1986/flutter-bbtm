@@ -131,19 +131,6 @@ class AppBloc extends Bloc<AppEvent, AppState> {
             screenDetailsJson: event.screenDetailsJson)));
   }
 
-  // Download tournament list & refresh
-  // void _requestNavToTournamentList(
-  //     AppRequestNavToTournamentList event, Emitter<AppState> emit) {
-  //   print("AppBloc: Request Navigation to Tournament List");
-
-  //   List<TournamentInfo>? tournamentList =
-  //       _tournamentRepository.getCurrentTournamentList();
-
-  //   if (tournamentList != null) {
-  //     add(AppTournamentListLoaded(tournamentList));
-  //   }
-  // }
-
   // Refresh app due to tournament list refresh
   void _onTournamentListLoaded(
       AppTournamentListLoaded event, Emitter<AppState> emit) {
