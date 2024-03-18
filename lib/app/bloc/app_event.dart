@@ -16,10 +16,18 @@ final class _AppUserChanged extends AppEvent {
   final User user;
 }
 
-// Request navigation to tournament selection page
-final class AppRequestNavToTournamentList extends AppEvent {
-  const AppRequestNavToTournamentList();
+// Request Navigation to a new page
+final class ScreenChange extends AppEvent {
+  const ScreenChange(this.mainScreen, {this.screenDetailsJson = const {}});
+
+  final String mainScreen;
+  final Map<String, dynamic> screenDetailsJson;
 }
+
+// // Request navigation to tournament selection page
+// final class AppRequestNavToTournamentList extends AppEvent {
+//   const AppRequestNavToTournamentList();
+// }
 
 // Tournament list is loaded / Navigate to tournament selection page
 final class AppTournamentListLoaded extends AppEvent {

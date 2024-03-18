@@ -10,6 +10,8 @@ import 'package:intl/intl.dart';
 class TournamentSelectionPage extends StatefulWidget {
   final String? tournamentId;
 
+  static const String tag = "TournamentSelectionPage";
+
   TournamentSelectionPage({Key? key, this.tournamentId}) : super(key: key);
 
   @override

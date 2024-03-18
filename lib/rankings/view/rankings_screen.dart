@@ -38,11 +38,14 @@ class _RankingsPage extends State<RankingsPage> {
 
     _tournament.reProcessAllRounds();
 
+    Widget widget;
     if (_tournament.useSquads()) {
-      return _squadAndCoachTabs();
+      widget = _squadAndCoachTabs();
+    } else {
+      widget = _coachRankingsWithToggles();
     }
 
-    return _coachRankingsWithToggles();
+    return widget;
   }
 
   List<SquadRankingFields> _getSquadRankingFieldsCombined() {

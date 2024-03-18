@@ -5,6 +5,8 @@ import 'package:bbnaf/rankings/rankings.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/home/view/overview_screen.dart';
+import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
+import 'package:bbnaf/utils/serializable.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,26 +15,23 @@ import 'package:fluttertoast/fluttertoast.dart';
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
 
+  static const String tag = "HomePage";
+
   @override
   State<StatefulWidget> createState() {
     return _HomePageState();
   }
 }
 
-class _WidgetFamily {
-  List<Widget> widgets;
-  _WidgetFamily(this.widgets);
-}
-
-class _HomePageState extends State<HomePage> {
-  int _parentIndex = 0;
-  int _childIndex = 0;
+class _HomePageState extends State<HomePage>
+    implements Serializable, Deserializable {
+  late int _widgetIdx;
 
   late FToast fToast;
   late Tournament _tournament;
   late User _user;
 
-  List<_WidgetFamily> _children = [];
+  List<Widget> _children = [];
 
   @override
   void initState() {
@@ -52,6 +51,10 @@ class _HomePageState extends State<HomePage> {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
+
+    Map<String, dynamic> detailsJson = appState.screenState.screenDetailsJson;
+
+    fromJson(detailsJson);
 
     print("HomePage: User: " +
         _user.getNafName() +
@@ -81,10 +84,10 @@ class _HomePageState extends State<HomePage> {
     final theme = Theme.of(context);
 
     _children = [
-      new _WidgetFamily([OverviewScreen()]),
-      new _WidgetFamily([MatchupsPage()]),
-      new _WidgetFamily([RankingsPage()]),
-      new _WidgetFamily([AdminScreen()]),
+      OverviewScreen(),
+      MatchupsPage(),
+      RankingsPage(),
+      AdminScreen(),
     ];
 
     return PopScope(
@@ -115,10 +118,10 @@ class _HomePageState extends State<HomePage> {
               SizedBox(width: 10),
             ],
           ),
-          body: _children[_parentIndex].widgets[_childIndex],
+          body: _children[_widgetIdx],
           bottomNavigationBar: BottomNavigationBar(
             items: _getBottomNavigationBarItems(),
-            currentIndex: _parentIndex,
+            currentIndex: _widgetIdx,
             onTap: _onItemTapped,
             type: BottomNavigationBarType.fixed,
             backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
@@ -146,25 +149,47 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleBackButton() {
-    if (_childIndex == 0) {
-      if (_parentIndex == 0) {
-        context.read<AppBloc>().add(AppRequestNavToTournamentList());
-      } else {
-        setState(() {
-          _parentIndex = 0;
-        });
-      }
+    if (_widgetIdx == 0) {
+      context.read<AppBloc>().add(ScreenChange(TournamentSelectionPage.tag));
     } else {
-      setState(() {
-        _childIndex = 0;
-      });
+      _widgetIdx = 0;
+      context.read<AppBloc>().add(ScreenChange(
+            HomePage.tag,
+            screenDetailsJson: toJson(),
+          ));
     }
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _parentIndex = index;
-      _childIndex = 0;
-    });
+    _widgetIdx = index;
+
+    context.read<AppBloc>().add(ScreenChange(
+          HomePage.tag,
+          screenDetailsJson: toJson(),
+        ));
+  }
+
+  @override
+  void fromJson(Map<String, dynamic> json) {
+    final tWidgetIdx = json['widgetIdx'] as int?;
+    _widgetIdx = tWidgetIdx != null ? tWidgetIdx : 0;
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> json;
+
+    // Add child widget json (if necessary)
+    Widget activeScreen = _children[_widgetIdx];
+    if (activeScreen is Serializable) {
+      json = (activeScreen as Serializable).toJson();
+    } else {
+      json = {};
+    }
+
+    // Add own json
+    json.putIfAbsent("widgetIdx", () => _widgetIdx);
+
+    return json;
   }
 }

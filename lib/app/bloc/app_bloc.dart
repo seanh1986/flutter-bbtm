@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/admin/admin.dart';
+import 'package:bbnaf/home/home.dart';
+import 'package:bbnaf/login/login.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/tournament_repository/src/tournament_repository.dart';
+import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -24,23 +27,23 @@ class AppBloc extends Bloc<AppEvent, AppState> {
                     ? AuthenticationState.authenticated(
                         authenticationRepository.currentUser)
                     : const AuthenticationState.unauthenticated()),
-            tournamentState: TournamentState.noTournamentList())) {
+            tournamentState: TournamentState.noTournamentList(),
+            screenState: ScreenState(mainScreen: LoginPage.tag))) {
     // Authentication Related
     on<_AppUserChanged>(_onUserChanged);
     on<AppLogoutRequested>(_onLogoutRequested);
     _userSubscription = _authenticationRepository.user.listen(
       (user) => add(_AppUserChanged(user)),
     );
+    // App Navigation Related
+    on<ScreenChange>(_onScreenChange);
     // Tournament List Related
-    on<AppRequestNavToTournamentList>(_requestNavToTournamentList);
+    // on<AppRequestNavToTournamentList>(_requestNavToTournamentList);
     on<AppTournamentListLoaded>(_onTournamentListLoaded);
-    _tournamentListSubscription = _tournamentRepository
-        .getTournamentList()
-        .listen(
-            (tournamentList) => add(AppTournamentListLoaded(tournamentList)));
     on<AppCreateTournament>(_createTournament);
     // Tournament Related
     on<AppTournamentRequested>(_appTournamentRequested);
+    on<AppTournamentLoaded>(_appTournamentLoaded);
     // Update Related
     on<UpdateMatchEvent>(_updateMatchEvent);
     on<UpdateMatchEvents>(_updateMatchEvents);
@@ -55,15 +58,28 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     on<DownloadNafUploadFile>(_downloadNafUploadFile);
     on<DownloadGlamFile>(_downloadGlamFile);
     on<DownloadFile>(_downloadFile);
+
+    // Subscriptions
+    _tournamentListSubscription =
+        _tournamentRepository.getTournamentList().listen((tournamentList) {
+      if (_selectedTournamentId == null) {
+        return add(AppTournamentListLoaded(tournamentList));
+      } else {
+        return add(AppTournamentRequested(_selectedTournamentId!));
+      }
+    });
   }
 
   final AuthenticationRepository _authenticationRepository;
   late final StreamSubscription<User> _userSubscription;
 
   final TournamentRepository _tournamentRepository;
+
   late final StreamSubscription<List<TournamentInfo>>
       _tournamentListSubscription;
-  // late final StreamSubscription<Tournament> _tournamentSubscription;
+
+  String? _selectedTournamentId;
+  StreamSubscription<Tournament>? _tournamentSubscription;
 
   // Do not maintain tournament state when user change occurs!
   void _onUserChanged(_AppUserChanged event, Emitter<AppState> emit) {
@@ -77,29 +93,42 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       print("AppBloc: Unauthenticated user");
     }
 
+    AuthenticationState authState = event.user.isNotEmpty
+        ? AuthenticationState.authenticated(event.user)
+        : const AuthenticationState.unauthenticated();
+    TournamentState tournamentState =
+        TournamentState.tournamentList(state.tournamentState.tournamentList);
+
+    ScreenState screenState = state.screenState;
+    if (screenState.mainScreen == LoginPage.tag &&
+        authState.status == AuthenticationStatus.authenticated) {
+      screenState = ScreenState(mainScreen: TournamentSelectionPage.tag);
+    }
+
     emit(AppState(
-        authenticationState: event.user.isNotEmpty
-            ? AuthenticationState.authenticated(event.user)
-            : const AuthenticationState.unauthenticated(),
-        tournamentState: TournamentState.tournamentList(
-            state.tournamentState.tournamentList)));
+        authenticationState: authState,
+        tournamentState: tournamentState,
+        screenState: screenState));
   }
 
   void _onLogoutRequested(AppLogoutRequested event, Emitter<AppState> emit) {
     unawaited(_authenticationRepository.logOut());
   }
 
-  // Download tournament list & refresh
-  void _requestNavToTournamentList(
-      AppRequestNavToTournamentList event, Emitter<AppState> emit) {
-    print("AppBloc: Request Navigation to Tournament List");
+  // Screen change
+  void _onScreenChange(ScreenChange event, Emitter<AppState> emit) {
+    print("AppBloc: ScreenChange: " +
+        event.mainScreen +
+        (event.screenDetailsJson.isNotEmpty
+            ? " -> " + event.screenDetailsJson.toString()
+            : ""));
 
-    List<TournamentInfo>? tournamentList =
-        _tournamentRepository.getCurrentTournamentList();
-
-    if (tournamentList != null) {
-      add(AppTournamentListLoaded(tournamentList));
-    }
+    emit(AppState(
+        authenticationState: state.authenticationState,
+        tournamentState: state.tournamentState,
+        screenState: ScreenState(
+            mainScreen: event.mainScreen,
+            screenDetailsJson: event.screenDetailsJson)));
   }
 
   // Refresh app due to tournament list refresh
@@ -108,9 +137,15 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     print("AppBloc: TournamentList Loaded: Size: " +
         event.tournamentList.length.toString());
 
+    ScreenState screenState = state.screenState;
+    if (screenState.mainScreen.isEmpty) {
+      screenState = ScreenState(mainScreen: TournamentSelectionPage.tag);
+    }
+
     emit(AppState(
         authenticationState: state.authenticationState,
-        tournamentState: TournamentState.tournamentList(event.tournamentList)));
+        tournamentState: TournamentState.tournamentList(event.tournamentList),
+        screenState: screenState));
   }
 
   // Create new tournament
@@ -119,35 +154,52 @@ class AppBloc extends Bloc<AppEvent, AppState> {
 
     emit(AppState(
         authenticationState: state.authenticationState,
-        tournamentState: TournamentState.createTournament()));
+        tournamentState: TournamentState.createTournament(),
+        screenState: state.screenState));
   }
 
   void _appTournamentRequested(
       AppTournamentRequested event, Emitter<AppState> emit) async {
     print("AppBloc: Request Tournament Download: " + event.tournamentId);
 
-    Tournament tournament =
-        await _tournamentRepository.requestTournament(event.tournamentId);
+    // Setup tournament subscription
+    _setupTournamentSubscription(event.tournamentId);
+  }
 
-    if (tournament.isEmpty()) {
-      return;
+  void _setupTournamentSubscription(String? tournamentId) {
+    _tournamentSubscription?.cancel();
+
+    if (tournamentId == null) {
+      _selectedTournamentId = null;
+      _tournamentSubscription = null;
+    } else {
+      _tournamentSubscription = _tournamentRepository
+          .getTournamentData(tournamentId)
+          .listen((tournament) {
+        return add(AppTournamentLoaded(tournament));
+      });
+    }
+  }
+
+  void _appTournamentLoaded(AppTournamentLoaded event, Emitter<AppState> emit) {
+    ScreenState screenState = state.screenState;
+    if (screenState.mainScreen == TournamentSelectionPage.tag ||
+        screenState.mainScreen == LoginPage.tag) {
+      screenState = ScreenState(mainScreen: HomePage.tag);
     }
 
-    print("AppBloc: Tournament Loaded: " +
-        tournament.info.name +
-        " (" +
-        tournament.info.id.toString() +
-        ")");
+    _selectedTournamentId = event.tournament.info.id;
 
     emit(AppState(
         authenticationState: state.authenticationState,
         tournamentState: TournamentState.selectTournament(
-            state.tournamentState.tournamentList, tournament)));
+            state.tournamentState.tournamentList, event.tournament),
+        screenState: screenState));
   }
 
   @override
   Future<void> close() {
-    // _tournamentSubscription.cancel();
+    _tournamentSubscription?.cancel();
     _tournamentListSubscription.cancel();
     _userSubscription.cancel();
     return super.close();

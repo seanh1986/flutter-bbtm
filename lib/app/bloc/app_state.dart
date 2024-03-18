@@ -69,13 +69,30 @@ class TournamentState extends Equatable {
   List<Object> get props => [status, tournamentList, tournament];
 }
 
+class ScreenState extends Equatable {
+  const ScreenState(
+      {required this.mainScreen, this.screenDetailsJson = const {}});
+
+  final String mainScreen;
+  final Map<String, dynamic> screenDetailsJson;
+
+  @override
+  List<Object> get props => [
+        mainScreen,
+        screenDetailsJson,
+      ];
+}
+
 final class AppState extends Equatable {
   const AppState(
-      {required this.authenticationState, required this.tournamentState});
+      {required this.authenticationState,
+      required this.tournamentState,
+      required this.screenState});
 
   final AuthenticationState authenticationState;
   final TournamentState tournamentState;
+  final ScreenState screenState;
 
   @override
-  List<Object> get props => [authenticationState, tournamentState];
+  List<Object> get props => [authenticationState, tournamentState, screenState];
 }

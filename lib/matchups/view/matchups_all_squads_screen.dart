@@ -8,25 +8,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
 
-class SquadMatchupsPage extends StatefulWidget {
-  final String squadName;
-
-  SquadMatchupsPage({Key? key, required this.squadName}) : super(key: key);
+class AllSquadsMatchupsPage extends StatefulWidget {
+  AllSquadsMatchupsPage({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return _SquadMatchupsPage();
+    return _AllSquadsMatchupsPage();
   }
 }
 
-class _SquadMatchupsPage extends State<SquadMatchupsPage> {
+class _AllSquadsMatchupsPage extends State<AllSquadsMatchupsPage> {
   late Tournament _tournament;
 
   List<SquadMatchup> _matchups = [];
 
-  late SquadMatchup? selectedMatchup;
-
   int? _roundIdx;
+
+  String? _selectedSquadName;
 
   FToast? fToast;
 
@@ -60,25 +58,31 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
       return _noMatchUpsYet();
     }
 
-    selectedMatchup = _matchups
-        .firstWhereOrNull((element) => element.hasSquad(widget.squadName));
+    if (_selectedSquadName != null) {
+      return SquadMatchupsPage(squadName: _selectedSquadName!);
+    }
 
-    return selectedMatchup != null
-        ? _selectedSquadMatchupUi(context, selectedMatchup!)
-        : Text("Failed to load Squad Matchup. Try again later.");
+    return _squadMatchupListUi();
   }
 
-  Widget _selectedSquadMatchupUi(BuildContext context, SquadMatchup m) {
-    List<Widget> matchupWidgets = [
-      _getSquadListRoundTitle(),
-      _getSquadVsSquadTitle(context, m)
-    ];
+  Widget _squadMatchupListUi() {
+    List<Widget> matchupWidgets = [_getSquadListRoundTitle()];
 
-    m.coachMatchups.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
-          matchup: m,
-          roundIdx: _roundIdx!,
-          refreshState: true, // widget.refreshState,
-        )));
+    _matchups.forEach((m) {
+      InkWell inkWell = InkWell(
+          child: MatchupSquadWidget(
+            refreshState: true,
+            matchup: m,
+            roundIdx: _roundIdx!,
+          ),
+          onTap: () {
+            setState(() {
+              _roundIdx = _roundIdx;
+              _selectedSquadName = m.homeSquadName;
+            });
+          });
+      matchupWidgets.add(inkWell);
+    });
 
     return SingleChildScrollView(
         child: ListView.builder(
@@ -136,93 +140,6 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
         ]),
       ))
     ]);
-  }
-
-  Widget _getSquadVsSquadTitle(BuildContext context, SquadMatchup m) {
-    final theme = Theme.of(context);
-
-    Squad? homeSquad = _tournament.getSquad(m.homeSquadName);
-    Squad? awaySquad = _tournament.getSquad(m.awaySquadName);
-
-    StringBuffer sbHome = StringBuffer();
-    sbHome.write(m.homeSquadName + "\n");
-    if (homeSquad != null) {
-      sbHome.write("(" +
-          homeSquad.wins().toString() +
-          "/" +
-          homeSquad.ties().toString() +
-          "/" +
-          homeSquad.losses().toString() +
-          ")");
-    }
-
-    StringBuffer sbAway = StringBuffer();
-    sbAway.write(m.awaySquadName + "\n");
-    if (awaySquad != null) {
-      sbAway.write("(" +
-          awaySquad.wins().toString() +
-          "/" +
-          awaySquad.ties().toString() +
-          "/" +
-          awaySquad.losses().toString() +
-          ")");
-    }
-
-    List<Widget> squadVsSquadTitleWidgets = [
-      Expanded(
-          child: Card(
-              color: _getColor(m, true),
-              child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(sbHome.toString(),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge)))),
-      Text("vs.", style: theme.textTheme.displaySmall),
-      Expanded(
-          child: Card(
-              color: _getColor(m, false),
-              child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(sbAway.toString(),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge)))),
-    ];
-
-    return Wrap(alignment: WrapAlignment.center, children: [
-      Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: squadVsSquadTitleWidgets,
-        ),
-        SizedBox(height: 2),
-        Divider(
-          height: 20,
-          thickness: 3,
-        ),
-      ]),
-    ]);
-  }
-
-  Color? _getColor(SquadMatchup m, bool home) {
-    if (!m.hasResult()) {
-      return null;
-    }
-
-    MatchResult result = m.getResult();
-
-    switch (result) {
-      case MatchResult.HomeWon:
-        return home ? Colors.green : Colors.red;
-      case MatchResult.AwayWon:
-        return home ? Colors.red : Colors.green;
-      case MatchResult.Draw:
-        return Colors.orange;
-      case MatchResult.Conflict:
-      case MatchResult.NoResult:
-      default:
-        return null;
-    }
   }
 
   Widget _noMatchUpsYet() {
