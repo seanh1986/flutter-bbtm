@@ -25,6 +25,8 @@ class _AllSquadsMatchupsPage extends State<AllSquadsMatchupsPage> {
 
   FToast? fToast;
 
+  String _searchValue = "";
+
   @override
   void initState() {
     super.initState();
@@ -42,6 +44,7 @@ class _AllSquadsMatchupsPage extends State<AllSquadsMatchupsPage> {
   Widget build(BuildContext context) {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
+    _searchValue = appState.screenState.searchValue;
 
     if (_roundIdx == null) {
       _roundIdx = _tournament.curRoundIdx();
@@ -72,6 +75,10 @@ class _AllSquadsMatchupsPage extends State<AllSquadsMatchupsPage> {
     List<Widget> matchupWidgets = [_getRoundTitle()];
 
     _matchups.forEach((m) {
+      if (!m.matchSearch(_searchValue)) {
+        return;
+      }
+
       InkWell inkWell = InkWell(
           child: MatchupSquadWidget(
             refreshState: true,

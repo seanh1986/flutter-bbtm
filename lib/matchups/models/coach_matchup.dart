@@ -72,6 +72,12 @@ class CoachMatchup extends IMatchup {
     return t.getCoach(awayNafName)!;
   }
 
+  @override
+  bool matchSearch(String search) {
+    return homeNafName.toLowerCase().contains(search) ||
+        awayNafName.toLowerCase().contains(search);
+  }
+
   MatchResult getResult() {
     if (homeReportedResults.reported && awayReportedResults.reported) {
       if (_areResultsSame()) {

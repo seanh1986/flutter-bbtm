@@ -23,6 +23,8 @@ abstract class IMatchup {
   IMatchupParticipant home(Tournament t);
   IMatchupParticipant away(Tournament t);
 
+  bool matchSearch(String search);
+
   // Map<String, dynamic> toJson();
 
   bool hasResult() {

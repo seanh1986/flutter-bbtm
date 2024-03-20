@@ -35,6 +35,12 @@ class SquadMatchup extends IMatchup {
   }
 
   @override
+  bool matchSearch(String search) {
+    return homeSquadName.toLowerCase().contains(search) ||
+        awaySquadName.toLowerCase().contains(search);
+  }
+
+  @override
   MatchResult getResult() {
     int homeWins = 0;
     int homeTies = 0;

@@ -32,6 +32,8 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
   FToast? fToast;
 
+  String _searchValue = "";
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +51,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   Widget build(BuildContext context) {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
+    _searchValue = appState.screenState.searchValue;
 
     if (_roundIdx == null) {
       _roundIdx = _tournament.curRoundIdx();
@@ -67,7 +70,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
     return selectedMatchup != null
         ? _selectedSquadMatchupUi(context, selectedMatchup!)
-        : Text("Failed to load Squad Matchup. Try again later.");
+        : Text("No Squad Matchup Found. Try Again Later.");
   }
 
   Widget _selectedSquadMatchupUi(BuildContext context, SquadMatchup m) {
@@ -76,11 +79,17 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
       _getSquadVsSquadTitle(context, m)
     ];
 
-    m.coachMatchups.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
-          matchup: m,
-          roundIdx: _roundIdx!,
-          refreshState: true, // widget.refreshState,
-        )));
+    m.coachMatchups.forEach((m) {
+      if (!m.matchSearch(_searchValue)) {
+        return;
+      }
+
+      matchupWidgets.add(MatchupCoachWidget(
+        matchup: m,
+        roundIdx: _roundIdx!,
+        refreshState: true, // widget.refreshState,
+      ));
+    });
 
     return SingleChildScrollView(
         child: ListView.builder(

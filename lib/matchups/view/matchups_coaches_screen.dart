@@ -39,6 +39,8 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
 
   FToast? fToast;
 
+  String _searchValue = "";
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +59,7 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
+    _searchValue = appState.screenState.searchValue;
 
     if (_roundIdx == null) {
       _roundIdx = _tournament.curRoundIdx();
@@ -129,11 +132,17 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
       _getRoundTitle(context),
     ];
 
-    matchupsToShow.forEach((m) => matchupWidgets.add(MatchupCoachWidget(
-          matchup: m,
-          roundIdx: _roundIdx!,
-          refreshState: widget.refreshState,
-        )));
+    matchupsToShow.forEach((m) {
+      if (!m.matchSearch(_searchValue)) {
+        return;
+      }
+
+      matchupWidgets.add(MatchupCoachWidget(
+        matchup: m,
+        roundIdx: _roundIdx!,
+        refreshState: widget.refreshState,
+      ));
+    });
 
     return SingleChildScrollView(
         child: ListView.builder(
