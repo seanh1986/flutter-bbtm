@@ -19,7 +19,7 @@ enum CoachRankingFields {
   OppScore,
   DeltaTd,
   DeltaCas,
-  BestSport
+  BestSport,
 }
 
 class RankingCoachPage extends StatefulWidget {
@@ -43,6 +43,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   bool _reset = true;
 
   List<Coach> _items = [];
+
+  String _searchValue = "";
 
   @override
   void initState() {
@@ -120,17 +122,28 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
     List<DataRow2> rows = [];
 
-    int rank = 1;
-    _items.forEach((coach) {
+    for (int i = 0; i < _items.length; i++) {
+      Coach coach = _items[i];
+
+      if (_searchValue.isNotEmpty && !coach.matchSearch(_searchValue)) {
+        continue;
+      }
+
+      int rank = i + 1;
+
       String nafname = _user.getNafName();
 
       bool primaryHighlight =
           coach.nafName.toLowerCase() == nafname.toLowerCase();
 
       // Check if coach is on squad of the logged-in user
-      Squad? squad = _tournament.getCoachSquad(nafname);
+      Squad? userSquad = _tournament.getCoachSquad(nafname);
 
-      bool secondaryHighlight = squad != null && squad.hasCoach(coach.nafName);
+      String coachSquadName =
+          _tournament.useSquadVsSquad() ? coach.squadName : "";
+
+      bool secondaryHighlight =
+          userSquad != null && userSquad.hasCoach(coach.nafName);
 
       TextStyle? textStyle = primaryHighlight
           ? TextStyle(color: Colors.red)
@@ -140,7 +153,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
       cells.add(_createDataCell(rank.toString(), textStyle));
 
-      cells.add(_createCoachDataCell(coach, squad, textStyle?.color));
+      cells.add(_createCoachDataCell(coach, coachSquadName, textStyle?.color));
 
       widget.fields.forEach((f) {
         String name = _getColumnName(f);
@@ -152,10 +165,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
       double? sizeNafName = theme.textTheme.bodyMedium?.fontSize;
       double? sizeSquadName =
-          squad != null ? theme.textTheme.bodySmall?.fontSize : 0;
+          coachSquadName.isNotEmpty ? theme.textTheme.bodySmall?.fontSize : 0;
       double? sizeRace = theme.textTheme.bodySmall?.fontSize;
 
-      int buffers = 10 * (squad != null ? 3 : 2);
+      int buffers = 10 * (coachSquadName.isNotEmpty ? 3 : 2);
 
       double? sizeRowHeight =
           (sizeNafName != null && sizeSquadName != null && sizeRace != null)
@@ -163,9 +176,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
               : null;
 
       rows.add(DataRow2(cells: cells, specificRowHeight: sizeRowHeight));
-
-      rank++;
-    });
+    }
 
     return rows;
   }
@@ -176,6 +187,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
 
+    _searchValue = appState.screenState.searchValue;
+
     if (_reset || _sortField == null) {
       _sortField = widget.fields.first;
       _sortAscending = false;
@@ -185,9 +198,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     // This will get reset if setState is called again
     _reset = true;
 
-    _items = List.from(_tournament
-        .getCoaches()
-        .where((a) => a.isActive(_tournament) || a.gamesPlayed() > 0));
+    _items = List.from(_tournament.getCoaches().where((a) =>
+        (a.isActive(_tournament) || a.gamesPlayed() > 0))); // "active"
 
     _items.sort((Coach a, Coach b) {
       final double aValue = _getSortingValue(a, _sortField!);
@@ -336,7 +348,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     }
   }
 
-  DataCell _createCoachDataCell(Coach coach, Squad? squad, Color? c) {
+  DataCell _createCoachDataCell(Coach coach, String coachSquadName, Color? c) {
     final theme = Theme.of(context);
 
     TextStyle nafNameStyle =
@@ -349,8 +361,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       Text(coach.nafName, overflow: TextOverflow.ellipsis, style: nafNameStyle),
     ];
 
-    if (squad != null) {
-      cellWidgets.add(Text("    " + squad.name(),
+    if (coachSquadName.isNotEmpty) {
+      cellWidgets.add(Text("    " + coachSquadName,
           overflow: TextOverflow.ellipsis, style: squadRaceStyle));
     }
 

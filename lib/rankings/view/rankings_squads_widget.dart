@@ -45,6 +45,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
   List<Squad> _items = [];
 
+  String _searchValue = "";
+
   @override
   void initState() {
     super.initState();
@@ -116,9 +118,15 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
     List<DataRow2> rows = [];
 
-    int rank = 1;
-    int idx = 0;
-    _items.forEach((squad) {
+    for (int i = 0; i < _items.length; i++) {
+      Squad squad = _items[i];
+
+      if (_searchValue.isNotEmpty && !squad.matchSearch(_searchValue)) {
+        continue;
+      }
+
+      int rank = i + 1;
+
       String nafName = _user.getNafName();
 
       bool highlight = squad.hasCoach(nafName);
@@ -152,9 +160,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         cells: cells,
         specificRowHeight: sizeRowHeight,
       ));
-
-      rank++;
-    });
+    }
 
     return rows;
   }
@@ -200,6 +206,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
+
+    _searchValue = appState.screenState.searchValue;
 
     if (_reset || _sortField == null) {
       _sortField = widget.fields.first;

@@ -42,6 +42,8 @@ class Coach extends IMatchupParticipant {
 
   List<CoachMatchup> matches = [];
 
+  bool isCustomStunty = false;
+
   Coach(String nafName, String squadName, this.coachName, this.race,
       this.teamName, this.nafNumber, this.active) {
     this.nafName = nafName.trim();
@@ -102,9 +104,27 @@ class Coach extends IMatchupParticipant {
     return active;
   }
 
+  // Search is lower case
+  @override
+  bool matchSearch(String search) {
+    return nafName.toLowerCase().contains(search) ||
+        coachName.toLowerCase().contains(search) ||
+        raceName().toLowerCase().contains(search) ||
+        squadName.toLowerCase().contains(search) ||
+        teamName.toLowerCase().contains(search);
+  }
+
   // Returns "" if not valid
   String raceName() {
     return RaceUtils.getName(race);
+  }
+
+  bool isStunty() {
+    return race == Race.Halfling ||
+        race == Race.Ogre ||
+        race == Race.Snotling ||
+        race == Race.Goblin ||
+        isCustomStunty;
   }
 
   void overwriteRecord(TournamentInfo t) {

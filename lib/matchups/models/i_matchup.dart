@@ -109,6 +109,9 @@ abstract class IMatchupParticipant {
   List<String> opponents();
   bool isActive(Tournament t);
 
+  // Check if it matches the search word
+  bool matchSearch(String search);
+
   String showRecord() {
     return wins().toString() +
         "-" +

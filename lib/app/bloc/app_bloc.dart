@@ -37,6 +37,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     );
     // App Navigation Related
     on<ScreenChange>(_onScreenChange);
+    on<SearchScreenChange>(_onSearchScreen);
     // Tournament List Related
     // on<AppRequestNavToTournamentList>(_requestNavToTournamentList);
     on<AppTournamentListLoaded>(_onTournamentListLoaded);
@@ -129,6 +130,21 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         screenState: ScreenState(
             mainScreen: event.mainScreen,
             screenDetailsJson: event.screenDetailsJson)));
+  }
+
+  // Search change
+  void _onSearchScreen(SearchScreenChange event, Emitter<AppState> emit) {
+    print("AppBloc: SearchScreenChange: " + event.search);
+
+    ScreenState screenState = ScreenState(
+        mainScreen: state.screenState.mainScreen,
+        screenDetailsJson: state.screenState.screenDetailsJson,
+        searchValue: event.search.toLowerCase());
+
+    emit(AppState(
+        authenticationState: state.authenticationState,
+        tournamentState: state.tournamentState,
+        screenState: screenState));
   }
 
   // Refresh app due to tournament list refresh

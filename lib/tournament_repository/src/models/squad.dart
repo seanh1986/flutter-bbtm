@@ -84,6 +84,13 @@ class Squad extends IMatchupParticipant {
     return numActiveCoaches == requiredNumCoachesPerSquad;
   }
 
+// Search is lower case
+  @override
+  bool matchSearch(String search) {
+    return _name.toLowerCase().contains(search) ||
+        _coaches.any((c) => c.toLowerCase().contains(search));
+  }
+
   int getNumActiveCoaches(Tournament t) {
     return _coaches.where((nafName) {
       Coach? c = t.getCoach(nafName);

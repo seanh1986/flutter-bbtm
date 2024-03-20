@@ -1,6 +1,5 @@
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:meta/meta.dart';
 
 class SquadMatchup extends IMatchup {
   late final String homeSquadName;

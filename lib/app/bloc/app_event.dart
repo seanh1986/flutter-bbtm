@@ -24,6 +24,12 @@ final class ScreenChange extends AppEvent {
   final Map<String, dynamic> screenDetailsJson;
 }
 
+final class SearchScreenChange extends AppEvent {
+  const SearchScreenChange(this.search);
+
+  final String search;
+}
+
 // // Request navigation to tournament selection page
 // final class AppRequestNavToTournamentList extends AppEvent {
 //   const AppRequestNavToTournamentList();

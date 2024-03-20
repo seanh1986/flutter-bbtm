@@ -8,6 +8,7 @@ import 'package:bbnaf/home/view/overview_screen.dart';
 import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
 import 'package:bbnaf/utils/serializable.dart';
 import 'package:bbnaf/utils/toast.dart';
+import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -74,11 +75,11 @@ class _HomePageState extends State<HomePage>
     context.read<AppBloc>().add(const AppLogoutRequested());
   }
 
-  void _handleRefreshTournamentPressed() {
-    print("Refresh Tournament Pressed");
-    ToastUtils.show(fToast, "Refreshing Tournament Data");
-    context.read<AppBloc>().add(AppTournamentRequested(_tournament.info.id));
-  }
+  // void _handleRefreshTournamentPressed() {
+  //   print("Refresh Tournament Pressed");
+  //   ToastUtils.show(fToast, "Refreshing Tournament Data");
+  //   context.read<AppBloc>().add(AppTournamentRequested(_tournament.info.id));
+  // }
 
   Widget _generateUi(BuildContext context, AppState appState) {
     final theme = Theme.of(context);
@@ -95,21 +96,20 @@ class _HomePageState extends State<HomePage>
           _handleBackButton();
         },
         child: Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back,
-                color: theme.iconTheme.color,
-              ),
-              onPressed: () => _handleBackButton(),
-            ),
+          appBar: EasySearchBar(
             title: Text(_tournament.info.name),
+            onSearch: (value) {
+              context.read<AppBloc>().add(SearchScreenChange(value));
+            },
+            leading: IconButton(
+                icon: Icon(Icons.arrow_back),
+                color: theme.iconTheme.color,
+                onPressed: () => _handleBackButton()),
             actions: [
-              IconButton(
-                  icon: Icon(Icons.refresh),
-                  color: theme.iconTheme.color,
-                  onPressed: () => _handleRefreshTournamentPressed()),
+              // IconButton(
+              //     icon: Icon(Icons.refresh),
+              //     color: theme.iconTheme.color,
+              //     onPressed: () => _handleRefreshTournamentPressed()),
               SizedBox(width: 20),
               IconButton(
                   icon: Icon(Icons.logout),
@@ -118,6 +118,29 @@ class _HomePageState extends State<HomePage>
               SizedBox(width: 10),
             ],
           ),
+          // AppBar(
+          //   automaticallyImplyLeading: false,
+          //   leading: IconButton(
+          //     icon: Icon(
+          //       Icons.arrow_back,
+          //       color: theme.iconTheme.color,
+          //     ),
+          //     onPressed: () => _handleBackButton(),
+          //   ),
+          //   title: Text(_tournament.info.name),
+          //   actions: [
+          //     IconButton(
+          //         icon: Icon(Icons.refresh),
+          //         color: theme.iconTheme.color,
+          //         onPressed: () => _handleRefreshTournamentPressed()),
+          //     SizedBox(width: 20),
+          //     IconButton(
+          //         icon: Icon(Icons.logout),
+          //         color: theme.iconTheme.color,
+          //         onPressed: () => _handleLogoutPressed()),
+          //     SizedBox(width: 10),
+          //   ],
+          // ),
           body: _children[_widgetIdx],
           bottomNavigationBar: BottomNavigationBar(
             items: _getBottomNavigationBarItems(),
