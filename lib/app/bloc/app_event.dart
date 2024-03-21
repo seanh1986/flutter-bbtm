@@ -70,8 +70,13 @@ final class UpdateMatchEvent extends AppEvent {
 
 // Update Multiple Match Events
 final class UpdateMatchEvents extends AppEvent {
-  const UpdateMatchEvents(this.matchEvents);
+  const UpdateMatchEvents(
+      {required this.tournamentId,
+      this.newRoundMatchups,
+      this.matchEvents = const []});
 
+  final String tournamentId;
+  final CoachRound? newRoundMatchups;
   final List<UpdateMatchReportEvent> matchEvents;
 }
 

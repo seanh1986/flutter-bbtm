@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
+import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:cache/cache.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -174,6 +175,27 @@ class TournamentRepository {
 
   Future<bool> updateCoachMatchReport(UpdateMatchReportEvent event) async {
     return updateCoachMatchReports([event]);
+  }
+
+  Future<bool> swapCoachMatchups(
+      String tournamentId, CoachRound newRoundMatchups) async {
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      var tRef = _tournyRef.doc(tournamentId);
+
+      var doc = await tRef.get();
+
+      Tournament dbTournament = _parseTournamentResponse(doc);
+
+      if (dbTournament.coachRounds.last.round() == newRoundMatchups.round()) {
+        dbTournament.coachRounds.last = newRoundMatchups;
+      }
+
+      await _overrwiteTournamentData(dbTournament);
+    }).then((value) {
+      return true;
+    }).catchError((e) {
+      return false;
+    });
   }
 
   Future<bool> updateCoachMatchReports(

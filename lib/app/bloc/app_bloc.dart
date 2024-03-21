@@ -8,6 +8,7 @@ import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/tournament_repository/src/tournament_repository.dart';
 import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';
+import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -239,15 +240,34 @@ class AppBloc extends Bloc<AppEvent, AppState> {
 
   void _updateMatchEvents(UpdateMatchEvents event, Emitter<AppState> emit) {
     print("AppBloc: updateMatchEvents");
-    _tournamentRepository
-        .updateCoachMatchReports(event.matchEvents)
-        .then((value) {
+
+    if (event.newRoundMatchups != null) {
+      print("AppBloc: updateMatchEvents -> swap matches");
+      _tournamentRepository
+          .swapCoachMatchups(event.tournamentId, event.newRoundMatchups!)
+          .then((value) {
+        _processUpdateMatches(event.tournamentId, event.matchEvents);
+      });
+    } else {
+      _processUpdateMatches(event.tournamentId, event.matchEvents);
+    }
+  }
+
+  void _processUpdateMatches(
+      String tournamentId, List<UpdateMatchReportEvent> matchEvents) {
+    if (matchEvents.isEmpty) {
+      return;
+    }
+
+    print("AppBloc: updateMatchEvents -> update matches");
+
+    _tournamentRepository.updateCoachMatchReports(matchEvents).then((value) {
       print("AppBloc: UpdateMatchEvents finished (size: " +
-          event.matchEvents.length.toString() +
+          matchEvents.length.toString() +
           ") -> " +
           value.toString());
-      if (value && event.matchEvents.isNotEmpty) {
-        add(AppTournamentRequested(event.matchEvents.first.tournament.info.id));
+      if (value && matchEvents.isNotEmpty) {
+        add(AppTournamentRequested(tournamentId));
       }
       return value;
     });

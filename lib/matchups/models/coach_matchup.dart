@@ -43,6 +43,22 @@ class CoachMatchup extends IMatchup {
     return OrgType.Coach;
   }
 
+  bool replaceCoachAndResetMatchReports(String oldNafName, String newNafName) {
+    if (homeNafName.toLowerCase() == oldNafName.toLowerCase()) {
+      homeNafName = newNafName;
+      homeReportedResults = ReportedMatchResult();
+      awayReportedResults = ReportedMatchResult();
+      return true;
+    } else if (awayNafName.toLowerCase() == oldNafName.toLowerCase()) {
+      awayNafName = newNafName;
+      homeReportedResults = ReportedMatchResult();
+      awayReportedResults = ReportedMatchResult();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   // @override
   // int tableNum() {
   //   return _tableNum;

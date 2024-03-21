@@ -42,7 +42,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   late List<DataColumn2> _roundSummaryCols;
   bool useBonus = false;
 
-  // CoachRoundDataSource? _dataSource;
+  bool hasSwapedMatches = false;
 
   int? editIdx;
   Set<int>? _editedMatchIndices;
@@ -124,6 +124,8 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
               _advanceRoundButton(context),
               SizedBox(width: 20),
               _discardCurrentRoundButton(context),
+              SizedBox(width: 20),
+              _swapMatchups(context),
               SizedBox(width: 20),
               _recoverBackupFromFile(context),
             ]));
@@ -260,7 +262,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                       _tournament, coachRound.matches[mIdx]))
                   .toList();
 
-              context.read<AppBloc>().add(UpdateMatchEvents(matchesToUpdate));
+              context.read<AppBloc>().add(UpdateMatchEvents(
+                  tournamentId: _tournament.info.id,
+                  newRoundMatchups: hasSwapedMatches ? coachRound : null,
+                  matchEvents: matchesToUpdate));
               // LoadingIndicatorDialog().show(context);
               // bool success =
               //     await _tournyBloc.updateMatchEvents(matchesToUpdate);
@@ -314,262 +319,432 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   Widget _advanceRoundButton(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-        height: 60,
-        padding: EdgeInsets.all(10),
-        child: ElevatedButton(
-          style: theme.elevatedButtonTheme.style,
-          child: Text('Advance to Round: ' +
-              (_tournament.curRoundNumber() + 1).toString()),
-          onPressed: () {
-            StringBuffer sb = new StringBuffer();
-            sb.writeln("Are you sure you want to process round " +
-                _tournament.curRoundNumber().toString() +
-                " and advance to round " +
-                (_tournament.curRoundNumber() + 1).toString() +
-                "?");
+    return ElevatedButton(
+      style: theme.elevatedButtonTheme.style,
+      child: Text(
+          'Advance to Round: ' + (_tournament.curRoundNumber() + 1).toString()),
+      onPressed: () {
+        StringBuffer sb = new StringBuffer();
+        sb.writeln("Are you sure you want to process round " +
+            _tournament.curRoundNumber().toString() +
+            " and advance to round " +
+            (_tournament.curRoundNumber() + 1).toString() +
+            "?");
 
-            VoidCallback advanceCallback = () async {
-              _tournament.processRound();
+        VoidCallback advanceCallback = () async {
+          _tournament.processRound();
 
-              String msg;
-              SwissPairings swiss = SwissPairings(_tournament);
-              RoundPairingError pairingError = swiss.pairNextRound();
+          String msg;
+          SwissPairings swiss = SwissPairings(_tournament);
+          RoundPairingError pairingError = swiss.pairNextRound();
 
-              switch (pairingError) {
-                case RoundPairingError.NoError:
-                  msg = "Succesful";
-                  break;
-                case RoundPairingError.MissingPreviousResults:
-                  msg = "Missing Previous Results";
-                  break;
-                case RoundPairingError.UnableToFindValidMatches:
-                  msg = "Unable To Find Valid Matches";
-                  break;
-                default:
-                  msg = "Unknown Error";
-                  break;
-              }
+          switch (pairingError) {
+            case RoundPairingError.NoError:
+              msg = "Succesful";
+              break;
+            case RoundPairingError.MissingPreviousResults:
+              msg = "Missing Previous Results";
+              break;
+            case RoundPairingError.UnableToFindValidMatches:
+              msg = "Unable To Find Valid Matches";
+              break;
+            default:
+              msg = "Unknown Error";
+              break;
+          }
 
-              showOkAlertDialog(
-                  context: context, title: "Advance Round", message: msg);
+          showOkAlertDialog(
+              context: context, title: "Advance Round", message: msg);
 
-              if (pairingError == RoundPairingError.NoError) {
-                ToastUtils.show(fToast, "Round Advanced");
+          if (pairingError == RoundPairingError.NoError) {
+            ToastUtils.show(fToast, "Round Advanced");
 
-                context.read<AppBloc>().add(AdvanceRound(_tournament));
-                // LoadingIndicatorDialog().show(context);
-                // bool success =
-                //     await _tournyBloc.advanceRound(widget.tournament);
-                // LoadingIndicatorDialog().dismiss();
+            context.read<AppBloc>().add(AdvanceRound(_tournament));
+            // LoadingIndicatorDialog().show(context);
+            // bool success =
+            //     await _tournyBloc.advanceRound(widget.tournament);
+            // LoadingIndicatorDialog().dismiss();
 
-                // if (success) {
-                //   ToastUtils.showSuccess(
-                //       fToast, "Tournament data successfully updated.");
+            // if (success) {
+            //   ToastUtils.showSuccess(
+            //       fToast, "Tournament data successfully updated.");
 
-                //   // Tournament? refreshedTournament = await _tournyBloc
-                //   //     .getRefreshedTournamentData(widget.tournament.info.id);
-                //   // if (refreshedTournament != null) {
-                //   //   _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
+            //   // Tournament? refreshedTournament = await _tournyBloc
+            //   //     .getRefreshedTournamentData(widget.tournament.info.id);
+            //   // if (refreshedTournament != null) {
+            //   //   _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
 
-                //   //   if (mounted) {
-                //   //     setState(() {});
-                //   //   }
-                //   // } else {
-                //   //   ToastUtils.showFailed(
-                //   //       fToast, "Failed to refresh tournament.");
-                //   // }
-                // } else {
-                //   ToastUtils.showFailed(
-                //       fToast, "Tournament data failed to update.");
-                // }
-              }
-            };
+            //   //   if (mounted) {
+            //   //     setState(() {});
+            //   //   }
+            //   // } else {
+            //   //   ToastUtils.showFailed(
+            //   //       fToast, "Failed to refresh tournament.");
+            //   // }
+            // } else {
+            //   ToastUtils.showFailed(
+            //       fToast, "Tournament data failed to update.");
+            // }
+          }
+        };
 
-            showOkCancelAlertDialog(
-                    context: context,
-                    title: "Advance Round",
-                    message: sb.toString(),
-                    okLabel: "Advance",
-                    cancelLabel: "Cancel")
-                .then((value) => {
-                      if (value == OkCancelResult.ok) {advanceCallback()}
-                    });
-          },
-        ));
+        showOkCancelAlertDialog(
+                context: context,
+                title: "Advance Round",
+                message: sb.toString(),
+                okLabel: "Advance",
+                cancelLabel: "Cancel")
+            .then((value) => {
+                  if (value == OkCancelResult.ok) {advanceCallback()}
+                });
+      },
+    );
   }
 
   Widget _discardCurrentRoundButton(BuildContext context) {
-    return Container(
-        height: 60,
-        padding: EdgeInsets.all(10),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            textStyle: TextStyle(color: Colors.white),
-          ),
-          child: Text('Discard Current Round (' +
+    final theme = Theme.of(context);
+
+    return ElevatedButton(
+      style: theme.elevatedButtonTheme.style,
+      child: Text('Discard Current Round (' +
+          _tournament.curRoundNumber().toString() +
+          ")"),
+      onPressed: () {
+        StringBuffer sb = new StringBuffer();
+        sb.writeln(
+            "Are you sure you want to discard the current drawn (round " +
+                _tournament.curRoundNumber().toString() +
+                ")?");
+
+        VoidCallback discardCallback = () async {
+          context.read<AppBloc>().add(DiscardCurrentRound(_tournament));
+          // //widget.tournament.coachRounds.removeLast();
+          // LoadingIndicatorDialog().show(context);
+          // bool success =
+          //     await _tournyBloc.discardCurrentRound(widget.tournament);
+          // LoadingIndicatorDialog().dismiss();
+
+          // if (success) {
+          //   ToastUtils.showSuccess(fToast, "Removed current round");
+          //   _tournyBloc
+          //       .add(TournamentEventRefreshData(widget.tournament.info.id));
+          // } else {
+          //   ToastUtils.showFailed(fToast, "Failed to remove current round");
+          // }
+        };
+
+        showOkCancelAlertDialog(
+                context: context,
+                title: "Discard Current Round)",
+                message: sb.toString(),
+                okLabel: "Discard",
+                cancelLabel: "Cancel")
+            .then((value) => {
+                  if (value == OkCancelResult.ok) {discardCallback()}
+                });
+      },
+    );
+  }
+
+  Widget _swapMatchups(BuildContext context) {
+    final theme = Theme.of(context);
+
+    Function(CoachRound newCoachRound) refreshCallback =
+        (CoachRound newCoachRound) async {
+      setState(() {
+        hasSwapedMatches = true;
+        _coachRounds.last = newCoachRound;
+      });
+    };
+
+    return ElevatedButton(
+      style: theme.elevatedButtonTheme.style,
+      child: Text(
+          'Swap Match (Round ' + _tournament.curRoundNumber().toString() + ")"),
+      onPressed: () {
+        _showSwapMatchesDialog((nafName1, nafName2) {
+          CoachRound lastRound = _tournament.coachRounds.last;
+
+          CoachMatchup match1 = lastRound.matches
+              .firstWhere((m) => m.hasParticipantName(nafName1));
+          CoachMatchup match2 = lastRound.matches
+              .firstWhere((m) => m.hasParticipantName(nafName2));
+
+          bool success1 =
+              match1.replaceCoachAndResetMatchReports(nafName1, nafName2);
+          bool success2 =
+              match2.replaceCoachAndResetMatchReports(nafName2, nafName1);
+
+          Coach? match1Coach1 = _tournament.getCoach(match1.homeNafName);
+          Coach? match1Coach2 = _tournament.getCoach(match1.awayNafName);
+
+          Coach? match2Coach1 = _tournament.getCoach(match2.homeNafName);
+          Coach? match2Coach2 = _tournament.getCoach(match2.awayNafName);
+
+          if (!success1 || match1Coach1 == null || match1Coach2 == null) {
+            ToastUtils.show(
+                fToast, "Failed to replace: " + nafName1 + " -> " + nafName2);
+            return;
+          } else if (!success2 ||
+              match2Coach1 == null ||
+              match2Coach2 == null) {
+            ToastUtils.show(
+                fToast, "Failed to replace: " + nafName2 + " -> " + nafName1);
+            return;
+          }
+
+          StringBuffer sb = new StringBuffer();
+          sb.writeln("Round " +
               _tournament.curRoundNumber().toString() +
-              ")"),
-          onPressed: () {
-            StringBuffer sb = new StringBuffer();
-            sb.writeln(
-                "Are you sure you want to discard the current drawn (round " +
-                    _tournament.curRoundNumber().toString() +
-                    ")?");
+              ": Are you sure that you want to swap " +
+              nafName1 +
+              " & " +
+              nafName2 +
+              "?");
 
-            VoidCallback discardCallback = () async {
-              context.read<AppBloc>().add(DiscardCurrentRound(_tournament));
-              // //widget.tournament.coachRounds.removeLast();
-              // LoadingIndicatorDialog().show(context);
-              // bool success =
-              //     await _tournyBloc.discardCurrentRound(widget.tournament);
-              // LoadingIndicatorDialog().dismiss();
+          sb.writeln();
+          sb.writeln("New Matchups:");
+          sb.writeln();
 
-              // if (success) {
-              //   ToastUtils.showSuccess(fToast, "Removed current round");
-              //   _tournyBloc
-              //       .add(TournamentEventRefreshData(widget.tournament.info.id));
-              // } else {
-              //   ToastUtils.showFailed(fToast, "Failed to remove current round");
-              // }
-            };
+          sb.writeln("Table " +
+              match1.tableNum.toString() +
+              ": " +
+              match1Coach1.nafName +
+              " (" +
+              match1Coach1.raceName() +
+              ") vs. " +
+              match1Coach2.nafName +
+              " (" +
+              match1Coach2.raceName() +
+              ")");
 
-            showOkCancelAlertDialog(
-                    context: context,
-                    title: "Discard Current Round)",
-                    message: sb.toString(),
-                    okLabel: "Discard",
-                    cancelLabel: "Cancel")
-                .then((value) => {
-                      if (value == OkCancelResult.ok) {discardCallback()}
-                    });
-          },
-        ));
+          sb.writeln("Table " +
+              match2.tableNum.toString() +
+              ": " +
+              match2Coach1.nafName +
+              " (" +
+              match2Coach1.raceName() +
+              ") vs. " +
+              match2Coach2.nafName +
+              " (" +
+              match2Coach2.raceName() +
+              ")");
+
+          sb.writeln("");
+          sb.writeln(
+              "NOTE: You will still need to click 'Update' to push the change(s) to the server! This allows you to easily swap multiple matches before pushing.");
+
+          showOkCancelAlertDialog(
+                  context: context,
+                  title: "Swap Matches",
+                  message: sb.toString(),
+                  okLabel: "Swap",
+                  cancelLabel: "Cancel")
+              .then((value) => {
+                    if (value == OkCancelResult.ok)
+                      {refreshCallback.call(lastRound)}
+                  });
+        });
+      },
+    );
+  }
+
+  Future<void> _showSwapMatchesDialog(
+      void Function(String nafName1, String nafName2) callback) async {
+    List<DropdownMenuItem> coachesDropDown = _tournament
+        .getCoaches()
+        .map((Coach c) => c.nafName)
+        .map((String r) => DropdownMenuItem(value: r, child: Text(r)))
+        .toList();
+
+    String title =
+        "Swap Matches (Round " + _tournament.curRoundNumber().toString() + ")";
+
+    String nafName1 = "";
+    String nafName2 = "";
+
+    DropdownButtonFormField coachField_1 = DropdownButtonFormField(
+      items: coachesDropDown,
+      onChanged: (value) {
+        nafName1 = value;
+      },
+      decoration: InputDecoration(labelText: "Nafname_1"),
+    );
+
+    DropdownButtonFormField coachField_2 = DropdownButtonFormField(
+      items: coachesDropDown,
+      onChanged: (value) {
+        nafName2 = value;
+      },
+      decoration: InputDecoration(labelText: "Nafname_2"),
+    );
+
+    List<Widget> widgets = [];
+    widgets.add(SizedBox(height: 10));
+    widgets.add(coachField_1);
+    widgets.add(SizedBox(height: 10));
+    widgets.add(Divider());
+    widgets.add(SizedBox(height: 10));
+    widgets.add(coachField_2);
+    widgets.add(SizedBox(height: 10));
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: widgets,
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+
+                if (nafName1.isEmpty) {
+                  ToastUtils.show(fToast, "Failed: Nafname_1 was empty");
+                } else if (nafName2.isEmpty) {
+                  ToastUtils.show(fToast, "Failed: Nafname_2 was empty");
+                } else if (nafName1 == nafName2) {
+                  ToastUtils.show(fToast, "Failed: Nafname_1 == Nafname_2");
+                } else {
+                  callback.call(nafName1, nafName2);
+                }
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _recoverBackupFromFile(BuildContext context) {
-    return Container(
-        height: 60,
-        padding: EdgeInsets.all(10),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            textStyle: TextStyle(color: Colors.white),
-          ),
-          child: Text('Recover Backup'),
-          onPressed: () {
-            VoidCallback recoveryCallback = () async {
-              FilePickerResult? picked;
+    final theme = Theme.of(context);
 
-              if (kIsWeb) {
-                picked = await FilePickerWeb.platform.pickFiles();
-              } else {
-                picked = await FilePicker.platform.pickFiles();
+    return ElevatedButton(
+      style: theme.elevatedButtonTheme.style,
+      child: Text('Recover Backup'),
+      onPressed: () {
+        VoidCallback recoveryCallback = () async {
+          FilePickerResult? picked;
+
+          if (kIsWeb) {
+            picked = await FilePickerWeb.platform.pickFiles();
+          } else {
+            picked = await FilePicker.platform.pickFiles();
+          }
+
+          if (picked != null) {
+            print(picked.files.first.name);
+
+            if (picked.files.first.extension == 'json') {
+              try {
+                String s = new String.fromCharCodes(picked.files.first.bytes!);
+
+                Map<String, dynamic> json = jsonDecode(s);
+
+                TournamentBackup tournyBackup = TournamentBackup.fromJson(json);
+
+                StringBuffer sb = new StringBuffer();
+                sb.writeln(
+                    "The recovery file has been successfull parsed. Please find a summary below.");
+                sb.writeln("");
+                sb.writeln(
+                    "Tournament Name: " + tournyBackup.tournament.info.name);
+                sb.writeln("# of Organizers: " +
+                    tournyBackup.tournament.info.organizers.length.toString());
+                sb.writeln("# of Squads: " +
+                    tournyBackup.tournament.getSquads().length.toString());
+                sb.writeln("# of Coaches: " +
+                    tournyBackup.tournament.getCoaches().length.toString());
+                sb.writeln("CurRound: " +
+                    tournyBackup.tournament.curRoundNumber().toString());
+                sb.writeln("");
+                sb.writeln(
+                    "Please confirm that you wish to OVERWRITE your tournament with the recovery file. This process cannot be undone.");
+
+                VoidCallback confirmedRecoveryCallback = () async {
+                  ToastUtils.show(fToast, "Recovering Backup");
+
+                  context
+                      .read<AppBloc>()
+                      .add(RecoverBackup(tournyBackup.tournament));
+
+                  // LoadingIndicatorDialog().show(context);
+                  // bool success = await widget.tournyBloc
+                  //     .recoverTournamentBackup(tournyBackup.tournament);
+                  // LoadingIndicatorDialog().dismiss();
+
+                  // if (success) {
+                  //   ToastUtils.showSuccess(
+                  //       fToast, "Recovering Backup successful.");
+
+                  //   // Tournament? refreshedTournament =
+                  //   //     await _tournyBloc.getRefreshedTournamentData(
+                  //   //         widget.tournament.info.id);
+
+                  //   // if (refreshedTournament != null) {
+                  //   //   ToastUtils.showSuccess(
+                  //   //       fToast, "Tournament refreshed");
+                  //   //   _tournyBloc
+                  //   //       .add(SelectTournamentEvent(refreshedTournament));
+                  //   // } else {
+                  //   //   ToastUtils.showFailed(fToast,
+                  //   //       "Automatic tournament refresh failed. Please refresh the page.");
+                  //   // }
+                  // } else {
+                  //   ToastUtils.showFailed(
+                  //       fToast, "Recovering Backup failed.");
+                  // }
+                };
+
+                showOkCancelAlertDialog(
+                        context: context,
+                        title: "Process Recovery Backup",
+                        message: sb.toString(),
+                        okLabel: "Overwrite",
+                        cancelLabel: "Cancel")
+                    .then((value) => {
+                          if (value == OkCancelResult.ok)
+                            {confirmedRecoveryCallback()}
+                        });
+              } catch (_) {
+                ToastUtils.showFailed(fToast, "Failed to parse recovery file");
               }
+            } else {
+              ToastUtils.showFailed(
+                  fToast, "Incorrect file format (must be .json)");
+            }
+          } else {
+            ToastUtils.show(fToast, "Recovering Cancelled");
+          }
+        };
 
-              if (picked != null) {
-                print(picked.files.first.name);
-
-                if (picked.files.first.extension == 'json') {
-                  try {
-                    String s =
-                        new String.fromCharCodes(picked.files.first.bytes!);
-
-                    Map<String, dynamic> json = jsonDecode(s);
-
-                    TournamentBackup tournyBackup =
-                        TournamentBackup.fromJson(json);
-
-                    StringBuffer sb = new StringBuffer();
-                    sb.writeln(
-                        "The recovery file has been successfull parsed. Please find a summary below.");
-                    sb.writeln("");
-                    sb.writeln("Tournament Name: " +
-                        tournyBackup.tournament.info.name);
-                    sb.writeln("# of Organizers: " +
-                        tournyBackup.tournament.info.organizers.length
-                            .toString());
-                    sb.writeln("# of Squads: " +
-                        tournyBackup.tournament.getSquads().length.toString());
-                    sb.writeln("# of Coaches: " +
-                        tournyBackup.tournament.getCoaches().length.toString());
-                    sb.writeln("CurRound: " +
-                        tournyBackup.tournament.curRoundNumber().toString());
-                    sb.writeln("");
-                    sb.writeln(
-                        "Please confirm that you wish to OVERWRITE your tournament with the recovery file. This process cannot be undone.");
-
-                    VoidCallback confirmedRecoveryCallback = () async {
-                      ToastUtils.show(fToast, "Recovering Backup");
-
-                      context
-                          .read<AppBloc>()
-                          .add(RecoverBackup(tournyBackup.tournament));
-
-                      // LoadingIndicatorDialog().show(context);
-                      // bool success = await widget.tournyBloc
-                      //     .recoverTournamentBackup(tournyBackup.tournament);
-                      // LoadingIndicatorDialog().dismiss();
-
-                      // if (success) {
-                      //   ToastUtils.showSuccess(
-                      //       fToast, "Recovering Backup successful.");
-
-                      //   // Tournament? refreshedTournament =
-                      //   //     await _tournyBloc.getRefreshedTournamentData(
-                      //   //         widget.tournament.info.id);
-
-                      //   // if (refreshedTournament != null) {
-                      //   //   ToastUtils.showSuccess(
-                      //   //       fToast, "Tournament refreshed");
-                      //   //   _tournyBloc
-                      //   //       .add(SelectTournamentEvent(refreshedTournament));
-                      //   // } else {
-                      //   //   ToastUtils.showFailed(fToast,
-                      //   //       "Automatic tournament refresh failed. Please refresh the page.");
-                      //   // }
-                      // } else {
-                      //   ToastUtils.showFailed(
-                      //       fToast, "Recovering Backup failed.");
-                      // }
-                    };
-
-                    showOkCancelAlertDialog(
-                            context: context,
-                            title: "Process Recovery Backup",
-                            message: sb.toString(),
-                            okLabel: "Overwrite",
-                            cancelLabel: "Cancel")
-                        .then((value) => {
-                              if (value == OkCancelResult.ok)
-                                {confirmedRecoveryCallback()}
-                            });
-                  } catch (_) {
-                    ToastUtils.showFailed(
-                        fToast, "Failed to parse recovery file");
-                  }
-                } else {
-                  ToastUtils.showFailed(
-                      fToast, "Incorrect file format (must be .json)");
-                }
-              } else {
-                ToastUtils.show(fToast, "Recovering Cancelled");
-              }
-            };
-
-            showOkCancelAlertDialog(
-                    context: context,
-                    title: "Recover Backup",
-                    message:
-                        "Uploading a recovery file will reset the tournament info/data. Are you sure you wish to proceed?",
-                    okLabel: "Yes",
-                    cancelLabel: "Cancel")
-                .then((value) => {
-                      if (value == OkCancelResult.ok) {recoveryCallback()}
-                    });
-          },
-        ));
+        showOkCancelAlertDialog(
+                context: context,
+                title: "Recover Backup",
+                message:
+                    "Uploading a recovery file will reset the tournament info/data. Are you sure you wish to proceed?",
+                okLabel: "Yes",
+                cancelLabel: "Cancel")
+            .then((value) => {
+                  if (value == OkCancelResult.ok) {recoveryCallback()}
+                });
+      },
+    );
   }
 }
 
