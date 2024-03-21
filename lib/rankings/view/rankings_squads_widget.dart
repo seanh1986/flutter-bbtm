@@ -1,5 +1,6 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
+import 'package:bbnaf/rankings/models/models.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
@@ -24,9 +25,11 @@ enum SquadRankingFields {
 }
 
 class RankingSquadsPage extends StatefulWidget {
+  final SquadRankingFilter? filter;
   final List<SquadRankingFields> fields;
 
-  RankingSquadsPage({Key? key, required this.fields}) : super(key: key);
+  RankingSquadsPage({Key? key, this.filter, required this.fields})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -206,7 +209,6 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
-
     _searchValue = appState.screenState.searchValue;
 
     if (_reset || _sortField == null) {
@@ -218,9 +220,10 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     // This will get reset if setState is called again
     _reset = true;
 
-    _items = List.from(_tournament
-        .getSquads()
-        .where((a) => a.isActive(_tournament) || a.gamesPlayed() > 0));
+    _items = List.from(_tournament.getSquads().where((a) =>
+        (widget.filter == null || widget.filter!.isActive(a)) && // Check filter
+            a.isActive(_tournament) ||
+        a.gamesPlayed() > 0)); // "active"
 
     _items.sort((Squad a, Squad b) {
       final double aValue = _getSortingValue(a, _sortField!);

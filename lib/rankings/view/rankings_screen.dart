@@ -95,6 +95,8 @@ class _RankingsPage extends State<RankingsPage> {
   Widget _coachRankingsWithToggles() {
     bool showAdminDetails = _tournament.isUserAdmin(_user);
 
+    StuntyFilter stuntyFilter = StuntyFilter();
+
     List<ToggleWidgetItem> items = [
       ToggleWidgetItem("Combined", (context) {
         return RankingCoachPage(
@@ -115,6 +117,10 @@ class _RankingsPage extends State<RankingsPage> {
           CoachRankingFields.OppCas,
           CoachRankingFields.DeltaCas
         ]);
+      }),
+      ToggleWidgetItem(stuntyFilter.name, (context) {
+        return RankingCoachPage(
+            filter: stuntyFilter, fields: stuntyFilter.fields);
       }),
     ];
 

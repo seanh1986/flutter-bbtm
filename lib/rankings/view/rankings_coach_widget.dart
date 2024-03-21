@@ -1,5 +1,6 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
+import 'package:bbnaf/rankings/rankings.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
@@ -23,9 +24,11 @@ enum CoachRankingFields {
 }
 
 class RankingCoachPage extends StatefulWidget {
+  final CoachRankingFilter? filter;
   final List<CoachRankingFields> fields;
 
-  RankingCoachPage({Key? key, required this.fields}) : super(key: key);
+  RankingCoachPage({Key? key, this.filter, required this.fields})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -186,7 +189,6 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
-
     _searchValue = appState.screenState.searchValue;
 
     if (_reset || _sortField == null) {
@@ -199,6 +201,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     _reset = true;
 
     _items = List.from(_tournament.getCoaches().where((a) =>
+        (widget.filter == null || widget.filter!.isActive(a)) && // Check filter
         (a.isActive(_tournament) || a.gamesPlayed() > 0))); // "active"
 
     _items.sort((Coach a, Coach b) {
@@ -210,9 +213,22 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       return multiplier * Comparable.compare(aValue, bValue);
     });
 
-    return Container(
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: getDataTable());
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      // Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      //   EasySearchBar(
+      //       title: Text('Search'),
+      //       onSearch: (value) => setState(() => _searchValue = value)),
+      //   // IconButton(onPressed: () {}, icon: Icon(Icons.filter))
+      // ]),
+      SizedBox(height: 1),
+      Container(
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: getDataTable())
+    ]);
+
+    // return Container(
+    //     height: MediaQuery.of(context).size.height * 0.6,
+    //     child: getDataTable());
   }
 
   Widget getDataTable() {
