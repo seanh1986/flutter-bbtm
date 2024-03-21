@@ -1,52 +1,121 @@
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/rankings/rankings.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 
 abstract class RankingFilter {
-  final String name;
+  late final String name;
 
   RankingFilter(this.name);
 
   bool isActive(IMatchupParticipant p);
+
+  RankingFilter.fromJson(Map<String, dynamic> json) {
+    final tName = json['name'] as String?;
+    this.name = tName != null ? tName : "";
+  }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+      };
 }
 
-class CoachRankingFilter extends RankingFilter {
-  bool Function(Coach c) _predicate;
-  final List<CoachRankingFields> fields;
+abstract class CoachRankingFilter extends RankingFilter {
+  late final List<CoachRankingFields> fields;
 
-  CoachRankingFilter(String name, this._predicate, this.fields) : super(name);
+  CoachRankingFilter(String name, this.fields) : super(name);
 
-  bool isActive(IMatchupParticipant p) {
-    if (p is Coach) {
-      return _predicate.call(p);
-    } else {
-      return false;
+  CoachRankingFilter.fromJson(Map<String, dynamic> json)
+      : super.fromJson(json) {
+    final tFields = json['fields'] as List<dynamic>?;
+
+    List<CoachRankingFields> tParsedFields = [];
+
+    if (tFields != null) {
+      tFields.forEach((f) {
+        CoachRankingFields? tParsed =
+            EnumToString.fromString(CoachRankingFields.values, f);
+        if (tParsed != null) {
+          tParsedFields.add(tParsed);
+        }
+      });
     }
+
+    this.fields = tParsedFields;
+  }
+
+  bool isActive(IMatchupParticipant p);
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> data = super.toJson();
+
+    data['fields'] = fields.map((e) => EnumToString.convertToString(e));
+    return data;
   }
 }
 
-class SquadRankingFilter extends RankingFilter {
-  bool Function(Squad c) _predicate;
+abstract class SquadRankingFilter extends RankingFilter {
   final List<SquadRankingFields> fields;
 
-  SquadRankingFilter(String name, this._predicate, this.fields) : super(name);
+  SquadRankingFilter(String name, this.fields) : super(name);
 
-  bool isActive(IMatchupParticipant p) {
-    if (p is Squad) {
-      return _predicate.call(p);
-    } else {
-      return false;
-    }
-  }
+  bool isActive(IMatchupParticipant p);
 }
 
 class StuntyFilter extends CoachRankingFilter {
   StuntyFilter()
-      : super("Stunty", (c) {
-          return c.isStunty();
-        }, [
+      : super("Stunty", [
           CoachRankingFields.Pts,
           CoachRankingFields.Td,
           CoachRankingFields.Cas
         ]);
+
+  @override
+  bool isActive(IMatchupParticipant p) {
+    if (p is Coach) {
+      return p.isStunty();
+    } else {
+      return false;
+    }
+  }
+}
+
+class CoachRaceFilter extends CoachRankingFilter {
+  late final List<Race> races;
+
+  CoachRaceFilter(String name, this.races, List<CoachRankingFields> fields)
+      : super(name, fields);
+
+  CoachRaceFilter.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
+    final tRaces = json['races'] as List<dynamic>?;
+
+    List<Race> tParsedRaces = [];
+
+    if (tRaces != null) {
+      tRaces.forEach((r) {
+        Race? tParsed = EnumToString.fromString(Race.values, r);
+        if (tParsed != null) {
+          tParsedRaces.add(tParsed);
+        }
+      });
+    }
+
+    this.races = tParsedRaces;
+  }
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> data = super.toJson();
+
+    data['races'] = fields.map((e) => EnumToString.convertToString(e));
+    return data;
+  }
+
+  @override
+  bool isActive(IMatchupParticipant p) {
+    if (p is Coach) {
+      return races.any((r) => r == p.race);
+    } else {
+      return false;
+    }
+  }
 }

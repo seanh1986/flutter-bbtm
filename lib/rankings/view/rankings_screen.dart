@@ -88,7 +88,7 @@ class _RankingsPage extends State<RankingsPage> {
       CoachRankingFields.OppScore,
       CoachRankingFields.Td,
       CoachRankingFields.Cas,
-      CoachRankingFields.BestSport
+      CoachRankingFields.BestSport,
     ];
   }
 
@@ -108,14 +108,14 @@ class _RankingsPage extends State<RankingsPage> {
         return RankingCoachPage(fields: [
           CoachRankingFields.Td,
           CoachRankingFields.OppTd,
-          CoachRankingFields.DeltaTd
+          CoachRankingFields.DeltaTd,
         ]);
       }),
       ToggleWidgetItem("Cas", (context) {
         return RankingCoachPage(fields: [
           CoachRankingFields.Cas,
           CoachRankingFields.OppCas,
-          CoachRankingFields.DeltaCas
+          CoachRankingFields.DeltaCas,
         ]);
       }),
       ToggleWidgetItem(stuntyFilter.name, (context) {

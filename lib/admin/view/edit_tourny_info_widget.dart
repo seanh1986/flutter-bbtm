@@ -270,7 +270,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         DataCell(removeOrgaBtn),
         DataCell(emailForm),
         DataCell(nafNameForm),
-        DataCell(primaryCheckbox)
+        DataCell(primaryCheckbox),
       ]));
     }
 
@@ -466,6 +466,20 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       ))
     ]);
 
+    List<Widget> children = [winTieLossPts, SizedBox(height: 5)];
+
+    children.addAll(_getCoachBonusPtsWidgets(details));
+
+// TODO: Need to add UI for adding CoachRankingFilters
+    // if (details is IndividualScoringDetails) {
+    //   children.addAll(_getCoachRankingFilterWidgets(details));
+    // }
+
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.center, children: children);
+  }
+
+  List<Widget> _getCoachBonusPtsWidgets(ScoringDetails details) {
     List<Widget> bonusPtsWidgets = [
       ElevatedButton(
         onPressed: () {
@@ -517,13 +531,67 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
           ]));
     }
 
-    List<Widget> children = [winTieLossPts, SizedBox(height: 5)];
-
-    children.addAll(bonusPtsWidgets);
-
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center, children: children);
+    return bonusPtsWidgets;
   }
+
+// TODO: Need to add UI for adding CoachRankingFilters
+
+  // List<Widget> _getCoachRankingFilterWidgets(IndividualScoringDetails details) {
+  //   List<Widget> rankingFilterWidgets = [
+  //     ElevatedButton(
+  //       onPressed: () {
+
+  //         setState(() {
+  //           refreshFields = false;
+  //           String idx =
+  //               (_scoringDetails.coachRaceRankingFilters.length + 1).toString();
+
+  //           _scoringDetails.coachRaceRankingFilters
+  //               .add(BonusDetails("RankingFilter_" + idx, 1));
+  //         });
+  //       },
+  //       child: const Text('Add Race Ranking Filter'),
+  //     )
+  //   ];
+
+  //   for (int i = 0; i < details.bonusPts.length; i++) {
+  //     String bonusKey = details.bonusPts[i].name;
+  //     double bonusVal = details.bonusPts[i].weight;
+
+  //     ValueChanged<String> bonusNameCallback = ((value) {
+  //       details.bonusPts[i] = BonusDetails(value, bonusVal);
+  //     });
+
+  //     ValueChanged<String> bonusPtsCallback = ((value) {
+  //       details.bonusPts[i] = BonusDetails(bonusKey, double.parse(value));
+  //     });
+
+  //     bonusPtsWidgets.add(Row(
+  //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //         children: <Widget>[
+  //           SizedBox(width: 10.0),
+  //           Expanded(
+  //               child: CustomTextFormField(
+  //                   initialValue: bonusKey.toString(),
+  //                   // inputFormatters: [
+  //                   //   FilteringTextInputFormatter.singleLineFormatter
+  //                   // ],
+  //                   keyboardType: TextInputType.number,
+  //                   title: 'Bonus Name',
+  //                   callback: (value) => bonusNameCallback(value))),
+  //           SizedBox(width: 10.0),
+  //           Expanded(
+  //               child: CustomTextFormField(
+  //                   initialValue: bonusVal.toString(),
+  //                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+  //                   keyboardType: TextInputType.number,
+  //                   title: 'Bonus Value',
+  //                   callback: (value) => bonusPtsCallback(value)))
+  //         ]));
+  //   }
+
+  //   return bonusPtsWidgets;
+  // }
 
   Widget _createCasulatyDetails() {
     final theme = Theme.of(context);

@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'package:bbnaf/rankings/models/models.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 
 class TournamentInfo {
@@ -272,6 +273,8 @@ class IndividualScoringDetails extends ScoringDetails {
     TieBreaker.CasDiff,
   ];
 
+  List<CoachRaceFilter> coachRaceRankingFilters = [];
+
   IndividualScoringDetails() : super.defaultForCoaches();
 
   IndividualScoringDetails.fromJson(Map<String, dynamic> json)
@@ -300,6 +303,15 @@ class IndividualScoringDetails extends ScoringDetails {
         TieBreaker.CasDiff,
       ];
     }
+
+    final tRankingFilters =
+        json['coach_race_ranking_filters'] as List<dynamic>?;
+    if (tRankingFilters != null) {
+      tRankingFilters.forEach((tFilter) {
+        var filterJson = tFilter as Map<String, dynamic>;
+        coachRaceRankingFilters.add(CoachRaceFilter.fromJson(filterJson));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -307,6 +319,9 @@ class IndividualScoringDetails extends ScoringDetails {
 
     data['tie_breakers'] =
         tieBreakers.map((e) => EnumToString.convertToString(e)).toList();
+
+    data['coach_race_ranking_filters'] =
+        coachRaceRankingFilters.map((e) => e.toJson()).toList();
     return data;
   }
 }
