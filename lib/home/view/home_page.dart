@@ -99,7 +99,9 @@ class _HomePageState extends State<HomePage>
           appBar: EasySearchBar(
             title: Text(_tournament.info.name),
             onSearch: (value) {
-              context.read<AppBloc>().add(SearchScreenChange(value));
+              context
+                  .read<AppBloc>()
+                  .add(SearchScreenChange(value.toLowerCase()));
             },
             leading: IconButton(
                 icon: Icon(Icons.arrow_back),

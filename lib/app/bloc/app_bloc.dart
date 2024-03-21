@@ -139,7 +139,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     ScreenState screenState = ScreenState(
         mainScreen: state.screenState.mainScreen,
         screenDetailsJson: state.screenState.screenDetailsJson,
-        searchValue: event.search.toLowerCase());
+        searchValue: event.search.toLowerCase()); // Ensure lower-case
 
     emit(AppState(
         authenticationState: state.authenticationState,
