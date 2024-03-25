@@ -153,6 +153,8 @@ class _AllSquadsMatchupsPage extends State<AllSquadsMatchupsPage> {
   }
 
   Widget _noMatchUpsYet() {
+    final theme = Theme.of(context);
+
     return Container(
         margin: EdgeInsets.fromLTRB(20, 2, 20, 2), // EdgeInsets.all(20),
         width: double.infinity,
@@ -162,7 +164,7 @@ class _AllSquadsMatchupsPage extends State<AllSquadsMatchupsPage> {
               padding: EdgeInsets.all(2),
               child: Text(
                 'Matchups not available yet',
-                style: TextStyle(fontSize: 20),
+                style: theme.textTheme.titleLarge,
               )),
         ));
   }

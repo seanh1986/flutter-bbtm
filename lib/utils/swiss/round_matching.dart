@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 
@@ -68,28 +70,13 @@ class SquadRound extends RoundMatching {
   bool hasMatchForSquad(Squad s) {
     return matches.any((SquadMatchup match) => match.hasParticipant(s));
   }
-
-  // SquadRound.fromJson(Map<String, dynamic> json) {
-  //   final tRound = json['round'] as int?;
-  //   this._round = tRound != null ? tRound : 0;
-
-  //   final tMatches = json['matches'] as List<dynamic>?;
-  //   if (tMatches != null) {
-  //     for (int i = 0; i < tMatches.length; i++) {
-  //       matches.add(SquadMatchup.fromJson(tMatches[i] as Map<String, dynamic>));
-  //     }
-  //   }
-  // }
-
-  // Map<String, dynamic> toJson() => {
-  //       'round': _round,
-  //       'matches': matches.map((e) => e.toJson()).toList(),
-  //     };
 }
 
 class CoachRound extends RoundMatching {
   late int _round;
   List<CoachMatchup> matches = [];
+
+  Map<String, List<int>> squadBonuses = {};
 
   CoachRound.newRound(this._round);
   CoachRound(this._round, this.matches);
@@ -110,6 +97,7 @@ class CoachRound extends RoundMatching {
       }
     });
   }
+
   CoachRound.from(CoachRound cr)
       : _round = cr._round,
         matches = cr.matches.map((m) => CoachMatchup.from(m)).toList();
@@ -137,11 +125,27 @@ class CoachRound extends RoundMatching {
         matches.add(CoachMatchup.fromJson(matchJson, info));
       }
     }
+
+    final tSquadBonuses = json['squad_bonuses'] as Map<String, dynamic>?;
+    if (tSquadBonuses != null) {
+      tSquadBonuses.forEach((key, value) {
+        List<int> bonuses = [];
+
+        if (value is List) {
+          value.forEach((v) {
+            bonuses.add(v as int);
+          });
+        }
+
+        squadBonuses.putIfAbsent(key, () => bonuses);
+      });
+    }
   }
 
   Map<String, dynamic> toJson() => {
         'round': _round,
         'matches': matches.map((e) => e.toJson()).toList(),
+        'squad_bonuses': squadBonuses,
       };
 }
 

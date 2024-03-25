@@ -83,22 +83,16 @@ class SquadMatchup extends IMatchup {
   }
 
   bool hasSquad(String squadName) {
-    return homeSquadName.toLowerCase() == squadName.toLowerCase() ||
-        awaySquadName.toLowerCase() == squadName.toLowerCase();
+    return isHome(squadName) || isAway(squadName);
   }
 
-  // SquadMatchup.fromJson(Map<String, dynamic> json) {
-  //   final tHomeName = json['home_name'] as String?;
-  //   this.homeSquadName = tHomeName != null ? tHomeName : "";
+  bool isHome(String? squadName) {
+    return squadName != null &&
+        homeSquadName.toLowerCase() == squadName.toLowerCase();
+  }
 
-  //   final tAwayName = json['away_name'] as String?;
-  //   this.awaySquadName = tAwayName != null ? tAwayName : "";
-
-  //   // TODO: Coach Matchups! (maybe use index only?)
-  // }
-
-  // Map<String, dynamic> toJson() => {
-  //       'home_name': homeSquadName,
-  //       'away_name': awaySquadName,
-  //     };
+  bool isAway(String? squadName) {
+    return squadName != null &&
+        awaySquadName.toLowerCase() == squadName.toLowerCase();
+  }
 }

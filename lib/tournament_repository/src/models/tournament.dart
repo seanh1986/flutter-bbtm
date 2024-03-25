@@ -326,6 +326,29 @@ class Tournament {
     return Authorization.Unauthorized;
   }
 
+  Authorization getSquadMatchAuthorization(SquadMatchup matchup, User user) {
+    // Check if Admin
+    if (isUserAdmin(user)) {
+      return Authorization.Admin;
+    }
+
+    String nafName = user.getNafName();
+    Squad? squad = getCoachSquad(nafName);
+    if (squad == null) {
+      return Authorization.Unauthorized;
+    }
+
+    String squadName = squad.name();
+
+    if (matchup.isAway(squadName)) {
+      return Authorization.AwayCoach;
+    } else if (matchup.isHome(nafName)) {
+      return Authorization.HomeCoach;
+    }
+
+    return Authorization.Unauthorized;
+  }
+
   bool isUserAdmin(User user) {
     return info.organizers.any((e) => e.email == user.getEmail());
   }

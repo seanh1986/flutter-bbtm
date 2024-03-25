@@ -18,6 +18,8 @@ class Squad extends IMatchupParticipant {
 
   double oppCoachPoints = 0.0;
 
+  List<double> _bonusPts = <double>[];
+
   List<double> _tieBreakers = <double>[];
 
   List<SquadOpponent> _opponents = <SquadOpponent>[];
@@ -132,6 +134,8 @@ class Squad extends IMatchupParticipant {
 
     int numExpectedMatches = t.info.squadDetails.requiredNumCoachesPerSquad;
 
+    _bonusPts.clear();
+
     t.coachRounds.forEach((cr) {
       int numCoachWins = 0;
       int numCoachTies = 0;
@@ -187,6 +191,12 @@ class Squad extends IMatchupParticipant {
       // Update opponents
       _opponents.add(SquadOpponent(roundOppSquads));
 
+      // Update bonus points
+      List<int>? bonuses = cr.squadBonuses[_name];
+      if (bonuses != null) {
+        _bonusPts = bonuses.map((b) => b as double).toList();
+      }
+
       int numMatchesPlayed = numCoachWins + numCoachTies + numCoachLosses;
 
       // Don't count uncompleted rounds
@@ -205,6 +215,15 @@ class Squad extends IMatchupParticipant {
     });
 
     _points = calcPoints(t);
+
+    // Add bonus points to total points
+    List<BonusDetails> bonusDetails =
+        t.info.squadDetails.scoringDetails.bonusPts;
+
+    for (int i = 0; i < _bonusPts.length; i++) {
+      double weight = i < bonusDetails.length ? bonusDetails[i].weight : 0.0;
+      _points += _bonusPts[i] * weight;
+    }
   }
 
   double calcPoints(Tournament t) {

@@ -80,6 +80,13 @@ final class UpdateMatchEvents extends AppEvent {
   final List<UpdateMatchReportEvent> matchEvents;
 }
 
+// Update Squad Bonus Points
+final class UpdateSquadBonusPts extends AppEvent {
+  const UpdateSquadBonusPts(this.tournament);
+
+  final Tournament tournament;
+}
+
 // Update Tournament Info
 final class UpdateTournamentInfo extends AppEvent {
   const UpdateTournamentInfo(this.context, this.tournamentInfo);

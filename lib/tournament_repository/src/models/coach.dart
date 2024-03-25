@@ -211,8 +211,12 @@ class Coach extends IMatchupParticipant {
         _ties * t.scoringDetails.tiePts +
         _losses * t.scoringDetails.lossPts;
 
+    // Add bonus points to total points
+    List<BonusDetails> bonusDetails = t.scoringDetails.bonusPts;
+
     for (int i = 0; i < _bonusPts.length; i++) {
-      _points += _bonusPts[i] * t.scoringDetails.bonusPts[i].weight;
+      double weight = i < bonusDetails.length ? bonusDetails[i].weight : 0.0;
+      _points += _bonusPts[i] * weight;
     }
   }
 

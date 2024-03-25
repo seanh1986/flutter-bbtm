@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:bbnaf/admin/admin.dart';
+import 'package:bbnaf/app/app.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:cache/cache.dart';
@@ -239,6 +240,33 @@ class TournamentRepository {
               .awayReportedResults = event.matchup.awayReportedResults;
         }
       });
+
+      await _overrwiteTournamentData(dbTournament);
+    }).then((value) {
+      return true;
+    }).catchError((e) {
+      return false;
+    });
+  }
+
+  Future<bool> updateSquadBonusPts(UpdateSquadBonusPts event) async {
+    Tournament tournament = event.tournament;
+
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      var tRef = _tournyRef.doc(tournament.info.id);
+
+      var doc = await tRef.get();
+
+      Tournament dbTournament = _parseTournamentResponse(doc);
+
+      if (dbTournament.coachRounds.length != tournament.coachRounds.length) {
+        throw new Exception("Tournament lengths do not align");
+      }
+
+      for (int i = 0; i < tournament.coachRounds.length; i++) {
+        dbTournament.coachRounds[i].squadBonuses =
+            Map.from(tournament.coachRounds[i].squadBonuses);
+      }
 
       await _overrwiteTournamentData(dbTournament);
     }).then((value) {

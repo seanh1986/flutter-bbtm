@@ -49,6 +49,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     // Update Related
     on<UpdateMatchEvent>(_updateMatchEvent);
     on<UpdateMatchEvents>(_updateMatchEvents);
+    on<UpdateSquadBonusPts>(_updateSquadBonusPts);
     on<UpdateTournamentInfo>(_updateTournamentInfo);
     on<UpdateCoaches>(_updateCoaches);
     on<RecoverBackup>(_recoverBackup);
@@ -268,6 +269,18 @@ class AppBloc extends Bloc<AppEvent, AppState> {
           value.toString());
       if (value && matchEvents.isNotEmpty) {
         add(AppTournamentRequested(tournamentId));
+      }
+      return value;
+    });
+  }
+
+  void _updateSquadBonusPts(UpdateSquadBonusPts event, Emitter<AppState> emit) {
+    print("AppBloc: UpdateSquadBonusPts");
+
+    _tournamentRepository.updateSquadBonusPts(event).then((value) {
+      print("AppBloc: UpdateSquadBonusPts finished");
+      if (value) {
+        add(AppTournamentRequested(event.tournament.info.id));
       }
       return value;
     });

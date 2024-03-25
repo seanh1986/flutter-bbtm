@@ -53,6 +53,8 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     _tournament = appState.tournamentState.tournament;
     _searchValue = appState.screenState.searchValue;
 
+    final theme = Theme.of(context);
+
     if (_roundIdx == null) {
       _roundIdx = _tournament.curRoundIdx();
     }
@@ -70,7 +72,8 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
     return selectedMatchup != null
         ? _selectedSquadMatchupUi(context, selectedMatchup!)
-        : Text("No Squad Matchup Found. Try Again Later.");
+        : Text("No Squad Matchup Found. Try Again Later.",
+            style: theme.textTheme.titleLarge);
   }
 
   Widget _selectedSquadMatchupUi(BuildContext context, SquadMatchup m) {
