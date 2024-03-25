@@ -342,7 +342,7 @@ class Tournament {
 
     if (matchup.isAway(squadName)) {
       return Authorization.AwayCoach;
-    } else if (matchup.isHome(nafName)) {
+    } else if (matchup.isHome(squadName)) {
       return Authorization.HomeCoach;
     }
 
