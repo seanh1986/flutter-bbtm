@@ -468,7 +468,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
     List<Widget> children = [winTieLossPts, SizedBox(height: 5)];
 
-    children.addAll(_getCoachBonusPtsWidgets(details));
+    children.addAll(_getBonusPtsWidgets(details));
 
 // TODO: Need to add UI for adding CoachRankingFilters
     // if (details is IndividualScoringDetails) {
@@ -479,16 +479,15 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         mainAxisAlignment: MainAxisAlignment.center, children: children);
   }
 
-  List<Widget> _getCoachBonusPtsWidgets(ScoringDetails details) {
+  List<Widget> _getBonusPtsWidgets(ScoringDetails details) {
     List<Widget> bonusPtsWidgets = [
       ElevatedButton(
         onPressed: () {
           setState(() {
             refreshFields = false;
-            String bonusPtsIdx =
-                (_scoringDetails.bonusPts.length + 1).toString();
-            _scoringDetails.bonusPts
-                .add(BonusDetails("Bonus_" + bonusPtsIdx, 1));
+
+            String bonusPtsIdx = (details.bonusPts.length + 1).toString();
+            details.bonusPts.add(BonusDetails("Bonus_" + bonusPtsIdx, 1));
           });
         },
         child: const Text('Add Bonus'),
@@ -510,6 +509,15 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       bonusPtsWidgets.add(Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
+            SizedBox(width: 10.0),
+            IconButton(
+                onPressed: () {
+                  setState(() {
+                    refreshFields = false;
+                    details.bonusPts.removeAt(i);
+                  });
+                },
+                icon: Icon(Icons.delete)),
             SizedBox(width: 10.0),
             Expanded(
                 child: CustomTextFormField(
