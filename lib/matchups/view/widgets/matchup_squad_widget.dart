@@ -65,6 +65,7 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
 
     Widget? homeBonusWidget = _getBonusPtsWidget(true);
     if (homeBonusWidget != null) {
+      homeWidgets.add(SizedBox(height: 10));
       homeWidgets.add(homeBonusWidget);
     }
 
@@ -76,6 +77,7 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
 
     Widget? awayBonusWidget = _getBonusPtsWidget(false);
     if (awayBonusWidget != null) {
+      awayWidgets.add(SizedBox(height: 10));
       awayWidgets.add(awayBonusWidget);
     }
 

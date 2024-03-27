@@ -170,69 +170,11 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
   }
 
   Widget _getSquadVsSquadTitle(BuildContext context, SquadMatchup m) {
-    final theme = Theme.of(context);
-
-    Squad? homeSquad = _tournament.getSquad(m.homeSquadName);
-    Squad? awaySquad = _tournament.getSquad(m.awaySquadName);
-
-    StringBuffer sbHome = StringBuffer();
-    sbHome.write(m.homeSquadName + "\n");
-    if (homeSquad != null) {
-      sbHome.write("(" +
-          homeSquad.wins().toString() +
-          "/" +
-          homeSquad.ties().toString() +
-          "/" +
-          homeSquad.losses().toString() +
-          ")");
-    }
-
-    StringBuffer sbAway = StringBuffer();
-    sbAway.write(m.awaySquadName + "\n");
-    if (awaySquad != null) {
-      sbAway.write("(" +
-          awaySquad.wins().toString() +
-          "/" +
-          awaySquad.ties().toString() +
-          "/" +
-          awaySquad.losses().toString() +
-          ")");
-    }
-
-    List<Widget> squadVsSquadTitleWidgets = [
-      Expanded(
-          child: Card(
-              color: _getColor(m, true),
-              child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(sbHome.toString(),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge)))),
-      Text("vs.", style: theme.textTheme.displaySmall),
-      Expanded(
-          child: Card(
-              color: _getColor(m, false),
-              child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(sbAway.toString(),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge)))),
-    ];
-
-    return Wrap(alignment: WrapAlignment.center, children: [
-      Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: squadVsSquadTitleWidgets,
-        ),
-        SizedBox(height: 2),
-        Divider(
-          height: 20,
-          thickness: 3,
-        ),
-      ]),
-    ]);
+    return MatchupSquadWidget(
+      refreshState: true,
+      matchup: m,
+      roundIdx: _roundIdx!,
+    );
   }
 
   Color? _getColor(SquadMatchup m, bool home) {
