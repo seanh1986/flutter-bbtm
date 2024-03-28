@@ -465,32 +465,33 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
         _showSwapMatchesDialog((nafName1, nafName2) {
           CoachRound lastRound = _tournament.coachRounds.last;
 
-          CoachMatchup match1 = lastRound.matches
-              .firstWhere((m) => m.hasParticipantName(nafName1));
-          CoachMatchup match2 = lastRound.matches
-              .firstWhere((m) => m.hasParticipantName(nafName2));
+          CoachMatchup? match1 = lastRound.matches
+              .firstWhereOrNull((m) => m.hasParticipantName(nafName1));
+          CoachMatchup? match2 = lastRound.matches
+              .firstWhereOrNull((m) => m.hasParticipantName(nafName2));
 
-          bool success1 =
+          bool success1 = match1 != null &&
               match1.replaceCoachAndResetMatchReports(nafName1, nafName2);
-          bool success2 =
+          bool success2 = match2 != null &&
               match2.replaceCoachAndResetMatchReports(nafName2, nafName1);
 
-          Coach? match1Coach1 = _tournament.getCoach(match1.homeNafName);
-          Coach? match1Coach2 = _tournament.getCoach(match1.awayNafName);
+          Coach? match1Coach1 =
+              match1 != null ? _tournament.getCoach(match1.homeNafName) : null;
+          Coach? match1Coach2 =
+              match1 != null ? _tournament.getCoach(match1.awayNafName) : null;
 
-          Coach? match2Coach1 = _tournament.getCoach(match2.homeNafName);
-          Coach? match2Coach2 = _tournament.getCoach(match2.awayNafName);
+          Coach? match2Coach1 =
+              match2 != null ? _tournament.getCoach(match2.homeNafName) : null;
+          Coach? match2Coach2 =
+              match2 != null ? _tournament.getCoach(match2.awayNafName) : null;
 
-          if (!success1 || match1Coach1 == null || match1Coach2 == null) {
-            ToastUtils.show(
-                fToast, "Failed to replace: " + nafName1 + " -> " + nafName2);
-            return;
-          } else if (!success2 ||
-              match2Coach1 == null ||
-              match2Coach2 == null) {
-            ToastUtils.show(
-                fToast, "Failed to replace: " + nafName2 + " -> " + nafName1);
-            return;
+          bool validSwap1 =
+              success1 && match1Coach1 != null && match1Coach2 != null;
+          bool validSwap2 =
+              success2 && match2Coach1 != null && match2Coach2 != null;
+
+          if (!validSwap1 && !validSwap2) {
+            ToastUtils.show(fToast, "Failed to swap matches");
           }
 
           StringBuffer sb = new StringBuffer();
@@ -506,29 +507,33 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
           sb.writeln("New Matchups:");
           sb.writeln();
 
-          sb.writeln("Table " +
-              match1.tableNum.toString() +
-              ": " +
-              match1Coach1.nafName +
-              " (" +
-              match1Coach1.raceName() +
-              ") vs. " +
-              match1Coach2.nafName +
-              " (" +
-              match1Coach2.raceName() +
-              ")");
+          if (validSwap1) {
+            sb.writeln("Table " +
+                match1.tableNum.toString() +
+                ": " +
+                match1Coach1.nafName +
+                " (" +
+                match1Coach1.raceName() +
+                ") vs. " +
+                match1Coach2.nafName +
+                " (" +
+                match1Coach2.raceName() +
+                ")");
+          }
 
-          sb.writeln("Table " +
-              match2.tableNum.toString() +
-              ": " +
-              match2Coach1.nafName +
-              " (" +
-              match2Coach1.raceName() +
-              ") vs. " +
-              match2Coach2.nafName +
-              " (" +
-              match2Coach2.raceName() +
-              ")");
+          if (validSwap2) {
+            sb.writeln("Table " +
+                match2.tableNum.toString() +
+                ": " +
+                match2Coach1.nafName +
+                " (" +
+                match2Coach1.raceName() +
+                ") vs. " +
+                match2Coach2.nafName +
+                " (" +
+                match2Coach2.raceName() +
+                ")");
+          }
 
           sb.writeln("");
           sb.writeln(
