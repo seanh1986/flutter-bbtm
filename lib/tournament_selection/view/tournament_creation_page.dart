@@ -51,6 +51,7 @@ class _TournamentCreationPage extends State<TournamentCreationPage> {
     _tournament = Tournament.empty();
     _tournament.info.id = id;
     _tournament.info.organizers.add(OrganizerInfo(email, nafName, true));
+    _tournament.info.locked = false;
 
     // return AdminScreen(tournament: _tournament, authUser: widget.authUser);
     return Material(

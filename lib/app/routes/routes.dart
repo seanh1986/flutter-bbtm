@@ -16,7 +16,11 @@ List<Page<dynamic>> onGenerateAppViewPages(
     // case SignUpPage.tag:
     //   return [SignUpPage.page()];
     case TournamentSelectionPage.tag:
-      return [MaterialPage(child: TournamentSelectionPage())];
+      if (state.tournamentState.status == TournamentStatus.create_tournament) {
+        return [MaterialPage(child: TournamentCreationPage())];
+      } else {
+        return [MaterialPage(child: TournamentSelectionPage())];
+      }
     case HomePage.tag:
       return [MaterialPage(child: HomePage())];
   }
