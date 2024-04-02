@@ -95,6 +95,16 @@ final class UpdateTournamentInfo extends AppEvent {
   final BuildContext context;
 }
 
+// Used for Locking & Unlocking tournament
+// Very similar to UpdateTournamentInfo
+final class LockOrUnlockTournament extends AppEvent {
+  const LockOrUnlockTournament(this.context, this.tournamentInfo, this.lock);
+
+  final bool lock;
+  final TournamentInfo tournamentInfo;
+  final BuildContext context;
+}
+
 // Update Coaches
 final class UpdateCoaches extends AppEvent {
   const UpdateCoaches(this.tournamentInfo, this.newCoaches, this.renames);

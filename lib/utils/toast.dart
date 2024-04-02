@@ -14,12 +14,14 @@ class ToastUtils {
 
   static void show(FToast fToast, String msg,
       {Color backgroundColor = Colors.white, Icon? icon}) {
+    final theme = Theme.of(fToast.context!);
+
     List<Widget> widgets = [];
     if (icon != null) {
       widgets.add(icon);
       widgets.add(SizedBox(width: 12.0));
     }
-    widgets.add(Text(msg));
+    widgets.add(Text(msg, style: theme.textTheme.displayMedium));
 
     Widget toast = Container(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),

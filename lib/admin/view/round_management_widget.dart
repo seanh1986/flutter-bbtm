@@ -63,7 +63,9 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   List<DataColumn2> _getRoundSummaryCols() {
     List<DataColumn2> cols = [
       DataColumn2(
-          label: Center(child: Text("Edit | Table")), size: ColumnSize.S),
+          label: Center(
+              child: Text(_tournament.isLocked() ? "Table" : "Edit | Table")),
+          size: ColumnSize.S),
       DataColumn2(
           label: Center(child: Text("Home | Away")),
           fixedWidth: 200,
@@ -112,6 +114,24 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   }
 
   Widget _advanceDiscardBackupBtns(BuildContext context) {
+    List<Widget> widgets = [];
+
+    if (!_tournament.isLocked()) {
+      widgets.addAll([
+        SizedBox(width: 20),
+        _advanceRoundButton(context),
+        SizedBox(width: 20),
+        _discardCurrentRoundButton(context),
+        SizedBox(width: 20),
+        _swapMatchups(context),
+        SizedBox(width: 20),
+        _recoverBackupFromFile(context),
+        SizedBox(width: 20),
+      ]);
+    }
+
+    widgets.add(_lockOrUnlockTournament(context));
+
     return Container(
         height: 60,
         alignment: Alignment.center,
@@ -119,16 +139,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
         child: ListView(
             scrollDirection: Axis.horizontal,
             shrinkWrap: true,
-            children: [
-              SizedBox(width: 20),
-              _advanceRoundButton(context),
-              SizedBox(width: 20),
-              _discardCurrentRoundButton(context),
-              SizedBox(width: 20),
-              _swapMatchups(context),
-              SizedBox(width: 20),
-              _recoverBackupFromFile(context),
-            ]));
+            children: widgets));
   }
 
   Widget _generateViewRounds(BuildContext context) {
@@ -239,8 +250,11 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
       rows: rows,
     );
 
-    return Column(children: [
-      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+    List<Widget> roundUpdateAndTableWidgets = [];
+
+    if (!_tournament.isLocked()) {
+      roundUpdateAndTableWidgets
+          .add(Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         ElevatedButton(
           onPressed: () {
             setState(() {
@@ -287,11 +301,14 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
           },
           child: const Text('Update'),
         )
-      ]),
-      Container(
-          height: MediaQuery.of(context).size.height * 0.6,
-          child: roundDataTable)
-    ]);
+      ]));
+    }
+
+    roundUpdateAndTableWidgets.add(Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: roundDataTable));
+
+    return Column(children: roundUpdateAndTableWidgets);
   }
 
   void _showDialogToConfirmOverwrite(
@@ -751,6 +768,55 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
       },
     );
   }
+
+  Widget _lockOrUnlockTournament(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ElevatedButton(
+      style: theme.elevatedButtonTheme.style,
+      child: IconButton(
+          icon: Icon(
+            _tournament.isLocked() ? Icons.lock_open : Icons.lock,
+            color: theme.iconTheme.color,
+          ),
+          onPressed: null),
+      onPressed: () {
+        String title;
+        String msg;
+
+        if (_tournament.isLocked()) {
+          title = "Unlock tournament";
+          msg =
+              "Are you sure you want to UNLOCK the tournament? This will allow users & admins to edit matches/data";
+        } else {
+          title = "Lock tournament";
+          msg =
+              "Are you sure you want to LOCK the tournament? This will prevent users & admins from editing matches/data";
+        }
+
+        VoidCallback discardCallback = () async {
+          TournamentInfo info = _tournament.info;
+
+          bool shouldLock = !info.locked;
+
+          info.locked = shouldLock;
+
+          context.read<AppBloc>().add(
+              LockOrUnlockTournament(context, _tournament.info, shouldLock));
+        };
+
+        showOkCancelAlertDialog(
+                context: context,
+                title: title,
+                message: msg,
+                okLabel: "Yes",
+                cancelLabel: "Cancel")
+            .then((value) => {
+                  if (value == OkCancelResult.ok) {discardCallback()}
+                });
+      },
+    );
+  }
 }
 
 class CoachRoundDataSource extends DataTableSource {
@@ -930,19 +996,21 @@ class CoachRoundDataSource extends DataTableSource {
 
     final bool isInEditMode = editIdx == index;
 
-    Text tableNum = Text(m.tableNum.toString(),
-        style: TextStyle(color: isRowPrevEdited ? Colors.orange : null));
+    List<Widget> editTableNumRow = [];
 
-    List<Widget> editTableNumRow = [
-      IconButton(
-          onPressed: () {
-            bool exitEditMode = isInEditMode;
-            editCallback(index, exitEditMode, editedMatchIndices);
-          },
-          icon: Icon(isInEditMode ? Icons.check : Icons.edit)),
-      SizedBox(width: 3),
-      tableNum,
-    ];
+    if (!info.locked) {
+      editTableNumRow.addAll([
+        IconButton(
+            onPressed: () {
+              bool exitEditMode = isInEditMode;
+              editCallback(index, exitEditMode, editedMatchIndices);
+            },
+            icon: Icon(isInEditMode ? Icons.check : Icons.edit)),
+        SizedBox(width: 3)
+      ]);
+    }
+    editTableNumRow.add(Text(m.tableNum.toString(),
+        style: TextStyle(color: isRowPrevEdited ? Colors.orange : null)));
 
     Text homeNafName = Text(m.homeNafName);
     Text awayNafName = Text(m.awayNafName);

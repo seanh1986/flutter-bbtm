@@ -22,6 +22,9 @@ class TournamentInfo {
 
   String logoFileName = "";
 
+  // Prevents users from submitting updates
+  bool locked = false;
+
   TournamentInfo(
       {required this.id,
       required this.name,
@@ -101,6 +104,10 @@ class TournamentInfo {
     if (tLogo != null) {
       this.logoFileName = tLogo;
     }
+
+    // Default is locked for legacy purposes
+    final tLocked = json['locked'] as bool?;
+    this.locked = tLocked == null || tLocked;
   }
 
   Map<String, dynamic> toJson() => {
@@ -116,6 +123,7 @@ class TournamentInfo {
         'details_kickoff': detailsKickOff,
         'details_special_rules': detailsSpecialRules,
         'logo_file_name': logoFileName,
+        'locked': locked,
       };
 }
 

@@ -116,6 +116,10 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
   }
 
   Widget? _getBonusPtsWidget(bool home) {
+    if (_tournament.isLocked()) {
+      return null;
+    }
+
     List<BonusDetails> bonuses =
         _tournament.info.squadDetails.scoringDetails.bonusPts;
 

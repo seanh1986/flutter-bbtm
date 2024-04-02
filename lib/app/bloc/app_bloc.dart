@@ -51,6 +51,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     on<UpdateMatchEvents>(_updateMatchEvents);
     on<UpdateSquadBonusPts>(_updateSquadBonusPts);
     on<UpdateTournamentInfo>(_updateTournamentInfo);
+    on<LockOrUnlockTournament>(_lockOrUnlockTournament);
     on<UpdateCoaches>(_updateCoaches);
     on<RecoverBackup>(_recoverBackup);
     // Round Management
@@ -292,8 +293,36 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     TournamentInfo info = event.tournamentInfo;
     // LoadingIndicatorDialog().show(context);
     print("AppBloc: updateTournamentInfo: " + info.name + "(" + info.id + ")");
-    _tournamentRepository.overwriteTournamentInfo(info).then((value) {
-      print("AppBloc: updateTournamentInfo " +
+    _processUpdateTournamentInfo(info, false);
+  }
+
+  void _lockOrUnlockTournament(
+      LockOrUnlockTournament event, Emitter<AppState> emit) {
+    TournamentInfo info = event.tournamentInfo;
+    info.locked = event.lock; // Make sure lock states align
+
+    print("AppBloc: _lockOrUnlockTournament: " +
+        info.name +
+        "(" +
+        info.id +
+        ") -> Lock: " +
+        event.lock.toString());
+    _processUpdateTournamentInfo(info, true);
+  }
+
+  void _processUpdateTournamentInfo(
+      TournamentInfo info, bool allowOverwriteLock) {
+    print("AppBloc: _processUpdateTournamentInfo: " +
+        info.name +
+        "(" +
+        info.id +
+        ") -> AllowOverwriteLock: " +
+        allowOverwriteLock.toString());
+
+    _tournamentRepository
+        .overwriteTournamentInfo(info, allowOverwriteLock)
+        .then((value) {
+      print("AppBloc: _processUpdateTournamentInfo " +
           info.name +
           "(" +
           info.id +

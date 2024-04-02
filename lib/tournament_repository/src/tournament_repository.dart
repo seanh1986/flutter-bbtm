@@ -15,9 +15,9 @@ import 'package:xml/xml.dart';
 class TournamentRepository {
   TournamentRepository({
     CacheClient? cache,
-  }) : _cache = cache ?? CacheClient();
+  }); // : _cache = cache ?? CacheClient();
 
-  final CacheClient _cache;
+  // final CacheClient _cache;
 
   /// Whether or not the current environment is web
   /// Should only be overridden for testing purposes. Otherwise,
@@ -136,17 +136,24 @@ class TournamentRepository {
   // Update Operations
   // ------------------
 
-  Future<bool> overwriteTournamentInfo(TournamentInfo info) {
+  Future<bool> overwriteTournamentInfo(
+      TournamentInfo info, bool allowOverwriteLock) {
     return FirebaseFirestore.instance.runTransaction((transaction) async {
       var tRef = _tournyRef.doc(info.id);
 
       var doc = await tRef.get();
 
       Tournament dbTournament = _parseTournamentResponse(doc);
+      if (!allowOverwriteLock && info.locked && dbTournament.isLocked()) {
+        // Then not allowed to overwrite
+        return false;
+      }
+
+      bool force = dbTournament.info.locked != info.locked;
 
       dbTournament.info = info;
 
-      await _overrwiteTournamentData(dbTournament);
+      await _overrwiteTournamentData(dbTournament, force: force);
     }).then((value) {
       return true;
     }).catchError((e) {
@@ -163,6 +170,9 @@ class TournamentRepository {
       var doc = await tRef.get();
 
       Tournament dbTournament = _parseTournamentResponse(doc);
+      if (dbTournament.isLocked()) {
+        return false;
+      }
 
       dbTournament.updateCoaches(newCoaches, renames);
 
@@ -202,6 +212,9 @@ class TournamentRepository {
   Future<bool> updateCoachMatchReports(
       List<UpdateMatchReportEvent> events) async {
     Tournament tournament = events.first.tournament;
+    if (tournament.isLocked()) {
+      return false;
+    }
 
     return FirebaseFirestore.instance.runTransaction((transaction) async {
       var tRef = _tournyRef.doc(tournament.info.id);
@@ -209,6 +222,10 @@ class TournamentRepository {
       var doc = await tRef.get();
 
       Tournament dbTournament = _parseTournamentResponse(doc);
+
+      if (dbTournament.isLocked()) {
+        return false;
+      }
 
       if (dbTournament.coachRounds.length != tournament.coachRounds.length) {
         throw new Exception("Tournament lengths do not align");
@@ -251,6 +268,9 @@ class TournamentRepository {
 
   Future<bool> updateSquadBonusPts(UpdateSquadBonusPts event) async {
     Tournament tournament = event.tournament;
+    if (tournament.isLocked()) {
+      return false;
+    }
 
     return FirebaseFirestore.instance.runTransaction((transaction) async {
       var tRef = _tournyRef.doc(tournament.info.id);
@@ -258,6 +278,9 @@ class TournamentRepository {
       var doc = await tRef.get();
 
       Tournament dbTournament = _parseTournamentResponse(doc);
+      if (dbTournament.isLocked()) {
+        return false;
+      }
 
       if (dbTournament.coachRounds.length != tournament.coachRounds.length) {
         throw new Exception("Tournament lengths do not align");
@@ -277,6 +300,10 @@ class TournamentRepository {
   }
 
   Future<bool> recoverTournamentBackup(Tournament t) async {
+    if (t.isLocked()) {
+      return false;
+    }
+
     return FirebaseFirestore.instance.runTransaction((transaction) async {
       await _overrwiteTournamentData(t);
     }).then((value) {
@@ -287,6 +314,10 @@ class TournamentRepository {
   }
 
   Future<bool> advanceRound(Tournament t) async {
+    if (t.isLocked()) {
+      return false;
+    }
+
     return FirebaseFirestore.instance.runTransaction((transaction) async {
       await _overrwiteTournamentData(t);
     }).then((value) {
@@ -297,12 +328,20 @@ class TournamentRepository {
   }
 
   Future<bool> discardCurrentRound(Tournament t) async {
+    if (t.isLocked()) {
+      return false;
+    }
+
     return FirebaseFirestore.instance.runTransaction((transaction) async {
       var tRef = _tournyRef.doc(t.info.id);
 
       var doc = await tRef.get();
 
       Tournament dbTournament = _parseTournamentResponse(doc);
+
+      if (dbTournament.isLocked()) {
+        return false;
+      }
 
       if (dbTournament.coachRounds.length != t.coachRounds.length) {
         throw new Exception("Tournament coach round lengths do not align");
@@ -326,7 +365,12 @@ class TournamentRepository {
     });
   }
 
-  Future<void> _overrwiteTournamentData(Tournament tournament) async {
+  Future<void> _overrwiteTournamentData(Tournament tournament,
+      {bool force = false}) async {
+    if (tournament.isLocked() && !force) {
+      return;
+    }
+
     Map<String, dynamic> jsonA = tournament.info.toJson();
 
     jsonA.putIfAbsent("data", () => tournament.toJson());

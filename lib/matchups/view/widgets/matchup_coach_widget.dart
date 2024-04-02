@@ -97,6 +97,10 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
     _state = _getMatchUploadState(_reportWithStatus, authorization);
 
+    if (_tournament.isLocked()) {
+      _state = UploadState.NotAuthorized;
+    }
+
     print("Matchup: " +
         _matchup.homeNafName +
         " vs. " +
@@ -164,6 +168,10 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   Widget? _getBestSportWidget(BuildContext context) {
+    if (_tournament.isLocked()) {
+      return null;
+    }
+
     final theme = Theme.of(context);
 
     // bool enableEditing =

@@ -137,6 +137,10 @@ class Tournament {
     return coachRounds.length - 1;
   }
 
+  bool isLocked() {
+    return info.locked;
+  }
+
   bool useSquads() {
     return info.squadDetails.type == SquadUsage.SQUADS;
   }
@@ -197,7 +201,6 @@ class Tournament {
         squad.overwriteRecord(this);
       });
 
-      // TODO - check!
       if (useSquadVsSquad()) {
         squadRounds.add(SquadRound.fromCoachRound(this, round));
       }
