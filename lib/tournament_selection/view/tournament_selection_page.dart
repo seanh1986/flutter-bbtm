@@ -3,7 +3,6 @@ import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 
@@ -30,8 +29,6 @@ enum DateType {
 class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   // late AppState appState;
 
-  late FToast fToast;
-
   String? tournamentId;
 
   DateType dateType = DateType.Recent_or_Upcoming_Tournaments;
@@ -45,9 +42,6 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
     super.initState();
 
     tournamentId = widget.tournamentId;
-
-    fToast = FToast();
-    fToast.init(context);
   }
 
   @override

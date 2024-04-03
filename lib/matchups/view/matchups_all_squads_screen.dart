@@ -3,7 +3,6 @@ import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class AllSquadsMatchupsPage extends StatefulWidget {
   AllSquadsMatchupsPage({Key? key}) : super(key: key);
@@ -23,16 +22,11 @@ class _AllSquadsMatchupsPage extends State<AllSquadsMatchupsPage> {
 
   String? _selectedSquadName;
 
-  FToast? fToast;
-
   String _searchValue = "";
 
   @override
   void initState() {
     super.initState();
-
-    fToast = FToast();
-    fToast!.init(context);
   }
 
   @override

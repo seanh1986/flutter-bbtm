@@ -9,6 +9,7 @@ import 'package:bbnaf/tournament_repository/src/tournament_repository.dart';
 import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
 import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
+import 'package:bbnaf/utils/toast.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -231,12 +232,14 @@ class AppBloc extends Bloc<AppEvent, AppState> {
 
   void _updateMatchEvent(UpdateMatchEvent event, Emitter<AppState> emit) {
     print("AppBloc: updateMatchEvent");
+    ToastUtils.show(event.context, "Uploading Match Report!");
     LoadingIndicatorDialog().show(event.context);
     _tournamentRepository
         .updateCoachMatchReport(event.matchEvent)
         .then((value) {
       print("AppBloc: updateMatchEvent finished -> " + value.toString());
       LoadingIndicatorDialog().dismiss();
+      _showSuccessFailToast(event.context, value);
       if (value) {
         add(AppTournamentRequested(event.matchEvent.tournament.info.id));
       }
@@ -248,11 +251,9 @@ class AppBloc extends Bloc<AppEvent, AppState> {
 
     if (event.newRoundMatchups != null) {
       print("AppBloc: updateMatchEvents -> swap matches");
-      LoadingIndicatorDialog().show(event.context);
       _tournamentRepository
           .swapCoachMatchups(event.tournamentId, event.newRoundMatchups!)
           .then((value) {
-        LoadingIndicatorDialog().dismiss();
         _processUpdateMatches(
             event.context, event.tournamentId, event.matchEvents);
       });
@@ -277,6 +278,9 @@ class AppBloc extends Bloc<AppEvent, AppState> {
           ") -> " +
           value.toString());
       LoadingIndicatorDialog().dismiss();
+
+      _showSuccessFailToast(context, value);
+
       if (value && matchEvents.isNotEmpty) {
         add(AppTournamentRequested(tournamentId));
       }
@@ -290,6 +294,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     _tournamentRepository.updateSquadBonusPts(event).then((value) {
       print("AppBloc: UpdateSquadBonusPts finished");
       LoadingIndicatorDialog().dismiss();
+      _showSuccessFailToast(event.context, value);
       if (value) {
         add(AppTournamentRequested(event.tournament.info.id));
       }
@@ -301,9 +306,8 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       UpdateTournamentInfo event, Emitter<AppState> emit) {
     BuildContext context = event.context;
     TournamentInfo info = event.tournamentInfo;
-    LoadingIndicatorDialog().show(context);
     print("AppBloc: updateTournamentInfo: " + info.name + "(" + info.id + ")");
-    _processUpdateTournamentInfo(info, false);
+    _processUpdateTournamentInfo(context, info, false);
   }
 
   void _lockOrUnlockTournament(
@@ -318,18 +322,19 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         info.id +
         ") -> Lock: " +
         event.lock.toString());
-    LoadingIndicatorDialog().show(context);
-    _processUpdateTournamentInfo(info, true);
+    _processUpdateTournamentInfo(context, info, true);
   }
 
   void _processUpdateTournamentInfo(
-      TournamentInfo info, bool allowOverwriteLock) {
+      BuildContext context, TournamentInfo info, bool allowOverwriteLock) {
     print("AppBloc: _processUpdateTournamentInfo: " +
         info.name +
         "(" +
         info.id +
         ") -> AllowOverwriteLock: " +
         allowOverwriteLock.toString());
+
+    LoadingIndicatorDialog().show(context);
 
     _tournamentRepository
         .overwriteTournamentInfo(info, allowOverwriteLock)
@@ -341,6 +346,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
           ") Finished -> " +
           value.toString());
       LoadingIndicatorDialog().dismiss();
+      _showSuccessFailToast(context, value);
       if (value) {
         add(AppTournamentRequested(info.id));
       }
@@ -451,5 +457,17 @@ class AppBloc extends Bloc<AppEvent, AppState> {
 
   Future<String> getFileUrl(String filename) {
     return _tournamentRepository.getFileUrl(filename);
+  }
+
+  // ---------------
+  // Utility Methods
+  // ---------------
+
+  void _showSuccessFailToast(BuildContext context, bool success) {
+    if (success) {
+      ToastUtils.show(context, "Update successful.");
+    } else {
+      ToastUtils.show(context, "Update failed.");
+    }
   }
 }

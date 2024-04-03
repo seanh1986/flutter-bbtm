@@ -7,11 +7,9 @@ import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/home/view/overview_screen.dart';
 import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
 import 'package:bbnaf/utils/serializable.dart';
-import 'package:bbnaf/utils/toast.dart';
 import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -28,7 +26,6 @@ class _HomePageState extends State<HomePage>
     implements Serializable, Deserializable {
   late int _widgetIdx;
 
-  late FToast fToast;
   late Tournament _tournament;
   late User _user;
 
@@ -37,9 +34,6 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
-
-    fToast = FToast();
-    fToast.init(context);
   }
 
   @override
@@ -71,15 +65,8 @@ class _HomePageState extends State<HomePage>
 
   void _handleLogoutPressed() {
     print("Logout Pressed");
-    // ToastUtils.show(fToast, "Logging out");
     context.read<AppBloc>().add(const AppLogoutRequested());
   }
-
-  // void _handleRefreshTournamentPressed() {
-  //   print("Refresh Tournament Pressed");
-  //   ToastUtils.show(fToast, "Refreshing Tournament Data");
-  //   context.read<AppBloc>().add(AppTournamentRequested(_tournament.info.id));
-  // }
 
   Widget _generateUi(BuildContext context, AppState appState) {
     final theme = Theme.of(context);

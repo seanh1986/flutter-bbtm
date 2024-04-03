@@ -640,7 +640,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           ? new UpdateMatchReportEvent(_tournament, _matchup, isHome)
           : new UpdateMatchReportEvent.admin(_tournament, _matchup);
 
-      ToastUtils.show(context, "Uploading Match Report!");
+      // ToastUtils.show(context, "Uploading Match Report!");
 
       context.read<AppBloc>().add(UpdateMatchEvent(context, event));
     } catch (_) {

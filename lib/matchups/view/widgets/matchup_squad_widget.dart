@@ -199,7 +199,9 @@ class _MatchupSquadWidget extends State<MatchupSquadWidget> {
                   for (int i = 0; i < bonuses.length; i++) {
                     thisSquadBonuses![i] = addMinusWidgets[i].item.value;
                   }
-                  context.read<AppBloc>().add(UpdateSquadBonusPts(_tournament));
+                  context
+                      .read<AppBloc>()
+                      .add(UpdateSquadBonusPts(context, _tournament));
                   Navigator.of(context).pop();
                 },
               ),

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
@@ -10,7 +9,6 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:checkbox_formfield/checkbox_formfield.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
@@ -52,8 +50,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   List<DataRow> _organizerRows = [];
   late DataTable _orgaDataTable;
 
-  late FToast fToast;
-
   late Tournament _tournament;
 
   QuillController _richTextSpecialRulesController = QuillController.basic();
@@ -63,9 +59,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
   @override
   void initState() {
     super.initState();
-
-    fToast = FToast();
-    fToast.init(context);
 
     _tryReloadRichText();
   }
@@ -200,7 +193,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
               _trySaveRichText();
 
-              ToastUtils.show(fToast, "Updating Tournament Info");
+              ToastUtils.show(context, "Updating Tournament Info");
 
               context.read<AppBloc>().add(UpdateTournamentInfo(context, info));
               // LoadingIndicatorDialog().show(context);
@@ -923,9 +916,9 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
   void _showSuccessFailToast(bool success) {
     if (success) {
-      ToastUtils.show(fToast, "Update successful.");
+      ToastUtils.show(context, "Update successful.");
     } else {
-      ToastUtils.show(fToast, "Update failed.");
+      ToastUtils.show(context, "Update failed.");
     }
   }
 }

@@ -3,20 +3,17 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bbnaf/utils/swiss/swiss.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
-import 'package:bbnaf/widgets/toggle_widget/models/toggle_widget_item.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:collection/collection.dart';
 
@@ -31,7 +28,6 @@ class RoundManagementWidget extends StatefulWidget {
 
 class _RoundManagementWidget extends State<RoundManagementWidget> {
   late Tournament _tournament;
-  late FToast fToast;
 
   bool updateRoundIdx = true;
   bool updateCoachRound = true;
@@ -50,9 +46,6 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   @override
   void initState() {
     super.initState();
-
-    fToast = FToast();
-    fToast.init(context);
   }
 
   @override

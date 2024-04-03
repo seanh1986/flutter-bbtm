@@ -5,7 +5,6 @@ import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class DownloadFilesWidget extends StatefulWidget {
   DownloadFilesWidget({Key? key}) : super(key: key);
@@ -17,15 +16,11 @@ class DownloadFilesWidget extends StatefulWidget {
 }
 
 class _DownloadFilesWidget extends State<DownloadFilesWidget> {
-  late FToast fToast;
   late Tournament _tournament;
 
   @override
   void initState() {
     super.initState();
-
-    fToast = FToast();
-    fToast.init(context);
   }
 
   @override
@@ -78,18 +73,6 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
               ToastUtils.show(context, "Downloading Backup File");
 
               context.read<AppBloc>().add(DownloadBackup(_tournament));
-
-              // LoadingIndicatorDialog().show(context);
-              // bool success = await _tournyBloc.downloadTournamentBackup(
-              //     DownloadTournamentBackup(_tournament));
-              // LoadingIndicatorDialog().dismiss();
-
-              // if (success) {
-              //   ToastUtils.showSuccess(
-              //       fToast, "Backup successfully downloaded");
-              // } else {
-              //   ToastUtils.showFailed(fToast, "Backup failed to download");
-              // }
             };
 
             showOkCancelAlertDialog(
@@ -121,16 +104,6 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
               ToastUtils.show(context, "Downloading Naf Upload File");
 
               context.read<AppBloc>().add(DownloadNafUploadFile(_tournament));
-              // LoadingIndicatorDialog().show(context);
-              // bool success =
-              //     await _tournyBloc.downloadNafUploadFile(widget.tournament);
-              // LoadingIndicatorDialog().dismiss();
-
-              // if (success) {
-              //   ToastUtils.showSuccess(fToast, "Naf Upload downloaded");
-              // } else {
-              //   ToastUtils.showFailed(fToast, "Naf Upload failed to download");
-              // }
             };
 
             showOkCancelAlertDialog(
@@ -163,16 +136,6 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
               ToastUtils.show(context, "Downloading Glam File");
 
               context.read<AppBloc>().add(DownloadGlamFile(_tournament));
-              // LoadingIndicatorDialog().show(context);
-              // bool success =
-              //     await _tournyBloc.downloadGlamFile(widget.tournament);
-              // LoadingIndicatorDialog().dismiss();
-
-              // if (success) {
-              //   ToastUtils.showSuccess(fToast, "Glam downloaded");
-              // } else {
-              //   ToastUtils.showFailed(fToast, "Glam failed to download");
-              // }
             };
 
             showOkCancelAlertDialog(

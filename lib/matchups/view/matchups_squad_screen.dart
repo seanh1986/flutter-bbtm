@@ -1,11 +1,8 @@
-import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
 
 class SquadMatchupsPage extends StatefulWidget {
@@ -30,16 +27,11 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
   int? _roundIdx;
 
-  FToast? fToast;
-
   String _searchValue = "";
 
   @override
   void initState() {
     super.initState();
-
-    fToast = FToast();
-    fToast!.init(context);
   }
 
   @override

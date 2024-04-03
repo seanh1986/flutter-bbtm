@@ -9,7 +9,6 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
 
 class EditParticipantsWidget extends StatefulWidget {
@@ -30,8 +29,6 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   late DataTable2 _coachDataTable;
 
-  late FToast fToast;
-
   late Tournament _tournament;
 
   bool initCoaches = true;
@@ -42,9 +39,6 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   @override
   void initState() {
     super.initState();
-
-    fToast = FToast();
-    fToast.init(context);
   }
 
   void _initFromTournament() {

@@ -5,7 +5,6 @@ import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class EditSquadsWidget extends StatefulWidget {
   EditSquadsWidget({Key? key}) : super(key: key);
@@ -26,14 +25,9 @@ class _EditSquadsWidget extends State<EditSquadsWidget> {
   late Tournament _originalTournament;
   late Tournament _tournament;
 
-  late FToast fToast;
-
   @override
   void initState() {
     super.initState();
-
-    fToast = FToast();
-    fToast.init(context);
 
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
@@ -134,7 +128,6 @@ class _EditSquadsWidget extends State<EditSquadsWidget> {
             ElevatedButton(
               onPressed: () {
                 if (_assignedSquads.containsKey("")) {
-                  _showSuccessFailToast(false);
                   return;
                 }
 
@@ -193,14 +186,6 @@ class _EditSquadsWidget extends State<EditSquadsWidget> {
         .then((value) => {
               if (value == OkCancelResult.ok) {confirmedUpdateCallback()}
             });
-  }
-
-  void _showSuccessFailToast(bool success) {
-    if (success) {
-      ToastUtils.show(fToast, "Update successful.");
-    } else {
-      ToastUtils.show(fToast, "Update failed.");
-    }
   }
 
   bool _isSquadActive(List<Coach> coaches) {
