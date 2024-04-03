@@ -59,96 +59,83 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
   }
 
   Widget _downloadFileBackup(BuildContext context) {
-    return Container(
-        height: 60,
-        padding: EdgeInsets.all(10),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            textStyle: TextStyle(color: Colors.white),
-          ),
-          child: Text('Download Backup'),
-          onPressed: () {
-            VoidCallback downloadBackupCallback = () async {
-              ToastUtils.show(context, "Downloading Backup File");
+    final theme = Theme.of(context);
 
-              context.read<AppBloc>().add(DownloadBackup(_tournament));
-            };
+    return ElevatedButton(
+      style: theme.elevatedButtonTheme.style,
+      child: Text('Download Backup'),
+      onPressed: () {
+        VoidCallback downloadBackupCallback = () async {
+          ToastUtils.show(context, "Downloading Backup File");
 
-            showOkCancelAlertDialog(
-                    context: context,
-                    title: "Download Backup File",
-                    message:
-                        "This will download a backup file which can be used as a backup to restore at a later time",
-                    okLabel: "Download",
-                    cancelLabel: "Cancel")
-                .then((value) => {
-                      if (value == OkCancelResult.ok) {downloadBackupCallback()}
-                    });
-          },
-        ));
+          context.read<AppBloc>().add(DownloadBackup(_tournament));
+        };
+
+        showOkCancelAlertDialog(
+                context: context,
+                title: "Download Backup File",
+                message:
+                    "This will download a backup file which can be used as a backup to restore at a later time",
+                okLabel: "Download",
+                cancelLabel: "Cancel")
+            .then((value) => {
+                  if (value == OkCancelResult.ok) {downloadBackupCallback()}
+                });
+      },
+    );
   }
 
   Widget _downloadNafUploadFile(BuildContext context) {
-    return Container(
-        height: 60,
-        padding: EdgeInsets.all(10),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            textStyle: TextStyle(color: Colors.white),
-          ),
-          child: Text('Download Naf Upload'),
-          onPressed: () {
-            VoidCallback downloadNafUploadCallback = () async {
-              ToastUtils.show(context, "Downloading Naf Upload File");
+    final theme = Theme.of(context);
 
-              context.read<AppBloc>().add(DownloadNafUploadFile(_tournament));
-            };
+    return ElevatedButton(
+      style: theme.elevatedButtonTheme.style,
+      child: Text('Download Naf Upload'),
+      onPressed: () {
+        VoidCallback downloadNafUploadCallback = () async {
+          ToastUtils.show(context, "Downloading Naf Upload File");
 
-            showOkCancelAlertDialog(
-                    context: context,
-                    title: "Download Naf Upload File",
-                    message:
-                        "This will download a the naf upload file which can be used to upload tournament results",
-                    okLabel: "Download",
-                    cancelLabel: "Cancel")
-                .then((value) => {
-                      if (value == OkCancelResult.ok)
-                        {downloadNafUploadCallback()}
-                    });
-          },
-        ));
+          context.read<AppBloc>().add(DownloadNafUploadFile(_tournament));
+        };
+
+        showOkCancelAlertDialog(
+                context: context,
+                title: "Download Naf Upload File",
+                message:
+                    "This will download a the naf upload file which can be used to upload tournament results",
+                okLabel: "Download",
+                cancelLabel: "Cancel")
+            .then((value) => {
+                  if (value == OkCancelResult.ok) {downloadNafUploadCallback()}
+                });
+      },
+    );
   }
 
   Widget _downloadGlamFile(BuildContext context) {
-    return Container(
-        height: 60,
-        padding: EdgeInsets.all(10),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            textStyle: TextStyle(color: Colors.white),
-          ),
-          child: Text('Download Glam Upload File'),
-          onPressed: () {
-            VoidCallback downloadGlamCallback = () async {
-              ToastUtils.show(context, "Downloading Glam File");
+    final theme = Theme.of(context);
 
-              context.read<AppBloc>().add(DownloadGlamFile(_tournament));
-            };
+    return ElevatedButton(
+      style: theme.elevatedButtonTheme.style,
+      child: Text('Download Glam Upload File'),
+      onPressed: () {
+        VoidCallback downloadGlamCallback = () async {
+          ToastUtils.show(context, "Downloading Glam File");
 
-            showOkCancelAlertDialog(
-                    context: context,
-                    title: "Glam Upload File",
-                    message:
-                        "This will download a the file which can be used to upload Glam results",
-                    okLabel: "Download",
-                    cancelLabel: "Cancel")
-                .then((value) => {
-                      if (value == OkCancelResult.ok) {downloadGlamCallback()}
-                    });
-          },
-        ));
+          context.read<AppBloc>().add(DownloadGlamFile(_tournament));
+        };
+
+        showOkCancelAlertDialog(
+                context: context,
+                title: "Glam Upload File",
+                message:
+                    "This will download a the file which can be used to upload Glam results",
+                okLabel: "Download",
+                cancelLabel: "Cancel")
+            .then((value) => {
+                  if (value == OkCancelResult.ok) {downloadGlamCallback()}
+                });
+      },
+    );
   }
 }

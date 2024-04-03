@@ -114,13 +114,18 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
         SizedBox(width: 20),
         _advanceRoundButton(context),
         SizedBox(width: 20),
-        _discardCurrentRoundButton(context),
-        SizedBox(width: 20),
-        _swapMatchups(context),
-        SizedBox(width: 20),
-        _recoverBackupFromFile(context),
-        SizedBox(width: 20),
       ]);
+
+      if (_tournament.curRoundNumber() > 0) {
+        widgets.addAll([
+          _discardCurrentRoundButton(context),
+          SizedBox(width: 20),
+          _swapMatchups(context),
+          SizedBox(width: 20),
+        ]);
+      }
+
+      widgets.addAll([_recoverBackupFromFile(context), SizedBox(width: 20)]);
     }
 
     widgets.add(_lockOrUnlockTournament(context));
