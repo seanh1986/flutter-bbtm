@@ -12,6 +12,7 @@ import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 part 'app_event.dart';
 part 'app_state.dart';
@@ -230,10 +231,12 @@ class AppBloc extends Bloc<AppEvent, AppState> {
 
   void _updateMatchEvent(UpdateMatchEvent event, Emitter<AppState> emit) {
     print("AppBloc: updateMatchEvent");
+    LoadingIndicatorDialog().show(event.context);
     _tournamentRepository
         .updateCoachMatchReport(event.matchEvent)
         .then((value) {
       print("AppBloc: updateMatchEvent finished -> " + value.toString());
+      LoadingIndicatorDialog().dismiss();
       if (value) {
         add(AppTournamentRequested(event.matchEvent.tournament.info.id));
       }
@@ -245,29 +248,35 @@ class AppBloc extends Bloc<AppEvent, AppState> {
 
     if (event.newRoundMatchups != null) {
       print("AppBloc: updateMatchEvents -> swap matches");
+      LoadingIndicatorDialog().show(event.context);
       _tournamentRepository
           .swapCoachMatchups(event.tournamentId, event.newRoundMatchups!)
           .then((value) {
-        _processUpdateMatches(event.tournamentId, event.matchEvents);
+        LoadingIndicatorDialog().dismiss();
+        _processUpdateMatches(
+            event.context, event.tournamentId, event.matchEvents);
       });
     } else {
-      _processUpdateMatches(event.tournamentId, event.matchEvents);
+      _processUpdateMatches(
+          event.context, event.tournamentId, event.matchEvents);
     }
   }
 
-  void _processUpdateMatches(
-      String tournamentId, List<UpdateMatchReportEvent> matchEvents) {
+  void _processUpdateMatches(BuildContext context, String tournamentId,
+      List<UpdateMatchReportEvent> matchEvents) {
     if (matchEvents.isEmpty) {
       return;
     }
 
     print("AppBloc: updateMatchEvents -> update matches");
+    LoadingIndicatorDialog().show(context);
 
     _tournamentRepository.updateCoachMatchReports(matchEvents).then((value) {
       print("AppBloc: UpdateMatchEvents finished (size: " +
           matchEvents.length.toString() +
           ") -> " +
           value.toString());
+      LoadingIndicatorDialog().dismiss();
       if (value && matchEvents.isNotEmpty) {
         add(AppTournamentRequested(tournamentId));
       }
@@ -277,9 +286,10 @@ class AppBloc extends Bloc<AppEvent, AppState> {
 
   void _updateSquadBonusPts(UpdateSquadBonusPts event, Emitter<AppState> emit) {
     print("AppBloc: UpdateSquadBonusPts");
-
+    LoadingIndicatorDialog().show(event.context);
     _tournamentRepository.updateSquadBonusPts(event).then((value) {
       print("AppBloc: UpdateSquadBonusPts finished");
+      LoadingIndicatorDialog().dismiss();
       if (value) {
         add(AppTournamentRequested(event.tournament.info.id));
       }
@@ -289,15 +299,16 @@ class AppBloc extends Bloc<AppEvent, AppState> {
 
   void _updateTournamentInfo(
       UpdateTournamentInfo event, Emitter<AppState> emit) {
-    // BuildContext context = event.context;
+    BuildContext context = event.context;
     TournamentInfo info = event.tournamentInfo;
-    // LoadingIndicatorDialog().show(context);
+    LoadingIndicatorDialog().show(context);
     print("AppBloc: updateTournamentInfo: " + info.name + "(" + info.id + ")");
     _processUpdateTournamentInfo(info, false);
   }
 
   void _lockOrUnlockTournament(
       LockOrUnlockTournament event, Emitter<AppState> emit) {
+    BuildContext context = event.context;
     TournamentInfo info = event.tournamentInfo;
     info.locked = event.lock; // Make sure lock states align
 
@@ -307,6 +318,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         info.id +
         ") -> Lock: " +
         event.lock.toString());
+    LoadingIndicatorDialog().show(context);
     _processUpdateTournamentInfo(info, true);
   }
 
@@ -328,7 +340,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
           info.id +
           ") Finished -> " +
           value.toString());
-      // LoadingIndicatorDialog().dismiss();
+      LoadingIndicatorDialog().dismiss();
       if (value) {
         add(AppTournamentRequested(info.id));
       }
@@ -344,10 +356,12 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         info.name +
         " -> NewCoaches: " +
         newCoaches.length.toString());
+    LoadingIndicatorDialog().show(event.context);
     _tournamentRepository
         .overwriteCoaches(info.id, newCoaches, renames)
         .then((value) {
       print("AppBloc: UpdateCoaches: Finished -> " + value.toString());
+      LoadingIndicatorDialog().dismiss();
       if (value) {
         add(AppTournamentRequested(info.id));
       }
@@ -359,11 +373,13 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   void _recoverBackup(RecoverBackup event, Emitter<AppState> emit) {
     Tournament tournament = event.tournament;
     print("AppBloc: RecoverBackup: " + tournament.info.name);
+    LoadingIndicatorDialog().show(event.context);
     _tournamentRepository.recoverTournamentBackup(tournament).then((value) {
       print("AppBloc: RecoverBackup: " +
           tournament.info.name +
           " Finished ->" +
           value.toString());
+      LoadingIndicatorDialog().dismiss();
       if (value) {
         add(AppTournamentRequested(tournament.info.id));
       }
@@ -374,11 +390,13 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   void _advanceRound(AdvanceRound event, Emitter<AppState> emit) {
     Tournament tournament = event.tournament;
     print("AppBloc: AdvanceRound: " + tournament.info.name);
+    LoadingIndicatorDialog().show(event.context);
     _tournamentRepository.advanceRound(tournament).then((value) {
       print("AppBloc: AdvanceRound: " +
           tournament.info.name +
           " Finished ->" +
           value.toString());
+      LoadingIndicatorDialog().dismiss();
       if (value) {
         add(AppTournamentRequested(tournament.info.id));
       }
@@ -389,11 +407,13 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   void _discardCurrentRound(DiscardCurrentRound event, Emitter<AppState> emit) {
     Tournament tournament = event.tournament;
     print("AppBloc: DiscardCurrentRound: " + tournament.info.name);
+    LoadingIndicatorDialog().show(event.context);
     _tournamentRepository.discardCurrentRound(tournament).then((value) {
       print("AppBloc: DiscardCurrentRound: " +
           tournament.info.name +
           " Finished ->" +
           value.toString());
+      LoadingIndicatorDialog().dismiss();
       if (value) {
         add(AppTournamentRequested(tournament.info.id));
       }

@@ -38,7 +38,10 @@ class LoadingIndicatorDialog {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(16),
-                        child: Text(text),
+                        child: Text(
+                          text,
+                          style: TextStyle(color: Colors.black),
+                        ),
                       )
                     ],
                   ),

@@ -75,7 +75,7 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
           child: Text('Download Backup'),
           onPressed: () {
             VoidCallback downloadBackupCallback = () async {
-              ToastUtils.show(fToast, "Downloading Backup File");
+              ToastUtils.show(context, "Downloading Backup File");
 
               context.read<AppBloc>().add(DownloadBackup(_tournament));
 
@@ -118,7 +118,7 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
           child: Text('Download Naf Upload'),
           onPressed: () {
             VoidCallback downloadNafUploadCallback = () async {
-              ToastUtils.show(fToast, "Downloading Naf Upload File");
+              ToastUtils.show(context, "Downloading Naf Upload File");
 
               context.read<AppBloc>().add(DownloadNafUploadFile(_tournament));
               // LoadingIndicatorDialog().show(context);
@@ -160,7 +160,7 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
           child: Text('Download Glam Upload File'),
           onPressed: () {
             VoidCallback downloadGlamCallback = () async {
-              ToastUtils.show(fToast, "Downloading Glam File");
+              ToastUtils.show(context, "Downloading Glam File");
 
               context.read<AppBloc>().add(DownloadGlamFile(_tournament));
               // LoadingIndicatorDialog().show(context);

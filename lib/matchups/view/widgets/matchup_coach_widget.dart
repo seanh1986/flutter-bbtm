@@ -2,13 +2,11 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/tournament_repository.dart';
-import 'package:bbnaf/utils/loading_indicator.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class MatchupCoachWidget extends StatefulWidget {
   final CoachMatchup matchup;
@@ -60,14 +58,9 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   late MatchupReportWidget homeReportWidget;
   late MatchupReportWidget awayReportWidget;
 
-  late FToast fToast;
-
   @override
   void initState() {
     super.initState();
-
-    fToast = FToast();
-    fToast.init(context);
   }
 
   @override
@@ -293,6 +286,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                             if (result.reported && isHome != null) {
                               //LoadingIndicatorDialog().show(context);
                               context.read<AppBloc>().add(UpdateMatchEvent(
+                                  context,
                                   UpdateMatchReportEvent(
                                       _tournament, _matchup, isHome)));
                               // _tournyBloc.updateMatchEvent(
@@ -646,44 +640,13 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           ? new UpdateMatchReportEvent(_tournament, _matchup, isHome)
           : new UpdateMatchReportEvent.admin(_tournament, _matchup);
 
-      ToastUtils.show(fToast, "Uploading Match Report!");
+      ToastUtils.show(context, "Uploading Match Report!");
 
-      context.read<AppBloc>().add(UpdateMatchEvent(event));
-
-      // LoadingIndicatorDialog().show(context);
-      // bool updateSuccess = await _tournyBloc.updateMatchEvent(event);
-      // LoadingIndicatorDialog().dismiss();
-
-      // if (updateSuccess) {
-      //   ToastUtils.showSuccess(fToast, "Uploaded Match Report!");
-      //   setState(() {});
-
-      //   // Tournament? refreshedTournament =
-      //   //     await _tournyBloc.getRefreshedTournamentData(_tournament.info.id);
-
-      //   // if (refreshedTournament != null) {
-      //   //   _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
-      //   //   if (mounted) {
-      //   //     setState(() {
-      //   //       _tournament = refreshedTournament;
-      //   //     });
-      //   //   }
-      //   // } else {
-      //   //   ToastUtils.showFailed(fToast,
-      //   //       "Automatic tournament refresh failed. Please refresh the page.");
-      //   // }
-      // } else {
-      //   ToastUtils.showFailed(fToast,
-      //       "Uploading Match Failed. Please reload the page and try again.");
-      // }
+      context.read<AppBloc>().add(UpdateMatchEvent(context, event));
     } catch (_) {
-      ToastUtils.showFailed(fToast,
+      ToastUtils.showFailed(context,
           "Uploading Match Failed. Please reload the page and try again.");
     }
-
-    // setState(() {
-    //   _state = UploadState.CanEdit;
-    // });
   }
 
   Widget? _itemUploadIcon() {

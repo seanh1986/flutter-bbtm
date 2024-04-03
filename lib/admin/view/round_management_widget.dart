@@ -277,24 +277,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                   .toList();
 
               context.read<AppBloc>().add(UpdateMatchEvents(
+                  context: context,
                   tournamentId: _tournament.info.id,
                   newRoundMatchups: hasSwapedMatches ? coachRound : null,
                   matchEvents: matchesToUpdate));
-              // LoadingIndicatorDialog().show(context);
-              // bool success =
-              //     await _tournyBloc.updateMatchEvents(matchesToUpdate);
-              // LoadingIndicatorDialog().dismiss();
-
-              // if (success) {
-              //   ToastUtils.showSuccess(
-              //       fToast, "Tournament data successfully updated.");
-
-              //   _tournyBloc
-              //       .add(TournamentEventRefreshData(widget.tournament.info.id));
-              // } else {
-              //   ToastUtils.showFailed(
-              //       fToast, "Tournament data failed to update.");
-              // }
             };
 
             _showDialogToConfirmOverwrite(context, callback);
@@ -374,34 +360,9 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
               context: context, title: "Advance Round", message: msg);
 
           if (pairingError == RoundPairingError.NoError) {
-            ToastUtils.show(fToast, "Round Advanced");
+            ToastUtils.show(context, "Round Advanced");
 
-            context.read<AppBloc>().add(AdvanceRound(_tournament));
-            // LoadingIndicatorDialog().show(context);
-            // bool success =
-            //     await _tournyBloc.advanceRound(widget.tournament);
-            // LoadingIndicatorDialog().dismiss();
-
-            // if (success) {
-            //   ToastUtils.showSuccess(
-            //       fToast, "Tournament data successfully updated.");
-
-            //   // Tournament? refreshedTournament = await _tournyBloc
-            //   //     .getRefreshedTournamentData(widget.tournament.info.id);
-            //   // if (refreshedTournament != null) {
-            //   //   _tournyBloc.add(SelectTournamentEvent(refreshedTournament));
-
-            //   //   if (mounted) {
-            //   //     setState(() {});
-            //   //   }
-            //   // } else {
-            //   //   ToastUtils.showFailed(
-            //   //       fToast, "Failed to refresh tournament.");
-            //   // }
-            // } else {
-            //   ToastUtils.showFailed(
-            //       fToast, "Tournament data failed to update.");
-            // }
+            context.read<AppBloc>().add(AdvanceRound(context, _tournament));
           }
         };
 
@@ -434,20 +395,9 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                 ")?");
 
         VoidCallback discardCallback = () async {
-          context.read<AppBloc>().add(DiscardCurrentRound(_tournament));
-          // //widget.tournament.coachRounds.removeLast();
-          // LoadingIndicatorDialog().show(context);
-          // bool success =
-          //     await _tournyBloc.discardCurrentRound(widget.tournament);
-          // LoadingIndicatorDialog().dismiss();
-
-          // if (success) {
-          //   ToastUtils.showSuccess(fToast, "Removed current round");
-          //   _tournyBloc
-          //       .add(TournamentEventRefreshData(widget.tournament.info.id));
-          // } else {
-          //   ToastUtils.showFailed(fToast, "Failed to remove current round");
-          // }
+          context
+              .read<AppBloc>()
+              .add(DiscardCurrentRound(context, _tournament));
         };
 
         showOkCancelAlertDialog(
@@ -508,7 +458,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
               success2 && match2Coach1 != null && match2Coach2 != null;
 
           if (!validSwap1 && !validSwap2) {
-            ToastUtils.show(fToast, "Failed to swap matches");
+            ToastUtils.show(context, "Failed to swap matches");
           }
 
           StringBuffer sb = new StringBuffer();
@@ -631,11 +581,11 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                 Navigator.of(context).pop();
 
                 if (nafName1.isEmpty) {
-                  ToastUtils.show(fToast, "Failed: Nafname_1 was empty");
+                  ToastUtils.show(context, "Failed: Nafname_1 was empty");
                 } else if (nafName2.isEmpty) {
-                  ToastUtils.show(fToast, "Failed: Nafname_2 was empty");
+                  ToastUtils.show(context, "Failed: Nafname_2 was empty");
                 } else if (nafName1 == nafName2) {
-                  ToastUtils.show(fToast, "Failed: Nafname_1 == Nafname_2");
+                  ToastUtils.show(context, "Failed: Nafname_1 == Nafname_2");
                 } else {
                   callback.call(nafName1, nafName2);
                 }
@@ -699,38 +649,11 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                     "Please confirm that you wish to OVERWRITE your tournament with the recovery file. This process cannot be undone.");
 
                 VoidCallback confirmedRecoveryCallback = () async {
-                  ToastUtils.show(fToast, "Recovering Backup");
+                  ToastUtils.show(context, "Recovering Backup");
 
                   context
                       .read<AppBloc>()
-                      .add(RecoverBackup(tournyBackup.tournament));
-
-                  // LoadingIndicatorDialog().show(context);
-                  // bool success = await widget.tournyBloc
-                  //     .recoverTournamentBackup(tournyBackup.tournament);
-                  // LoadingIndicatorDialog().dismiss();
-
-                  // if (success) {
-                  //   ToastUtils.showSuccess(
-                  //       fToast, "Recovering Backup successful.");
-
-                  //   // Tournament? refreshedTournament =
-                  //   //     await _tournyBloc.getRefreshedTournamentData(
-                  //   //         widget.tournament.info.id);
-
-                  //   // if (refreshedTournament != null) {
-                  //   //   ToastUtils.showSuccess(
-                  //   //       fToast, "Tournament refreshed");
-                  //   //   _tournyBloc
-                  //   //       .add(SelectTournamentEvent(refreshedTournament));
-                  //   // } else {
-                  //   //   ToastUtils.showFailed(fToast,
-                  //   //       "Automatic tournament refresh failed. Please refresh the page.");
-                  //   // }
-                  // } else {
-                  //   ToastUtils.showFailed(
-                  //       fToast, "Recovering Backup failed.");
-                  // }
+                      .add(RecoverBackup(context, tournyBackup.tournament));
                 };
 
                 showOkCancelAlertDialog(
@@ -744,14 +667,14 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
                             {confirmedRecoveryCallback()}
                         });
               } catch (_) {
-                ToastUtils.showFailed(fToast, "Failed to parse recovery file");
+                ToastUtils.showFailed(context, "Failed to parse recovery file");
               }
             } else {
               ToastUtils.showFailed(
-                  fToast, "Incorrect file format (must be .json)");
+                  context, "Incorrect file format (must be .json)");
             }
           } else {
-            ToastUtils.show(fToast, "Recovering Cancelled");
+            ToastUtils.show(context, "Recovering Cancelled");
           }
         };
 

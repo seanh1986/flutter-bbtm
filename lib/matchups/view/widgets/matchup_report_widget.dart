@@ -97,8 +97,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   final double fabSize = kIsWeb ? 32.0 : 20.0;
   final double raceIconSize = kIsWeb ? 50.0 : 30.0;
 
-  late FToast fToast;
-
   late Color? _titleColor;
 
   String _rosterFileName = "";
@@ -107,9 +105,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   @override
   void initState() {
     super.initState();
-
-    fToast = FToast();
-    fToast.init(context);
 
     _refreshState();
   }
@@ -159,18 +154,13 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   }
 
   void _handleRosterDownload() async {
-    fToast.init(context);
     if (isDownloaded) {
-      ToastUtils.showFailed(fToast, "Already Downloaded: " + _rosterFileName);
+      ToastUtils.showFailed(context, "Already Downloaded: " + _rosterFileName);
       return;
     }
-    ToastUtils.show(fToast, "Downloading: " + _rosterFileName);
+    ToastUtils.show(context, "Downloading: " + _rosterFileName);
 
     context.read<AppBloc>().add(DownloadFile(_rosterFileName));
-    // // LoadingIndicatorDialog().show(context);
-    // isDownloaded =
-    //     await _tournyBloc.downloadFile(DownloadFile(_rosterFileName));
-    // // LoadingIndicatorDialog().dismiss();
   }
 
   Widget _itemHeader(IMatchupParticipant participant) {
@@ -183,7 +173,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
         RaceUtils.getLogo(participant.race),
         fit: BoxFit.cover,
         height: raceIconSize,
-        // scale: kIsWeb ? 1.0 : 0.75,
       );
 
       if (_rosterFileName.isNotEmpty) {

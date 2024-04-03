@@ -133,9 +133,8 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
                   List<RenameNafName> renames =
                       _coachSource.coachIdxNafRenames.values.toList();
 
-                  context
-                      .read<AppBloc>()
-                      .add(UpdateCoaches(_tournament.info, _coaches, renames));
+                  context.read<AppBloc>().add(UpdateCoaches(
+                      context, _tournament.info, _coaches, renames));
                   // LoadingIndicatorDialog().show(context);
                   // bool success = await _tournyBloc.overwriteCoaches(
                   //     _tournament.info, _coaches, renames);
@@ -155,7 +154,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
                 coachImportExport.import().then((importedCoaches) {
                   if (importedCoaches.isEmpty) {
                     ToastUtils.show(
-                        fToast, "Failed to import coaches (NumberFound: 0)");
+                        context, "Failed to import coaches (NumberFound: 0)");
                     return;
                   }
 
@@ -184,7 +183,9 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
                             if (value == OkCancelResult.ok)
                               {
                                 context.read<AppBloc>().add(UpdateCoaches(
-                                    _tournament.info, importedCoaches, []))
+                                    context,
+                                    _tournament.info,
+                                    importedCoaches, []))
                               }
                           });
                 });
@@ -295,14 +296,6 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
         .then((value) => {
               if (value == OkCancelResult.ok) {confirmedUpdateCallback()}
             });
-  }
-
-  void _showSuccessFailToast(bool success) {
-    if (success) {
-      ToastUtils.show(fToast, "Update successful.");
-    } else {
-      ToastUtils.show(fToast, "Update failed.");
-    }
   }
 
   List<DataRow2> _getCoachRows() {

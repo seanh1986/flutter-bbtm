@@ -63,18 +63,21 @@ final class AppTournamentLoaded extends AppEvent {
 
 // Update Match
 final class UpdateMatchEvent extends AppEvent {
-  const UpdateMatchEvent(this.matchEvent);
+  const UpdateMatchEvent(this.context, this.matchEvent);
 
+  final BuildContext context;
   final UpdateMatchReportEvent matchEvent;
 }
 
 // Update Multiple Match Events
 final class UpdateMatchEvents extends AppEvent {
   const UpdateMatchEvents(
-      {required this.tournamentId,
+      {required this.context,
+      required this.tournamentId,
       this.newRoundMatchups,
       this.matchEvents = const []});
 
+  final BuildContext context;
   final String tournamentId;
   final CoachRound? newRoundMatchups;
   final List<UpdateMatchReportEvent> matchEvents;
@@ -82,8 +85,9 @@ final class UpdateMatchEvents extends AppEvent {
 
 // Update Squad Bonus Points
 final class UpdateSquadBonusPts extends AppEvent {
-  const UpdateSquadBonusPts(this.tournament);
+  const UpdateSquadBonusPts(this.context, this.tournament);
 
+  final BuildContext context;
   final Tournament tournament;
 }
 
@@ -91,8 +95,8 @@ final class UpdateSquadBonusPts extends AppEvent {
 final class UpdateTournamentInfo extends AppEvent {
   const UpdateTournamentInfo(this.context, this.tournamentInfo);
 
-  final TournamentInfo tournamentInfo;
   final BuildContext context;
+  final TournamentInfo tournamentInfo;
 }
 
 // Used for Locking & Unlocking tournament
@@ -100,15 +104,17 @@ final class UpdateTournamentInfo extends AppEvent {
 final class LockOrUnlockTournament extends AppEvent {
   const LockOrUnlockTournament(this.context, this.tournamentInfo, this.lock);
 
+  final BuildContext context;
   final bool lock;
   final TournamentInfo tournamentInfo;
-  final BuildContext context;
 }
 
 // Update Coaches
 final class UpdateCoaches extends AppEvent {
-  const UpdateCoaches(this.tournamentInfo, this.newCoaches, this.renames);
+  const UpdateCoaches(
+      this.context, this.tournamentInfo, this.newCoaches, this.renames);
 
+  final BuildContext context;
   final TournamentInfo tournamentInfo;
   final List<Coach> newCoaches;
   final List<RenameNafName> renames;
@@ -116,22 +122,25 @@ final class UpdateCoaches extends AppEvent {
 
 // Recover backup by overwriting the current tournament with the supplied
 final class RecoverBackup extends AppEvent {
-  const RecoverBackup(this.tournament);
+  const RecoverBackup(this.context, this.tournament);
 
+  final BuildContext context;
   final Tournament tournament;
 }
 
 // Advance to next round
 final class AdvanceRound extends AppEvent {
-  const AdvanceRound(this.tournament);
+  const AdvanceRound(this.context, this.tournament);
 
+  final BuildContext context;
   final Tournament tournament;
 }
 
 // Discard the current round
 final class DiscardCurrentRound extends AppEvent {
-  const DiscardCurrentRound(this.tournament);
+  const DiscardCurrentRound(this.context, this.tournament);
 
+  final BuildContext context;
   final Tournament tournament;
 }
 
