@@ -199,19 +199,12 @@ class _CoachMatchupsPage extends State<CoachMatchupsPage> {
   Widget _noMatchUpsYet(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-        margin: EdgeInsets.fromLTRB(20, 2, 20, 2), // EdgeInsets.all(20),
-        width: double.infinity,
-        child: Card(
-          color: Colors.transparent,
-          margin: EdgeInsets.all(10),
-          child: Container(
-              color: Colors.transparent,
-              padding: EdgeInsets.all(2),
-              child: Text(
-                'Matchups not available yet',
-                style: theme.textTheme.titleLarge,
-              )),
-        ));
+    return Center(
+        child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Text(
+              'Matchups not available yet. Try again later.',
+              style: theme.textTheme.bodyLarge,
+            )));
   }
 }

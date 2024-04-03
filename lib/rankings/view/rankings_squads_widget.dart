@@ -236,11 +236,11 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
     return Container(
         height: MediaQuery.of(context).size.height * 0.75,
-        child: getDataTable());
+        child: getDataTable(context));
   }
 
-  Widget getDataTable() {
-    // final theme = Theme.of(context);
+  Widget getDataTable(BuildContext context) {
+    final theme = Theme.of(context);
 
     return DataTable2(
         // headingRowColor:
@@ -261,8 +261,10 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         empty: Center(
             child: Container(
                 padding: const EdgeInsets.all(20),
-                color: Colors.grey[200],
-                child: const Text('No data yet'))),
+                child: Text(
+                  'No data yet',
+                  style: theme.textTheme.bodyLarge,
+                ))),
         columns: _getColumns(),
         rows: _getRows(),
         sortAscending: _sortAscending,

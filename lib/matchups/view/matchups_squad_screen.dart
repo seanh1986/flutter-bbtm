@@ -45,8 +45,6 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     _tournament = appState.tournamentState.tournament;
     _searchValue = appState.screenState.searchValue;
 
-    final theme = Theme.of(context);
-
     if (_roundIdx == null) {
       _roundIdx = _tournament.curRoundIdx();
     }
@@ -56,7 +54,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     }
 
     if (_matchups.isEmpty) {
-      return _noMatchUpsYet();
+      return _noMatchUpsYet(context);
     }
 
     selectedMatchup = _matchups
@@ -64,8 +62,7 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
 
     return selectedMatchup != null
         ? _selectedSquadMatchupUi(context, selectedMatchup!)
-        : Text("No Squad Matchup Found. Try Again Later.",
-            style: theme.textTheme.titleLarge);
+        : _noMatchUpsYet(context);
   }
 
   Widget _selectedSquadMatchupUi(BuildContext context, SquadMatchup m) {
@@ -169,39 +166,15 @@ class _SquadMatchupsPage extends State<SquadMatchupsPage> {
     );
   }
 
-  Color? _getColor(SquadMatchup m, bool home) {
-    if (!m.hasResult()) {
-      return null;
-    }
+  Widget _noMatchUpsYet(BuildContext context) {
+    final theme = Theme.of(context);
 
-    MatchResult result = m.getResult();
-
-    switch (result) {
-      case MatchResult.HomeWon:
-        return home ? Colors.green : Colors.red;
-      case MatchResult.AwayWon:
-        return home ? Colors.red : Colors.green;
-      case MatchResult.Draw:
-        return Colors.orange;
-      case MatchResult.Conflict:
-      case MatchResult.NoResult:
-      default:
-        return null;
-    }
-  }
-
-  Widget _noMatchUpsYet() {
-    return Container(
-        margin: EdgeInsets.fromLTRB(20, 2, 20, 2), // EdgeInsets.all(20),
-        width: double.infinity,
-        child: Card(
-          margin: EdgeInsets.all(10),
-          child: Container(
-              padding: EdgeInsets.all(2),
-              child: Text(
-                'Matchups not available yet',
-                style: TextStyle(fontSize: 20),
-              )),
-        ));
+    return Center(
+        child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Text(
+              'Matchups not available yet. Try again later.',
+              style: theme.textTheme.bodyLarge,
+            )));
   }
 }

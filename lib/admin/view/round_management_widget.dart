@@ -194,6 +194,8 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
       return null;
     }
 
+    final theme = Theme.of(context);
+
     CoachRound coachRound = _coachRounds[roundIdx];
 
     CoachRoundDataSource dataSource = CoachRoundDataSource(
@@ -237,8 +239,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
       empty: Center(
           child: Container(
               padding: const EdgeInsets.all(20),
-              color: Colors.grey[200],
-              child: const Text('No data yet'))),
+              child: Text(
+                'No data yet',
+                style: theme.textTheme.bodyLarge,
+              ))),
       columns: _roundSummaryCols,
       rows: rows,
     );

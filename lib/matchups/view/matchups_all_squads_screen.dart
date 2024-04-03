@@ -149,17 +149,12 @@ class _AllSquadsMatchupsPage extends State<AllSquadsMatchupsPage> {
   Widget _noMatchUpsYet() {
     final theme = Theme.of(context);
 
-    return Container(
-        margin: EdgeInsets.fromLTRB(20, 2, 20, 2), // EdgeInsets.all(20),
-        width: double.infinity,
-        child: Card(
-          margin: EdgeInsets.all(10),
-          child: Container(
-              padding: EdgeInsets.all(2),
-              child: Text(
-                'Matchups not available yet',
-                style: theme.textTheme.titleLarge,
-              )),
-        ));
+    return Center(
+        child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Text(
+              'Matchups not available yet. Try again later.',
+              style: theme.textTheme.bodyLarge,
+            )));
   }
 }

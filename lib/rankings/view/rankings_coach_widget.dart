@@ -223,7 +223,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       SizedBox(height: 1),
       Container(
           height: MediaQuery.of(context).size.height * 0.6,
-          child: getDataTable())
+          child: getDataTable(context))
     ]);
 
     // return Container(
@@ -231,7 +231,9 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     //     child: getDataTable());
   }
 
-  Widget getDataTable() {
+  Widget getDataTable(BuildContext context) {
+    final theme = Theme.of(context);
+
     return DataTable2(
         // headingRowColor:
         //     MaterialStateColor.resolveWith((states) => Colors.grey[850]!),
@@ -251,8 +253,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         empty: Center(
             child: Container(
                 padding: const EdgeInsets.all(20),
-                color: Colors.grey[200],
-                child: const Text('No data yet'))),
+                child: Text('No data yet', style: theme.textTheme.bodyLarge))),
         columns: _getColumns(),
         rows: _getRows(),
         sortAscending: _sortAscending,

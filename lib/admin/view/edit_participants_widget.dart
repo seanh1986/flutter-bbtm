@@ -260,8 +260,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
       empty: Center(
           child: Container(
               padding: const EdgeInsets.all(20),
-              color: Colors.grey[200],
-              child: const Text('No data yet'))),
+              child: Text('No data yet', style: theme.textTheme.bodyLarge))),
       columns: _coachCols,
       rows: _getCoachRows(),
     );
