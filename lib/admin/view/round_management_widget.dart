@@ -525,8 +525,11 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
 
   Future<void> _showSwapMatchesDialog(
       void Function(String nafName1, String nafName2) callback) async {
-    List<DropdownMenuItem> coachesDropDown = _tournament
-        .getCoaches()
+    List<Coach> tCoaches = List.from(_tournament.getCoaches());
+    tCoaches.sort(
+        (a, b) => a.nafName.toLowerCase().compareTo(b.nafName.toLowerCase()));
+
+    List<DropdownMenuItem> coachesDropDown = tCoaches
         .map((Coach c) => c.nafName)
         .map((String r) => DropdownMenuItem(value: r, child: Text(r)))
         .toList();
