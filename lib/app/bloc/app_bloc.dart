@@ -109,6 +109,8 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     if (screenState.mainScreen == LoginPage.tag &&
         authState.status == AuthenticationStatus.authenticated) {
       screenState = ScreenState(mainScreen: TournamentSelectionPage.tag);
+    } else if (authState.status == AuthenticationStatus.unauthenticated) {
+      screenState = ScreenState(mainScreen: LoginPage.tag);
     }
 
     emit(AppState(
