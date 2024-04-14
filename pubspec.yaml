@@ -51,6 +51,7 @@ dependencies:
   json_serializable: ^6.7.1
   meta: ^1.7.0
   responsive_framework: ^1.1.1 
+  screenshot: ^2.3.0
   string_similarity: ^2.0.0
   syncfusion_flutter_datepicker: ^24.1.47
   uni_links: ^0.5.1

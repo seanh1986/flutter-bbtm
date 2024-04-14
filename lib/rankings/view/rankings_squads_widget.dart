@@ -1,10 +1,15 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/rankings/models/models.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
+import 'package:bbnaf/utils/save_as/save_as.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:screenshot/screenshot.dart';
 
 enum SquadRankingFields {
   Pts,
@@ -49,6 +54,14 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   List<Squad> _items = [];
 
   String _searchValue = "";
+
+  ScreenshotController screenshotController = ScreenshotController();
+
+  PaginatorController controller = PaginatorController();
+
+  final key = new GlobalKey<PaginatedDataTableState>();
+
+  late PaginatedDataTable2 paginatedDataTable;
 
   @override
   void initState() {
@@ -239,9 +252,34 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
       return multiplier * Comparable.compare(aValue, bValue);
     });
 
-    return Container(
-        height: MediaQuery.of(context).size.height * 0.75,
-        child: getDataTable(context));
+    final theme = Theme.of(context);
+
+    paginatedDataTable = getPaginatedDataTable(context);
+
+    return Column(
+      children: [
+        ElevatedButton(
+            style: theme.elevatedButtonTheme.style,
+            child: IconButton(
+                icon: Icon(
+                  Icons.save,
+                  color: theme.iconTheme.color,
+                ),
+                onPressed: null),
+            onPressed: () {
+              _createImage(context);
+            }),
+        Container(
+            height: MediaQuery.of(context).size.height * 0.75,
+            // child: getDataTable(context)),
+            child: Screenshot(
+                controller: screenshotController, child: paginatedDataTable))
+      ],
+    );
+
+    // return Container(
+    //     height: MediaQuery.of(context).size.height * 0.75,
+    //     child: getDataTable(context));
   }
 
   Widget getDataTable(BuildContext context) {
@@ -377,4 +415,129 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         return 0.0;
     }
   }
+
+  PaginatedDataTable2 getPaginatedDataTable(BuildContext context) {
+    final theme = Theme.of(context);
+
+    List<DataColumn2> cols = _getColumns();
+    List<DataRow2> rows = _getRows();
+    DataTableSource source = RowDataSource(rows);
+
+    return PaginatedDataTable2(
+        key: key,
+        headingCheckboxTheme: const CheckboxThemeData(
+            side: BorderSide(color: Colors.white, width: 2.0)),
+        columnSpacing: 12,
+        horizontalMargin: 12,
+        border: TableBorder.all(),
+        controller: controller,
+        dividerThickness:
+            1, // this one will be ignored if [border] is set above
+        fixedTopRows: 1,
+        minWidth: 900,
+        empty: Center(
+            child: Container(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  'No data yet',
+                  style: theme.textTheme.bodyLarge,
+                ))),
+        columns: cols,
+        source: source);
+  }
+
+  void _createImage(BuildContext context) {
+    //Widget table = getPaginatedDataTable(context);
+
+    _captureScreenshot(context, paginatedDataTable, "SquadRankings_0.jpg");
+
+    if (!controller.isAttached) {
+      return;
+    }
+
+    // Iterate page by page until none left
+    // Start at first page
+    int initRowIdx = controller.currentRowIndex;
+    controller.goToFirstPage();
+    int numPages = (controller.rowCount / controller.rowsPerPage).ceil();
+
+    for (int i = 0; i < numPages; i++) {
+      int pageNumber = i + 1;
+
+      String fileName = "SquadRankings_" + pageNumber.toString() + ".jpg";
+
+      _captureScreenshot(context, paginatedDataTable, fileName);
+
+      controller.goToNextPage();
+    }
+
+    // Restore state
+    controller.goToRow(initRowIdx);
+  }
+
+  Future<void> _captureScreenshot(
+      BuildContext context, Widget widget, String fileName) {
+    return screenshotController
+        .capture(pixelRatio: 1.5)
+        .then((Uint8List? capturedImage) {
+      //Capture Done
+      if (capturedImage != null) {
+        saveAsBytes(capturedImage, fileName);
+      }
+    }).catchError((onError) {
+      print(onError);
+    });
+
+    // Widget w = Container(
+    //     height: MediaQuery.of(context).size.height * 0.75,
+    //     // child: getDataTable(context)),
+    //     child: paginatedDataTable);
+
+    // return screenshotController
+    //     .captureFromWidget(
+    //   w,
+    //   // InheritedTheme.captureAll(
+    //   //   context,
+    //   //   widget,
+    //   // ),
+    //   // delay: Duration(seconds: 1),
+    //   pixelRatio: 1.5,
+    //   context: context,
+
+    //   ///
+    //   /// Additionally you can define constraint for your image.
+    //   ///
+    //   /// constraints: BoxConstraints(
+    //   ///   maxHeight: 1000,
+    //   ///   maxWidth: 1000,
+    //   /// ))
+    // )
+    //     .then((capturedImage) {
+    //   // Handle captured image
+    //   saveAsBytes(capturedImage, fileName);
+    // });
+  }
+}
+
+class RowDataSource extends DataTableSource {
+  List<DataRow2> rows;
+
+  RowDataSource(this.rows);
+
+  @override
+  DataRow2? getRow(int index) {
+    if (index < 0 || index >= rows.length) {
+      return null;
+    }
+    return rows[index];
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => rows.length;
+
+  @override
+  int get selectedRowCount => 0;
 }
