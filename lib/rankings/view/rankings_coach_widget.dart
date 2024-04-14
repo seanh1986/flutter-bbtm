@@ -148,21 +148,23 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       bool secondaryHighlight =
           userSquad != null && userSquad.hasCoach(coach.nafName);
 
-      TextStyle? textStyle = primaryHighlight
-          ? TextStyle(color: Colors.red)
-          : (secondaryHighlight ? TextStyle(color: Colors.lightBlue) : null);
+      double highlightOpacity = 0.5;
+      Color? cellColor = primaryHighlight
+          ? Colors.red.withOpacity(highlightOpacity)
+          : (secondaryHighlight
+              ? Colors.lightBlue.withOpacity(highlightOpacity)
+              : null);
 
       List<DataCell> cells = [];
 
-      cells.add(_createDataCell(rank.toString(), textStyle));
-
-      cells.add(_createCoachDataCell(coach, coachSquadName, textStyle?.color));
+      cells.add(_createDataCell(rank.toString()));
+      cells.add(_createCoachDataCell(coach, coachSquadName));
 
       widget.fields.forEach((f) {
         String name = _getColumnName(f);
 
         if (name.isNotEmpty) {
-          cells.add(_createDataCell(_getCellValue(coach, f), textStyle));
+          cells.add(_createDataCell(_getCellValue(coach, f)));
         }
       });
 
@@ -178,7 +180,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
               ? sizeNafName + sizeRace + sizeSquadName + buffers
               : null;
 
-      rows.add(DataRow2(cells: cells, specificRowHeight: sizeRowHeight));
+      rows.add(DataRow2(
+          cells: cells,
+          specificRowHeight: sizeRowHeight,
+          color: MaterialStatePropertyAll(cellColor)));
     }
 
     return rows;
@@ -214,32 +219,17 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     });
 
     return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      // Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      //   EasySearchBar(
-      //       title: Text('Search'),
-      //       onSearch: (value) => setState(() => _searchValue = value)),
-      //   // IconButton(onPressed: () {}, icon: Icon(Icons.filter))
-      // ]),
       SizedBox(height: 1),
       Container(
           height: MediaQuery.of(context).size.height * 0.6,
           child: getDataTable(context))
     ]);
-
-    // return Container(
-    //     height: MediaQuery.of(context).size.height * 0.6,
-    //     child: getDataTable());
   }
 
   Widget getDataTable(BuildContext context) {
     final theme = Theme.of(context);
 
     return DataTable2(
-        // headingRowColor:
-        //     MaterialStateColor.resolveWith((states) => Colors.grey[850]!),
-        // headingTextStyle: const TextStyle(color: Colors.white),
-        // headingCheckboxTheme: const CheckboxThemeData(
-        //     side: BorderSide(color: Colors.white, width: 2.0)),
         isHorizontalScrollBarVisible: true,
         isVerticalScrollBarVisible: true,
         columnSpacing: 12,
@@ -365,14 +355,11 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     }
   }
 
-  DataCell _createCoachDataCell(Coach coach, String coachSquadName, Color? c) {
+  DataCell _createCoachDataCell(Coach coach, String coachSquadName) {
     final theme = Theme.of(context);
 
-    TextStyle nafNameStyle =
-        TextStyle(color: c, fontSize: theme.textTheme.bodyMedium?.fontSize);
-
-    TextStyle squadRaceStyle =
-        TextStyle(color: c, fontSize: theme.textTheme.bodySmall?.fontSize);
+    TextStyle? nafNameStyle = theme.textTheme.bodyMedium;
+    TextStyle? squadRaceStyle = theme.textTheme.bodySmall;
 
     List<Widget> cellWidgets = [
       Text(coach.nafName, overflow: TextOverflow.ellipsis, style: nafNameStyle),
@@ -386,18 +373,16 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     cellWidgets.add(Text("    " + coach.raceName(),
         overflow: TextOverflow.ellipsis, style: squadRaceStyle));
 
-    return DataCell(ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 200),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: cellWidgets,
-        )));
+    return DataCell(Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: cellWidgets,
+    ));
   }
 
-  DataCell _createDataCell(String text, TextStyle? textStyle) {
-    return DataCell(ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 200),
-        child: Text(text, overflow: TextOverflow.ellipsis, style: textStyle)));
+  DataCell _createDataCell(String text) {
+    return DataCell(Align(
+        alignment: Alignment.center,
+        child: Text(text, overflow: TextOverflow.ellipsis)));
   }
 }

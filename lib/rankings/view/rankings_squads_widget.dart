@@ -108,8 +108,18 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
       case SquadRankingFields.SumIndividualScore:
       case SquadRankingFields.W_T_L:
       case SquadRankingFields.SumBestSport:
+      case SquadRankingFields.W_Percent:
         return 90;
       case SquadRankingFields.Pts:
+      case SquadRankingFields.SumTd:
+      case SquadRankingFields.SumCas:
+      case SquadRankingFields.SumOppTd:
+      case SquadRankingFields.SumOppCas:
+      case SquadRankingFields.SumDeltaTd:
+      case SquadRankingFields.SumDeltaCas:
+      case SquadRankingFields.W:
+      case SquadRankingFields.T:
+      case SquadRankingFields.L:
         return 70;
       default:
         return null;
@@ -134,19 +144,21 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
       bool highlight = squad.hasCoach(nafName);
 
-      TextStyle? textStyle = highlight ? TextStyle(color: Colors.red) : null;
+      double highlightOpacity = 0.5;
+      Color? cellColor =
+          highlight ? Colors.red.withOpacity(highlightOpacity) : null;
 
       List<DataCell> cells = [];
 
-      cells.add(_createDataCell(rank.toString(), textStyle));
+      cells.add(_createDataCell(rank.toString()));
 
-      cells.add(_createSquadCoachesDataCell(squad, textStyle?.color));
+      cells.add(_createSquadCoachesDataCell(squad));
 
       widget.fields.forEach((f) {
         String name = _getColumnName(f);
 
         if (name.isNotEmpty) {
-          cells.add(_createDataCell(_getCellValue(squad, f), textStyle));
+          cells.add(_createDataCell(_getCellValue(squad, f)));
         }
       });
 
@@ -162,20 +174,18 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
       rows.add(DataRow2(
         cells: cells,
         specificRowHeight: sizeRowHeight,
+        color: MaterialStatePropertyAll(cellColor),
       ));
     }
 
     return rows;
   }
 
-  DataCell _createSquadCoachesDataCell(Squad squad, Color? c) {
+  DataCell _createSquadCoachesDataCell(Squad squad) {
     final theme = Theme.of(context);
 
-    TextStyle squadStyle =
-        TextStyle(color: c, fontSize: theme.textTheme.bodyMedium?.fontSize);
-
-    TextStyle coachStyle =
-        TextStyle(color: c, fontSize: theme.textTheme.bodySmall?.fontSize);
+    TextStyle? squadStyle = theme.textTheme.bodyMedium;
+    TextStyle? coachStyle = theme.textTheme.bodySmall;
 
     List<Widget> cellWidgets = [
       Text(squad.name(), overflow: TextOverflow.ellipsis, style: squadStyle),
@@ -186,22 +196,17 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
           Text("    " + c, overflow: TextOverflow.ellipsis, style: coachStyle));
     });
 
-    return DataCell(ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 200),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: cellWidgets,
-        )));
+    return DataCell(Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: cellWidgets,
+    ));
   }
 
-  DataCell _createDataCell(String text, TextStyle? textStyle) {
-    Text textWidget =
-        Text(text, overflow: TextOverflow.ellipsis, style: textStyle);
-
-    return DataCell(ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 200),
-        child: Center(child: textWidget)));
+  DataCell _createDataCell(String text) {
+    return DataCell(Align(
+        alignment: Alignment.center,
+        child: Text(text, overflow: TextOverflow.ellipsis)));
   }
 
   @override
@@ -243,9 +248,6 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     final theme = Theme.of(context);
 
     return DataTable2(
-        // headingRowColor:
-        //     MaterialStateColor.resolveWith((states) => Colors.grey[850]!),
-        // headingTextStyle: const TextStyle(color: Colors.white),
         headingCheckboxTheme: const CheckboxThemeData(
             side: BorderSide(color: Colors.white, width: 2.0)),
         isHorizontalScrollBarVisible: true,
