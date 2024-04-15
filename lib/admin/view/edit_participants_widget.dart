@@ -1,4 +1,5 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:bbnaf/admin/view/view.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/excel/coach_import_export.dart';
@@ -20,6 +21,11 @@ class EditParticipantsWidget extends StatefulWidget {
   }
 }
 
+enum EditParticipantState {
+  ParticipantList,
+  ManageRosters,
+}
+
 class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   late List<Coach> _coaches = [];
 
@@ -35,6 +41,8 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   int? _editIdx;
   Map<int, RenameNafName>? _coachIdxNafRenames;
+
+  EditParticipantState _state = EditParticipantState.ParticipantList;
 
   @override
   void initState() {
@@ -71,12 +79,29 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
       _coaches = _tournament.getCoaches().map((c) => Coach.from(c)).toList();
     }
 
+    List<Widget> widgetList = [];
+
+    if (_state == EditParticipantState.ParticipantList) {
+      widgetList.addAll(_viewCoaches(context));
+    } else if (_state == EditParticipantState.ManageRosters) {
+      widgetList.addAll([
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              _state = EditParticipantState.ParticipantList;
+            });
+          },
+          child: const Text('Participant List'),
+        ),
+        SizedBox(width: 20),
+        RosterManageWidget(),
+      ]);
+    }
+
     return Column(children: [
       TitleBar(title: "Edit Tournament Participants"),
       SizedBox(height: 20),
-      Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: _viewCoaches(context))
+      Column(mainAxisAlignment: MainAxisAlignment.center, children: widgetList)
     ]);
   }
 
@@ -129,12 +154,6 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
                   context.read<AppBloc>().add(UpdateCoaches(
                       context, _tournament.info, _coaches, renames));
-                  // LoadingIndicatorDialog().show(context);
-                  // bool success = await _tournyBloc.overwriteCoaches(
-                  //     _tournament.info, _coaches, renames);
-                  // LoadingIndicatorDialog().dismiss();
-
-                  // _showSuccessFailToast(success);
                 };
 
                 _showDialogToConfirmOverwrite(context, callback);
@@ -185,7 +204,16 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
                 });
               },
               child: const Text('Import from File'),
-            )
+            ),
+            SizedBox(width: 20),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _state = EditParticipantState.ManageRosters;
+                });
+              },
+              child: const Text('Rosters'),
+            ),
           ]),
         ]));
   }
