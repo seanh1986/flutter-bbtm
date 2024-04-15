@@ -19,7 +19,7 @@ enum RosterDownloadState {
 }
 
 class _RosterManageWidget extends State<RosterManageWidget> {
-  late Map<String, RosterDownloadState> _rosterDownloads = {};
+  late Map<Coach, RosterDownloadState> _rosterDownloads = {};
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ class _RosterManageWidget extends State<RosterManageWidget> {
 
     List<String> nafNames = _rosterDownloads.entries
         .where((a) => a.value == state)
-        .map((e) => e.key)
+        .map((e) => e.key.nafName)
         .toList();
 
     String msg;
@@ -82,8 +82,7 @@ class _RosterManageWidget extends State<RosterManageWidget> {
       bool noFile = c.rosterFileName.isEmpty;
 
       if (noFile) {
-        _rosterDownloads.update(
-            c.nafName, (v) => RosterDownloadState.NotUploaded,
+        _rosterDownloads.update(c, (v) => RosterDownloadState.NotUploaded,
             ifAbsent: () => RosterDownloadState.NotUploaded);
 
         return;
@@ -92,8 +91,7 @@ class _RosterManageWidget extends State<RosterManageWidget> {
       RosterDownloadState? state = _rosterDownloads[c.nafName];
 
       if (state == null) {
-        _rosterDownloads.putIfAbsent(
-            c.nafName, () => RosterDownloadState.Checking);
+        _rosterDownloads.putIfAbsent(c, () => RosterDownloadState.Checking);
 
         context.read<AppBloc>().getFileUrl(c.rosterFileName).then((value) {
           if (mounted) {
@@ -103,20 +101,18 @@ class _RosterManageWidget extends State<RosterManageWidget> {
                 : RosterDownloadState.NotUploaded;
 
             setState(() {
-              _rosterDownloads.update(c.nafName, (v) => state,
-                  ifAbsent: () => state);
+              _rosterDownloads.update(c, (v) => state, ifAbsent: () => state);
             });
           }
         }).onError((error, stackTrace) {
           setState(() {
-            _rosterDownloads.update(
-                c.nafName, (v) => RosterDownloadState.NotUploaded,
+            _rosterDownloads.update(c, (v) => RosterDownloadState.NotUploaded,
                 ifAbsent: () => RosterDownloadState.NotUploaded);
           });
         });
         return;
       } else {
-        _rosterDownloads.update(c.nafName, (v) => state, ifAbsent: () => state);
+        _rosterDownloads.update(c, (v) => state, ifAbsent: () => state);
       }
     });
   }
