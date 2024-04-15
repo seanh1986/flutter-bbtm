@@ -93,7 +93,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
           },
           child: const Text('Participant List'),
         ),
-        SizedBox(width: 20),
+        SizedBox(height: 20),
         RosterManageWidget(),
       ]);
     }

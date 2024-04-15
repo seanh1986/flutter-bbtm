@@ -25,6 +25,7 @@ class _RosterManageWidget extends State<RosterManageWidget> {
   Widget build(BuildContext context) {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     Tournament tournament = appState.tournamentState.tournament;
+
     initFromTournament(context, tournament);
 
     return _getCurrentStatus(context);
