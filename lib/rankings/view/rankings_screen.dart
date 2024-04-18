@@ -100,19 +100,20 @@ class _RankingsPage extends State<RankingsPage> {
     List<ToggleWidgetItem> items = [
       ToggleWidgetItem("Combined", (context) {
         return RankingCoachPage(
+            title: "Coach Rankings - Combined",
             fields: showAdminDetails
                 ? _getCoachRankingFieldsCombinedAdmin()
                 : _getCoachRankingFieldsCombined());
       }),
       ToggleWidgetItem("Td", (context) {
-        return RankingCoachPage(fields: [
+        return RankingCoachPage(title: "Coach Touchdowns", fields: [
           CoachRankingFields.Td,
           CoachRankingFields.OppTd,
           CoachRankingFields.DeltaTd,
         ]);
       }),
       ToggleWidgetItem("Cas", (context) {
-        return RankingCoachPage(fields: [
+        return RankingCoachPage(title: "Coach Casualties", fields: [
           CoachRankingFields.Cas,
           CoachRankingFields.OppCas,
           CoachRankingFields.DeltaCas,
@@ -120,13 +121,16 @@ class _RankingsPage extends State<RankingsPage> {
       }),
       ToggleWidgetItem(stuntyFilter.name, (context) {
         return RankingCoachPage(
-            filter: stuntyFilter, fields: stuntyFilter.fields);
+            title: "Coach " + stuntyFilter.name,
+            filter: stuntyFilter,
+            fields: stuntyFilter.fields);
       }),
     ];
 
     if (showAdminDetails) {
       items.add(ToggleWidgetItem("Sport", (context) {
-        return RankingCoachPage(fields: [CoachRankingFields.BestSport]);
+        return RankingCoachPage(
+            title: "Coach Best Sport", fields: [CoachRankingFields.BestSport]);
       }));
     }
 
@@ -139,19 +143,20 @@ class _RankingsPage extends State<RankingsPage> {
     List<ToggleWidgetItem> items = [
       ToggleWidgetItem("Combined", (context) {
         return RankingSquadsPage(
+            title: "Squad Rankings - Combined",
             fields: showAdminDetails
                 ? _getSquadRankingFieldsCombinedAdmin()
                 : _getSquadRankingFieldsCombined());
       }),
       ToggleWidgetItem("Td", (context) {
-        return RankingSquadsPage(fields: [
+        return RankingSquadsPage(title: "Squad Touchdowns", fields: [
           SquadRankingFields.SumTd,
           SquadRankingFields.SumOppTd,
           SquadRankingFields.SumDeltaTd,
         ]);
       }),
       ToggleWidgetItem("Cas", (context) {
-        return RankingSquadsPage(fields: [
+        return RankingSquadsPage(title: "Squad Casualties", fields: [
           SquadRankingFields.SumCas,
           SquadRankingFields.SumOppCas,
           SquadRankingFields.SumDeltaCas,
@@ -161,7 +166,9 @@ class _RankingsPage extends State<RankingsPage> {
 
     if (showAdminDetails) {
       items.add(ToggleWidgetItem("Sport", (context) {
-        return RankingSquadsPage(fields: [SquadRankingFields.SumBestSport]);
+        return RankingSquadsPage(
+            title: "Squad Best Sports",
+            fields: [SquadRankingFields.SumBestSport]);
       }));
     }
 

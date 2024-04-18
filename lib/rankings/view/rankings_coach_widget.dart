@@ -24,10 +24,12 @@ enum CoachRankingFields {
 }
 
 class RankingCoachPage extends StatefulWidget {
+  final String title;
   final CoachRankingFilter? filter;
   final List<CoachRankingFields> fields;
 
-  RankingCoachPage({Key? key, this.filter, required this.fields})
+  RankingCoachPage(
+      {Key? key, required this.title, this.filter, required this.fields})
       : super(key: key);
 
   @override

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:authentication_repository/authentication_repository.dart';
@@ -30,10 +31,12 @@ enum SquadRankingFields {
 }
 
 class RankingSquadsPage extends StatefulWidget {
+  final String title;
   final SquadRankingFilter? filter;
   final List<SquadRankingFields> fields;
 
-  RankingSquadsPage({Key? key, this.filter, required this.fields})
+  RankingSquadsPage(
+      {Key? key, required this.title, this.filter, required this.fields})
       : super(key: key);
 
   @override
@@ -56,12 +59,6 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   String _searchValue = "";
 
   ScreenshotController screenshotController = ScreenshotController();
-
-  PaginatorController controller = PaginatorController();
-
-  final key = new GlobalKey<PaginatedDataTableState>();
-
-  late PaginatedDataTable2 paginatedDataTable;
 
   @override
   void initState() {
@@ -139,10 +136,13 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     }
   }
 
-  List<DataRow2> _getRows() {
+  List<DataRow2> _getAllRows({bool allowHighlights = true}) {
     final theme = Theme.of(context);
 
     List<DataRow2> rows = [];
+
+    Color? even = theme.listTileTheme.tileColor;
+    Color? odd = theme.listTileTheme.selectedTileColor;
 
     for (int i = 0; i < _items.length; i++) {
       Squad squad = _items[i];
@@ -155,11 +155,15 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
       String nafName = _user.getNafName();
 
-      bool highlight = squad.hasCoach(nafName);
+      bool highlight = allowHighlights && squad.hasCoach(nafName);
 
       double highlightOpacity = 0.5;
       Color? cellColor =
           highlight ? Colors.red.withOpacity(highlightOpacity) : null;
+
+      if (cellColor == null) {
+        cellColor = i % 2 == 0 ? even : odd;
+      }
 
       List<DataCell> cells = [];
 
@@ -254,7 +258,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
     final theme = Theme.of(context);
 
-    paginatedDataTable = getPaginatedDataTable(context);
+    List<DataColumn2> columns = _getColumns();
+    List<DataRow2> rows = _getAllRows();
 
     return Column(
       children: [
@@ -271,9 +276,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
             }),
         Container(
             height: MediaQuery.of(context).size.height * 0.75,
-            // child: getDataTable(context)),
-            child: Screenshot(
-                controller: screenshotController, child: paginatedDataTable))
+            child: getDataTable(context, rows, columns)),
       ],
     );
 
@@ -282,7 +285,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     //     child: getDataTable(context));
   }
 
-  Widget getDataTable(BuildContext context) {
+  DataTable2 getDataTable(
+      BuildContext context, List<DataRow2> rows, List<DataColumn2> columns) {
     final theme = Theme.of(context);
 
     return DataTable2(
@@ -305,8 +309,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
                   'No data yet',
                   style: theme.textTheme.bodyLarge,
                 ))),
-        columns: _getColumns(),
-        rows: _getRows(),
+        rows: rows,
+        columns: columns,
         sortAscending: _sortAscending,
         sortColumnIndex: _getSortColumnIndex());
   }
@@ -416,106 +420,87 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     }
   }
 
-  PaginatedDataTable2 getPaginatedDataTable(BuildContext context) {
+  void _createImage(BuildContext context) {
     final theme = Theme.of(context);
 
-    List<DataColumn2> cols = _getColumns();
-    List<DataRow2> rows = _getRows();
-    DataTableSource source = RowDataSource(rows);
+    List<DataRow2> allRows = _getAllRows(allowHighlights: false);
+    List<DataColumn2> columns = _getColumns();
 
-    return PaginatedDataTable2(
-        key: key,
-        headingCheckboxTheme: const CheckboxThemeData(
-            side: BorderSide(color: Colors.white, width: 2.0)),
-        columnSpacing: 12,
-        horizontalMargin: 12,
-        border: TableBorder.all(),
-        controller: controller,
-        dividerThickness:
-            1, // this one will be ignored if [border] is set above
-        fixedTopRows: 1,
-        minWidth: 900,
-        empty: Center(
-            child: Container(
-                padding: const EdgeInsets.all(20),
-                child: Text(
-                  'No data yet',
-                  style: theme.textTheme.bodyLarge,
-                ))),
-        columns: cols,
-        source: source);
-  }
+    String tournyName = _tournament.info.name;
+    int roundNumber = _tournament.curRoundNumber();
 
-  void _createImage(BuildContext context) {
-    //Widget table = getPaginatedDataTable(context);
+    List<Widget> headingWidgets = [
+      Text(tournyName, style: theme.textTheme.displaySmall),
+      SizedBox(height: 10),
+      Text(widget.title + " - Round " + roundNumber.toString(),
+          style: theme.textTheme.displaySmall),
+    ];
 
-    _captureScreenshot(context, paginatedDataTable, "SquadRankings_0.jpg");
+    int numRows = allRows.length;
+    int rowsPerPage = 10;
 
-    if (!controller.isAttached) {
-      return;
-    }
-
-    // Iterate page by page until none left
-    // Start at first page
-    int initRowIdx = controller.currentRowIndex;
-    controller.goToFirstPage();
-    int numPages = (controller.rowCount / controller.rowsPerPage).ceil();
+    int numPages = (numRows / rowsPerPage).ceil();
 
     for (int i = 0; i < numPages; i++) {
       int pageNumber = i + 1;
+      String fileName = tournyName.toString() +
+          "_SquadRankings_Round_" +
+          roundNumber.toString() +
+          "_Page_" +
+          pageNumber.toString() +
+          "_of_" +
+          numPages.toString() +
+          ".jpg";
 
-      String fileName = "SquadRankings_" + pageNumber.toString() + ".jpg";
+      int startIdx = i * rowsPerPage;
+      int endIdx = min((i + 1) * rowsPerPage, allRows.length);
 
-      _captureScreenshot(context, paginatedDataTable, fileName);
+      List<DataRow2> iRow = allRows.getRange(startIdx, endIdx).toList();
+      DataTable2 iTable = getDataTable(context, iRow, columns);
 
-      controller.goToNextPage();
+      List<Widget> childrenWidgets = [];
+      childrenWidgets.addAll(headingWidgets);
+      childrenWidgets.add(iTable);
+      childrenWidgets.add(Text(
+          "Page " + pageNumber.toString() + "/" + numPages.toString(),
+          style: theme.textTheme.bodySmall));
+
+      Widget widget = Container(
+          height: MediaQuery.of(context).size.height * 0.85,
+          child: Column(children: childrenWidgets));
+
+      _captureScreenshot(context, widget, fileName);
     }
-
-    // Restore state
-    controller.goToRow(initRowIdx);
   }
 
   Future<void> _captureScreenshot(
       BuildContext context, Widget widget, String fileName) {
-    return screenshotController
-        .capture(pixelRatio: 1.5)
-        .then((Uint8List? capturedImage) {
-      //Capture Done
-      if (capturedImage != null) {
-        saveAsBytes(capturedImage, fileName);
-      }
-    }).catchError((onError) {
-      print(onError);
-    });
-
     // Widget w = Container(
-    //     height: MediaQuery.of(context).size.height * 0.75,
-    //     // child: getDataTable(context)),
-    //     child: paginatedDataTable);
+    //     height: MediaQuery.of(context).size.height * 0.75, child: widget);
 
-    // return screenshotController
-    //     .captureFromWidget(
-    //   w,
-    //   // InheritedTheme.captureAll(
-    //   //   context,
-    //   //   widget,
-    //   // ),
-    //   // delay: Duration(seconds: 1),
-    //   pixelRatio: 1.5,
-    //   context: context,
+    return screenshotController
+        .captureFromWidget(
+      // InheritedTheme.captureAll(
+      //   context,
+      //   widget,
+      // ),
+      widget,
+      delay: Duration(seconds: 1),
+      pixelRatio: 2,
+      context: context,
 
-    //   ///
-    //   /// Additionally you can define constraint for your image.
-    //   ///
-    //   /// constraints: BoxConstraints(
-    //   ///   maxHeight: 1000,
-    //   ///   maxWidth: 1000,
-    //   /// ))
-    // )
-    //     .then((capturedImage) {
-    //   // Handle captured image
-    //   saveAsBytes(capturedImage, fileName);
-    // });
+      ///
+      /// Additionally you can define constraint for your image.
+      ///
+      /// constraints: BoxConstraints(
+      ///   maxHeight: 1000,
+      ///   maxWidth: 1000,
+      /// ))
+    )
+        .then((capturedImage) {
+      // Handle captured image
+      saveAsBytes(capturedImage, fileName);
+    });
   }
 }
 
