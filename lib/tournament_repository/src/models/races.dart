@@ -12,6 +12,7 @@ enum Race {
   DarkElf,
   Dwarf,
   ElfUnion,
+  Gnomes,
   Goblin,
   Halfling,
   HighElf,
@@ -49,6 +50,7 @@ class RaceUtils {
     Race.DarkElf: _baseLogoFolder + "logo_darkelf.png",
     Race.Dwarf: _baseLogoFolder + "logo_dwarf.png",
     Race.ElfUnion: _baseLogoFolder + "logo_elvenunion.png",
+    Race.Gnomes: _baseLogoFolder + "logo_gnomes.png",
     Race.Goblin: _baseLogoFolder + "logo_goblins.png",
     Race.Halfling: _baseLogoFolder + "logo_halflings.png",
     Race.HighElf: _baseLogoFolder + "logo_highelf.png",
@@ -83,6 +85,7 @@ class RaceUtils {
     Race.DarkElf: "Dark Elf",
     Race.Dwarf: "Dwarf",
     Race.ElfUnion: "Elf Union",
+    Race.Gnomes: "Gnomes",
     Race.Goblin: "Goblin",
     Race.Halfling: "Halfling",
     Race.HighElf: "High Elf",
@@ -151,6 +154,7 @@ class RaceUtils {
     return race == Race.Ogre ||
         race == Race.Halfling ||
         race == Race.Goblin ||
+        race == Race.Gnomes ||
         race == Race.Snotling;
   }
 }

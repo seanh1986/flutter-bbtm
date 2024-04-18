@@ -4,6 +4,7 @@ import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
+import 'package:bbnaf/widgets/set_item_list_widget/set_item_list_widget.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +41,9 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
   bool refreshFields = true;
   bool editDates = false;
+
+  bool editIndividualTieBreakers = false;
+  bool editSquadTieBreakers = false;
 
   List<DataColumn> _organizerCols = [
     DataColumn(label: Text("")), // For add/remove rows
@@ -96,7 +100,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
           child: SingleChildScrollView(
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: _viewInfos()),
+            children: _viewInfos(context)),
       )),
     ]);
   }
@@ -108,7 +112,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
     });
   }
 
-  List<Widget> _viewInfos() {
+  List<Widget> _viewInfos(BuildContext context) {
     _initOrgas();
 
     return [
@@ -133,7 +137,8 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       Divider(),
       _createOrgaTable(),
       Divider(),
-      _createScoringDetails("Coach Scoring:", _scoringDetails),
+      _createScoringDetails("Coach Scoring:", _scoringDetails,
+          _createIndividualTieBreakers(context, _scoringDetails)),
       Divider(),
       _createCasulatyDetails(),
       Divider(),
@@ -196,12 +201,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
               ToastUtils.show(context, "Updating Tournament Info");
 
               context.read<AppBloc>().add(UpdateTournamentInfo(context, info));
-              // LoadingIndicatorDialog().show(context);
-              // bool success =
-              //     await widget.tournyBloc.overwriteTournamentInfo(info);
-              // LoadingIndicatorDialog().dismiss();
-
-              // _showSuccessFailToast(success);
             };
 
             _showDialogToConfirmOverwrite(context, callback);
@@ -375,57 +374,61 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
     }
   }
 
-  // Widget _createIndividualScoringDetails(
-  //     String title, IndividualScoringDetails details) {
-  //   return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-  //     _createScoringDetails(title, details),
-  //     SizedBox(height: 10),
-  //   ]);
-  // }
+  Widget _createIndividualTieBreakers(
+      BuildContext context, IndividualScoringDetails details) {
+    final theme = Theme.of(context);
 
-  // Widget _createIndividualTieBreakers(
-  //     String title, IndividualScoringDetails details) {
-  //   List<String> allTiebreakers = EnumToString.toList(TieBreaker.values);
+    List<String> curTiebreakers = EnumToString.toList(details.tieBreakers);
 
-  //   List<DropdownMenuItem<String>> squadUsageTypesDropDown = squadUsageTypes
-  //       .map((String r) => DropdownMenuItem<String>(value: r, child: Text(r)))
-  //       .toList();
+    String title = "Individual Tie Breakers";
 
-  //   return Row(
-  //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //       children: <Widget>[
-  //         SizedBox(width: 10.0),
-  //         Text(title),
-  //         SizedBox(width: 10.0),
-  //         Expanded(
-  //           child: Column(children: [],),
-  //         )
-  //       ]);
+    if (editIndividualTieBreakers) {
+      List<String> allTiebreakers = EnumToString.toList(TieBreaker.values);
 
-  //   ReorderableListView(
-  //     padding: const EdgeInsets.symmetric(horizontal: 40),
-  //     proxyDecorator: proxyDecorator,
-  //     children: <Widget>[
-  //       for (int index = 0; index < _items.length; index += 1)
-  //         ListTile(
-  //           key: Key('$index'),
-  //           tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
-  //           title: Text('Item ${_items[index]}'),
-  //         ),
-  //     ],
-  //     onReorder: (int oldIndex, int newIndex) {
-  //       setState(() {
-  //         if (oldIndex < newIndex) {
-  //           newIndex -= 1;
-  //         }
-  //         final String item = _items.removeAt(oldIndex);
-  //         _items.insert(newIndex, item);
-  //       });
-  //     },
-  //   );
-  // }
+      return SetItemListWidget(
+          title: title,
+          allItems: allTiebreakers,
+          curItems: curTiebreakers,
+          onComplete: (newItems) {
+            List<TieBreaker?> tieBreakers =
+                EnumToString.fromList(TieBreaker.values, newItems);
 
-  Widget _createScoringDetails(String title, ScoringDetails details) {
+            setState(() {
+              refreshFields = false;
+              details.tieBreakers = tieBreakers.nonNulls.toList();
+              editIndividualTieBreakers = false;
+            });
+          });
+    } else {
+      StringBuffer sb = StringBuffer();
+      sb.writeln(title);
+      for (int i = 0; i < curTiebreakers.length; i++) {
+        int rank = i + 1;
+        String tieBreakerName = curTiebreakers[i];
+        sb.write(rank.toString() + ". " + tieBreakerName);
+        if (i + 1 < curTiebreakers.length) {
+          sb.write("\n");
+        }
+      }
+
+      return Row(
+        children: [
+          IconButton(
+              onPressed: () {
+                setState(() {
+                  refreshFields = false;
+                  editIndividualTieBreakers = true;
+                });
+              },
+              icon: Icon(Icons.edit)),
+          Text(sb.toString(), style: theme.textTheme.bodyMedium),
+        ],
+      );
+    }
+  }
+
+  Widget _createScoringDetails(
+      String title, ScoringDetails details, Widget? tiebreakerWidget) {
     Row winTieLossPts =
         Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
       SizedBox(width: 10.0),
@@ -459,7 +462,14 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       ))
     ]);
 
-    List<Widget> children = [winTieLossPts, SizedBox(height: 5)];
+    List<Widget> children = [
+      winTieLossPts,
+      SizedBox(height: 10),
+    ];
+
+    if (tiebreakerWidget != null) {
+      children.addAll([tiebreakerWidget, SizedBox(height: 10)]);
+    }
 
     children.addAll(_getBonusPtsWidgets(details));
 
@@ -728,13 +738,15 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       mainContent.addAll([
         SizedBox(height: 10),
         _getSquadScoringSelection(),
+        SizedBox(height: 10),
       ]);
 
       if (_squadDetails.scoringType == SquadScoring.SQUAD_RESULT_W_T_L) {
         // Update Main Content w/ squad scoring parameters
         mainContent.addAll([
           SizedBox(height: 10),
-          _createScoringDetails("Squad Scoring:", _squadDetails.scoringDetails),
+          _createScoringDetails("Squad Scoring:", _squadDetails.scoringDetails,
+              _createSquadTieBreakers(context, _squadDetails)),
         ]);
       }
 
@@ -780,7 +792,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
             refreshFields = false;
           });
         },
-      ))
+      )),
     ];
 
     return Row(
@@ -824,6 +836,59 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: squadMatchMakingRow);
+  }
+
+  Widget _createSquadTieBreakers(BuildContext context, SquadDetails details) {
+    final theme = Theme.of(context);
+
+    List<String> curTiebreakers = EnumToString.toList(details.squadTieBreakers);
+
+    String title = "Squad Tie Breakers";
+
+    if (editSquadTieBreakers) {
+      List<String> allTiebreakers =
+          EnumToString.toList(SquadTieBreakers.values);
+
+      return SetItemListWidget(
+          title: title,
+          allItems: allTiebreakers,
+          curItems: curTiebreakers,
+          onComplete: (newItems) {
+            List<SquadTieBreakers?> tieBreakers =
+                EnumToString.fromList(SquadTieBreakers.values, newItems);
+
+            setState(() {
+              refreshFields = false;
+              details.squadTieBreakers = tieBreakers.nonNulls.toList();
+              editSquadTieBreakers = false;
+            });
+          });
+    } else {
+      StringBuffer sb = StringBuffer();
+      sb.writeln(title);
+      for (int i = 0; i < curTiebreakers.length; i++) {
+        int rank = i + 1;
+        String tieBreakerName = curTiebreakers[i];
+        sb.write(rank.toString() + ". " + tieBreakerName);
+        if (i + 1 < curTiebreakers.length) {
+          sb.write("\n");
+        }
+      }
+
+      return Row(
+        children: [
+          IconButton(
+              onPressed: () {
+                setState(() {
+                  refreshFields = false;
+                  editSquadTieBreakers = true;
+                });
+              },
+              icon: Icon(Icons.edit)),
+          Text(sb.toString(), style: theme.textTheme.bodyMedium),
+        ],
+      );
+    }
   }
 
   Widget _getRichTextEditor(String title, QuillController controller) {
@@ -912,13 +977,5 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
               if (value == OkCancelResult.ok) {confirmedUpdateCallback()}
               // {_processUpdate(confirmedUpdateCallback)}
             });
-  }
-
-  void _showSuccessFailToast(bool success) {
-    if (success) {
-      ToastUtils.show(context, "Update successful.");
-    } else {
-      ToastUtils.show(context, "Update failed.");
-    }
   }
 }

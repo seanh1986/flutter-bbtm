@@ -120,11 +120,7 @@ class Coach extends IMatchupParticipant {
   }
 
   bool isStunty() {
-    return race == Race.Halfling ||
-        race == Race.Ogre ||
-        race == Race.Snotling ||
-        race == Race.Goblin ||
-        isCustomStunty;
+    return RaceUtils.isStunty(race) || isCustomStunty;
   }
 
   void overwriteRecord(TournamentInfo t) {
