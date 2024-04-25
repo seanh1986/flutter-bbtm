@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/rankings/rankings.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
+import 'package:bbnaf/widgets/screenshot_util/screenshot_util.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,6 +45,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   late Tournament _tournament;
   late User _user;
 
+  late String _title;
+
   CoachRankingFields? _sortField;
   bool _sortAscending = false;
 
@@ -50,6 +55,9 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   List<Coach> _items = [];
 
   String _searchValue = "";
+
+  ScreenshotUtil _screenshot = ScreenshotUtil();
+  // GlobalKey _screenshotKey = GlobalKey();
 
   @override
   void initState() {
@@ -122,10 +130,13 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     }
   }
 
-  List<DataRow2> _getRows() {
+  List<DataRow2> _getAllRows({bool allowHighlights = true}) {
     final theme = Theme.of(context);
 
     List<DataRow2> rows = [];
+
+    Color? even = theme.listTileTheme.tileColor;
+    Color? odd = theme.listTileTheme.selectedTileColor;
 
     for (int i = 0; i < _items.length; i++) {
       Coach coach = _items[i];
@@ -138,7 +149,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
       String nafname = _user.getNafName();
 
-      bool primaryHighlight =
+      bool primaryHighlight = allowHighlights &&
           coach.nafName.toLowerCase() == nafname.toLowerCase();
 
       // Check if coach is on squad of the logged-in user
@@ -147,8 +158,9 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       String coachSquadName =
           _tournament.useSquadVsSquad() ? coach.squadName : "";
 
-      bool secondaryHighlight =
-          userSquad != null && userSquad.hasCoach(coach.nafName);
+      bool secondaryHighlight = allowHighlights &&
+          userSquad != null &&
+          userSquad.hasCoach(coach.nafName);
 
       double highlightOpacity = 0.5;
       Color? cellColor = primaryHighlight
@@ -156,6 +168,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
           : (secondaryHighlight
               ? Colors.lightBlue.withOpacity(highlightOpacity)
               : null);
+
+      if (cellColor == null) {
+        cellColor = i % 2 == 0 ? even : odd;
+      }
 
       List<DataCell> cells = [];
 
@@ -207,6 +223,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     // This will get reset if setState is called again
     _reset = true;
 
+    _title = widget.title;
+
     _items = List.from(_tournament.getCoaches().where((a) =>
         (widget.filter == null || widget.filter!.isActive(a)) && // Check filter
         (a.isActive(_tournament) || a.gamesPlayed() > 0))); // "active"
@@ -220,18 +238,43 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       return multiplier * Comparable.compare(aValue, bValue);
     });
 
-    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      SizedBox(height: 1),
-      Container(
-          height: MediaQuery.of(context).size.height * 0.6,
-          child: getDataTable(context))
-    ]);
+    final theme = Theme.of(context);
+
+    List<DataColumn2> columns = _getColumns();
+    List<DataRow2> rows = _getAllRows();
+
+    List<Widget> widgets = [];
+
+    if (_tournament.isUserAdmin(_user)) {
+      widgets.add(ElevatedButton(
+          style: theme.elevatedButtonTheme.style,
+          child: IconButton(
+              icon: Icon(
+                Icons.save,
+                color: theme.iconTheme.color,
+              ),
+              onPressed: null),
+          onPressed: () {
+            _createImage(context);
+          }));
+    }
+
+    widgets.add(Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        child: getDataTable(context, rows, columns)));
+
+    return Column(
+      children: widgets,
+    );
   }
 
-  Widget getDataTable(BuildContext context) {
+  DataTable2 getDataTable(
+      BuildContext context, List<DataRow2> rows, List<DataColumn2> columns,
+      {Key? key}) {
     final theme = Theme.of(context);
 
     return DataTable2(
+        key: key,
         isHorizontalScrollBarVisible: true,
         isVerticalScrollBarVisible: true,
         columnSpacing: 12,
@@ -246,8 +289,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
             child: Container(
                 padding: const EdgeInsets.all(20),
                 child: Text('No data yet', style: theme.textTheme.bodyLarge))),
-        columns: _getColumns(),
-        rows: _getRows(),
+        rows: rows,
+        columns: columns,
         sortAscending: _sortAscending,
         sortColumnIndex: _getSortColumnIndex());
   }
@@ -386,5 +429,48 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     return DataCell(Align(
         alignment: Alignment.center,
         child: Text(text, overflow: TextOverflow.ellipsis)));
+  }
+
+  void _createImage(BuildContext context) {
+    List<DataRow2> allRows = _getAllRows(allowHighlights: false);
+    List<DataColumn2> columns = _getColumns();
+
+    String tournyName = _tournament.info.name;
+    int roundNumber = _tournament.curRoundNumber();
+
+    String headerTitle = tournyName;
+    String headerSubTitle = _title + " - Round " + roundNumber.toString();
+
+    int numRows = allRows.length;
+    int rowsPerPage = 10;
+
+    int numPages = (numRows / rowsPerPage).ceil();
+
+    for (int i = 0; i < numPages; i++) {
+      int pageNumber = i + 1;
+      String fileName = tournyName.toString() +
+          "_" +
+          _title +
+          "_Round_" +
+          roundNumber.toString() +
+          "_Page_" +
+          pageNumber.toString() +
+          "_of_" +
+          numPages.toString() +
+          ".jpg";
+
+      int startIdx = i * rowsPerPage;
+      int endIdx = min((i + 1) * rowsPerPage, allRows.length);
+
+      List<DataRow2> iRow = allRows.getRange(startIdx, endIdx).toList();
+      DataTable2 iTable =
+          getDataTable(context, iRow, columns); //, key: _screenshotKey);
+
+      String footer =
+          "Page " + pageNumber.toString() + "/" + numPages.toString();
+
+      _screenshot.capture(
+          context, headerTitle, headerSubTitle, iTable, footer, fileName);
+    }
   }
 }

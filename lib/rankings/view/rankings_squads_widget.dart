@@ -1,16 +1,12 @@
-import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
-
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/rankings/models/models.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/utils/save_as/save_as.dart';
+import 'package:bbnaf/widgets/screenshot_util/screenshot_util.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:screenshot/screenshot.dart';
 
 enum SquadRankingFields {
   Pts,
@@ -49,6 +45,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   late Tournament _tournament;
   late User _user;
 
+  late String _title;
+
   SquadRankingFields? _sortField;
   bool _sortAscending = false;
 
@@ -58,7 +56,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
   String _searchValue = "";
 
-  ScreenshotController screenshotController = ScreenshotController();
+  ScreenshotUtil _screenshot = ScreenshotUtil();
+  // GlobalKey _screenshotKey = GlobalKey();
 
   @override
   void initState() {
@@ -242,6 +241,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     // This will get reset if setState is called again
     _reset = true;
 
+    _title = widget.title;
+
     _items = List.from(_tournament.getSquads().where((a) =>
         (widget.filter == null || widget.filter!.isActive(a)) && // Check filter
             a.isActive(_tournament) ||
@@ -261,37 +262,40 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     List<DataColumn2> columns = _getColumns();
     List<DataRow2> rows = _getAllRows();
 
-    return Column(
-      children: [
-        ElevatedButton(
-            style: theme.elevatedButtonTheme.style,
-            child: IconButton(
-                icon: Icon(
-                  Icons.save,
-                  color: theme.iconTheme.color,
-                ),
-                onPressed: null),
-            onPressed: () {
-              _createImage(context);
-            }),
-        Container(
-            height: MediaQuery.of(context).size.height * 0.75,
-            child: getDataTable(context, rows, columns)),
-      ],
-    );
+    List<Widget> widgets = [];
 
-    // return Container(
-    //     height: MediaQuery.of(context).size.height * 0.75,
-    //     child: getDataTable(context));
+    if (_tournament.isUserAdmin(_user)) {
+      widgets.add(ElevatedButton(
+          style: theme.elevatedButtonTheme.style,
+          child: IconButton(
+              icon: Icon(
+                Icons.save,
+                color: theme.iconTheme.color,
+              ),
+              onPressed: null),
+          onPressed: () {
+            _createImage(context);
+          }));
+    }
+
+    widgets.add(Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        child: getDataTable(context, rows, columns)));
+
+    return Column(
+      children: widgets,
+    );
   }
 
   DataTable2 getDataTable(
-      BuildContext context, List<DataRow2> rows, List<DataColumn2> columns) {
+      BuildContext context, List<DataRow2> rows, List<DataColumn2> columns,
+      {Key? key}) {
     final theme = Theme.of(context);
 
     return DataTable2(
-        headingCheckboxTheme: const CheckboxThemeData(
-            side: BorderSide(color: Colors.white, width: 2.0)),
+        key: key,
+        // headingCheckboxTheme: const CheckboxThemeData(
+        //     side: BorderSide(color: Colors.white, width: 2.0)),
         isHorizontalScrollBarVisible: true,
         isVerticalScrollBarVisible: true,
         columnSpacing: 12,
@@ -421,20 +425,14 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   }
 
   void _createImage(BuildContext context) {
-    final theme = Theme.of(context);
-
     List<DataRow2> allRows = _getAllRows(allowHighlights: false);
     List<DataColumn2> columns = _getColumns();
 
     String tournyName = _tournament.info.name;
     int roundNumber = _tournament.curRoundNumber();
 
-    List<Widget> headingWidgets = [
-      Text(tournyName, style: theme.textTheme.displaySmall),
-      SizedBox(height: 10),
-      Text(widget.title + " - Round " + roundNumber.toString(),
-          style: theme.textTheme.displaySmall),
-    ];
+    String headerTitle = tournyName;
+    String headerSubTitle = _title + " - Round " + roundNumber.toString();
 
     int numRows = allRows.length;
     int rowsPerPage = 10;
@@ -444,7 +442,9 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     for (int i = 0; i < numPages; i++) {
       int pageNumber = i + 1;
       String fileName = tournyName.toString() +
-          "_SquadRankings_Round_" +
+          "_" +
+          _title +
+          "_Round_" +
           roundNumber.toString() +
           "_Page_" +
           pageNumber.toString() +
@@ -456,73 +456,14 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
       int endIdx = min((i + 1) * rowsPerPage, allRows.length);
 
       List<DataRow2> iRow = allRows.getRange(startIdx, endIdx).toList();
-      DataTable2 iTable = getDataTable(context, iRow, columns);
+      DataTable2 iTable =
+          getDataTable(context, iRow, columns); //, key: _screenshotKey);
 
-      List<Widget> childrenWidgets = [];
-      childrenWidgets.addAll(headingWidgets);
-      childrenWidgets.add(iTable);
-      childrenWidgets.add(Text(
-          "Page " + pageNumber.toString() + "/" + numPages.toString(),
-          style: theme.textTheme.bodySmall));
+      String footer =
+          "Page " + pageNumber.toString() + "/" + numPages.toString();
 
-      Widget widget = Container(
-          height: MediaQuery.of(context).size.height * 0.85,
-          child: Column(children: childrenWidgets));
-
-      _captureScreenshot(context, widget, fileName);
+      _screenshot.capture(
+          context, headerTitle, headerSubTitle, iTable, footer, fileName);
     }
   }
-
-  Future<void> _captureScreenshot(
-      BuildContext context, Widget widget, String fileName) {
-    // Widget w = Container(
-    //     height: MediaQuery.of(context).size.height * 0.75, child: widget);
-
-    return screenshotController
-        .captureFromWidget(
-      // InheritedTheme.captureAll(
-      //   context,
-      //   widget,
-      // ),
-      widget,
-      delay: Duration(seconds: 1),
-      pixelRatio: 2,
-      context: context,
-
-      ///
-      /// Additionally you can define constraint for your image.
-      ///
-      /// constraints: BoxConstraints(
-      ///   maxHeight: 1000,
-      ///   maxWidth: 1000,
-      /// ))
-    )
-        .then((capturedImage) {
-      // Handle captured image
-      saveAsBytes(capturedImage, fileName);
-    });
-  }
-}
-
-class RowDataSource extends DataTableSource {
-  List<DataRow2> rows;
-
-  RowDataSource(this.rows);
-
-  @override
-  DataRow2? getRow(int index) {
-    if (index < 0 || index >= rows.length) {
-      return null;
-    }
-    return rows[index];
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => rows.length;
-
-  @override
-  int get selectedRowCount => 0;
 }
