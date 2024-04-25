@@ -138,51 +138,60 @@ class TournamentRepository {
   // ------------------
 
   Future<bool> overwriteTournamentInfo(
-      TournamentInfo info, bool allowOverwriteLock) {
-    return FirebaseFirestore.instance.runTransaction((transaction) async {
-      var tRef = _tournyRef.doc(info.id);
+      TournamentInfo info, bool allowOverwriteLock) async {
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        var tRef = _tournyRef.doc(info.id);
 
-      var doc = await tRef.get();
+        var doc = await tRef.get();
+        if (!doc.exists) {
+          return false;
+        }
 
-      Tournament dbTournament = _parseTournamentResponse(doc);
-      if (!allowOverwriteLock && info.locked && dbTournament.isLocked()) {
-        // Then not allowed to overwrite
-        return false;
-      }
+        Tournament dbTournament = _parseTournamentResponse(doc);
+        if (!allowOverwriteLock && info.locked && dbTournament.isLocked()) {
+          // Then not allowed to overwrite
+          return false;
+        }
 
-      bool force = dbTournament.info.locked != info.locked;
+        bool force = dbTournament.info.locked != info.locked;
 
-      dbTournament.info = info;
+        dbTournament.info = info;
 
-      await _overrwiteTournamentData(dbTournament, force: force);
-    }).then((value) {
+        await _overrwiteTournamentData(dbTournament, force: force);
+      });
+
       return true;
-    }).catchError((e) {
-      print(e.toString());
+    } catch (e) {
       return false;
-    });
+    }
   }
 
   Future<bool> overwriteCoaches(String tournamentId, List<Coach> newCoaches,
-      List<RenameNafName> renames) {
-    return FirebaseFirestore.instance.runTransaction((transaction) async {
-      var tRef = _tournyRef.doc(tournamentId);
+      List<RenameNafName> renames) async {
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        var tRef = _tournyRef.doc(tournamentId);
 
-      var doc = await tRef.get();
+        var doc = await tRef.get();
+        if (!doc.exists) {
+          return false;
+        }
 
-      Tournament dbTournament = _parseTournamentResponse(doc);
-      if (dbTournament.isLocked()) {
-        return false;
-      }
+        Tournament dbTournament = _parseTournamentResponse(doc);
+        if (dbTournament.isLocked()) {
+          return false;
+        }
 
-      dbTournament.updateCoaches(newCoaches, renames);
+        dbTournament.updateCoaches(newCoaches, renames);
 
-      await _overrwiteTournamentData(dbTournament);
-    }).then((value) {
+        await _overrwiteTournamentData(dbTournament);
+      });
+
       return true;
-    }).catchError((e) {
+    } catch (e) {
       return false;
-    });
+    }
   }
 
   Future<bool> updateCoachMatchReport(UpdateMatchReportEvent event) async {
@@ -191,23 +200,28 @@ class TournamentRepository {
 
   Future<bool> swapCoachMatchups(
       String tournamentId, CoachRound newRoundMatchups) async {
-    return FirebaseFirestore.instance.runTransaction((transaction) async {
-      var tRef = _tournyRef.doc(tournamentId);
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        var tRef = _tournyRef.doc(tournamentId);
 
-      var doc = await tRef.get();
+        var doc = await tRef.get();
+        if (!doc.exists) {
+          return false;
+        }
 
-      Tournament dbTournament = _parseTournamentResponse(doc);
+        Tournament dbTournament = _parseTournamentResponse(doc);
 
-      if (dbTournament.coachRounds.last.round() == newRoundMatchups.round()) {
-        dbTournament.coachRounds.last = newRoundMatchups;
-      }
+        if (dbTournament.coachRounds.last.round() == newRoundMatchups.round()) {
+          dbTournament.coachRounds.last = newRoundMatchups;
+        }
 
-      await _overrwiteTournamentData(dbTournament);
-    }).then((value) {
+        await _overrwiteTournamentData(dbTournament);
+      });
+
       return true;
-    }).catchError((e) {
+    } catch (e) {
       return false;
-    });
+    }
   }
 
   Future<bool> updateCoachMatchReports(
@@ -217,54 +231,58 @@ class TournamentRepository {
       return false;
     }
 
-    return FirebaseFirestore.instance.runTransaction((transaction) async {
-      var tRef = _tournyRef.doc(tournament.info.id);
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        var tRef = _tournyRef.doc(tournament.info.id);
 
-      var doc = await tRef.get();
-
-      Tournament dbTournament = _parseTournamentResponse(doc);
-
-      if (dbTournament.isLocked()) {
-        return false;
-      }
-
-      if (dbTournament.coachRounds.length != tournament.coachRounds.length) {
-        throw new Exception("Tournament lengths do not align");
-      }
-
-      events.forEach((event) {
-        int roundIdx = dbTournament.coachRounds.length - 1;
-
-        int matchIdx = dbTournament.coachRounds.last.matches.indexWhere((e) =>
-            e.awayNafName.toLowerCase() ==
-                event.matchup.awayNafName.toLowerCase() &&
-            e.homeNafName.toLowerCase() ==
-                event.matchup.homeNafName.toLowerCase());
-
-        if (roundIdx < 0 || matchIdx < 0) {
-          throw new Exception("Couldn't find index match");
+        var doc = await tRef.get();
+        if (!doc.exists) {
+          return false;
         }
 
-        if (event.isHome) {
-          dbTournament.coachRounds[roundIdx].matches[matchIdx]
-              .homeReportedResults = event.matchup.homeReportedResults;
-        } else if (event.isAdmin) {
-          dbTournament.coachRounds[roundIdx].matches[matchIdx]
-              .homeReportedResults = event.matchup.homeReportedResults;
-          dbTournament.coachRounds[roundIdx].matches[matchIdx]
-              .awayReportedResults = event.matchup.awayReportedResults;
-        } else {
-          dbTournament.coachRounds[roundIdx].matches[matchIdx]
-              .awayReportedResults = event.matchup.awayReportedResults;
+        Tournament dbTournament = _parseTournamentResponse(doc);
+
+        if (dbTournament.isLocked()) {
+          return false;
         }
+
+        if (dbTournament.coachRounds.length != tournament.coachRounds.length) {
+          throw new Exception("Tournament lengths do not align");
+        }
+
+        events.forEach((event) {
+          int roundIdx = dbTournament.coachRounds.length - 1;
+
+          int matchIdx = dbTournament.coachRounds.last.matches.indexWhere((e) =>
+              e.awayNafName.toLowerCase() ==
+                  event.matchup.awayNafName.toLowerCase() &&
+              e.homeNafName.toLowerCase() ==
+                  event.matchup.homeNafName.toLowerCase());
+
+          if (roundIdx < 0 || matchIdx < 0) {
+            throw new Exception("Couldn't find index match");
+          }
+
+          if (event.isHome) {
+            dbTournament.coachRounds[roundIdx].matches[matchIdx]
+                .homeReportedResults = event.matchup.homeReportedResults;
+          } else if (event.isAdmin) {
+            dbTournament.coachRounds[roundIdx].matches[matchIdx]
+                .homeReportedResults = event.matchup.homeReportedResults;
+            dbTournament.coachRounds[roundIdx].matches[matchIdx]
+                .awayReportedResults = event.matchup.awayReportedResults;
+          } else {
+            dbTournament.coachRounds[roundIdx].matches[matchIdx]
+                .awayReportedResults = event.matchup.awayReportedResults;
+          }
+        });
+
+        await _overrwiteTournamentData(dbTournament);
       });
-
-      await _overrwiteTournamentData(dbTournament);
-    }).then((value) {
       return true;
-    }).catchError((e) {
+    } catch (e) {
       return false;
-    });
+    }
   }
 
   Future<bool> updateSquadBonusPts(UpdateSquadBonusPts event) async {
@@ -273,31 +291,36 @@ class TournamentRepository {
       return false;
     }
 
-    return FirebaseFirestore.instance.runTransaction((transaction) async {
-      var tRef = _tournyRef.doc(tournament.info.id);
+    try {
+      FirebaseFirestore.instance.runTransaction((transaction) async {
+        var tRef = _tournyRef.doc(tournament.info.id);
 
-      var doc = await tRef.get();
+        var doc = await tRef.get();
+        if (!doc.exists) {
+          return false;
+        }
 
-      Tournament dbTournament = _parseTournamentResponse(doc);
-      if (dbTournament.isLocked()) {
-        return false;
-      }
+        Tournament dbTournament = _parseTournamentResponse(doc);
+        if (dbTournament.isLocked()) {
+          return false;
+        }
 
-      if (dbTournament.coachRounds.length != tournament.coachRounds.length) {
-        throw new Exception("Tournament lengths do not align");
-      }
+        if (dbTournament.coachRounds.length != tournament.coachRounds.length) {
+          throw new Exception("Tournament lengths do not align");
+        }
 
-      for (int i = 0; i < tournament.coachRounds.length; i++) {
-        dbTournament.coachRounds[i].squadBonuses =
-            Map.from(tournament.coachRounds[i].squadBonuses);
-      }
+        for (int i = 0; i < tournament.coachRounds.length; i++) {
+          dbTournament.coachRounds[i].squadBonuses =
+              Map.from(tournament.coachRounds[i].squadBonuses);
+        }
 
-      await _overrwiteTournamentData(dbTournament);
-    }).then((value) {
+        await _overrwiteTournamentData(dbTournament);
+      });
+
       return true;
-    }).catchError((e) {
+    } catch (e) {
       return false;
-    });
+    }
   }
 
   Future<bool> recoverTournamentBackup(Tournament t) async {
@@ -305,13 +328,15 @@ class TournamentRepository {
       return false;
     }
 
-    return FirebaseFirestore.instance.runTransaction((transaction) async {
-      await _overrwiteTournamentData(t);
-    }).then((value) {
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        await _overrwiteTournamentData(t);
+      });
+
       return true;
-    }).catchError((e) {
+    } catch (e) {
       return false;
-    });
+    }
   }
 
   Future<bool> advanceRound(Tournament t) async {
@@ -319,13 +344,15 @@ class TournamentRepository {
       return false;
     }
 
-    return FirebaseFirestore.instance.runTransaction((transaction) async {
-      await _overrwiteTournamentData(t);
-    }).then((value) {
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        await _overrwiteTournamentData(t);
+      });
+
       return true;
-    }).catchError((e) {
+    } catch (e) {
       return false;
-    });
+    }
   }
 
   Future<bool> discardCurrentRound(Tournament t) async {
@@ -333,37 +360,39 @@ class TournamentRepository {
       return false;
     }
 
-    return FirebaseFirestore.instance.runTransaction((transaction) async {
-      var tRef = _tournyRef.doc(t.info.id);
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        var tRef = _tournyRef.doc(t.info.id);
 
-      var doc = await tRef.get();
+        var doc = await tRef.get();
 
-      Tournament dbTournament = _parseTournamentResponse(doc);
+        Tournament dbTournament = _parseTournamentResponse(doc);
 
-      if (dbTournament.isLocked()) {
-        return false;
-      }
+        if (dbTournament.isLocked()) {
+          return false;
+        }
 
-      if (dbTournament.coachRounds.length != t.coachRounds.length) {
-        throw new Exception("Tournament coach round lengths do not align");
-      } else if (dbTournament.squadRounds.length != t.squadRounds.length) {
-        throw new Exception("Tournament squad round lengths do not align");
-      }
+        if (dbTournament.coachRounds.length != t.coachRounds.length) {
+          throw new Exception("Tournament coach round lengths do not align");
+        } else if (dbTournament.squadRounds.length != t.squadRounds.length) {
+          throw new Exception("Tournament squad round lengths do not align");
+        }
 
-      if (dbTournament.squadRounds.isNotEmpty) {
-        dbTournament.squadRounds.removeLast();
-      }
+        if (dbTournament.squadRounds.isNotEmpty) {
+          dbTournament.squadRounds.removeLast();
+        }
 
-      if (dbTournament.coachRounds.isNotEmpty) {
-        dbTournament.coachRounds.removeLast();
-      }
+        if (dbTournament.coachRounds.isNotEmpty) {
+          dbTournament.coachRounds.removeLast();
+        }
 
-      await _overrwiteTournamentData(dbTournament);
-    }).then((value) {
+        await _overrwiteTournamentData(dbTournament);
+      });
+
       return true;
-    }).catchError((e) {
+    } catch (e) {
       return false;
-    });
+    }
   }
 
   Future<void> _overrwiteTournamentData(Tournament tournament,
