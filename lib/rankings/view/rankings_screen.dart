@@ -127,12 +127,13 @@ class _RankingsPage extends State<RankingsPage> {
       }),
     ];
 
-    if (showAdminDetails) {
-      items.add(ToggleWidgetItem("Sport", (context) {
-        return RankingCoachPage(
-            title: "Coach Best Sport", fields: [CoachRankingFields.BestSport]);
-      }));
-    }
+// TODO: BestSport
+    // if (showAdminDetails) {
+    //   items.add(ToggleWidgetItem("Sport", (context) {
+    //     return RankingCoachPage(
+    //         title: "Coach Best Sport", fields: [CoachRankingFields.BestSport]);
+    //   }));
+    // }
 
     return ToggleWidget(items: items);
   }
@@ -164,13 +165,14 @@ class _RankingsPage extends State<RankingsPage> {
       }),
     ];
 
-    if (showAdminDetails) {
-      items.add(ToggleWidgetItem("Sport", (context) {
-        return RankingSquadsPage(
-            title: "Squad Best Sports",
-            fields: [SquadRankingFields.SumBestSport]);
-      }));
-    }
+// TODO: BestSport
+    // if (showAdminDetails) {
+    //   items.add(ToggleWidgetItem("Sport", (context) {
+    //     return RankingSquadsPage(
+    //         title: "Squad Best Sports",
+    //         fields: [SquadRankingFields.SumBestSport]);
+    //   }));
+    // }
 
     return ToggleWidget(items: items);
   }

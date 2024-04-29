@@ -57,7 +57,6 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   String _searchValue = "";
 
   ScreenshotUtil _screenshot = ScreenshotUtil();
-  // GlobalKey _screenshotKey = GlobalKey();
 
   @override
   void initState() {

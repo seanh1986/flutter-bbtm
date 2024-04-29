@@ -146,13 +146,14 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
     List<Widget> matchAndSportWidgets = [rowItemWidget];
 
-    Widget? bestSportWidget = _getBestSportWidget(context);
+// TODO: BestSport
+    // Widget? bestSportWidget = _getBestSportWidget(context);
 
-    if (bestSportWidget != null) {
-      matchAndSportWidgets.add(SizedBox(height: 5));
-      matchAndSportWidgets.add(bestSportWidget);
-      matchAndSportWidgets.add(SizedBox(height: 5));
-    }
+    // if (bestSportWidget != null) {
+    //   matchAndSportWidgets.add(SizedBox(height: 5));
+    //   matchAndSportWidgets.add(bestSportWidget);
+    //   matchAndSportWidgets.add(SizedBox(height: 5));
+    // }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
