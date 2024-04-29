@@ -16,6 +16,8 @@ class TournamentInfo {
 
   SquadDetails squadDetails = SquadDetails();
 
+  AwardVotingDetails awardVotingDetails = AwardVotingDetails();
+
   String detailsWeather = "";
   String detailsKickOff = "";
   String detailsSpecialRules = "";
@@ -119,6 +121,7 @@ class TournamentInfo {
         'scoring_details': scoringDetails.toJson(),
         'casualty_details': casualtyDetails.toJson(),
         'squad_details': squadDetails.toJson(),
+        'award_voting_details': awardVotingDetails.toJson(),
         'details_weather': detailsWeather,
         'details_kickoff': detailsKickOff,
         'details_special_rules': detailsSpecialRules,
@@ -483,5 +486,53 @@ class SquadDetails {
         'squad_tie_breakers': squadTieBreakers
             .map((e) => EnumToString.convertToString(e))
             .toList(),
+      };
+}
+
+enum VoteAwardType {
+  NO_AWARD,
+  PICK_ONE,
+  RANK_OPPONENTS,
+  RANK_THREE,
+}
+
+class VoteAward {
+  String name = "";
+  VoteAwardType type = VoteAwardType.NO_AWARD;
+  VoteAward(this.name, this.type);
+
+  VoteAward.fromJson(Map<String, dynamic> json) {
+    final tName = json['name'] as String?;
+    if (tName != null) {
+      this.name = tName;
+    }
+
+    final tType = json['type'] as String?;
+    if (tType != null) {
+      VoteAwardType? aType =
+          EnumToString.fromString(VoteAwardType.values, tType);
+      if (aType != null) {
+        this.type = aType;
+      }
+    }
+  }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'type': EnumToString.convertToString(type),
+      };
+}
+
+class AwardVotingDetails {
+  List<VoteAward> awards = [];
+
+  AwardVotingDetails();
+
+  AwardVotingDetails.fromJson(Map<String, dynamic> json) {
+    BonusDetails.fromJsonWithDefault(json, null);
+  }
+
+  Map<String, dynamic> toJson() => {
+        'awards': awards.map((e) => e.toJson()).toList(),
       };
 }
