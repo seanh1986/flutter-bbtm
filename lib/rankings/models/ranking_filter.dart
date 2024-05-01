@@ -23,7 +23,14 @@ abstract class RankingFilter {
 abstract class CoachRankingFilter extends RankingFilter {
   late final List<CoachRankingFields> fields;
 
-  CoachRankingFilter(String name, this.fields) : super(name);
+  CoachRankingFilter(
+      {required String name,
+      this.fields = const [
+        CoachRankingFields.Pts,
+        CoachRankingFields.Td,
+        CoachRankingFields.Cas
+      ]})
+      : super(name);
 
   CoachRankingFilter.fromJson(Map<String, dynamic> json)
       : super.fromJson(json) {
@@ -64,7 +71,7 @@ abstract class SquadRankingFilter extends RankingFilter {
 
 class StuntyFilter extends CoachRankingFilter {
   StuntyFilter()
-      : super("Stunty", [
+      : super(name: "Stunty", fields: [
           CoachRankingFields.Pts,
           CoachRankingFields.Td,
           CoachRankingFields.Cas
@@ -83,8 +90,7 @@ class StuntyFilter extends CoachRankingFilter {
 class CoachRaceFilter extends CoachRankingFilter {
   late final List<Race> races;
 
-  CoachRaceFilter(String name, this.races, List<CoachRankingFields> fields)
-      : super(name, fields);
+  CoachRaceFilter(String name, this.races) : super(name: name);
 
   CoachRaceFilter.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
     final tRaces = json['races'] as List<dynamic>?;
@@ -106,7 +112,7 @@ class CoachRaceFilter extends CoachRankingFilter {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = super.toJson();
 
-    data['races'] = fields.map((e) => EnumToString.convertToString(e));
+    data['races'] = races.map((e) => EnumToString.convertToString(e));
     return data;
   }
 

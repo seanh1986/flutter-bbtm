@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
+import 'package:bbnaf/rankings/models/ranking_filter.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
@@ -473,10 +474,9 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
     children.addAll(_getBonusPtsWidgets(details));
 
-// TODO: Need to add UI for adding CoachRankingFilters
-    // if (details is IndividualScoringDetails) {
-    //   children.addAll(_getCoachRankingFilterWidgets(details));
-    // }
+    if (details is IndividualScoringDetails) {
+      children.addAll(_getCoachRankingFilterWidgets(details));
+    }
 
     return Column(
         mainAxisAlignment: MainAxisAlignment.center, children: children);
@@ -547,62 +547,69 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
 // TODO: Need to add UI for adding CoachRankingFilters
 
-  // List<Widget> _getCoachRankingFilterWidgets(IndividualScoringDetails details) {
-  //   List<Widget> rankingFilterWidgets = [
-  //     ElevatedButton(
-  //       onPressed: () {
+  List<Widget> _getCoachRankingFilterWidgets(IndividualScoringDetails details) {
+    List<Widget> rankingFilterWidgets = [
+      ElevatedButton(
+        onPressed: () {
+          setState(() {
+            refreshFields = false;
+            String idx =
+                (_scoringDetails.coachRaceRankingFilters.length + 1).toString();
 
-  //         setState(() {
-  //           refreshFields = false;
-  //           String idx =
-  //               (_scoringDetails.coachRaceRankingFilters.length + 1).toString();
+            _scoringDetails.coachRaceRankingFilters
+                .add(CoachRaceFilter("RankingFilter_" + idx, []));
+          });
+        },
+        child: const Text('Add Race Ranking Filter'),
+      )
+    ];
 
-  //           _scoringDetails.coachRaceRankingFilters
-  //               .add(BonusDetails("RankingFilter_" + idx, 1));
-  //         });
-  //       },
-  //       child: const Text('Add Race Ranking Filter'),
-  //     )
-  //   ];
+    for (int i = 0; i < details.coachRaceRankingFilters.length; i++) {
+      CoachRaceFilter filter = details.coachRaceRankingFilters[i];
 
-  //   for (int i = 0; i < details.bonusPts.length; i++) {
-  //     String bonusKey = details.bonusPts[i].name;
-  //     double bonusVal = details.bonusPts[i].weight;
+      String label = filter.name;
+      List<String> curRaces = EnumToString.toList(filter.races);
 
-  //     ValueChanged<String> bonusNameCallback = ((value) {
-  //       details.bonusPts[i] = BonusDetails(value, bonusVal);
-  //     });
+      List<String> allRaces = EnumToString.toList(Race.values);
 
-  //     ValueChanged<String> bonusPtsCallback = ((value) {
-  //       details.bonusPts[i] = BonusDetails(bonusKey, double.parse(value));
-  //     });
+      rankingFilterWidgets.add(Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            SizedBox(width: 10.0),
+            Expanded(
+                child: CustomTextFormField(
+                    initialValue: label.toString(),
+                    keyboardType: TextInputType.number,
+                    title: 'Race Filter Label',
+                    callback: (value) {
+                      setState(() {
+                        details.coachRaceRankingFilters[i].name = label;
+                      });
+                    })),
+            SizedBox(width: 10.0),
+            Expanded(
+                child: SetItemListWidget(
+                    title: 'Set Races',
+                    allItems: allRaces,
+                    curItems: curRaces,
+                    onComplete: (newItems) {
+                      List<Race> races =
+                          EnumToString.fromList(Race.values, newItems)
+                              .nonNulls
+                              .toList();
 
-  //     bonusPtsWidgets.add(Row(
-  //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //         children: <Widget>[
-  //           SizedBox(width: 10.0),
-  //           Expanded(
-  //               child: CustomTextFormField(
-  //                   initialValue: bonusKey.toString(),
-  //                   // inputFormatters: [
-  //                   //   FilteringTextInputFormatter.singleLineFormatter
-  //                   // ],
-  //                   keyboardType: TextInputType.number,
-  //                   title: 'Bonus Name',
-  //                   callback: (value) => bonusNameCallback(value))),
-  //           SizedBox(width: 10.0),
-  //           Expanded(
-  //               child: CustomTextFormField(
-  //                   initialValue: bonusVal.toString(),
-  //                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-  //                   keyboardType: TextInputType.number,
-  //                   title: 'Bonus Value',
-  //                   callback: (value) => bonusPtsCallback(value)))
-  //         ]));
-  //   }
+                      details.coachRaceRankingFilters[i] =
+                          CoachRaceFilter(label, races);
 
-  //   return bonusPtsWidgets;
-  // }
+                      setState(() {
+                        refreshFields = false;
+                      });
+                    }))
+          ]));
+    }
+
+    return rankingFilterWidgets;
+  }
 
   Widget _createCasulatyDetails() {
     final theme = Theme.of(context);
