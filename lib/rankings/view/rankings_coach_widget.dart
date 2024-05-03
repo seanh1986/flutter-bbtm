@@ -48,6 +48,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   late String _title;
 
   CoachRankingFields? _sortField;
+
   bool _sortAscending = false;
 
   bool _reset = true;
@@ -224,8 +225,12 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
     _title = widget.title;
 
+    bool Function(Coach) selectedFilter = (c) {
+      return widget.filter == null || widget.filter!.isActive(c);
+    };
+
     _items = List.from(_tournament.getCoaches().where((a) =>
-        (widget.filter == null || widget.filter!.isActive(a)) && // Check filter
+        selectedFilter(a) && // Check filters
         (a.isActive(_tournament) || a.gamesPlayed() > 0))); // "active"
 
     _items.sort((Coach a, Coach b) {

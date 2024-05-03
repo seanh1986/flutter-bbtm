@@ -127,6 +127,17 @@ class _RankingsPage extends State<RankingsPage> {
       }),
     ];
 
+    _tournament.info.scoringDetails.coachRaceRankingFilters.forEach((f) {
+      items.add(ToggleWidgetItem(f.name, (context) {
+        return RankingCoachPage(
+            title: "Coach " + f.name,
+            filter: f,
+            fields: showAdminDetails
+                ? _getCoachRankingFieldsCombinedAdmin()
+                : _getCoachRankingFieldsCombined());
+      }));
+    });
+
 // TODO: BestSport
     // if (showAdminDetails) {
     //   items.add(ToggleWidgetItem("Sport", (context) {
