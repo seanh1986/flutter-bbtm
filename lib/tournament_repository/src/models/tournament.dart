@@ -440,6 +440,10 @@ class Tournament {
       //Coaches
       builder.element("coaches", nest: () {
         _coaches.forEach((c) {
+          if (c.gamesPlayed() <= 0) {
+            return;
+          }
+
           builder.element("coach", nest: () {
             builder.element("name", nest: c.nafName);
             builder.element("number", nest: c.nafNumber);
@@ -491,7 +495,8 @@ class Tournament {
   XmlDocument generateGlamFile() {
     OrganizerInfo mainOrganizer = info.organizers.firstWhere((o) => o.primary);
 
-    List<Coach> coachResults = List.from(_coaches);
+    List<Coach> coachResults =
+        List.from(_coaches.where((c) => c.gamesPlayed() > 0));
     // Sort in descending order
     coachResults.sort((a, b) =>
         -1 *

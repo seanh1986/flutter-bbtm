@@ -85,7 +85,7 @@ class RaceUtils {
     Race.DarkElf: "Dark Elf",
     Race.Dwarf: "Dwarf",
     Race.ElfUnion: "Elf Union",
-    Race.Gnomes: "Gnomes",
+    Race.Gnomes: "Gnome",
     Race.Goblin: "Goblin",
     Race.Halfling: "Halfling",
     Race.HighElf: "High Elf",
