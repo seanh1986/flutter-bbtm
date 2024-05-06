@@ -56,7 +56,8 @@ abstract class CoachRankingFilter extends RankingFilter {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = super.toJson();
 
-    data['fields'] = fields.map((e) => EnumToString.convertToString(e));
+    data['fields'] =
+        fields.map((e) => EnumToString.convertToString(e)).toList();
     return data;
   }
 }
@@ -112,7 +113,7 @@ class CoachRaceFilter extends CoachRankingFilter {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = super.toJson();
 
-    data['races'] = races.map((e) => EnumToString.convertToString(e));
+    data['races'] = races.map((e) => EnumToString.convertToString(e)).toList();
     return data;
   }
 
