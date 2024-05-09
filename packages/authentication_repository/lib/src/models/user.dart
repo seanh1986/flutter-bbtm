@@ -45,4 +45,15 @@ class User extends Equatable {
   String getEmail() {
     return email != null ? email as String : "";
   }
+
+  bool isGuestLogin() {
+    return email == null ||
+        email!.isEmpty ||
+        email!.trim().toLowerCase() == getNafName().toLowerCase() + "@naf.com";
+  }
+
+  // Fake email: nafname@naf.com
+  static createGuestLogin(String nafName) {
+    return nafName.trim().toLowerCase() + "@naf.com";
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/screens/splash_screen.dart';
@@ -29,6 +30,8 @@ enum DateType {
 class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   // late AppState appState;
 
+  late User _user;
+
   String? tournamentId;
 
   DateType dateType = DateType.Recent_or_Upcoming_Tournaments;
@@ -52,6 +55,7 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
   @override
   Widget build(BuildContext context) {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
+    _user = appState.authenticationState.user;
 
     return BlocListener<AppBloc, AppState>(
         listener: (context, state) {
@@ -108,7 +112,14 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
       SizedBox(width: 20),
     ];
 
-    DateType.values.forEach((element) {
+    bool isGuest = _user.isGuestLogin();
+
+    List<DateType> values = List.from(DateType.values);
+    if (isGuest) {
+      values.remove(DateType.Create_Tournament);
+    }
+
+    values.forEach((element) {
       bool clickable = dateType != element;
 
       toggleWidgets.add(ElevatedButton(
@@ -237,18 +248,4 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
           style: theme.listTileTheme.style,
         ));
   }
-
-  // Widget _createNewTournament() {
-  //   // AuthUser? authUser;
-  //   // if (_authState is AuthStateLoggedIn) {
-  //   //   authUser = (_authState as AuthStateLoggedIn).authUser;
-  //   // }
-
-  //   // if (authUser != null && authUser.user != null) {
-  //   //   return Expanded(child: TournamentCreationPage());
-  //   // } else {
-  //   //   return LoginOrganizerPage();
-  //   // }
-  //   return Expanded(child: TournamentCreationPage());
-  // }
 }

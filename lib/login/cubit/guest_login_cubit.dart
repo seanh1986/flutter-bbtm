@@ -20,9 +20,8 @@ class GuestLoginCubit extends Cubit<GuestLoginState> {
     );
   }
 
-  // Fake email: nafname@naf.com
   String _getEmail() {
-    return state.nafName.trim().toLowerCase() + "@naf.com";
+    return User.createGuestLogin(state.nafName);
   }
 
 // Fake PW: naf1234!
