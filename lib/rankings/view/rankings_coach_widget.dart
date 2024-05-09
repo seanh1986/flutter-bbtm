@@ -77,7 +77,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   List<DataColumn2> _getColumns() {
     List<DataColumn2> columns = [];
 
-    columns.add(DataColumn2(label: Center(child: Text('#')), fixedWidth: 25));
+    columns.add(DataColumn2(label: Center(child: Text('#')), fixedWidth: 35));
 
     columns
         .add(DataColumn2(label: Center(child: Text('Coach')), fixedWidth: 200));

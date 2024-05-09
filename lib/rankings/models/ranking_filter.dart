@@ -27,8 +27,10 @@ abstract class CoachRankingFilter extends RankingFilter {
       {required String name,
       this.fields = const [
         CoachRankingFields.Pts,
+        CoachRankingFields.W_T_L,
+        CoachRankingFields.OppScore,
         CoachRankingFields.Td,
-        CoachRankingFields.Cas
+        CoachRankingFields.Cas,
       ]})
       : super(name);
 
@@ -60,14 +62,6 @@ abstract class CoachRankingFilter extends RankingFilter {
         fields.map((e) => EnumToString.convertToString(e)).toList();
     return data;
   }
-}
-
-abstract class SquadRankingFilter extends RankingFilter {
-  final List<SquadRankingFields> fields;
-
-  SquadRankingFilter(String name, this.fields) : super(name);
-
-  bool isActive(IMatchupParticipant p);
 }
 
 class StuntyFilter extends CoachRankingFilter {
@@ -121,6 +115,83 @@ class CoachRaceFilter extends CoachRankingFilter {
   bool isActive(IMatchupParticipant p) {
     if (p is Coach) {
       return races.any((r) => r == p.race);
+    } else {
+      return false;
+    }
+  }
+}
+
+abstract class SquadRankingFilter extends RankingFilter {
+  late final List<SquadRankingFields> fields;
+
+  SquadRankingFilter(String name, this.fields) : super(name);
+
+  bool isActive(IMatchupParticipant p);
+
+  SquadRankingFilter.fromJson(Map<String, dynamic> json)
+      : super.fromJson(json) {
+    List<SquadRankingFields> tParsedFields = [];
+
+    final tFields = json['fields'] as List<dynamic>?;
+    if (tFields != null) {
+      tFields.forEach((f) {
+        SquadRankingFields? tParsed =
+            EnumToString.fromString(SquadRankingFields.values, f);
+        if (tParsed != null) {
+          tParsedFields.add(tParsed);
+        }
+      });
+    }
+
+    this.fields = tParsedFields;
+  }
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> data = super.toJson();
+
+    data['fields'] =
+        fields.map((e) => EnumToString.convertToString(e)).toList();
+    return data;
+  }
+}
+
+class SquadNameFilter extends SquadRankingFilter {
+  late final List<String> squadNames;
+
+  SquadNameFilter(String name, this.squadNames)
+      : super(name, const [
+          SquadRankingFields.Pts,
+          SquadRankingFields.W_T_L,
+          SquadRankingFields.SumIndividualScore,
+          SquadRankingFields.OppScore,
+          SquadRankingFields.SumTd,
+          SquadRankingFields.SumCas,
+        ]);
+
+  SquadNameFilter.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
+    final tSquadNames = json['squad_names'] as List<dynamic>?;
+
+    squadNames = [];
+    if (tSquadNames != null) {
+      tSquadNames.forEach((r) {
+        if (r != null && r is String) {
+          squadNames.add(r);
+        }
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> data = super.toJson();
+
+    data['squad_names'] = squadNames.toList();
+    return data;
+  }
+
+  @override
+  bool isActive(IMatchupParticipant p) {
+    if (p is Squad) {
+      return squadNames.any((r) => r.toLowerCase() == p.name().toLowerCase());
     } else {
       return false;
     }

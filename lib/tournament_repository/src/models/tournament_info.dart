@@ -405,6 +405,8 @@ class SquadDetails {
     SquadTieBreakers.SumCasDiff,
   ];
 
+  List<SquadRankingFilter> squadRankingFilters = [];
+
   SquadDetails();
 
   SquadDetails.fromJson(Map<String, dynamic> json) {
@@ -474,6 +476,14 @@ class SquadDetails {
         SquadTieBreakers.SumCasDiff,
       ];
     }
+
+    final tRankingFilters = json['squad_ranking_filters'] as List<dynamic>?;
+    if (tRankingFilters != null) {
+      tRankingFilters.forEach((tFilter) {
+        var filterJson = tFilter as Map<String, dynamic>;
+        squadRankingFilters.add(SquadNameFilter.fromJson(filterJson));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() => {
@@ -486,6 +496,8 @@ class SquadDetails {
         'squad_tie_breakers': squadTieBreakers
             .map((e) => EnumToString.convertToString(e))
             .toList(),
+        'squad_ranking_filters':
+            squadRankingFilters.map((e) => e.toJson()).toList(),
       };
 }
 

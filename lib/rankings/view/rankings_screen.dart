@@ -67,7 +67,7 @@ class _RankingsPage extends State<RankingsPage> {
       SquadRankingFields.OppScore,
       SquadRankingFields.SumTd,
       SquadRankingFields.SumCas,
-      SquadRankingFields.SumBestSport,
+      // SquadRankingFields.SumBestSport,
     ];
   }
 
@@ -88,7 +88,7 @@ class _RankingsPage extends State<RankingsPage> {
       CoachRankingFields.OppScore,
       CoachRankingFields.Td,
       CoachRankingFields.Cas,
-      CoachRankingFields.BestSport,
+      // CoachRankingFields.BestSport,
     ];
   }
 
@@ -184,6 +184,13 @@ class _RankingsPage extends State<RankingsPage> {
     //         fields: [SquadRankingFields.SumBestSport]);
     //   }));
     // }
+
+    _tournament.info.squadDetails.squadRankingFilters.forEach((f) {
+      items.add(ToggleWidgetItem(f.name, (context) {
+        return RankingSquadsPage(
+            title: "Squad " + f.name, filter: f, fields: f.fields);
+      }));
+    });
 
     return ToggleWidget(items: items);
   }

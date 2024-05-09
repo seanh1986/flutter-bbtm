@@ -77,7 +77,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   List<DataColumn2> _getColumns() {
     List<DataColumn2> columns = [];
 
-    columns.add(DataColumn2(label: Text('#'), fixedWidth: 25));
+    columns.add(DataColumn2(label: Text('#'), fixedWidth: 35));
 
     columns.add(DataColumn2(
         label: Center(child: Text('Squad  |  Coaches')), fixedWidth: 200));
