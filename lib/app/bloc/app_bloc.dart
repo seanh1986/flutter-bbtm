@@ -41,6 +41,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     // App Navigation Related
     on<ScreenChange>(_onScreenChange);
     on<SearchScreenChange>(_onSearchScreen);
+    on<AppRequestNavToTournamentList>(_onAppRequestNavToTournamentList);
     // Tournament List Related
     // on<AppRequestNavToTournamentList>(_requestNavToTournamentList);
     on<AppTournamentListLoaded>(_onTournamentListLoaded);
@@ -179,6 +180,22 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         authenticationState: state.authenticationState,
         tournamentState: TournamentState.createTournament(),
         screenState: state.screenState));
+  }
+
+  void _onAppRequestNavToTournamentList(
+      AppRequestNavToTournamentList event, Emitter<AppState> emit) {
+    print("AppBloc: AppRequestNavToTournament");
+
+    List<TournamentInfo>? tournamentList =
+        _tournamentRepository.getCurrentTournamentList();
+    if (tournamentList == null) {
+      return;
+    }
+
+    emit(AppState(
+        authenticationState: state.authenticationState,
+        tournamentState: TournamentState.tournamentList(tournamentList),
+        screenState: ScreenState(mainScreen: TournamentSelectionPage.tag)));
   }
 
   void _appTournamentRequested(

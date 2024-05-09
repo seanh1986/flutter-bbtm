@@ -30,10 +30,10 @@ final class SearchScreenChange extends AppEvent {
   final String search;
 }
 
-// // Request navigation to tournament selection page
-// final class AppRequestNavToTournamentList extends AppEvent {
-//   const AppRequestNavToTournamentList();
-// }
+// Request navigation to tournament selection page
+final class AppRequestNavToTournamentList extends AppEvent {
+  const AppRequestNavToTournamentList();
+}
 
 // Tournament list is loaded / Navigate to tournament selection page
 final class AppTournamentListLoaded extends AppEvent {

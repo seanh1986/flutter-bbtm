@@ -2,6 +2,7 @@ import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
+import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
@@ -42,6 +43,8 @@ class _TournamentCreationPage extends State<TournamentCreationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     _user =
         context.select((AppBloc bloc) => bloc.state.authenticationState.user);
 
@@ -53,12 +56,19 @@ class _TournamentCreationPage extends State<TournamentCreationPage> {
     _tournament.info.organizers.add(OrganizerInfo(email, nafName, true));
     _tournament.info.locked = false;
 
-    // return AdminScreen(tournament: _tournament, authUser: widget.authUser);
     return Material(
         child: Container(
             child: SingleChildScrollView(
-                child: EditTournamentInfoWidget(
-      tournament: _tournament,
-    ))));
+                child: Column(children: [
+      IconButton(
+          icon: Icon(Icons.arrow_back),
+          color: theme.iconTheme.color,
+          onPressed: () {
+            context.read<AppBloc>().add(AppRequestNavToTournamentList());
+          }),
+      EditTournamentInfoWidget(
+        tournament: _tournament,
+      )
+    ]))));
   }
 }

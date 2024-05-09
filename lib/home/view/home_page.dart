@@ -162,7 +162,7 @@ class _HomePageState extends State<HomePage>
 
   void _handleBackButton() {
     if (_widgetIdx == 0) {
-      context.read<AppBloc>().add(ScreenChange(TournamentSelectionPage.tag));
+      context.read<AppBloc>().add(AppRequestNavToTournamentList());
     } else {
       _widgetIdx = 0;
       context.read<AppBloc>().add(ScreenChange(
