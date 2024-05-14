@@ -44,6 +44,8 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
   EditParticipantState _state = EditParticipantState.ParticipantList;
 
+  String _searchValue = "";
+
   @override
   void initState() {
     super.initState();
@@ -73,6 +75,8 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
   Widget build(BuildContext context) {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
+    _searchValue = appState.screenState.searchValue;
+
     _initFromTournament();
 
     if (initCoaches) {
@@ -248,6 +252,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
         originalCoaches: _coaches,
         editIdx: _editIdx,
         coachIdxNafRenames: _coachIdxNafRenames,
+        searchValue: _searchValue,
         editCallback: (cIdx, doneEdit, newCoaches, coachIdxNafRenames) {
           setState(() {
             initCoaches = false;
@@ -343,6 +348,7 @@ class CoachesDataSource extends DataTableSource {
   bool useSquad;
   List<Coach> originalCoaches;
   List<Coach> newCoaches;
+  String? searchValue;
 
   Function(int, bool, List<Coach>, Map<int, RenameNafName>)
       editCallback; // true if done with edit mode
@@ -363,6 +369,7 @@ class CoachesDataSource extends DataTableSource {
       this.removeItemCallback,
       this.theme,
       this.editIdx,
+      this.searchValue,
       Map<int, RenameNafName>? coachIdxNafRenames})
       : newCoaches = originalCoaches.map((c) => Coach.from(c)).toList(),
         coachIdxNafRenames = coachIdxNafRenames ?? {};
@@ -371,6 +378,10 @@ class CoachesDataSource extends DataTableSource {
   DataRow2? getRow(int index) {
     Coach c = newCoaches[index];
     Coach cOriginal = originalCoaches[index];
+
+    if (searchValue != null && !c.matchSearch(searchValue!)) {
+      return null;
+    }
 
     print("c_idx: " + index.toString() + " -> " + c.coachName);
 
