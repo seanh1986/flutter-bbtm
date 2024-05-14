@@ -4,6 +4,7 @@ import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/home/home.dart';
 import 'package:bbnaf/login/login.dart';
+import 'package:bbnaf/login/view/login_landing_page.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/tournament_repository/src/tournament_repository.dart';
 import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
@@ -13,7 +14,6 @@ import 'package:bbnaf/utils/toast.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 part 'app_event.dart';
 part 'app_state.dart';
@@ -31,7 +31,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
                         authenticationRepository.currentUser)
                     : const AuthenticationState.unauthenticated()),
             tournamentState: TournamentState.noTournamentList(),
-            screenState: ScreenState(mainScreen: LoginPage.tag))) {
+            screenState: ScreenState(mainScreen: LoginLandingPage.tag))) {
     // Authentication Related
     on<_AppUserChanged>(_onUserChanged);
     on<AppLogoutRequested>(_onLogoutRequested);
@@ -107,11 +107,11 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         TournamentState.tournamentList(state.tournamentState.tournamentList);
 
     ScreenState screenState = state.screenState;
-    if (screenState.mainScreen == LoginPage.tag &&
+    if (screenState.mainScreen == LoginLandingPage.tag &&
         authState.status == AuthenticationStatus.authenticated) {
       screenState = ScreenState(mainScreen: TournamentSelectionPage.tag);
     } else if (authState.status == AuthenticationStatus.unauthenticated) {
-      screenState = ScreenState(mainScreen: LoginPage.tag);
+      screenState = ScreenState(mainScreen: LoginLandingPage.tag);
     }
 
     emit(AppState(
@@ -224,7 +224,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   void _appTournamentLoaded(AppTournamentLoaded event, Emitter<AppState> emit) {
     ScreenState screenState = state.screenState;
     if (screenState.mainScreen == TournamentSelectionPage.tag ||
-        screenState.mainScreen == LoginPage.tag) {
+        screenState.mainScreen == LoginLandingPage.tag) {
       screenState = ScreenState(mainScreen: HomePage.tag);
     }
 

@@ -7,14 +7,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
-  static const String tag = "LoginPage";
-
-  static Page<void> page() => const MaterialPage<void>(child: LoginPage());
+  static Route<void> route() {
+    return MaterialPageRoute<void>(builder: (_) => const LoginPage());
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(title: const Text('Account Login')),
       body: Padding(
         padding: const EdgeInsets.all(8),
         child: BlocProvider(
