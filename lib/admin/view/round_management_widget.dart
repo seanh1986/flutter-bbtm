@@ -43,6 +43,8 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   int? editIdx;
   Set<int>? _editedMatchIndices;
 
+  String _searchValue = "";
+
   @override
   void initState() {
     super.initState();
@@ -84,6 +86,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
   Widget build(BuildContext context) {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
     _tournament = appState.tournamentState.tournament;
+    _searchValue = appState.screenState.searchValue;
 
     if (updateCoachRound) {
       _coachRounds =
@@ -209,6 +212,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
       coachRound: coachRound,
       editedMatchIndices: _editedMatchIndices,
       editIdx: editIdx,
+      searchValue: _searchValue,
       editCallback: (mIdx, doneEdit, editedMatchIndices) {
         setState(() {
           if (doneEdit) {
@@ -751,6 +755,7 @@ class CoachRoundDataSource extends DataTableSource {
   BuildContext context;
   TournamentInfo info;
   CoachRound coachRound;
+  String? searchValue;
 
   Function(int, bool, Set<int>)
       editCallback; // true if done with edit mode, edited match indices
@@ -764,6 +769,7 @@ class CoachRoundDataSource extends DataTableSource {
       required this.coachRound,
       required this.editCallback,
       this.editIdx,
+      this.searchValue,
       Set<int>? editedMatchIndices})
       : editedMatchIndices = editedMatchIndices ?? {};
 
@@ -912,6 +918,10 @@ class CoachRoundDataSource extends DataTableSource {
   @override
   DataRow2? getRow(int index) {
     CoachMatchup m = coachRound.matches[index];
+
+    if (searchValue != null && !m.matchSearch(searchValue!)) {
+      return null;
+    }
 
     bool isRowPrevEdited = editedMatchIndices.contains(index);
 
