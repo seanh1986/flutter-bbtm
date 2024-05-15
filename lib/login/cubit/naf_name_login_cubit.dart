@@ -3,11 +3,11 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
 
-part 'guest_login_state.dart';
+part 'naf_name_login_state.dart';
 
-class GuestLoginCubit extends Cubit<GuestLoginState> {
-  GuestLoginCubit(this._authenticationRepository)
-      : super(const GuestLoginState());
+class NafNameLoginCubit extends Cubit<NafNameLoginState> {
+  NafNameLoginCubit(this._authenticationRepository)
+      : super(const NafNameLoginState());
 
   final AuthenticationRepository _authenticationRepository;
 
@@ -21,7 +21,7 @@ class GuestLoginCubit extends Cubit<GuestLoginState> {
   }
 
   String _getEmail() {
-    return User.createGuestLogin(state.nafName);
+    return User.createNafNameLogin(state.nafName);
   }
 
 // Fake PW: naf1234!
@@ -29,7 +29,7 @@ class GuestLoginCubit extends Cubit<GuestLoginState> {
     return "naf1234!";
   }
 
-  Future<void> guestSignInSubmitted() async {
+  Future<void> nafNameSignInSubmitted() async {
     if (!state.isValid) return;
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     // First try login
@@ -44,7 +44,7 @@ class GuestLoginCubit extends Cubit<GuestLoginState> {
     } else {
       emit(
         state.copyWith(
-          errorMessage: "Guest Login Failed",
+          errorMessage: "Naf Name Login Failed",
           status: FormzSubmissionStatus.failure,
         ),
       );
@@ -54,7 +54,7 @@ class GuestLoginCubit extends Cubit<GuestLoginState> {
   Future<bool> _tryLogin() async {
     String email = _getEmail();
     String password = _getPassword();
-    print("GuestLogin: Try Login {" + email + "," + password + "}");
+    print("Naf Name Login: Try Login {" + email + "," + password + "}");
     try {
       await _authenticationRepository.logInWithEmailAndPassword(
         email: email,
@@ -71,7 +71,7 @@ class GuestLoginCubit extends Cubit<GuestLoginState> {
   Future<bool> _trySignUp() async {
     String email = _getEmail();
     String password = _getPassword();
-    print("GuestLogin: Try Signup {" + email + "," + password + "}");
+    print("Naf NameLogin: Try Signup {" + email + "," + password + "}");
     try {
       await _authenticationRepository.signUp(
         email: email,

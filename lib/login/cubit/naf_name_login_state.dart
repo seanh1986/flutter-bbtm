@@ -1,7 +1,7 @@
-part of 'guest_login_cubit.dart';
+part of 'naf_name_login_cubit.dart';
 
-final class GuestLoginState extends Equatable {
-  const GuestLoginState({
+final class NafNameLoginState extends Equatable {
+  const NafNameLoginState({
     this.nafName = "",
     this.status = FormzSubmissionStatus.initial,
     this.isValid = false,
@@ -16,13 +16,13 @@ final class GuestLoginState extends Equatable {
   @override
   List<Object?> get props => [nafName, status, isValid, errorMessage];
 
-  GuestLoginState copyWith({
+  NafNameLoginState copyWith({
     String? nafName,
     FormzSubmissionStatus? status,
     bool? isValid,
     String? errorMessage,
   }) {
-    return GuestLoginState(
+    return NafNameLoginState(
       nafName: nafName ?? this.nafName,
       status: status ?? this.status,
       isValid: isValid ?? this.isValid,

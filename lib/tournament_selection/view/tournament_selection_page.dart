@@ -112,10 +112,10 @@ class _TournamentSelectionPage extends State<TournamentSelectionPage> {
       SizedBox(width: 20),
     ];
 
-    bool isGuest = _user.isGuestLogin();
+    bool isAccountUser = _user.isAccountUser();
 
     List<DateType> values = List.from(DateType.values);
-    if (isGuest) {
+    if (!isAccountUser) {
       values.remove(DateType.Create_Tournament);
     }
 

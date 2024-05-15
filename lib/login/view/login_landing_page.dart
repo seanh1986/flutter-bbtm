@@ -1,5 +1,5 @@
 import 'package:bbnaf/login/login.dart';
-import 'package:bbnaf/login/view/guest_login_page.dart';
+import 'package:bbnaf/login/view/naf_name_login_page.dart';
 import 'package:flutter/material.dart';
 
 class LoginLandingPage extends StatelessWidget {
@@ -27,7 +27,7 @@ class LoginLandingPage extends StatelessWidget {
                   height: 200,
                 ),
                 const SizedBox(height: 20),
-                _GuestButton(),
+                _NafNameButton(),
                 const SizedBox(height: 20),
                 _AccountLoginButton(),
               ],
@@ -52,14 +52,15 @@ class _AccountLoginButton extends StatelessWidget {
   }
 }
 
-class _GuestButton extends StatelessWidget {
+class _NafNameButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return TextButton(
       style: theme.elevatedButtonTheme.style,
-      key: const Key('loginLandingPage_guestLogin_flatButton'),
-      onPressed: () => Navigator.of(context).push<void>(GuestLoginPage.route()),
+      key: const Key('loginLandingPage_nafNameLogin_flatButton'),
+      onPressed: () =>
+          Navigator.of(context).push<void>(NafNameLoginPage.route()),
       child: Text('NAF NAME LOGIN'),
     );
   }

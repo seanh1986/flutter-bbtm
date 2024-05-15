@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/home/home.dart';
-import 'package:bbnaf/login/login.dart';
 import 'package:bbnaf/login/view/login_landing_page.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/tournament_repository/src/tournament_repository.dart';
