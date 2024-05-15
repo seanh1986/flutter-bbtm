@@ -54,7 +54,9 @@ class User extends Equatable {
   }
 
   bool isSpectator() {
-    return email == null || email!.isEmpty;
+    return email == null ||
+        email!.isEmpty ||
+        email!.trim().toLowerCase() == createSpectatorLogin();
   }
 
   bool isNafNameLogin() {
@@ -64,7 +66,12 @@ class User extends Equatable {
   }
 
   // Fake email: nafname@naf.com
-  static createNafNameLogin(String nafName) {
+  static String createNafNameLogin(String nafName) {
     return nafName.trim().toLowerCase() + "@naf.com";
+  }
+
+  // Fake email for spectator
+  static String createSpectatorLogin() {
+    return "spectator@nafspec.com";
   }
 }
