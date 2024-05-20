@@ -270,6 +270,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       print("AppBloc: updateMatchEvent finished -> " + value.toString());
       LoadingIndicatorDialog().dismiss();
       _showSuccessFailToast(event.context, value);
+      // Refresh tournament UI
       if (value) {
         add(AppTournamentRequested(event.matchEvent.tournament.info.id));
       }

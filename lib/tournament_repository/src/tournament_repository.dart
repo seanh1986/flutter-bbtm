@@ -48,13 +48,17 @@ class TournamentRepository {
 
   // Future<void> requestTournamentList() async {}
 
-  Future<Tournament> requestTournament(String tournamentId) async {
-    Tournament t = await _tournyRef
-        .doc(tournamentId)
-        .get()
-        .then((value) => _parseTournamentResponse(value));
+  Future<Tournament?> _requestTournament(String tournamentId) async {
+    try {
+      Tournament t = await _tournyRef
+          .doc(tournamentId)
+          .get(GetOptions(source: Source.server))
+          .then((value) => _parseTournamentResponse(value));
 
-    return t;
+      return t;
+    } catch (_) {
+      return null;
+    }
   }
 
   List<TournamentInfo>? _tournamentList;
@@ -87,9 +91,12 @@ class TournamentRepository {
   Stream<Tournament> getTournamentData(String tournamentId) async* {
     print("TournamentRepository: getTournamentData");
 
-    Tournament t = await requestTournament(tournamentId);
-
-    yield t;
+    try {
+      Tournament? t = await _requestTournament(tournamentId);
+      if (t != null) {
+        yield t;
+      }
+    } catch (_) {}
   }
 
   Tournament _parseTournamentResponse(
@@ -118,7 +125,7 @@ class TournamentRepository {
     try {
       Tournament t = await _tournyRef
           .doc(tournamentId)
-          .get()
+          .get(GetOptions(source: Source.server))
           .then((value) => _parseTournamentResponse(value));
       return t;
     } catch (_) {
@@ -143,7 +150,7 @@ class TournamentRepository {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         var tRef = _tournyRef.doc(info.id);
 
-        var doc = await tRef.get();
+        var doc = await tRef.get(GetOptions(source: Source.server));
         if (!doc.exists) {
           return false;
         }
@@ -173,7 +180,7 @@ class TournamentRepository {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         var tRef = _tournyRef.doc(tournamentId);
 
-        var doc = await tRef.get();
+        var doc = await tRef.get(GetOptions(source: Source.server));
         if (!doc.exists) {
           return false;
         }
@@ -204,7 +211,7 @@ class TournamentRepository {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         var tRef = _tournyRef.doc(tournamentId);
 
-        var doc = await tRef.get();
+        var doc = await tRef.get(GetOptions(source: Source.server));
         if (!doc.exists) {
           return false;
         }
@@ -233,19 +240,23 @@ class TournamentRepository {
 
     try {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
+        // Get reference to DB
         var tRef = _tournyRef.doc(tournament.info.id);
 
-        var doc = await tRef.get();
+        // Fetch from server
+        var doc = await tRef.get(GetOptions(source: Source.server));
         if (!doc.exists) {
-          return false;
+          return false; // failed, stop
         }
 
+        // Parse data from DB
         Tournament dbTournament = _parseTournamentResponse(doc);
 
         if (dbTournament.isLocked()) {
-          return false;
+          return false; // failed due to locked
         }
 
+        // Cannot update matches when tournament rounds do not align (obvious error)
         if (dbTournament.coachRounds.length != tournament.coachRounds.length) {
           throw new Exception("Tournament lengths do not align");
         }
@@ -295,7 +306,7 @@ class TournamentRepository {
       FirebaseFirestore.instance.runTransaction((transaction) async {
         var tRef = _tournyRef.doc(tournament.info.id);
 
-        var doc = await tRef.get();
+        var doc = await tRef.get(GetOptions(source: Source.server));
         if (!doc.exists) {
           return false;
         }
@@ -364,7 +375,7 @@ class TournamentRepository {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         var tRef = _tournyRef.doc(t.info.id);
 
-        var doc = await tRef.get();
+        var doc = await tRef.get(GetOptions(source: Source.server));
 
         Tournament dbTournament = _parseTournamentResponse(doc);
 

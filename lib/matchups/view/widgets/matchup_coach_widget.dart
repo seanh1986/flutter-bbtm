@@ -177,7 +177,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
     ReportedMatchResult? result;
     Coach? opponent;
-    Color? color;
+    // Color? color;
     Alignment alignment = Alignment.center;
 
     String nafName = _user.getNafName();
@@ -251,8 +251,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                           padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 10.0),
                           child: Text(
                             'Confirm',
-                            style: theme.textTheme
-                                .bodyMedium, // TextStyle(color: Colors.black),
+                            style: theme.textTheme.bodyMedium,
                           ),
                         ),
                         onPressed: () {
@@ -285,7 +284,6 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                                 widget.result.bestSportOppRank;
 
                             if (result.reported && isHome != null) {
-                              //LoadingIndicatorDialog().show(context);
                               context.read<AppBloc>().add(UpdateMatchEvent(
                                   context,
                                   UpdateMatchReportEvent(
@@ -581,65 +579,59 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   void _uploadToServer() async {
     String nafName = _user.getNafName();
 
+    CoachMatchup m = CoachMatchup.from(_matchup);
+
     bool? isHome; // fall back (e.g. for admin)
-    if (_matchup.isHome(nafName) ||
-        _tournament.isSquadCaptainFor(nafName, _matchup.homeNafName)) {
+    if (m.isHome(nafName) ||
+        _tournament.isSquadCaptainFor(nafName, m.homeNafName)) {
       isHome = true;
-      _matchup.homeReportedResults.homeTds = homeReportWidget.getTds();
-      _matchup.homeReportedResults.homeCas = homeReportWidget.getCas();
-      _matchup.homeReportedResults.homeBonusPts =
-          homeReportWidget.getBonusPts();
+      m.homeReportedResults.homeTds = homeReportWidget.getTds();
+      m.homeReportedResults.homeCas = homeReportWidget.getCas();
+      m.homeReportedResults.homeBonusPts = homeReportWidget.getBonusPts();
 
-      _matchup.homeReportedResults.awayTds = awayReportWidget.getTds();
-      _matchup.homeReportedResults.awayCas = awayReportWidget.getCas();
-      _matchup.homeReportedResults.awayBonusPts =
-          awayReportWidget.getBonusPts();
+      m.homeReportedResults.awayTds = awayReportWidget.getTds();
+      m.homeReportedResults.awayCas = awayReportWidget.getCas();
+      m.homeReportedResults.awayBonusPts = awayReportWidget.getBonusPts();
 
-      _matchup.homeReportedResults.reported = true;
-    } else if (_matchup.isAway(nafName) ||
-        _tournament.isSquadCaptainFor(nafName, _matchup.awayNafName)) {
+      m.homeReportedResults.reported = true;
+    } else if (m.isAway(nafName) ||
+        _tournament.isSquadCaptainFor(nafName, m.awayNafName)) {
       isHome = false;
-      _matchup.awayReportedResults.homeTds = homeReportWidget.getTds();
-      _matchup.awayReportedResults.homeCas = homeReportWidget.getCas();
-      _matchup.awayReportedResults.homeBonusPts =
-          homeReportWidget.getBonusPts();
+      m.awayReportedResults.homeTds = homeReportWidget.getTds();
+      m.awayReportedResults.homeCas = homeReportWidget.getCas();
+      m.awayReportedResults.homeBonusPts = homeReportWidget.getBonusPts();
 
-      _matchup.awayReportedResults.awayTds = awayReportWidget.getTds();
-      _matchup.awayReportedResults.awayCas = awayReportWidget.getCas();
-      _matchup.awayReportedResults.awayBonusPts =
-          awayReportWidget.getBonusPts();
+      m.awayReportedResults.awayTds = awayReportWidget.getTds();
+      m.awayReportedResults.awayCas = awayReportWidget.getCas();
+      m.awayReportedResults.awayBonusPts = awayReportWidget.getBonusPts();
 
-      _matchup.awayReportedResults.reported = true;
+      m.awayReportedResults.reported = true;
     } else {
-      _matchup.homeReportedResults.homeTds = homeReportWidget.getTds();
-      _matchup.homeReportedResults.homeCas = homeReportWidget.getCas();
-      _matchup.homeReportedResults.homeBonusPts =
-          homeReportWidget.getBonusPts();
+      m.homeReportedResults.homeTds = homeReportWidget.getTds();
+      m.homeReportedResults.homeCas = homeReportWidget.getCas();
+      m.homeReportedResults.homeBonusPts = homeReportWidget.getBonusPts();
 
-      _matchup.homeReportedResults.awayTds = awayReportWidget.getTds();
-      _matchup.homeReportedResults.awayCas = awayReportWidget.getCas();
-      _matchup.homeReportedResults.awayBonusPts =
-          awayReportWidget.getBonusPts();
+      m.homeReportedResults.awayTds = awayReportWidget.getTds();
+      m.homeReportedResults.awayCas = awayReportWidget.getCas();
+      m.homeReportedResults.awayBonusPts = awayReportWidget.getBonusPts();
 
-      _matchup.homeReportedResults.reported = true;
+      m.homeReportedResults.reported = true;
 
-      _matchup.awayReportedResults.homeTds = homeReportWidget.getTds();
-      _matchup.awayReportedResults.homeCas = homeReportWidget.getCas();
-      _matchup.awayReportedResults.homeBonusPts =
-          homeReportWidget.getBonusPts();
+      m.awayReportedResults.homeTds = homeReportWidget.getTds();
+      m.awayReportedResults.homeCas = homeReportWidget.getCas();
+      m.awayReportedResults.homeBonusPts = homeReportWidget.getBonusPts();
 
-      _matchup.awayReportedResults.awayTds = awayReportWidget.getTds();
-      _matchup.awayReportedResults.awayCas = awayReportWidget.getCas();
-      _matchup.awayReportedResults.awayBonusPts =
-          awayReportWidget.getBonusPts();
+      m.awayReportedResults.awayTds = awayReportWidget.getTds();
+      m.awayReportedResults.awayCas = awayReportWidget.getCas();
+      m.awayReportedResults.awayBonusPts = awayReportWidget.getBonusPts();
 
-      _matchup.awayReportedResults.reported = true;
+      m.awayReportedResults.reported = true;
     }
 
     try {
       UpdateMatchReportEvent event = isHome != null
-          ? new UpdateMatchReportEvent(_tournament, _matchup, isHome)
-          : new UpdateMatchReportEvent.admin(_tournament, _matchup);
+          ? new UpdateMatchReportEvent(_tournament, m, isHome)
+          : new UpdateMatchReportEvent.admin(_tournament, m);
 
       // ToastUtils.show(context, "Uploading Match Report!");
 
