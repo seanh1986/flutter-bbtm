@@ -1,11 +1,7 @@
-import 'package:authentication_repository/authentication_repository.dart';
-import 'package:bbnaf/login/cubit/spectator_login_cubit.dart';
 import 'package:bbnaf/login/login.dart';
 import 'package:bbnaf/login/view/naf_name_login_page.dart';
 import 'package:bbnaf/login/view/spectator_login_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:formz/formz.dart';
 
 class LoginLandingPage extends StatelessWidget {
   const LoginLandingPage({super.key});

@@ -221,12 +221,24 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   }
 
   void _appTournamentLoaded(AppTournamentLoaded event, Emitter<AppState> emit) {
+    // Maintain same screen, unless:
+    // 1. Tournament Selectin Screen
+    // 2. Login Screen
     ScreenState screenState = state.screenState;
     if (screenState.mainScreen == TournamentSelectionPage.tag ||
         screenState.mainScreen == LoginLandingPage.tag) {
       screenState = ScreenState(mainScreen: HomePage.tag);
     }
 
+    // If round change --> Reset to Home Screen
+    if (state.screenState.mainScreen == HomePage.tag &&
+        state.tournamentState.status == TournamentStatus.selected_tournament &&
+        state.tournamentState.tournament.curRoundIdx() !=
+            event.tournament.curRoundIdx()) {
+      screenState = ScreenState(mainScreen: HomePage.tag);
+    }
+
+    // Update current selected tournament Id
     _selectedTournamentId = event.tournament.info.id;
 
     emit(AppState(
