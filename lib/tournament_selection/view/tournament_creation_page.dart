@@ -2,7 +2,6 @@ import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';

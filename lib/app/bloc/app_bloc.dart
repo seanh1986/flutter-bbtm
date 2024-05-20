@@ -202,10 +202,10 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     print("AppBloc: Request Tournament Download: " + event.tournamentId);
 
     // Setup tournament subscription
-    _setupTournamentSubscription(event.tournamentId);
+    _setupTournamentSubscription(event.tournamentId, event.forceReload);
   }
 
-  void _setupTournamentSubscription(String? tournamentId) {
+  void _setupTournamentSubscription(String? tournamentId, bool forceReload) {
     _tournamentSubscription?.cancel();
 
     if (tournamentId == null) {
@@ -215,7 +215,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       _tournamentSubscription = _tournamentRepository
           .getTournamentData(tournamentId)
           .listen((tournament) {
-        return add(AppTournamentLoaded(tournament));
+        return add(AppTournamentLoaded(tournament, forceReload: forceReload));
       });
     }
   }
@@ -230,12 +230,16 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       screenState = ScreenState(mainScreen: HomePage.tag);
     }
 
-    // If round change --> Reset to Home Screen
-    if (state.screenState.mainScreen == HomePage.tag &&
-        state.tournamentState.status == TournamentStatus.selected_tournament &&
-        state.tournamentState.tournament.curRoundIdx() !=
-            event.tournament.curRoundIdx()) {
-      screenState = ScreenState(mainScreen: HomePage.tag);
+    // If round change or forceReload --> Reset to Home Screen
+    if (state.screenState.mainScreen == HomePage.tag) {
+      bool reloadDueToRoundChange = state.tournamentState.status ==
+              TournamentStatus.selected_tournament &&
+          state.tournamentState.tournament.curRoundIdx() !=
+              event.tournament.curRoundIdx();
+
+      if (reloadDueToRoundChange || event.forceReload) {
+        screenState = ScreenState(mainScreen: HomePage.tag);
+      }
     }
 
     // Update current selected tournament Id
@@ -418,7 +422,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
           value.toString());
       LoadingIndicatorDialog().dismiss();
       if (value) {
-        add(AppTournamentRequested(tournament.info.id));
+        add(AppTournamentRequested(tournament.info.id, forceReload: true));
       }
       return value;
     });
@@ -435,7 +439,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
           value.toString());
       LoadingIndicatorDialog().dismiss();
       if (value) {
-        add(AppTournamentRequested(tournament.info.id));
+        add(AppTournamentRequested(tournament.info.id, forceReload: true));
       }
       return value;
     });
@@ -452,7 +456,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
           value.toString());
       LoadingIndicatorDialog().dismiss();
       if (value) {
-        add(AppTournamentRequested(tournament.info.id));
+        add(AppTournamentRequested(tournament.info.id, forceReload: true));
       }
       return value;
     });

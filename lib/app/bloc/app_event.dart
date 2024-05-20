@@ -49,16 +49,18 @@ final class AppCreateTournament extends AppEvent {
 
 // Tournament refresh is requested
 final class AppTournamentRequested extends AppEvent {
-  const AppTournamentRequested(this.tournamentId);
+  const AppTournamentRequested(this.tournamentId, {this.forceReload = false});
 
   final String tournamentId;
+  final bool forceReload;
 }
 
 // Tournament loaded
 final class AppTournamentLoaded extends AppEvent {
-  const AppTournamentLoaded(this.tournament);
+  const AppTournamentLoaded(this.tournament, {this.forceReload = false});
 
   final Tournament tournament;
+  final bool forceReload;
 }
 
 // Update Match

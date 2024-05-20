@@ -5,7 +5,6 @@ import 'package:bbnaf/rankings/rankings.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/home/view/overview_screen.dart';
-import 'package:bbnaf/tournament_selection/view/tournament_selection_page.dart';
 import 'package:bbnaf/utils/serializable.dart';
 import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:flutter/material.dart';
