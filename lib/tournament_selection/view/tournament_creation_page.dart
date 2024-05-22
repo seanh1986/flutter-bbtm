@@ -67,6 +67,7 @@ class _TournamentCreationPage extends State<TournamentCreationPage> {
           }),
       EditTournamentInfoWidget(
         tournament: _tournament,
+        createTournament: true,
       )
     ]))));
   }

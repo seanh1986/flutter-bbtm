@@ -44,7 +44,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     // Tournament List Related
     // on<AppRequestNavToTournamentList>(_requestNavToTournamentList);
     on<AppTournamentListLoaded>(_onTournamentListLoaded);
-    on<AppCreateTournament>(_createTournament);
+    on<AppCreateTournament>(_navigateToCreateTournament);
     // Tournament Related
     on<AppTournamentRequested>(_appTournamentRequested);
     on<AppTournamentLoaded>(_appTournamentLoaded);
@@ -52,6 +52,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     on<UpdateMatchEvent>(_updateMatchEvent);
     on<UpdateMatchEvents>(_updateMatchEvents);
     on<UpdateSquadBonusPts>(_updateSquadBonusPts);
+    on<CreateTournament>(_createTournamentInDb);
     on<UpdateTournamentInfo>(_updateTournamentInfo);
     on<LockOrUnlockTournament>(_lockOrUnlockTournament);
     on<UpdateCoaches>(_updateCoaches);
@@ -172,7 +173,8 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   }
 
   // Create new tournament
-  void _createTournament(AppCreateTournament event, Emitter<AppState> emit) {
+  void _navigateToCreateTournament(
+      AppCreateTournament event, Emitter<AppState> emit) {
     print("AppBloc: CreateTournament");
 
     emit(AppState(
@@ -337,6 +339,13 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     });
   }
 
+  void _createTournamentInDb(CreateTournament event, Emitter<AppState> emit) {
+    BuildContext context = event.context;
+    TournamentInfo info = event.tournamentInfo;
+    print("AppBloc: createTournamentInDb: " + info.name + "(" + info.id + ")");
+    _processCreateTournament(context, info);
+  }
+
   void _updateTournamentInfo(
       UpdateTournamentInfo event, Emitter<AppState> emit) {
     BuildContext context = event.context;
@@ -358,6 +367,31 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         ") -> Lock: " +
         event.lock.toString());
     _processUpdateTournamentInfo(context, info, true);
+  }
+
+  void _processCreateTournament(BuildContext context, TournamentInfo info) {
+    print("AppBloc: _processCreateTournament: " +
+        info.name +
+        "(" +
+        info.id +
+        ")");
+
+    LoadingIndicatorDialog().show(context);
+
+    _tournamentRepository.createTournament(info).then((value) {
+      print("AppBloc: _processCreateTournament " +
+          info.name +
+          "(" +
+          info.id +
+          ") Finished -> " +
+          value.toString());
+      LoadingIndicatorDialog().dismiss();
+      _showSuccessFailToast(context, value);
+      if (value) {
+        add(AppTournamentRequested(info.id));
+      }
+      return value;
+    });
   }
 
   void _processUpdateTournamentInfo(

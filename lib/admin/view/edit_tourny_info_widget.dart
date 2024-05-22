@@ -13,14 +13,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:checkbox_formfield/checkbox_formfield.dart';
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
 class EditTournamentInfoWidget extends StatefulWidget {
   // Optional can supply tournament object for population (e.g., create tournament)
   final Tournament? tournament;
+  final bool createTournament;
 
-  EditTournamentInfoWidget({Key? key, this.tournament}) : super(key: key);
+  EditTournamentInfoWidget(
+      {Key? key, this.tournament, this.createTournament = false})
+      : super(key: key);
 
   @override
   State<EditTournamentInfoWidget> createState() {
@@ -94,6 +98,9 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       _tryReloadRichText();
     }
 
+    // Initialize to false after loading
+    refreshFields = false;
+
     return Column(children: [
       TitleBar(title: "Edit Tournament Info (Id: " + _tournament.info.id + ")"),
       SizedBox(height: 20),
@@ -108,7 +115,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
   void _addNewOrga() {
     setState(() {
-      refreshFields = false;
       _organizers.add(OrganizerInfo("", "", false));
     });
   }
@@ -199,9 +205,16 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
 
               _trySaveRichText();
 
-              ToastUtils.show(context, "Updating Tournament Info");
-
-              context.read<AppBloc>().add(UpdateTournamentInfo(context, info));
+              // Handle create vs update tournament
+              if (widget.createTournament) {
+                ToastUtils.show(context, "Creating Tournament");
+                context.read<AppBloc>().add(CreateTournament(context, info));
+              } else {
+                ToastUtils.show(context, "Updating Tournament Info");
+                context
+                    .read<AppBloc>()
+                    .add(UpdateTournamentInfo(context, info));
+              }
             };
 
             _showDialogToConfirmOverwrite(context, callback);
@@ -237,7 +250,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         onChanged: (value) {
           if (value != null) {
             setState(() {
-              refreshFields = false;
               if (value) {
                 _organizers.forEach((element) {
                   element.primary = false;
@@ -252,7 +264,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       ElevatedButton removeOrgaBtn = ElevatedButton(
         onPressed: () {
           setState(() {
-            refreshFields = false;
             _organizers.removeAt(i);
           });
         },
@@ -362,16 +373,12 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       _startDate = arg.value.startDate;
       _endDate = arg.value.endDate;
 
-      setState(() {
-        refreshFields = false;
-      });
+      setState(() {});
     } else if (arg.value is DateTime) {
       _startDate = arg.value;
       _endDate = arg.value;
 
-      setState(() {
-        refreshFields = false;
-      });
+      setState(() {});
     }
   }
 
@@ -395,7 +402,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
                 EnumToString.fromList(TieBreaker.values, newItems);
 
             setState(() {
-              refreshFields = false;
               details.tieBreakers = tieBreakers.nonNulls.toList();
               editIndividualTieBreakers = false;
             });
@@ -417,7 +423,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
           IconButton(
               onPressed: () {
                 setState(() {
-                  refreshFields = false;
                   editIndividualTieBreakers = true;
                 });
               },
@@ -487,8 +492,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       ElevatedButton(
         onPressed: () {
           setState(() {
-            refreshFields = false;
-
             String bonusPtsIdx = (details.bonusPts.length + 1).toString();
             details.bonusPts.add(BonusDetails("Bonus_" + bonusPtsIdx, 1));
           });
@@ -516,7 +519,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
             IconButton(
                 onPressed: () {
                   setState(() {
-                    refreshFields = false;
                     details.bonusPts.removeAt(i);
                   });
                 },
@@ -552,7 +554,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
       ElevatedButton(
         onPressed: () {
           setState(() {
-            refreshFields = false;
             String idx =
                 (_scoringDetails.coachRaceRankingFilters.length + 1).toString();
 
@@ -601,9 +602,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
                       details.coachRaceRankingFilters[i] =
                           CoachRaceFilter(label, races);
 
-                      setState(() {
-                        refreshFields = false;
-                      });
+                      setState(() {});
                     }))
           ]));
     }
@@ -702,9 +701,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
           _squadDetails.type = usage != null ? usage : SquadUsage.NO_SQUADS;
 
           // Update UI based on toggle
-          setState(() {
-            refreshFields = false;
-          });
+          setState(() {});
         },
       ))
     ];
@@ -795,9 +792,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
               ? scoringTypes
               : SquadScoring.CUMULATIVE_PLAYER_SCORES;
 
-          setState(() {
-            refreshFields = false;
-          });
+          setState(() {});
         },
       )),
     ];
@@ -865,7 +860,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
                 EnumToString.fromList(SquadTieBreakers.values, newItems);
 
             setState(() {
-              refreshFields = false;
               details.squadTieBreakers = tieBreakers.nonNulls.toList();
               editSquadTieBreakers = false;
             });
@@ -887,7 +881,6 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
           IconButton(
               onPressed: () {
                 setState(() {
-                  refreshFields = false;
                   editSquadTieBreakers = true;
                 });
               },

@@ -144,6 +144,29 @@ class TournamentRepository {
   // Update Operations
   // ------------------
 
+  Future<bool> createTournament(TournamentInfo info) async {
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        var tRef = _tournyRef.doc(info.id);
+
+        var doc = await tRef.get(GetOptions(source: Source.server));
+        if (doc.exists) {
+          // Failed if tournament already exists
+          return false;
+        }
+
+        Tournament tournament = Tournament.empty();
+        tournament.info = info;
+
+        await _overrwiteTournamentData(tournament, force: true);
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<bool> overwriteTournamentInfo(
       TournamentInfo info, bool allowOverwriteLock) async {
     try {

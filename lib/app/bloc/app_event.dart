@@ -93,6 +93,14 @@ final class UpdateSquadBonusPts extends AppEvent {
   final Tournament tournament;
 }
 
+// Create Tournament
+final class CreateTournament extends AppEvent {
+  const CreateTournament(this.context, this.tournamentInfo);
+
+  final BuildContext context;
+  final TournamentInfo tournamentInfo;
+}
+
 // Update Tournament Info
 final class UpdateTournamentInfo extends AppEvent {
   const UpdateTournamentInfo(this.context, this.tournamentInfo);

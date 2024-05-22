@@ -56,7 +56,7 @@ class _AdminScreenState extends State<AdminScreen> {
   WidgetBuilder? _getSubScreenBuilder(AdminSubScreens subScreen) {
     switch (subScreen) {
       case AdminSubScreens.EDIT_INFO:
-        return (context) => EditTournamentInfoWidget();
+        return (context) => EditTournamentInfoWidget(createTournament: false);
       case AdminSubScreens.EDIT_SQUADS:
         return null; // TODO...
       case AdminSubScreens.EDIT_PARTICIPANTS:
