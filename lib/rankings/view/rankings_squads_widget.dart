@@ -207,9 +207,35 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
       Text(squad.name(), overflow: TextOverflow.ellipsis, style: squadStyle),
     ];
 
+    List<Coach> coaches = [];
     squad.getCoaches().forEach((c) {
-      cellWidgets.add(
-          Text("    " + c, overflow: TextOverflow.ellipsis, style: coachStyle));
+      Coach? coach = _tournament.getCoach(c);
+      if (coach != null) {
+        coaches.add(coach);
+      }
+    });
+
+    // Sort in descending order
+    coaches.sort((c1, c2) {
+      return -1 *
+          c1
+              .pointsWithTieBreakersBuiltIn()
+              .compareTo(c2.pointsWithTieBreakersBuiltIn());
+    });
+
+    coaches.forEach((c) {
+      cellWidgets.add(Text(
+          "    " +
+              c.nafName +
+              " (" +
+              c.wins().toString() +
+              "/" +
+              c.ties().toString() +
+              "/" +
+              c.losses().toString() +
+              ")",
+          overflow: TextOverflow.ellipsis,
+          style: coachStyle));
     });
 
     return DataCell(Column(
@@ -434,10 +460,21 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     String headerTitle = tournyName;
     String headerSubTitle = _title + " - Round " + roundNumber.toString();
 
+    // Number of squads
     int numRows = allRows.length;
-    int rowsPerPage = 10;
 
-    int numPages = (numRows / rowsPerPage).ceil();
+    // Total lines available for squad rows
+    int totalLinesPerPage = 36;
+
+    // Total lines per squad row
+    int numLinesPerRow =
+        _tournament.info.squadDetails.maxNumCoachesPerSquad + 1;
+
+    // Total number of squads per page
+    int rowsPerPage = ((totalLinesPerPage as double) / numLinesPerRow).floor();
+
+    // Number of pages required
+    int numPages = ((numRows as double) / rowsPerPage).ceil();
 
     for (int i = 0; i < numPages; i++) {
       int pageNumber = i + 1;

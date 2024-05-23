@@ -445,10 +445,20 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     String headerTitle = tournyName;
     String headerSubTitle = _title + " - Round " + roundNumber.toString();
 
+    // Number of coaches
     int numRows = allRows.length;
-    int rowsPerPage = 10;
 
-    int numPages = (numRows / rowsPerPage).ceil();
+    // Total lines available for coach rows
+    int totalLinesPerPage = 36;
+
+    // Total lines per coach row
+    int numLinesPerRow = _tournament.useSquadVsSquad() ? 3 : 2;
+
+    // Total number of coaches per page
+    int rowsPerPage = ((totalLinesPerPage as double) / numLinesPerRow).floor();
+
+    // Number of pages required
+    int numPages = ((numRows as double) / rowsPerPage).ceil();
 
     for (int i = 0; i < numPages; i++) {
       int pageNumber = i + 1;
