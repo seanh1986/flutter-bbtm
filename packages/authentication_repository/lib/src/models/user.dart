@@ -39,7 +39,11 @@ class User extends Equatable {
   List<Object?> get props => [email, id, name, photo];
 
   String getNafName() {
-    return name != null ? name!.trim() : "";
+    return name != null
+        ? name!.trim()
+        : (email != null && email!.contains("@naf.com")
+            ? _extractBeforeAt(email!)
+            : "");
   }
 
   String getEmail() {
@@ -73,5 +77,11 @@ class User extends Equatable {
   // Fake email for spectator
   static String createSpectatorLogin() {
     return "spectator@nafspec.com";
+  }
+
+  static String _extractBeforeAt(String input) {
+    final regex = RegExp(r'^[^@]+');
+    final match = regex.firstMatch(input);
+    return match?.group(0) ?? '';
   }
 }
