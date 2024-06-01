@@ -38,9 +38,9 @@ enum UploadState {
 }
 
 class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
-  late Tournament _tournament;
   late User _user;
-  late CoachMatchup _matchup;
+  Tournament? _tournament;
+  CoachMatchup? _matchup;
 
   late ReportedMatchResultWithStatus _reportWithStatus;
   UploadState _state = UploadState.NotYetSet;
@@ -55,8 +55,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
   final double vsTableNumWidth = kIsWeb ? 55.0 : 35.0;
 
-  late MatchupReportWidget homeReportWidget;
-  late MatchupReportWidget awayReportWidget;
+  MatchupReportWidget? homeReportWidget;
+  MatchupReportWidget? awayReportWidget;
 
   @override
   void initState() {
@@ -75,52 +75,87 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   @override
   Widget build(BuildContext context) {
     AppState appState = context.select((AppBloc bloc) => bloc.state);
+
+    // Check if round refreshed
+    bool isNewRound = _tournament == null ||
+        _tournament!.curRoundNumber() !=
+            appState.tournamentState.tournament.curRoundNumber();
+
+    // Update internal state
     _tournament = appState.tournamentState.tournament;
     _user = appState.authenticationState.user;
 
-    if (widget.refreshState) {
+    // Make sure we don't reset inputs if user has not yet submitted results
+    String nafName = _user.getNafName();
+
+    bool canEditHome = _matchup != null &&
+        (_matchup!.isHome(nafName) ||
+            _tournament!.isSquadCaptainFor(nafName, _matchup!.homeNafName));
+
+    bool canEditAway = _matchup != null &&
+        (_matchup!.isAway(nafName) ||
+            _tournament!.isSquadCaptainFor(nafName, _matchup!.awayNafName));
+
+    bool canEdit = canEditHome || canEditAway;
+
+    bool reportedHomeResults = canEditHome &&
+        homeReportWidget != null &&
+        homeReportWidget!.reportedMatch!.reported;
+
+    bool reportedAwayResults = canEditAway &&
+        awayReportWidget != null &&
+        awayReportWidget!.reportedMatch!.reported;
+
+    bool reportedResults = reportedHomeResults || reportedAwayResults;
+
+    bool allowRefresh = isNewRound || !canEdit || reportedResults;
+
+    bool refreshState = widget.refreshState && allowRefresh;
+
+    if (refreshState) {
       _refreshState();
+
+      _reportWithStatus = _matchup!.getReportedMatchStatus();
+
+      Authorization authorization =
+          widget.roundIdx == _tournament!.curRoundIdx()
+              ? _tournament!.getMatchAuthorization(_matchup!, _user)
+              : Authorization.Unauthorized;
+
+      _state = _getMatchUploadState(_reportWithStatus, authorization);
+
+      if (_tournament!.isLocked()) {
+        _state = UploadState.NotAuthorized;
+      }
+
+      print("Matchup: " +
+          _matchup!.homeNafName +
+          " vs. " +
+          _matchup!.awayNafName +
+          " -> " +
+          _state.toString());
+
+      Color? homeColor = _getColor(true);
+      Color? awayColor = _getColor(false);
+
+      homeReportWidget = MatchupReportWidget(
+          tounamentInfo: _tournament!.info,
+          reportedMatch: _reportWithStatus,
+          participant: _matchup!.home(_tournament!),
+          showHome: true,
+          state: _state,
+          refreshState: refreshState,
+          titleColor: homeColor);
+
+      awayReportWidget = MatchupReportWidget(
+          tounamentInfo: _tournament!.info,
+          reportedMatch: _reportWithStatus,
+          participant: _matchup!.away(_tournament!),
+          showHome: false,
+          state: _state,
+          refreshState: refreshState,
+          titleColor: awayColor);
     }
-
-    _reportWithStatus = _matchup.getReportedMatchStatus();
-
-    Authorization authorization = widget.roundIdx == _tournament.curRoundIdx()
-        ? _tournament.getMatchAuthorization(_matchup, _user)
-        : Authorization.Unauthorized;
-
-    _state = _getMatchUploadState(_reportWithStatus, authorization);
-
-    if (_tournament.isLocked()) {
-      _state = UploadState.NotAuthorized;
-    }
-
-    print("Matchup: " +
-        _matchup.homeNafName +
-        " vs. " +
-        _matchup.awayNafName +
-        " -> " +
-        _state.toString());
-
-    Color? homeColor = _getColor(true);
-    Color? awayColor = _getColor(false);
-
-    homeReportWidget = MatchupReportWidget(
-        tounamentInfo: _tournament.info,
-        reportedMatch: _reportWithStatus,
-        participant: _matchup.home(_tournament),
-        showHome: true,
-        state: _state,
-        refreshState: widget.refreshState,
-        titleColor: homeColor);
-
-    awayReportWidget = MatchupReportWidget(
-        tounamentInfo: _tournament.info,
-        reportedMatch: _reportWithStatus,
-        participant: _matchup.away(_tournament),
-        showHome: false,
-        state: _state,
-        refreshState: widget.refreshState,
-        titleColor: awayColor);
 
     return Container(
         alignment: FractionalOffset.center,
@@ -162,7 +197,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   Widget? _getBestSportWidget(BuildContext context) {
-    if (_tournament.isLocked()) {
+    if (_tournament!.isLocked()) {
       return null;
     }
 
@@ -182,14 +217,14 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
     String nafName = _user.getNafName();
 
-    if (_matchup.isHome(nafName)) {
-      result = _matchup.homeReportedResults;
-      opponent = _tournament.getCoach(_matchup.awayNafName);
+    if (_matchup!.isHome(nafName)) {
+      result = _matchup!.homeReportedResults;
+      opponent = _tournament!.getCoach(_matchup!.awayNafName);
       // color = Theme.of(context).colorScheme.primary;
       alignment = Alignment.centerLeft;
-    } else if (_matchup.isAway(nafName)) {
-      result = _matchup.awayReportedResults;
-      opponent = _tournament.getCoach(_matchup.homeNafName);
+    } else if (_matchup!.isAway(nafName)) {
+      result = _matchup!.awayReportedResults;
+      opponent = _tournament!.getCoach(_matchup!.homeNafName);
       // color = Theme.of(context).colorScheme.secondary;
       alignment = Alignment.centerRight;
     }
@@ -263,19 +298,19 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                           ReportedMatchResult? result;
                           bool? isHome;
 
-                          if (_matchup.isHome(nafName)) {
-                            result = _matchup.homeReportedResults;
+                          if (_matchup!.isHome(nafName)) {
+                            result = _matchup!.homeReportedResults;
                             isHome = true;
-                          } else if (_matchup.isAway(nafName)) {
-                            result = _matchup.awayReportedResults;
+                          } else if (_matchup!.isAway(nafName)) {
+                            result = _matchup!.awayReportedResults;
                             isHome = false;
-                          } else if (_tournament.isSquadCaptainFor(
-                              nafName, _matchup.homeNafName)) {
-                            result = _matchup.homeReportedResults;
+                          } else if (_tournament!.isSquadCaptainFor(
+                              nafName, _matchup!.homeNafName)) {
+                            result = _matchup!.homeReportedResults;
                             isHome = true;
-                          } else if (_tournament.isSquadCaptainFor(
-                              nafName, _matchup.awayNafName)) {
-                            result = _matchup.awayReportedResults;
+                          } else if (_tournament!.isSquadCaptainFor(
+                              nafName, _matchup!.awayNafName)) {
+                            result = _matchup!.awayReportedResults;
                             isHome = false;
                           }
 
@@ -287,7 +322,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
                               context.read<AppBloc>().add(UpdateMatchEvent(
                                   context,
                                   UpdateMatchReportEvent(
-                                      _tournament, _matchup, isHome)));
+                                      _tournament!, _matchup!, isHome)));
                               // _tournyBloc.updateMatchEvent(
                               // UpdateMatchReportEvent(
                               //     _tournament, _matchup, isHome));
@@ -354,7 +389,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     tableVsDetails.add(Text(' vs. ',
         style: theme
             .textTheme.labelSmall)); //TextStyle(fontSize: subTitleFontSize)));
-    tableVsDetails.add(Text('T#' + _matchup.tableNum.toString(),
+    tableVsDetails.add(Text('T#' + _matchup!.tableNum.toString(),
         style: theme
             .textTheme.labelSmall)); // TextStyle(fontSize: subTitleFontSize)));
 
@@ -383,11 +418,11 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     String title = "Match Report Status";
 
     StringBuffer sb = StringBuffer();
-    sb.writeln("home: " + _matchup.homeNafName);
-    sb.writeln("away: " + _matchup.awayNafName);
+    sb.writeln("home: " + _matchup!.homeNafName);
+    sb.writeln("away: " + _matchup!.awayNafName);
 
-    ReportedMatchResult homeResult = _matchup.homeReportedResults;
-    ReportedMatchResult awayResult = _matchup.awayReportedResults;
+    ReportedMatchResult homeResult = _matchup!.homeReportedResults;
+    ReportedMatchResult awayResult = _matchup!.awayReportedResults;
 
     Text homeVsAway = Text(sb.toString());
 
@@ -425,7 +460,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       awayCas,
     ];
 
-    List<BonusDetails> bonuses = _tournament.info.scoringDetails.bonusPts;
+    List<BonusDetails> bonuses = _tournament!.info.scoringDetails.bonusPts;
     if (bonuses.isNotEmpty) {
       for (int i = 0; i < bonuses.length; i++) {
         BonusDetails bonusDetails = bonuses[i];
@@ -520,17 +555,17 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   }
 
   void _checkIfUploadToServer(BuildContext context) async {
-    int homeTds = homeReportWidget.getTds();
-    int homeCas = homeReportWidget.getCas();
+    int homeTds = homeReportWidget!.getTds();
+    int homeCas = homeReportWidget!.getCas();
 
-    int awayTds = awayReportWidget.getTds();
-    int awayCas = awayReportWidget.getCas();
+    int awayTds = awayReportWidget!.getTds();
+    int awayCas = awayReportWidget!.getCas();
 
     StringBuffer sb = StringBuffer();
     sb.writeln("Match Report");
     sb.writeln("");
-    sb.writeln("home: " + _matchup.homeNafName);
-    sb.writeln("away: " + _matchup.awayNafName);
+    sb.writeln("home: " + _matchup!.homeNafName);
+    sb.writeln("away: " + _matchup!.awayNafName);
     sb.writeln("");
     sb.writeln("homeTds: " + homeTds.toString());
     sb.writeln("awayTds: " + awayTds.toString());
@@ -538,10 +573,10 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     sb.writeln("homeCas: " + homeCas.toString());
     sb.writeln("awayCas: " + awayCas.toString());
 
-    List<BonusDetails> bonuses = _tournament.info.scoringDetails.bonusPts;
+    List<BonusDetails> bonuses = _tournament!.info.scoringDetails.bonusPts;
     if (bonuses.isNotEmpty) {
-      List<int> homeBonuses = homeReportWidget.getBonusPts();
-      List<int> awayBonuses = awayReportWidget.getBonusPts();
+      List<int> homeBonuses = homeReportWidget!.getBonusPts();
+      List<int> awayBonuses = awayReportWidget!.getBonusPts();
 
       sb.writeln("");
       sb.writeln("Bonuses:");
@@ -579,59 +614,65 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   void _uploadToServer() async {
     String nafName = _user.getNafName();
 
-    CoachMatchup m = CoachMatchup.from(_matchup);
-
     bool? isHome; // fall back (e.g. for admin)
-    if (m.isHome(nafName) ||
-        _tournament.isSquadCaptainFor(nafName, m.homeNafName)) {
+    if (_matchup!.isHome(nafName) ||
+        _tournament!.isSquadCaptainFor(nafName, _matchup!.homeNafName)) {
       isHome = true;
-      m.homeReportedResults.homeTds = homeReportWidget.getTds();
-      m.homeReportedResults.homeCas = homeReportWidget.getCas();
-      m.homeReportedResults.homeBonusPts = homeReportWidget.getBonusPts();
+      _matchup!.homeReportedResults.homeTds = homeReportWidget!.getTds();
+      _matchup!.homeReportedResults.homeCas = homeReportWidget!.getCas();
+      _matchup!.homeReportedResults.homeBonusPts =
+          homeReportWidget!.getBonusPts();
 
-      m.homeReportedResults.awayTds = awayReportWidget.getTds();
-      m.homeReportedResults.awayCas = awayReportWidget.getCas();
-      m.homeReportedResults.awayBonusPts = awayReportWidget.getBonusPts();
+      _matchup!.homeReportedResults.awayTds = awayReportWidget!.getTds();
+      _matchup!.homeReportedResults.awayCas = awayReportWidget!.getCas();
+      _matchup!.homeReportedResults.awayBonusPts =
+          awayReportWidget!.getBonusPts();
 
-      m.homeReportedResults.reported = true;
-    } else if (m.isAway(nafName) ||
-        _tournament.isSquadCaptainFor(nafName, m.awayNafName)) {
+      _matchup!.homeReportedResults.reported = true;
+    } else if (_matchup!.isAway(nafName) ||
+        _tournament!.isSquadCaptainFor(nafName, _matchup!.awayNafName)) {
       isHome = false;
-      m.awayReportedResults.homeTds = homeReportWidget.getTds();
-      m.awayReportedResults.homeCas = homeReportWidget.getCas();
-      m.awayReportedResults.homeBonusPts = homeReportWidget.getBonusPts();
+      _matchup!.awayReportedResults.homeTds = homeReportWidget!.getTds();
+      _matchup!.awayReportedResults.homeCas = homeReportWidget!.getCas();
+      _matchup!.awayReportedResults.homeBonusPts =
+          homeReportWidget!.getBonusPts();
 
-      m.awayReportedResults.awayTds = awayReportWidget.getTds();
-      m.awayReportedResults.awayCas = awayReportWidget.getCas();
-      m.awayReportedResults.awayBonusPts = awayReportWidget.getBonusPts();
+      _matchup!.awayReportedResults.awayTds = awayReportWidget!.getTds();
+      _matchup!.awayReportedResults.awayCas = awayReportWidget!.getCas();
+      _matchup!.awayReportedResults.awayBonusPts =
+          awayReportWidget!.getBonusPts();
 
-      m.awayReportedResults.reported = true;
+      _matchup!.awayReportedResults.reported = true;
     } else {
-      m.homeReportedResults.homeTds = homeReportWidget.getTds();
-      m.homeReportedResults.homeCas = homeReportWidget.getCas();
-      m.homeReportedResults.homeBonusPts = homeReportWidget.getBonusPts();
+      _matchup!.homeReportedResults.homeTds = homeReportWidget!.getTds();
+      _matchup!.homeReportedResults.homeCas = homeReportWidget!.getCas();
+      _matchup!.homeReportedResults.homeBonusPts =
+          homeReportWidget!.getBonusPts();
 
-      m.homeReportedResults.awayTds = awayReportWidget.getTds();
-      m.homeReportedResults.awayCas = awayReportWidget.getCas();
-      m.homeReportedResults.awayBonusPts = awayReportWidget.getBonusPts();
+      _matchup!.homeReportedResults.awayTds = awayReportWidget!.getTds();
+      _matchup!.homeReportedResults.awayCas = awayReportWidget!.getCas();
+      _matchup!.homeReportedResults.awayBonusPts =
+          awayReportWidget!.getBonusPts();
 
-      m.homeReportedResults.reported = true;
+      _matchup!.homeReportedResults.reported = true;
 
-      m.awayReportedResults.homeTds = homeReportWidget.getTds();
-      m.awayReportedResults.homeCas = homeReportWidget.getCas();
-      m.awayReportedResults.homeBonusPts = homeReportWidget.getBonusPts();
+      _matchup!.awayReportedResults.homeTds = homeReportWidget!.getTds();
+      _matchup!.awayReportedResults.homeCas = homeReportWidget!.getCas();
+      _matchup!.awayReportedResults.homeBonusPts =
+          homeReportWidget!.getBonusPts();
 
-      m.awayReportedResults.awayTds = awayReportWidget.getTds();
-      m.awayReportedResults.awayCas = awayReportWidget.getCas();
-      m.awayReportedResults.awayBonusPts = awayReportWidget.getBonusPts();
+      _matchup!.awayReportedResults.awayTds = awayReportWidget!.getTds();
+      _matchup!.awayReportedResults.awayCas = awayReportWidget!.getCas();
+      _matchup!.awayReportedResults.awayBonusPts =
+          awayReportWidget!.getBonusPts();
 
-      m.awayReportedResults.reported = true;
+      _matchup!.awayReportedResults.reported = true;
     }
 
     try {
       UpdateMatchReportEvent event = isHome != null
-          ? new UpdateMatchReportEvent(_tournament, m, isHome)
-          : new UpdateMatchReportEvent.admin(_tournament, m);
+          ? new UpdateMatchReportEvent(_tournament!, _matchup!, isHome)
+          : new UpdateMatchReportEvent.admin(_tournament!, _matchup!);
 
       // ToastUtils.show(context, "Uploading Match Report!");
 
@@ -724,8 +765,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   Color? _getColor(bool home) {
     ReportedMatchResult? result;
 
-    ReportedMatchResult homeResult = _matchup.homeReportedResults;
-    ReportedMatchResult awayResult = _matchup.awayReportedResults;
+    ReportedMatchResult homeResult = _matchup!.homeReportedResults;
+    ReportedMatchResult awayResult = _matchup!.awayReportedResults;
 
     if (homeResult.reported && awayResult.reported) {
       bool areSameOutcome = homeResult.homeTds == awayResult.homeTds &&
