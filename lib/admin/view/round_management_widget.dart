@@ -279,7 +279,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
               List<UpdateMatchReportEvent> matchesToUpdate = dataSource
                   .editedMatchIndices
                   .map((mIdx) => UpdateMatchReportEvent.admin(
-                      _tournament, coachRound.matches[mIdx]))
+                      _tournament, coachRound.matches[mIdx], _selectedRoundIdx))
                   .toList();
 
               context.read<AppBloc>().add(UpdateMatchEvents(

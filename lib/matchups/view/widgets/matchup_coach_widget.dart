@@ -671,7 +671,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     try {
       UpdateMatchReportEvent event = isHome != null
           ? new UpdateMatchReportEvent(_tournament!, _matchup!, isHome)
-          : new UpdateMatchReportEvent.admin(_tournament!, _matchup!);
+          : new UpdateMatchReportEvent.admin(
+              _tournament!, _matchup!, _tournament!.curRoundIdx());
 
       // ToastUtils.show(context, "Uploading Match Report!");
 

@@ -27,12 +27,14 @@ class UpdateMatchReportEvent {
   final CoachMatchup matchup;
   late final bool isHome;
   late final bool isAdmin;
+  late final int roundIdx;
 
   UpdateMatchReportEvent(this.tournament, this.matchup, this.isHome) {
     this.isAdmin = false;
+    roundIdx = tournament.curRoundIdx();
   }
 
-  UpdateMatchReportEvent.admin(this.tournament, this.matchup) {
+  UpdateMatchReportEvent.admin(this.tournament, this.matchup, this.roundIdx) {
     this.isHome = false;
     this.isAdmin = true;
   }

@@ -285,13 +285,14 @@ class TournamentRepository {
         }
 
         events.forEach((event) {
-          int roundIdx = dbTournament.coachRounds.length - 1;
+          int roundIdx = event.roundIdx;
 
-          int matchIdx = dbTournament.coachRounds.last.matches.indexWhere((e) =>
-              e.awayNafName.toLowerCase() ==
-                  event.matchup.awayNafName.toLowerCase() &&
-              e.homeNafName.toLowerCase() ==
-                  event.matchup.homeNafName.toLowerCase());
+          int matchIdx = dbTournament.coachRounds[roundIdx].matches.indexWhere(
+              (e) =>
+                  e.awayNafName.toLowerCase() ==
+                      event.matchup.awayNafName.toLowerCase() &&
+                  e.homeNafName.toLowerCase() ==
+                      event.matchup.homeNafName.toLowerCase());
 
           if (roundIdx < 0 || matchIdx < 0) {
             throw new Exception("Couldn't find index match");
