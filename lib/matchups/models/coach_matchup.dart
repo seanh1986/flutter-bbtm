@@ -120,7 +120,8 @@ class CoachMatchup extends IMatchup {
     }
   }
 
-  ReportedMatchResultWithStatus getReportedMatchStatus() {
+  ReportedMatchResultWithStatus getReportedMatchStatus(
+      {Tournament? t, String? nafName}) {
     bool homeReported = homeReportedResults.reported;
     bool awayReported = awayReportedResults.reported;
 
@@ -132,7 +133,10 @@ class CoachMatchup extends IMatchup {
             ReportedMatchStatus.BothReportedAgree, homeReportedResults);
       } else {
         return ReportedMatchResultWithStatus.from(
-            ReportedMatchStatus.BothReportedConflict, homeReportedResults);
+            ReportedMatchStatus.BothReportedConflict,
+            t != null && nafName != null && canEditAway(t, nafName)
+                ? awayReportedResults
+                : homeReportedResults);
       }
     } else if (homeReported) {
       return ReportedMatchResultWithStatus.from(
@@ -191,6 +195,14 @@ class CoachMatchup extends IMatchup {
   bool isAway(String? nafName) {
     return nafName != null &&
         awayNafName.toLowerCase() == nafName.toLowerCase();
+  }
+
+  bool canEditHome(Tournament t, String nafName) {
+    return isHome(nafName) || t.isSquadCaptainFor(nafName, homeNafName);
+  }
+
+  bool canEditAway(Tournament t, String nafName) {
+    return isAway(nafName) || t.isSquadCaptainFor(nafName, awayNafName);
   }
 
   bool hasPlayer(String nafName) {

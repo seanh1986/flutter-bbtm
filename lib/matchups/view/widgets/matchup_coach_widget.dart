@@ -88,13 +88,11 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     // Make sure we don't reset inputs if user has not yet submitted results
     String nafName = _user.getNafName();
 
-    bool canEditHome = _matchup != null &&
-        (_matchup!.isHome(nafName) ||
-            _tournament!.isSquadCaptainFor(nafName, _matchup!.homeNafName));
+    bool canEditHome =
+        _matchup != null && _matchup!.canEditHome(_tournament!, nafName);
 
-    bool canEditAway = _matchup != null &&
-        (_matchup!.isAway(nafName) ||
-            _tournament!.isSquadCaptainFor(nafName, _matchup!.awayNafName));
+    bool canEditAway =
+        _matchup != null && _matchup!.canEditAway(_tournament!, nafName);
 
     bool canEdit = canEditHome || canEditAway;
 
@@ -115,7 +113,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     if (refreshState) {
       _refreshState();
 
-      _reportWithStatus = _matchup!.getReportedMatchStatus();
+      _reportWithStatus =
+          _matchup!.getReportedMatchStatus(t: _tournament!, nafName: nafName);
 
       Authorization authorization =
           widget.roundIdx == _tournament!.curRoundIdx()
