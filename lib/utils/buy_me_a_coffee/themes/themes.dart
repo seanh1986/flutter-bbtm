@@ -58,7 +58,7 @@ class WhiteTheme implements BuyMeACoffeeThemeData {
 /// it has a blue background and a white text color
 class BlueTheme implements BuyMeACoffeeThemeData {
   @override
-  Color backgroundColor = const Color(0xFF5F7FFF);
+  Color backgroundColor = Colors.blue;
   @override
   Color textColor = Colors.white;
 }

@@ -102,7 +102,18 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
     refreshFields = false;
 
     return Column(children: [
-      TitleBar(title: "Edit Tournament Info (Id: " + _tournament.info.id + ")"),
+      TitleBar(
+        title: "Edit Tournament Info (Id: " + _tournament.info.id + ")",
+        extraWidgets: [
+          IconButton(
+              onPressed: () async {
+                await Clipboard.setData(
+                    ClipboardData(text: _tournament.info.id));
+                // copied successfully
+              },
+              icon: Icon(Icons.copy))
+        ],
+      ),
       SizedBox(height: 20),
       Container(
           child: SingleChildScrollView(
