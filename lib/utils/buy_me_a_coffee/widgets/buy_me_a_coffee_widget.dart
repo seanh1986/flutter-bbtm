@@ -88,7 +88,7 @@ class BuyMeACoffeeWidget extends StatelessWidget {
       child: InkWell(
         onTap: () {
           final uri = Uri.parse(buyMeACoffeeUrl + sponsorID);
-          launchUrl(uri);
+          launchUrl(uri, mode: LaunchMode.externalApplication);
         },
         child: Container(
           padding: padding ??
