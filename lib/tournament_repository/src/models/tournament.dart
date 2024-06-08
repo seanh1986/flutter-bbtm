@@ -392,6 +392,8 @@ class Tournament {
     reProcessAllRounds();
   }
 
+  Tournament.from(Tournament t) : this.fromJson(t.info, t.toJson());
+
   Map<String, dynamic> toJson() => {
         'coaches': _coaches.map((e) => e.toJson()).toList(),
         'coach_rounds': coachRounds.map((e) => e.toJson()).toList(),

@@ -343,6 +343,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
         VoidCallback advanceCallback = () async {
           _tournament.processRound();
 
+          // Download a backup before processing the round
+          Tournament t = Tournament.from(_tournament);
+          context.read<AppBloc>().add(DownloadBackup(t));
+
           String msg;
           SwissPairings swiss = SwissPairings(_tournament);
           RoundPairingError pairingError = swiss.pairNextRound();
@@ -369,6 +373,10 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
             ToastUtils.show(context, "Round Advanced");
 
             context.read<AppBloc>().add(AdvanceRound(context, _tournament));
+
+            // Download a backup after a successful round process
+            Tournament t = Tournament.from(_tournament);
+            context.read<AppBloc>().add(DownloadBackup(t));
           }
         };
 
