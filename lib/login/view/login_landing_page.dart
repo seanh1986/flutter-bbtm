@@ -1,6 +1,7 @@
 import 'package:bbnaf/login/login.dart';
 import 'package:bbnaf/login/view/naf_name_login_page.dart';
 import 'package:bbnaf/login/view/spectator_login_page.dart';
+import 'package:bbnaf/utils/buy_me_a_coffee/buy_me_a_coffee.dart';
 import 'package:flutter/material.dart';
 
 class LoginLandingPage extends StatelessWidget {
@@ -14,25 +15,28 @@ class LoginLandingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
       body: Padding(
         padding: const EdgeInsets.all(8),
         child: Align(
-          alignment: const Alignment(0, -1 / 3),
+          alignment: Alignment.topCenter,
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  'assets/images/logos/amorical_logo_2024.png',
-                  height: 200,
+                  'assets/images/logos/BBTM-Cover-Photo.png',
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
                 _NafNameButton(),
                 const SizedBox(height: 20),
                 _AccountLoginButton(),
                 const SizedBox(height: 20),
                 _SpectatorButton(),
+                const SizedBox(height: 40),
+                Divider(),
+                const SizedBox(height: 40),
+                BuyMeACoffeeWidget(
+                    sponsorID: "seanhuberman", theme: BlueTheme())
               ],
             ),
           ),
@@ -82,33 +86,3 @@ class _SpectatorButton extends StatelessWidget {
     );
   }
 }
-
-// class _SpectatorButton extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return BlocProvider(
-//         create: (_) =>
-//             SpectatorLoginCubit(context.read<AuthenticationRepository>()),
-//         child: BlocBuilder<SpectatorLoginCubit, SpectatorLoginState>(
-//           builder: (context, state) {
-//             return state.status.isInProgress
-//                 ? const CircularProgressIndicator()
-//                 : ElevatedButton(
-//                     key: const Key('spectatorLogInForm_continue_raisedButton'),
-//                     style: ElevatedButton.styleFrom(
-//                       shape: RoundedRectangleBorder(
-//                         borderRadius: BorderRadius.circular(30),
-//                       ),
-//                       backgroundColor: Colors.orangeAccent,
-//                     ),
-//                     onPressed: state.isValid
-//                         ? () => context
-//                             .read<SpectatorLoginCubit>()
-//                             .spectatorSignInSubmitted()
-//                         : null,
-//                     child: const Text('SPECTATOR'),
-//                   );
-//           },
-//         ));
-//   }
-// }

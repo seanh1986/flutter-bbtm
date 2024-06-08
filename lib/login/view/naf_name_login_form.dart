@@ -23,14 +23,20 @@ class NafNameLoginForm extends StatelessWidget {
         }
       },
       child: Align(
-        alignment: const Alignment(0, -1 / 3),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _NafNameInput(),
-            const SizedBox(height: 8),
-            _NafNameLoginButton(),
-          ],
+        alignment: Alignment.topCenter,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/logos/BBTM-Cover-Photo.png',
+              ),
+              const SizedBox(height: 40),
+              _NafNameInput(),
+              const SizedBox(height: 8),
+              _NafNameLoginButton(),
+            ],
+          ),
         ),
       ),
     );

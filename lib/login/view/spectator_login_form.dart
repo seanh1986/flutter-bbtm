@@ -23,12 +23,18 @@ class SpectatorLoginForm extends StatelessWidget {
         }
       },
       child: Align(
-        alignment: const Alignment(0, -1 / 3),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _SpectatorLoginButton(),
-          ],
+        alignment: Alignment.topCenter,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/logos/BBTM-Cover-Photo.png',
+              ),
+              const SizedBox(height: 40),
+              _SpectatorLoginButton(),
+            ],
+          ),
         ),
       ),
     );

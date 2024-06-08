@@ -22,16 +22,15 @@ class LoginForm extends StatelessWidget {
         }
       },
       child: Align(
-        alignment: const Alignment(0, -1 / 3),
+        alignment: Alignment.topCenter,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'assets/images/logos/amorical_logo_2024.png',
-                height: 200,
+                'assets/images/logos/BBTM-Cover-Photo.png',
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 40),
               _EmailInput(),
               const SizedBox(height: 8),
               _PasswordInput(),
