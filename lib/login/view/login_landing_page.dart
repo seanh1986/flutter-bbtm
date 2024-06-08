@@ -2,7 +2,9 @@ import 'package:bbnaf/login/login.dart';
 import 'package:bbnaf/login/view/naf_name_login_page.dart';
 import 'package:bbnaf/login/view/spectator_login_page.dart';
 import 'package:bbnaf/utils/buy_me_a_coffee/buy_me_a_coffee.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LoginLandingPage extends StatelessWidget {
   const LoginLandingPage({super.key});
@@ -24,7 +26,7 @@ class LoginLandingPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  'assets/images/logos/BBTM-Cover-Photo.png',
+                  'assets/images/logos/BBTM-Cover-Photo-Thick.png',
                 ),
                 const SizedBox(height: 40),
                 _NafNameButton(),
@@ -35,8 +37,16 @@ class LoginLandingPage extends StatelessWidget {
                 const SizedBox(height: 40),
                 Divider(),
                 const SizedBox(height: 40),
-                BuyMeACoffeeWidget(
-                    sponsorID: "seanhuberman", theme: BlueTheme())
+                Container(
+                  height: 40,
+                  child: BuyMeACoffeeWidget(
+                    sponsorID: "seanhuberman",
+                    theme: BlueTheme(),
+                    textStyle: GoogleFonts.cookie(
+                        color: Colors.black,
+                        textStyle: TextStyle(fontSize: 16.0)),
+                  ),
+                )
               ],
             ),
           ),

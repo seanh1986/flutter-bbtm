@@ -29,7 +29,7 @@ class NafNameLoginForm extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'assets/images/logos/BBTM-Cover-Photo.png',
+                'assets/images/logos/BBTM-Cover-Photo-Thick.png',
               ),
               const SizedBox(height: 40),
               _NafNameInput(),
