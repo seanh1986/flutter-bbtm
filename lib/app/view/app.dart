@@ -38,6 +38,7 @@ class AppView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: "BB Tournament Manager",
       theme: getAppTheme(context, false),
       darkTheme: getAppTheme(context, true),
       themeMode: ThemeMode.system,
