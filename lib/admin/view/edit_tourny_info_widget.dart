@@ -464,7 +464,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         keyboardType: TextInputType.number,
         title: 'Losses',
-        callback: (value) => details.tiePts = double.parse(value),
+        callback: (value) => details.lossPts = double.parse(value),
       ))
     ]);
 
