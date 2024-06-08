@@ -1,4 +1,5 @@
 import 'package:bbnaf/login/login.dart';
+import 'package:bbnaf/login/view/bbtm_logo.dart';
 import 'package:bbnaf/login/view/naf_name_login_page.dart';
 import 'package:bbnaf/login/view/spectator_login_page.dart';
 import 'package:bbnaf/utils/buy_me_a_coffee/buy_me_a_coffee.dart';
@@ -25,9 +26,7 @@ class LoginLandingPage extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Image.asset(
-                  'assets/images/logos/BBTM-Cover-Photo-Thick.png',
-                ),
+                BbtmLogo(),
                 const SizedBox(height: 40),
                 _NafNameButton(),
                 const SizedBox(height: 20),

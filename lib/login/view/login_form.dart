@@ -1,5 +1,7 @@
 import 'package:bbnaf/login/cubit/login_cubit.dart';
+import 'package:bbnaf/login/view/bbtm_logo.dart';
 import 'package:bbnaf/sign_up/view/sign_up_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
@@ -27,9 +29,7 @@ class LoginForm extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
-                'assets/images/logos/BBTM-Cover-Photo-Thick.png',
-              ),
+              BbtmLogo(),
               const SizedBox(height: 40),
               _EmailInput(),
               const SizedBox(height: 8),

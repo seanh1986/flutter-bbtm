@@ -1,4 +1,5 @@
 import 'package:bbnaf/login/cubit/spectator_login_cubit.dart';
+import 'package:bbnaf/login/view/bbtm_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
@@ -28,9 +29,7 @@ class SpectatorLoginForm extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
-                'assets/images/logos/BBTM-Cover-Photo-Thick.png',
-              ),
+              BbtmLogo(),
               const SizedBox(height: 40),
               _SpectatorLoginButton(),
             ],
