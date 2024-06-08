@@ -114,29 +114,6 @@ class _HomePageState extends State<HomePage>
               SizedBox(width: 10),
             ],
           ),
-          // AppBar(
-          //   automaticallyImplyLeading: false,
-          //   leading: IconButton(
-          //     icon: Icon(
-          //       Icons.arrow_back,
-          //       color: theme.iconTheme.color,
-          //     ),
-          //     onPressed: () => _handleBackButton(),
-          //   ),
-          //   title: Text(_tournament.info.name),
-          //   actions: [
-          //     IconButton(
-          //         icon: Icon(Icons.refresh),
-          //         color: theme.iconTheme.color,
-          //         onPressed: () => _handleRefreshTournamentPressed()),
-          //     SizedBox(width: 20),
-          //     IconButton(
-          //         icon: Icon(Icons.logout),
-          //         color: theme.iconTheme.color,
-          //         onPressed: () => _handleLogoutPressed()),
-          //     SizedBox(width: 10),
-          //   ],
-          // ),
           body: _children[_widgetIdx],
           bottomNavigationBar: BottomNavigationBar(
             items: _getBottomNavigationBarItems(),

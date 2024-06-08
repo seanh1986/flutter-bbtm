@@ -353,7 +353,12 @@ class Tournament {
   }
 
   bool isUserAdmin(User user) {
-    return info.organizers.any((e) => e.email == user.getEmail());
+    return info.organizers.any((e) => e.email == user.getEmail()) ||
+        _isUserSuperAdmin(user);
+  }
+
+  bool _isUserSuperAdmin(User user) {
+    return user.getEmail() == "huberman.sean@gmail.com";
   }
 
   bool isEmpty() {

@@ -126,7 +126,7 @@ class BuyMeACoffeeWidget extends StatelessWidget {
                               color: theme == null
                                   ? Colors.white
                                   : theme!.textColor,
-                              fontSize: 14.0, //28.0,
+                              fontSize: 28.0,
                               letterSpacing: 0.6,
                             ),
                       ),
