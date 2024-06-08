@@ -4,7 +4,11 @@ import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
+import 'dart:html' as html;
+import 'dart:typed_data';
 
 class DownloadFilesWidget extends StatefulWidget {
   DownloadFilesWidget({Key? key}) : super(key: key);
@@ -42,20 +46,40 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
 
   Widget _downloadFileBtns(BuildContext context) {
     return Container(
-        height: 60,
+        // height: 60,
+        width: 500,
         alignment: Alignment.center,
         padding: EdgeInsets.all(10),
         child: ListView(
-            scrollDirection: Axis.horizontal,
+            scrollDirection: Axis.vertical,
             shrinkWrap: true,
             children: [
-              SizedBox(width: 20),
+              SizedBox(height: 30),
               _downloadFileBackup(context),
-              SizedBox(width: 20),
+              SizedBox(height: 30),
+              _downloadCoachImportTemplate(context),
+              SizedBox(height: 30),
               _downloadNafUploadFile(context),
-              SizedBox(width: 20),
+              SizedBox(height: 30),
               _downloadGlamFile(context),
             ]));
+  }
+
+  Widget _downloadCoachImportTemplate(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ElevatedButton(
+      style: theme.elevatedButtonTheme.style,
+      child: Text('Download Coach Import Template'),
+      onPressed: () {
+        ToastUtils.show(context, "Downloading Coach Import Template");
+
+        String assetFilePath = 'assets/files/bbtm-coach-import-template.xlsx';
+        String downloadFileName = 'bbtm-coach-import-template.xlsx';
+
+        _downloadAssetFile(context, downloadFileName, assetFilePath);
+      },
+    );
   }
 
   Widget _downloadFileBackup(BuildContext context) {
@@ -137,5 +161,35 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
                 });
       },
     );
+  }
+
+  Future<void> _downloadAssetFile(BuildContext context, String downloadFileName,
+      String assetFilePath) async {
+    try {
+      // Load file from assets
+      final response = await http.get(Uri.parse(assetFilePath));
+
+      if (response.statusCode == 200) {
+        final Uint8List bytes = response.bodyBytes;
+
+        // Create a blob from the bytes
+        final blob = html.Blob([bytes]);
+
+        // Create a link element
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', downloadFileName)
+          ..click();
+
+        // Cleanup
+        html.Url.revokeObjectUrl(url);
+
+        ToastUtils.show(context, "Downloading " + downloadFileName);
+      } else {
+        throw Exception('Failed to load asset');
+      }
+    } catch (e) {
+      ToastUtils.show(context, "Failed to download " + downloadFileName);
+    }
   }
 }
