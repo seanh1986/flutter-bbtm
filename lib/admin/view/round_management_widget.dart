@@ -77,7 +77,7 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
       cols.add(DataColumn2(label: Center(child: Text("Bonus"))));
     }
 
-    cols.add(DataColumn2(label: Center(child: Text("Sport"))));
+    // cols.add(DataColumn2(label: Center(child: Text("Sport"))));
 
     return cols;
   }
@@ -983,7 +983,7 @@ class CoachRoundDataSource extends DataTableSource {
       cellRows.add(DataCell(_btnBonus(report, index)));
     }
 
-    cellRows.add(DataCell(_btnBestSport(report, index)));
+    // cellRows.add(DataCell(_btnBestSport(report, index)));
 
     return DataRow2(
         cells: cellRows, specificRowHeight: isInEditMode ? 100 : null);

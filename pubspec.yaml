@@ -1,7 +1,7 @@
 name: bbnaf
 description: Bloodbowl tournament management App.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.1.0+1
+version: 2.1.0+1
 
 environment:
   sdk: ">=3.2.0 <4.0.0"
@@ -80,3 +80,4 @@ flutter:
     - assets/images/background/
     - assets/images/logos/
     - assets/images/teams/
+    - assets/files/

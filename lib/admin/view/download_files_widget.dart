@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/utils/toast.dart';
@@ -72,12 +74,7 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
       style: theme.elevatedButtonTheme.style,
       child: Text('Download Coach Import Template'),
       onPressed: () {
-        ToastUtils.show(context, "Downloading Coach Import Template");
-
-        String assetFilePath = 'assets/files/bbtm-coach-import-template.xlsx';
-        String downloadFileName = 'bbtm-coach-import-template.xlsx';
-
-        _downloadAssetFile(context, downloadFileName, assetFilePath);
+        _downloadImportCoachesTemplateFromGoogleDrive(context);
       },
     );
   }
@@ -163,11 +160,13 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
     );
   }
 
-  Future<void> _downloadAssetFile(BuildContext context, String downloadFileName,
-      String assetFilePath) async {
+  Future<bool> _downloadImportCoachesTemplateFromGoogleDrive(
+      BuildContext context) async {
+    String downloadFileName = 'bbtm-coach-import-template.xlsx';
     try {
-      // Load file from assets
-      final response = await http.get(Uri.parse(assetFilePath));
+      Uri uri = Uri.parse(
+          'https://docs.google.com/spreadsheets/d/1jDNdmgVDnhC_UJgCEAt8WOF90i3d5yum/edit?usp=sharing&ouid=116212630434144180021&rtpof=true&sd=true');
+      final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final Uint8List bytes = response.bodyBytes;
@@ -185,11 +184,17 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
         html.Url.revokeObjectUrl(url);
 
         ToastUtils.show(context, "Downloading " + downloadFileName);
+        return true;
       } else {
-        throw Exception('Failed to load asset');
+        throw Exception('Failed to load asset. Uri: ' +
+            uri.path +
+            ' -> code: ' +
+            response.statusCode.toString());
       }
     } catch (e) {
-      ToastUtils.show(context, "Failed to download " + downloadFileName);
+      ToastUtils.show(context,
+          "Failed to download " + downloadFileName + "\n" + e.toString());
+      return false;
     }
   }
 }
