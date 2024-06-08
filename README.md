@@ -1,16 +1,13 @@
-# bbnaf_tournaments
+# BBTM
 
-A new Flutter project.
+BB Tournament Manager is a web-based application for managing BB tournaments. In includes the following key features.
 
-## Getting Started
+Admin
+- Tournament Creation
+- Tournament Editing
+- Round Management/Editing/Processing
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Participant
+- Enter Results
+- View Pairings
+- View Rankings
