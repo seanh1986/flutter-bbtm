@@ -1,4 +1,4 @@
-# BBTM
+# BB Tournament Manager
 
 BB Tournament Manager is a web-based application for managing BB tournaments. In includes the following key features.
 
