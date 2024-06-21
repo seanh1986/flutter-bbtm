@@ -106,7 +106,12 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
     bool reportedResults = reportedHomeResults || reportedAwayResults;
 
-    bool allowRefresh = isNewRound || !canEdit || reportedResults;
+    bool isSameMatchup = _matchup != null &&
+        _matchup!.isHome(widget.matchup.homeName()) &&
+        _matchup!.isAway(widget.matchup.awayName());
+
+    bool allowRefresh =
+        !isSameMatchup || isNewRound || !canEdit || reportedResults;
 
     bool refreshState = widget.refreshState && allowRefresh;
 
