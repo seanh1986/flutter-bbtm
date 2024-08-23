@@ -4,12 +4,14 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
+import 'package:bbnaf/utils/download_file/download_file.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
-import 'dart:html' as html;
+//import 'dart:html' as html;
+import 'package:web/web.dart';
 import 'dart:typed_data';
 
 class DownloadFilesWidget extends StatefulWidget {
@@ -163,38 +165,50 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
   Future<bool> _downloadImportCoachesTemplateFromGoogleDrive(
       BuildContext context) async {
     String downloadFileName = 'bbtm-coach-import-template.xlsx';
+    String url =
+        'https://docs.google.com/spreadsheets/d/1jDNdmgVDnhC_UJgCEAt8WOF90i3d5yum/edit?usp=sharing&ouid=116212630434144180021&rtpof=true&sd=true';
+
     try {
-      Uri uri = Uri.parse(
-          'https://docs.google.com/spreadsheets/d/1jDNdmgVDnhC_UJgCEAt8WOF90i3d5yum/edit?usp=sharing&ouid=116212630434144180021&rtpof=true&sd=true');
-      final response = await http.get(uri);
-
-      if (response.statusCode == 200) {
-        final Uint8List bytes = response.bodyBytes;
-
-        // Create a blob from the bytes
-        final blob = html.Blob([bytes]);
-
-        // Create a link element
-        final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
-          ..setAttribute('download', downloadFileName)
-          ..click();
-
-        // Cleanup
-        html.Url.revokeObjectUrl(url);
-
-        ToastUtils.show(context, "Downloading " + downloadFileName);
-        return true;
-      } else {
-        throw Exception('Failed to load asset. Uri: ' +
-            uri.path +
-            ' -> code: ' +
-            response.statusCode.toString());
-      }
+      ToastUtils.show(context, "Downloading " + downloadFileName);
+      return DownloadFileUtils.downloadFile(url, downloadFileName);
     } catch (e) {
       ToastUtils.show(context,
           "Failed to download " + downloadFileName + "\n" + e.toString());
       return false;
     }
+
+    // try {
+    //   Uri uri = Uri.parse(
+    //       'https://docs.google.com/spreadsheets/d/1jDNdmgVDnhC_UJgCEAt8WOF90i3d5yum/edit?usp=sharing&ouid=116212630434144180021&rtpof=true&sd=true');
+    //   final response = await http.get(uri);
+
+    //   if (response.statusCode == 200) {
+    //     final Uint8List bytes = response.bodyBytes;
+
+    //     // Create a blob from the bytes
+    //     final blob = Blob(bytes);
+
+    //     // Create a link element
+    //     final url = Url.createObjectUrlFromBlob(blob);
+    //     final anchor = AnchorElement(href: url)
+    //       ..setAttribute('download', downloadFileName)
+    //       ..click();
+
+    //     // Cleanup
+    //     Url.revokeObjectUrl(url);
+
+    //     ToastUtils.show(context, "Downloading " + downloadFileName);
+    //     return true;
+    //   } else {
+    //     throw Exception('Failed to load asset. Uri: ' +
+    //         uri.path +
+    //         ' -> code: ' +
+    //         response.statusCode.toString());
+    //   }
+    // } catch (e) {
+    //   ToastUtils.show(context,
+    //       "Failed to download " + downloadFileName + "\n" + e.toString());
+    //   return false;
+    // }
   }
 }

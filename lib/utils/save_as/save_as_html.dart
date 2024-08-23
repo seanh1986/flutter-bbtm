@@ -1,5 +1,6 @@
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:typed_data';
 
 /// Initializes a DOM container where we can host elements.

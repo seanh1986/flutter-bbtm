@@ -919,7 +919,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         QuillEditor.basic(
           configurations: QuillEditorConfigurations(
             controller: controller,
-            readOnly: false,
+            // readOnly: false,
             sharedConfigurations: const QuillSharedConfigurations(
               locale: Locale('en'),
             ),

@@ -3,7 +3,6 @@ import 'package:bbnaf/login/view/bbtm_logo.dart';
 import 'package:bbnaf/login/view/naf_name_login_page.dart';
 import 'package:bbnaf/login/view/spectator_login_page.dart';
 import 'package:bbnaf/utils/buy_me_a_coffee/buy_me_a_coffee.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
