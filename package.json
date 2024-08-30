@@ -3,10 +3,14 @@
     "firebase": "^9.16.0",
     "firebase-tools": "^12.9.1"
   },
+  "devDependencies": {
+    "husky": "^8.0.0"
+  },
   "engines": {
     "node": "16"
   }, 
   "scripts": {
+    "prepare": "husky install",
     "preinstall": "npm run update-nvmrc",
     "preversion": "npm run update-nvmrc",
     "update-nvmrc": "node scripts/update-nvmrc.js"
