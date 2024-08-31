@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/utils/toast.dart';
@@ -7,12 +5,11 @@ import 'package:bbnaf/widgets/title_widget.dart';
 import 'package:bbnaf/utils/download_file/download_file.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http;
 //import 'dart:html' as html;
-import 'package:web/web.dart';
-import 'dart:typed_data';
+// import 'package:web/web.dart' hide Text;
 
 class DownloadFilesWidget extends StatefulWidget {
   DownloadFilesWidget({Key? key}) : super(key: key);

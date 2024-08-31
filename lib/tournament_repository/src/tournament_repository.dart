@@ -5,16 +5,17 @@ import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/download_file/download_file.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:cache/cache.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Blob;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 // ignore: avoid_web_libraries_in_flutter
 // import 'dart:html' as html;
-import 'package:web/web.dart';
-import 'package:http/http.dart' as http;
+//import 'package:web/web.dart';
+// import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:xml/xml.dart';
+import 'dart:html'
+    as html; // This provides access to the Blob class and other web APIs
 
 class TournamentRepository {
   TournamentRepository({
@@ -577,8 +578,8 @@ class TournamentRepository {
     try {
       // prepare
       final bytes = utf8.encode(contents);
-      final blob = Blob(bytes);
-      final url = Url.createObjectUrlFromBlob(blob);
+      final blob = html.Blob(bytes);
+      final url = html.Url.createObjectUrlFromBlob(blob);
       final anchor = html.document.createElement('a') as html.AnchorElement
         ..href = url
         ..style.display = 'none'
@@ -598,8 +599,6 @@ class TournamentRepository {
     }
   }
 }
-
-
 
 
 // Future<void> _downloadFileMobile(String filename) async {

@@ -5,6 +5,7 @@ import 'package:bbnaf/tournament_repository/src/tournament_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,10 @@ Future<void> main() async {
           messagingSenderId: "432579212807",
           appId: "1:432579212807:web:f1b596fdecf5ea67dddca2",
           measurementId: "G-S8H1Y9BMZ5"));
+
+  // await FlutterDownloader.initialize(
+  //   debug: true, // set false to disable printing logs to console
+  // );
 
   final authenticationRepository = AuthenticationRepository();
   await authenticationRepository.user.first;
