@@ -1,0 +1,11 @@
+#!/bin/sh
+#set -x
+
+# Check if package.json has changed
+if git diff --cached --name-only | grep -qE "package\.json|\.nvmrc"; then
+  # Run the update-nvmrc.js script to update .nvmrc
+  node scripts/update-nvmrc.js
+
+  # Add the updated .nvmrc to the commit
+  git add .nvmrc
+fi
