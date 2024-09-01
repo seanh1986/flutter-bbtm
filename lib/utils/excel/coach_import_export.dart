@@ -91,16 +91,18 @@ class CoachImportExport {
 
           switch (value) {
             case TextCellValue():
+              String text = value.value.text!;
+
               if (c == _idxCoachName) {
-                coachName = value.value;
+                coachName = text;
               } else if (c == _idxNafName) {
-                nafName = value.value;
+                nafName = text;
               } else if (c == _idxRace) {
-                race = RaceUtils.getRaceOrFindSimilar(value.value);
+                race = RaceUtils.getRaceOrFindSimilar(text);
               } else if (c == _idxTeamName) {
-                teamName = value.value;
+                teamName = text;
               } else if (c == _idxSquadName) {
-                squadName = value.value;
+                squadName = text;
               }
               break;
             case IntCellValue():

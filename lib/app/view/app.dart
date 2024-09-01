@@ -20,6 +20,8 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("App -> Build!");
+
     return RepositoryProvider.value(
       value: _authenticationRepository,
       child: BlocProvider(
