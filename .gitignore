@@ -40,3 +40,6 @@ app.*.symbols
 app.*.map.json
 
 node_modules
+
+# FVM Version Cache
+.fvm/
