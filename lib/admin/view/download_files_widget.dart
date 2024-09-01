@@ -1,16 +1,15 @@
-import 'dart:convert';
-
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/utils/toast.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
+// import 'package:bbnaf/utils/download_file/download_file.dart';
 import 'package:flutter/material.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'dart:html' as html;
-import 'dart:typed_data';
+// import 'package:web/web.dart' hide Text;
 
 class DownloadFilesWidget extends StatefulWidget {
   DownloadFilesWidget({Key? key}) : super(key: key);
@@ -163,16 +162,28 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
   Future<bool> _downloadImportCoachesTemplateFromGoogleDrive(
       BuildContext context) async {
     String downloadFileName = 'bbtm-coach-import-template.xlsx';
+    String url =
+        'https://docs.google.com/spreadsheets/d/1jDNdmgVDnhC_UJgCEAt8WOF90i3d5yum/edit?usp=sharing&ouid=116212630434144180021&rtpof=true&sd=true';
+
+    // try {
+    //   ToastUtils.show(context, "Downloading " + downloadFileName);
+    //   return DownloadFileUtils.downloadFile(url, downloadFileName);
+    // } catch (e) {
+    //   ToastUtils.show(context,
+    //       "Failed to download " + downloadFileName + "\n" + e.toString());
+    //   return false;
+    // }
+
     try {
       Uri uri = Uri.parse(
           'https://docs.google.com/spreadsheets/d/1jDNdmgVDnhC_UJgCEAt8WOF90i3d5yum/edit?usp=sharing&ouid=116212630434144180021&rtpof=true&sd=true');
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
-        final Uint8List bytes = response.bodyBytes;
+        final bytes = response.bodyBytes;
 
         // Create a blob from the bytes
-        final blob = html.Blob([bytes]);
+        final blob = html.Blob(bytes);
 
         // Create a link element
         final url = html.Url.createObjectUrlFromBlob(blob);

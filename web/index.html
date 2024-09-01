@@ -27,47 +27,25 @@
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-storage.js"></script>
 
   <script>
-    // Your web app's Firebase configuration
-    var firebaseConfig = {
-      apiKey: "AIzaSyB-TUGMpvec35ON6FPU7U0OIwZtZ4bnERE",
-      authDomain: "bbtournaments-eaa1e.firebaseapp.com",
-      projectId: "bbtournaments-eaa1e",
-      storageBucket: "bbtournaments-eaa1e.appspot.com",
-      messagingSenderId: "432579212807",
-      appId: "1:432579212807:web:f1b596fdecf5ea67dddca2",
-      measurementId: "G-S8H1Y9BMZ5"
-    };
+    // Default to production if no env is set
+    var environment = window.environment || 'prod';
+
+    if (environment === 'prod') {
+      var script = document.createElement('script');
+      script.src = 'firebase-config-prod.js';
+      document.head.appendChild(script);
+    } else {
+      var script = document.createElement('script');
+      script.src = 'firebase-config-dev.js';
+      document.head.appendChild(script);
+    }
+    
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
-    // firebase.analytics();
   </script>
 
-  <!-- This script installs service_worker.js to provide PWA functionality to
-       application. For more information, see:
-       https://developers.google.com/web/fundamentals/primers/service-workers -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('flutter_service_worker.js');
-      });
-    }
-  </script>
-  <script src="main.dart.js" type="application/javascript"></script>  
-  <script>
-    if ('serviceWorker' in navigator) {
-       // Service workers are supported. Use them.
-       window.addEventListener('load', function () {
-         // ADD THIS LINE
-         navigator.serviceWorker.register('/firebase-messaging-sw.js');
-
-         // Wait for registration to finish before dropping the <script> tag.
-         // Otherwise, the browser will load the script multiple times,
-         // potentially different versions.
-         var serviceWorkerUrl = 'flutter_service_worker.js?v=' + serviceWorkerVersion;
-
-         //  ...
-       });
-   }
-</script>
+  <!-- Use flutter.js for service worker registration -->
+  <script src="flutter.js" type="application/javascript"></script>
+  <script src="main.dart.js" type="application/javascript"></script>
 </body>
 </html>

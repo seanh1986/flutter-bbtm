@@ -365,20 +365,20 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       List<Widget> widgets = [];
 
       if (statusIcon != null) {
-        widgets.add(_createButton(
-            statusIcon,
-            () => {
-                  if (!_hideItemUploadBtn()) {_showStatusDialog()}
-                }));
+        widgets.add(_createButton(statusIcon, () {
+          if (!_hideItemUploadBtn()) {
+            _showStatusDialog();
+          }
+        }));
         widgets.add(SizedBox(height: 10));
       }
 
       if (uploadIcon != null) {
-        widgets.add(_createButton(
-            uploadIcon,
-            () => {
-                  if (!_hideItemUploadBtn()) {_checkIfUploadToServer(context)}
-                }));
+        widgets.add(_createButton(uploadIcon, () {
+          if (!_hideItemUploadBtn()) {
+            _checkIfUploadToServer(context);
+          }
+        }));
       }
 
       tableVsDetails.add(Container(

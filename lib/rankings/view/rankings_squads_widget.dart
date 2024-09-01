@@ -190,7 +190,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
       rows.add(DataRow2(
         cells: cells,
         specificRowHeight: sizeRowHeight,
-        color: MaterialStatePropertyAll(cellColor),
+        color: WidgetStatePropertyAll(cellColor),
       ));
     }
 

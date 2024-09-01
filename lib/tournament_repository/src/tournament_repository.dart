@@ -2,14 +2,16 @@ import 'dart:convert';
 import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/app/app.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
+// import 'package:bbnaf/utils/download_file/download_file.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:cache/cache.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
+//import 'package:web/web.dart';
+// import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:xml/xml.dart';
 
@@ -465,6 +467,7 @@ class TournamentRepository {
     if (filename.isEmpty) {
       return false;
     }
+
     if (isWeb) {
       return _downloadFileWeb(filename);
     }
@@ -563,31 +566,38 @@ class TournamentRepository {
 
   Future<bool> _downloadFile(String fileName, String contents) async {
     try {
-      // prepare
+      // Convert the string contents to UTF-8 bytes
       final bytes = utf8.encode(contents);
+
+      // Create a Blob from the bytes
       final blob = html.Blob([bytes]);
+
+      // Generate a URL for the Blob object
       final url = html.Url.createObjectUrlFromBlob(blob);
+
+      // Create an anchor element and set its attributes for downloading the file
       final anchor = html.document.createElement('a') as html.AnchorElement
         ..href = url
         ..style.display = 'none'
         ..download = fileName;
+
+      // Add the anchor to the document body
       html.document.body?.children.add(anchor);
 
-      // download
+      // Trigger the download by clicking the anchor
       anchor.click();
 
-      // cleanup
-      html.document.body?.children.remove(anchor);
+      // Clean up: remove the anchor element and revoke the Blob URL
+      anchor.remove();
       html.Url.revokeObjectUrl(url);
 
       return true;
-    } catch (_) {
+    } catch (e) {
+      print('Download failed: $e');
       return false;
     }
   }
 }
-
-
 
 
 // Future<void> _downloadFileMobile(String filename) async {

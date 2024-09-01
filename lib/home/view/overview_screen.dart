@@ -160,7 +160,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       return QuillEditor.basic(
         configurations: QuillEditorConfigurations(
           controller: controller,
-          readOnly: true,
+          // readOnly: true,
         ),
       );
     } catch (_) {

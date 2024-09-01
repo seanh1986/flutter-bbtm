@@ -19,7 +19,7 @@ ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
             displayColor: isDarkTheme ? Colors.white : Colors.black,
           ),
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.all(
+        thumbColor: WidgetStateProperty.all(
             isDarkTheme ? Colors.blue : Colors.lightBlue),
       ),
       listTileTheme: ListTileThemeData(
@@ -45,14 +45,14 @@ ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith<Color>(
-            (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) return Colors.red;
+        backgroundColor:
+            WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) return Colors.red;
           return Colors.blue; // Defer to the widget's default.
         }),
-        foregroundColor: MaterialStateProperty.resolveWith<Color>(
-            (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) return Colors.white;
+        foregroundColor:
+            WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) return Colors.white;
           return Colors.white; // Defer to the widget's default.
         }),
       )
@@ -71,10 +71,10 @@ ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
         unselectedItemColor: isDarkTheme ? Colors.grey : Colors.black,
       ),
       dataTableTheme: DataTableThemeData(headingRowColor:
-          MaterialStateColor.resolveWith((states) {
+          WidgetStateColor.resolveWith((states) {
         return isDarkTheme ? Colors.grey[850]! : Colors.grey;
       }), dataRowColor:
-          MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+          WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
         if ((idx++)
             .isEven) //Change Color if Row is Even, this is for Stripped Table
           return isDarkTheme ? Colors.grey[600]! : Colors.grey;

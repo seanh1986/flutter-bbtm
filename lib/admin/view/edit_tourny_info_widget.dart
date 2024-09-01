@@ -4,6 +4,7 @@ import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/rankings/models/ranking_filter.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/toast.dart';
+import 'package:bbnaf/widgets/checkbox_formfield/checkbox_list_tile_formfield.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:bbnaf/widgets/set_item_list_widget/set_item_list_widget.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
@@ -11,9 +12,8 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:checkbox_formfield/checkbox_formfield.dart';
 import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
+// import 'package:meta/meta.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
@@ -919,7 +919,7 @@ class _EditTournamentInfoWidget extends State<EditTournamentInfoWidget> {
         QuillEditor.basic(
           configurations: QuillEditorConfigurations(
             controller: controller,
-            readOnly: false,
+            // readOnly: false,
             sharedConfigurations: const QuillSharedConfigurations(
               locale: Locale('en'),
             ),

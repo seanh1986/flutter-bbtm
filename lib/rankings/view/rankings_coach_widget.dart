@@ -201,7 +201,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       rows.add(DataRow2(
           cells: cells,
           specificRowHeight: sizeRowHeight,
-          color: MaterialStatePropertyAll(cellColor)));
+          color: WidgetStatePropertyAll(cellColor)));
     }
 
     return rows;

@@ -5,10 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "bbtm",
+            "name": "bbtm - dev",
             "request": "launch",
             "type": "dart",
-            "program": "lib/main.dart"
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define=ENV=dev"
+            ]
+        },
+        {
+            "name": "bbtm - prod",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define=ENV=prod"
+            ]
         }
     ]
 }
