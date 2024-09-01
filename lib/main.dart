@@ -5,7 +5,6 @@ import 'package:bbnaf/tournament_repository/src/tournament_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 
 Future<void> main() async {
   print("main started!");
@@ -26,12 +25,6 @@ Future<void> main() async {
           measurementId: "G-S8H1Y9BMZ5"));
 
   print("Firebase initialized!");
-
-  await FlutterDownloader.initialize(
-    debug: true, // set false to disable printing logs to console
-  );
-
-  print("FlutterDownloader initialized!");
 
   final authenticationRepository = AuthenticationRepository();
   await authenticationRepository.user.first;

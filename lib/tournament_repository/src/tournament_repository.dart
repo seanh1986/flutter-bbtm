@@ -2,20 +2,18 @@ import 'dart:convert';
 import 'package:bbnaf/admin/admin.dart';
 import 'package:bbnaf/app/app.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
-import 'package:bbnaf/utils/download_file/download_file.dart';
+// import 'package:bbnaf/utils/download_file/download_file.dart';
 import 'package:bbnaf/utils/swiss/round_matching.dart';
 import 'package:cache/cache.dart';
-import 'package:cloud_firestore/cloud_firestore.dart' hide Blob;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 // ignore: avoid_web_libraries_in_flutter
-// import 'dart:html' as html;
+import 'dart:html' as html;
 //import 'package:web/web.dart';
 // import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:xml/xml.dart';
-import 'dart:html'
-    as html; // This provides access to the Blob class and other web APIs
 
 class TournamentRepository {
   TournamentRepository({
@@ -470,45 +468,37 @@ class TournamentRepository {
       return false;
     }
 
-    try {
-      String url = await _storage.ref(filename).getDownloadURL();
-      return DownloadFileUtils.downloadFile(url, filename);
-    } catch (e) {
-      print(e);
-      return false;
+    if (isWeb) {
+      return _downloadFileWeb(filename);
     }
-
-    // if (isWeb) {
-    //   return _downloadFileWeb(filename);
+    // else {
+    //   _downloadFileMobile(filename);
     // }
-    // // else {
-    // //   _downloadFileMobile(filename);
-    // // }
 
-    // return false;
+    return false;
   }
 
-  // Future<bool> _downloadFileWeb(String filename) async {
-  //   try {
-  //     Uint8List? data = await _storage.ref(filename).getData();
-  //     if (data == null) {
-  //       return false;
-  //     }
+  Future<bool> _downloadFileWeb(String filename) async {
+    try {
+      Uint8List? data = await _storage.ref(filename).getData();
+      if (data == null) {
+        return false;
+      }
 
-  //     String encodedData = base64Encode(data);
+      String encodedData = base64Encode(data);
 
-  //     AnchorElement(
-  //         href:
-  //             'data:application/octet-stream;charset=utf-8;base64,$encodedData')
-  //       ..setAttribute('download', filename)
-  //       ..click();
+      html.AnchorElement(
+          href:
+              'data:application/octet-stream;charset=utf-8;base64,$encodedData')
+        ..setAttribute('download', filename)
+        ..click();
 
-  //     return true;
-  //   } catch (error) {
-  //     print(error);
-  //     return false;
-  //   }
-  // }
+      return true;
+    } catch (error) {
+      print(error);
+      return false;
+    }
+  }
 
   Future<bool> downloadBackupFile(Tournament tournament) async {
     try {
