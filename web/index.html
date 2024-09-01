@@ -27,16 +27,19 @@
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-storage.js"></script>
 
   <script>
-    // Your web app's Firebase configuration
-    var firebaseConfig = {
-      apiKey: "AIzaSyB-TUGMpvec35ON6FPU7U0OIwZtZ4bnERE",
-      authDomain: "bbtournaments-eaa1e.firebaseapp.com",
-      projectId: "bbtournaments-eaa1e",
-      storageBucket: "bbtournaments-eaa1e.appspot.com",
-      messagingSenderId: "432579212807",
-      appId: "1:432579212807:web:f1b596fdecf5ea67dddca2",
-      measurementId: "G-S8H1Y9BMZ5"
-    };
+    // Default to production if no env is set
+    var environment = window.environment || 'prod';
+
+    if (environment === 'prod') {
+      var script = document.createElement('script');
+      script.src = 'firebase-config-prod.js';
+      document.head.appendChild(script);
+    } else {
+      var script = document.createElement('script');
+      script.src = 'firebase-config-dev.js';
+      document.head.appendChild(script);
+    }
+    
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
   </script>

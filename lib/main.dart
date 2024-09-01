@@ -1,10 +1,17 @@
-import 'package:authentication_repository/authentication_repository.dart';
-import 'package:bbnaf/app/bloc_observer.dart';
-import 'package:bbnaf/app/view/app.dart';
-import 'package:bbnaf/tournament_repository/src/tournament_repository.dart';
-import 'package:bloc/bloc.dart';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
+import 'package:bloc/bloc.dart';
+import 'package:bbnaf/app/bloc_observer.dart';
+import 'package:bbnaf/app/view/app.dart';
+import 'package:authentication_repository/authentication_repository.dart';
+import 'package:bbnaf/tournament_repository/src/tournament_repository.dart';
+
+// Conditional imports based on environment
+import 'firebase_options_dev.dart' as dev;
+import 'firebase_options_prod.dart' as prod;
 
 Future<void> main() async {
   print("main started!");
@@ -14,15 +21,17 @@ Future<void> main() async {
 
   print("Before Firebase Init!");
 
-  await Firebase.initializeApp(
-      options: FirebaseOptions(
-          apiKey: "AIzaSyB-TUGMpvec35ON6FPU7U0OIwZtZ4bnERE",
-          authDomain: "bbtournaments-eaa1e.firebaseapp.com",
-          projectId: "bbtournaments-eaa1e",
-          storageBucket: "bbtournaments-eaa1e.appspot.com",
-          messagingSenderId: "432579212807",
-          appId: "1:432579212807:web:f1b596fdecf5ea67dddca2",
-          measurementId: "G-S8H1Y9BMZ5"));
+  const String environment =
+      String.fromEnvironment('ENV', defaultValue: 'prod');
+
+  FirebaseOptions options;
+  if (environment == 'dev') {
+    options = dev.firebaseOptions;
+  } else {
+    options = prod.firebaseOptions;
+  }
+
+  await Firebase.initializeApp(options: options);
 
   print("Firebase initialized!");
 
