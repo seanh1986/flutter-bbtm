@@ -566,25 +566,34 @@ class TournamentRepository {
 
   Future<bool> _downloadFile(String fileName, String contents) async {
     try {
-      // prepare
+      // Convert the string contents to UTF-8 bytes
       final bytes = utf8.encode(contents);
-      final blob = html.Blob(bytes);
+
+      // Create a Blob from the bytes
+      final blob = html.Blob([bytes]);
+
+      // Generate a URL for the Blob object
       final url = html.Url.createObjectUrlFromBlob(blob);
+
+      // Create an anchor element and set its attributes for downloading the file
       final anchor = html.document.createElement('a') as html.AnchorElement
         ..href = url
         ..style.display = 'none'
         ..download = fileName;
+
+      // Add the anchor to the document body
       html.document.body?.children.add(anchor);
 
-      // download
+      // Trigger the download by clicking the anchor
       anchor.click();
 
-      // cleanup
-      html.document.body?.children.remove(anchor);
+      // Clean up: remove the anchor element and revoke the Blob URL
+      anchor.remove();
       html.Url.revokeObjectUrl(url);
 
       return true;
-    } catch (_) {
+    } catch (e) {
+      print('Download failed: $e');
       return false;
     }
   }
