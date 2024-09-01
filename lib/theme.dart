@@ -71,10 +71,10 @@ ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
         unselectedItemColor: isDarkTheme ? Colors.grey : Colors.black,
       ),
       dataTableTheme: DataTableThemeData(headingRowColor:
-          MaterialStateColor.resolveWith((states) {
+          WidgetStateColor.resolveWith((states) {
         return isDarkTheme ? Colors.grey[850]! : Colors.grey;
       }), dataRowColor:
-          MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+          WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
         if ((idx++)
             .isEven) //Change Color if Row is Even, this is for Stripped Table
           return isDarkTheme ? Colors.grey[600]! : Colors.grey;
