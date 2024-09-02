@@ -156,3 +156,12 @@ add-zsh-hook chpwd fvm_auto_use
 # Run the function on shell startup
 fvm_auto_use
 ```
+
+### Building Flutter Web
+
+The flutter web project can be built for `production` or `development` environments, as outlined below.
+
+```
+flutter build web --dart-define=ENV=dev
+flutter build web --dart-define=ENV=prod
+```
