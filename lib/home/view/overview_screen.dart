@@ -144,7 +144,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
   Widget? _parseQuillOrHtml(String input) {
     try {
       // Try parsing using quill
-      QuillController controller = QuillController.basic();
+      QuillController controller = QuillController(
+          document: Document(),
+          selection: const TextSelection.collapsed(offset: 0),
+          readOnly: true);
       final json = jsonDecode(input);
 
       // Check for empty quill
@@ -157,12 +160,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       }
 
       controller.document = Document.fromJson(json);
-      return QuillEditor.basic(
-        configurations: QuillEditorConfigurations(
-          controller: controller,
-          // readOnly: true,
-        ),
-      );
+      return QuillEditor.basic(controller: controller);
     } catch (_) {
       try {
         if (input.isEmpty) {
