@@ -9,12 +9,3 @@ if git diff --cached --name-only | grep -qE "package\.json|\.nvmrc"; then
   # Add the updated .nvmrc to the commit
   git add .nvmrc
 fi
-
-# Check if pubspec.yaml has changed
-if git diff --cached --name-only | grep -qE "pubspec\.yaml|\.fvmrc"; then
-  # Run the update-fvmrc.js script to update .fvmrc
-  node scripts/update-fvmrc.js
-
-  # Add the updated .fvmrc to the commit
-  git add .fvmrc
-fi
