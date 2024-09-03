@@ -1,4 +1,5 @@
 import 'package:bbnaf/admin/admin.dart';
+import 'package:bbnaf/admin/view/edit_tourny_info_expandable_widget.dart';
 import 'package:bbnaf/widgets/toggle_widget/models/toggle_widget_item.dart';
 import 'package:bbnaf/widgets/toggle_widget/view/toggle_widget.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +57,9 @@ class _AdminScreenState extends State<AdminScreen> {
   WidgetBuilder? _getSubScreenBuilder(AdminSubScreens subScreen) {
     switch (subScreen) {
       case AdminSubScreens.EDIT_INFO:
-        return (context) => EditTournamentInfoWidget(createTournament: false);
+        return (context) =>
+            EditTournamentInfoExpandableWidget(createTournament: false);
+      // return (context) => EditTournamentInfoWidget(createTournament: false);
       case AdminSubScreens.EDIT_SQUADS:
         return null; // TODO...
       case AdminSubScreens.EDIT_PARTICIPANTS:
