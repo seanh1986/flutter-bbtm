@@ -16,12 +16,15 @@ try {
 }
 
 // Extract Node.js version from engines field
-const nodeVersion = packageJson.engines.node.replace(">=", "");
+const packageNodeVersion = packageJson.engines.node;
 
-if (!nodeVersion) {
+if (!packageNodeVersion) {
   console.error("Node.js version not found in package.json");
   process.exit(1);
 }
+
+// Clean up the version string (remove ^, ~, or >=)
+const nvmNodeVersion = packageNodeVersion.replace(/[^0-9.]/g, '');
 
 // Path to .nvmrc file
 const nvmrcPath = path.join(rootPath, ".nvmrc");
@@ -35,10 +38,10 @@ try {
 }
 
 // Compare versions and update only if necessary
-if (currentNvmrcVersion !== nodeVersion) {
+if (currentNvmrcVersion !== nvmNodeVersion) {
   try {
-    fs.writeFileSync(nvmrcPath, nodeVersion);
-    console.log(`.nvmrc updated with Node.js version ${nodeVersion}`);
+    fs.writeFileSync(nvmrcPath, nvmNodeVersion);
+    console.log(`.nvmrc updated with Node.js version ${nvmNodeVersion}`);
   } catch (error) {
     console.error(`Error writing .nvmrc: ${error.message}`);
     process.exit(1);
