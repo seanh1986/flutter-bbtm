@@ -45,5 +45,6 @@ node_modules
 .fvm/
 
 
+.firebase\
 .firebase/
 .firebase/*
