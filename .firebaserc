@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "bbtournaments-eaa1e"
+    "default": "bbtournaments-eaa1e",
+    "prod": "bbtournaments-eaa1e",
+    "dev": "bbtm-dev"
   }
 }

@@ -467,8 +467,20 @@ class Tournament {
 
         // For each Match
         cr.matches.forEach((m) {
-          Coach c1 = getCoach(m.homeNafName)!;
-          Coach c2 = getCoach(m.awayNafName)!;
+          Coach? c1 = getCoach(m.homeNafName);
+          Coach? c2 = getCoach(m.awayNafName);
+
+          if (c1 == null) {
+            throw Exception("Null coach. Round: " +
+                cr.round().toString() +
+                " -> Coach not found: " +
+                m.homeNafName);
+          } else if (c2 == null) {
+            throw Exception("Null coach. Round: " +
+                cr.round().toString() +
+                " -> Coach not found: " +
+                m.awayNafName);
+          }
 
           ReportedMatchResultWithStatus r = m.getReportedMatchStatus();
 

@@ -37,7 +37,7 @@ dependencies:
   flutter_native_splash: ^2.3.9
   flutter_rating_bar: ^4.0.1
   flutter_widget_from_html: ^0.14.11
-  flutter_quill: ^10.0.7
+  flutter_quill: ^10.5.3
   fluttertoast: ^8.1.4
   font_awesome_flutter: ^10.1.0
   form_inputs:

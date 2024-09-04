@@ -1,18 +1,20 @@
 {
   "dependencies": {
-    "firebase": "^9.16.0",
-    "firebase-tools": "^12.9.1"
+    "firebase": "^10.13.1",
+    "firebase-tools": "^13.16.0"
   },
   "devDependencies": {
-    "husky": "^8.0.0"
+    "husky": "^9.1.5"
   },
   "engines": {
-    "node": "16"
-  }, 
+    "node": "20"
+  },
   "scripts": {
     "prepare": "husky install",
     "preinstall": "npm run update-nvmrc",
     "preversion": "npm run update-nvmrc",
-    "update-nvmrc": "node scripts/update-nvmrc.js"
+    "update-nvmrc": "node scripts/update-nvmrc.js",
+    "deploy:prod": "firebase use bbtournaments-eaa1e && flutter build web --dart-define=ENV=prod && firebase deploy",
+    "deploy:dev": "firebase use bbtm-dev && flutter build web --dart-define=ENV=dev && firebase deploy"
   }
 }

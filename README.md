@@ -156,3 +156,34 @@ add-zsh-hook chpwd fvm_auto_use
 # Run the function on shell startup
 fvm_auto_use
 ```
+
+### Development vs. Prodcution
+
+Two Google Firebase projects are setup for `production` and `development` respesctively.
+
+Production Firebase projectId: `bbtournaments-eaa1e`
+Development Firebase projectId: `bbtm-dev`
+
+When running locally in debug mode (e.g., using `VSCode`), the project contains two configurations in the `launch.json` file, one for `bbtm - prod` and one for `bbtm - dev`. These can be selected and run locally.
+
+When building, the flutter web project can be built for `production` or `development` environments, as outlined below, by specifying the `dart-define`. Note that the default `ENV` is `prod`.
+
+```
+flutter build web --dart-define=ENV=dev
+flutter build web --dart-define=ENV=prod
+```
+
+To view the currently selected Firebase project, you can use `firebase projects:list`. Scripts were added to the `package.json` file so that we can easily, and clearly, run flutter builds (using above `dart-define`) and `firebase deploy` to the correct environment.
+
+```
+npm run deploy:prod
+npm run deploy:dev
+```
+
+Note: if you are running into issues (e.g., “path” argument must be of type string. Received undefined), try clearing the firebase hosting cache and re-building, as follows (e.g., in bash):
+```
+rm -rf .firebase
+flutter clean
+flutter build web --dart-define=ENV=dev
+firebase deploy
+```
