@@ -24,6 +24,8 @@ class TournamentInfo {
 
   String logoFileName = "";
 
+  bool showRankings = true;
+
   // Prevents users from submitting updates
   bool locked = false;
 
@@ -107,6 +109,10 @@ class TournamentInfo {
       this.logoFileName = tLogo;
     }
 
+    // Default is showRankings for legacy purposes
+    final tShowRankings = json['showRankings'] as bool?;
+    this.showRankings = tShowRankings == null || tShowRankings;
+
     // Default is locked for legacy purposes
     final tLocked = json['locked'] as bool?;
     this.locked = tLocked == null || tLocked;
@@ -126,6 +132,7 @@ class TournamentInfo {
         'details_kickoff': detailsKickOff,
         'details_special_rules': detailsSpecialRules,
         'logo_file_name': logoFileName,
+        'showRankings': showRankings,
         'locked': locked,
       };
 }
