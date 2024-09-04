@@ -8,10 +8,12 @@ import 'package:flutter/material.dart';
 
 class TournyIndividualSettingsWidget extends StatefulWidget {
   late IndividualScoringDetails scoringDetails;
+  late CoachDisplayName coachDisplayName;
 
   TournyIndividualSettingsWidget({Key? key, required TournamentInfo info})
       : super(key: key) {
     this.scoringDetails = info.scoringDetails;
+    this.coachDisplayName = info.coachDisplayName;
   }
 
   @override
@@ -21,6 +23,7 @@ class TournyIndividualSettingsWidget extends StatefulWidget {
 
   void updateTournamentInfo(TournamentInfo info) {
     info.scoringDetails = scoringDetails;
+    info.coachDisplayName = coachDisplayName;
   }
 }
 
@@ -44,7 +47,9 @@ class _TournyIndividualSettingsWidget
       TournyScoringDetailsWidget(
           title: "Coach Scoring", details: widget.scoringDetails),
       Divider(),
-      _createIndividualTieBreakers(context)
+      _createIndividualTieBreakers(context),
+      Divider(),
+      _createCoachDisplayName(),
     ]);
   }
 
@@ -97,5 +102,42 @@ class _TournyIndividualSettingsWidget
         ],
       );
     }
+  }
+
+  Row _createCoachDisplayName() {
+    final theme = Theme.of(context);
+
+    // Create Row for Display Names
+    List<String> coachDisplayNames =
+        EnumToString.toList(CoachDisplayName.values);
+
+    List<DropdownMenuItem<String>> dropDown = coachDisplayNames
+        .map((String r) => DropdownMenuItem<String>(value: r, child: Text(r)))
+        .toList();
+
+    List<Widget> row = [
+      SizedBox(width: 10.0),
+      Text("Display Names:"),
+      SizedBox(width: 10.0),
+      SizedBox(
+          width: 250,
+          child: DropdownButtonFormField<String>(
+            style: theme.textTheme.labelMedium,
+            value: EnumToString.convertToString(widget.coachDisplayName),
+            items: dropDown,
+            onChanged: (value) {
+              CoachDisplayName? displayName = value is String
+                  ? EnumToString.fromString(CoachDisplayName.values, value)
+                  : null;
+              widget.coachDisplayName =
+                  displayName != null ? displayName : CoachDisplayName.NafName;
+
+              setState(() {});
+            },
+          )),
+      SizedBox(width: 10.0),
+    ];
+
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: row);
   }
 }
