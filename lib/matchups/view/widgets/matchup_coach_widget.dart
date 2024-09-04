@@ -390,13 +390,9 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           .add(SizedBox(width: uploadIconSize, height: uploadIconSize));
     }
 
-    tableVsDetails.add(Text(' vs. ',
-        style: theme
-            .textTheme.labelSmall)); //TextStyle(fontSize: subTitleFontSize)));
+    tableVsDetails.add(Text(' vs. ', style: theme.textTheme.labelSmall));
     tableVsDetails.add(Text('T#' + _matchup!.tableNum.toString(),
-        style: theme
-            .textTheme.labelSmall)); // TextStyle(fontSize: subTitleFontSize)));
-
+        style: theme.textTheme.bodyLarge));
     return SizedBox(
         width: vsTableNumWidth,
         child: Card(
