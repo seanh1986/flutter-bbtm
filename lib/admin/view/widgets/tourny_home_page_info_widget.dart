@@ -3,10 +3,12 @@
 import 'dart:convert';
 
 import 'package:bbnaf/tournament_repository/src/models/tournament_info.dart';
+import 'package:bbnaf/widgets/checkbox_formfield/checkbox_list_tile_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
 class TournyHomePageInfoWidget extends StatefulWidget {
+  late CasualtyDetails casualtyDetails;
   late String detailsSpecialRules;
   late String detailsKickOff;
   late String detailsWeather;
@@ -17,6 +19,7 @@ class TournyHomePageInfoWidget extends StatefulWidget {
 
   TournyHomePageInfoWidget({Key? key, required TournamentInfo info})
       : super(key: key) {
+    this.casualtyDetails = info.casualtyDetails;
     this.detailsSpecialRules = info.detailsSpecialRules;
     this.detailsKickOff = info.detailsKickOff;
     this.detailsWeather = info.detailsWeather;
@@ -28,6 +31,8 @@ class TournyHomePageInfoWidget extends StatefulWidget {
   }
 
   void updateTournamentInfo(TournamentInfo info) {
+    info.casualtyDetails = casualtyDetails;
+
     var jsonSpecialRules =
         jsonEncode(_richTextSpecialRulesController.document.toDelta().toJson());
     var jsonKickOff =
@@ -64,6 +69,72 @@ class _TournyHomePageInfoWidget extends State<TournyHomePageInfoWidget> {
       Divider(),
       _getRichTextEditor("Weather Rules", widget._richTextWeatherController),
     ]);
+  }
+
+  Widget _createCasulatyDetails() {
+    final theme = Theme.of(context);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        SizedBox(width: 10.0),
+        Text("Casualty Details:"),
+        SizedBox(width: 10.0),
+        Expanded(
+            child: CheckboxListTileFormField(
+                title: Text('Spp', style: theme.textTheme.labelMedium),
+                initialValue: widget.casualtyDetails.spp,
+                onChanged: (value) {
+                  widget.casualtyDetails.spp = value;
+                },
+                autovalidateMode: AutovalidateMode.always,
+                contentPadding: EdgeInsets.all(1))),
+        SizedBox(width: 10.0),
+        Expanded(
+            child: CheckboxListTileFormField(
+          title: Text('Foul', style: theme.textTheme.labelMedium),
+          initialValue: widget.casualtyDetails.foul,
+          onChanged: (value) {
+            widget.casualtyDetails.foul = value;
+          },
+          autovalidateMode: AutovalidateMode.always,
+          contentPadding: EdgeInsets.all(1),
+        )),
+        SizedBox(width: 10.0),
+        Expanded(
+            child: CheckboxListTileFormField(
+          title: Text('Surf', style: theme.textTheme.labelMedium),
+          initialValue: widget.casualtyDetails.surf,
+          onChanged: (value) {
+            widget.casualtyDetails.surf = value;
+          },
+          autovalidateMode: AutovalidateMode.always,
+          contentPadding: EdgeInsets.all(1),
+        )),
+        SizedBox(width: 10.0),
+        Expanded(
+            child: CheckboxListTileFormField(
+          title: Text('Weapon', style: theme.textTheme.labelMedium),
+          initialValue: widget.casualtyDetails.weapon,
+          onChanged: (value) {
+            widget.casualtyDetails.weapon = value;
+          },
+          autovalidateMode: AutovalidateMode.always,
+          contentPadding: EdgeInsets.all(1),
+        )),
+        SizedBox(width: 10.0),
+        Expanded(
+            child: CheckboxListTileFormField(
+          title: Text('Dodge', style: theme.textTheme.labelMedium),
+          initialValue: widget.casualtyDetails.dodge,
+          onChanged: (value) {
+            widget.casualtyDetails.dodge = value;
+          },
+          autovalidateMode: AutovalidateMode.always,
+          contentPadding: EdgeInsets.all(1),
+        )),
+      ],
+    );
   }
 
   Widget _getRichTextEditor(String title, QuillController controller) {

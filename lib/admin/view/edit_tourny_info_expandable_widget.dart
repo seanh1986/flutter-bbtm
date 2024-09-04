@@ -144,7 +144,7 @@ class _EditTournamentInfoExpandableWidget
       // _createScoringDetails("Coach Scoring:", _scoringDetails,
       //     _createIndividualTieBreakers(context, _scoringDetails)),
       Divider(),
-      _createCasulatyDetails(),
+      // _createCasulatyDetails(),
       Divider(),
       // _createSquadDetails(),
       Divider(),
@@ -262,72 +262,6 @@ class _EditTournamentInfoExpandableWidget
     }
 
     return rankingFilterWidgets;
-  }
-
-  Widget _createCasulatyDetails() {
-    final theme = Theme.of(context);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        SizedBox(width: 10.0),
-        Text("Casualty Details:"),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CheckboxListTileFormField(
-                title: Text('Spp', style: theme.textTheme.labelMedium),
-                initialValue: _casualtyDetails.spp,
-                onChanged: (value) {
-                  _casualtyDetails.spp = value;
-                },
-                autovalidateMode: AutovalidateMode.always,
-                contentPadding: EdgeInsets.all(1))),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CheckboxListTileFormField(
-          title: Text('Foul', style: theme.textTheme.labelMedium),
-          initialValue: _casualtyDetails.foul,
-          onChanged: (value) {
-            _casualtyDetails.foul = value;
-          },
-          autovalidateMode: AutovalidateMode.always,
-          contentPadding: EdgeInsets.all(1),
-        )),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CheckboxListTileFormField(
-          title: Text('Surf', style: theme.textTheme.labelMedium),
-          initialValue: _casualtyDetails.surf,
-          onChanged: (value) {
-            _casualtyDetails.surf = value;
-          },
-          autovalidateMode: AutovalidateMode.always,
-          contentPadding: EdgeInsets.all(1),
-        )),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CheckboxListTileFormField(
-          title: Text('Weapon', style: theme.textTheme.labelMedium),
-          initialValue: _casualtyDetails.weapon,
-          onChanged: (value) {
-            _casualtyDetails.weapon = value;
-          },
-          autovalidateMode: AutovalidateMode.always,
-          contentPadding: EdgeInsets.all(1),
-        )),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CheckboxListTileFormField(
-          title: Text('Dodge', style: theme.textTheme.labelMedium),
-          initialValue: _casualtyDetails.dodge,
-          onChanged: (value) {
-            _casualtyDetails.dodge = value;
-          },
-          autovalidateMode: AutovalidateMode.always,
-          contentPadding: EdgeInsets.all(1),
-        )),
-      ],
-    );
   }
 
   void _showDialogToConfirmOverwrite(
