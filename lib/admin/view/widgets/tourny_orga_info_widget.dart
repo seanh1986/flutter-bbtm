@@ -26,14 +26,9 @@ class TournyOrganizerInfoWidget extends StatefulWidget {
 }
 
 class _TournyBasicInfoWidget extends State<TournyOrganizerInfoWidget> {
-  List<DataColumn> _organizerCols = [];
-  List<DataRow> _organizerRows = [];
-  late DataTable _orgaDataTable;
-
   @override
   void initState() {
     super.initState();
-    _initOrgas();
   }
 
   @override
@@ -82,72 +77,6 @@ class _TournyBasicInfoWidget extends State<TournyOrganizerInfoWidget> {
           ),
         );
       },
-    );
-  }
-
-  void _initOrgas() {
-    _organizerCols = [
-      DataColumn(label: Text("")), // For add/remove rows
-      DataColumn(label: Text("Email")),
-      DataColumn(label: Text("NafName")),
-      DataColumn(label: Text("Primary")),
-    ];
-
-    _organizerRows.clear();
-
-    for (int i = 0; i < widget.organizers.length; i++) {
-      OrganizerInfo orga = widget.organizers[i];
-
-      TextEditingController emailController =
-          TextEditingController(text: orga.email);
-      TextFormField emailForm = TextFormField(
-          controller: emailController,
-          onChanged: (value) => {orga.email = value});
-
-      TextEditingController nafNameController =
-          TextEditingController(text: orga.nafName);
-      TextFormField nafNameForm = TextFormField(
-          controller: nafNameController,
-          onChanged: (value) {
-            orga.nafName = value;
-          });
-
-      Checkbox primaryCheckbox = Checkbox(
-        value: orga.primary,
-        onChanged: (value) {
-          if (value != null) {
-            setState(() {
-              if (value) {
-                widget.organizers.forEach((element) {
-                  element.primary = false;
-                });
-              }
-              orga.primary = value;
-            });
-          }
-        },
-      );
-
-      ElevatedButton removeOrgaBtn = ElevatedButton(
-        onPressed: () {
-          setState(() {
-            widget.organizers.removeAt(i);
-          });
-        },
-        child: const Text('-'),
-      );
-
-      _organizerRows.add(DataRow(cells: [
-        DataCell(removeOrgaBtn),
-        DataCell(emailForm),
-        DataCell(nafNameForm),
-        DataCell(primaryCheckbox),
-      ]));
-    }
-
-    _orgaDataTable = DataTable(
-      columns: _organizerCols,
-      rows: _organizerRows,
     );
   }
 

@@ -1,26 +1,17 @@
-import 'dart:convert';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/admin/view/widgets/tourny_basic_info_widget.dart';
 import 'package:bbnaf/admin/view/widgets/tourny_home_page_info_widget.dart';
 import 'package:bbnaf/admin/view/widgets/tourny_individual_settings_widget.dart';
 import 'package:bbnaf/admin/view/widgets/tourny_orga_info_widget.dart';
-import 'package:bbnaf/admin/view/widgets/tourny_scoring_details.dart';
+import 'package:bbnaf/admin/view/widgets/tourny_ranking_settings_widget.dart';
 import 'package:bbnaf/admin/view/widgets/tourny_squad_settings_widget.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
-import 'package:bbnaf/rankings/models/ranking_filter.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/toast.dart';
-import 'package:bbnaf/widgets/checkbox_formfield/checkbox_list_tile_formfield.dart';
-import 'package:bbnaf/widgets/custom_form_field.dart';
-import 'package:bbnaf/widgets/set_item_list_widget/set_item_list_widget.dart';
 import 'package:bbnaf/widgets/title_widget.dart';
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
-// import 'package:meta/meta.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class EditTournamentInfoExpandableWidget extends StatefulWidget {
   // Optional can supply tournament object for population (e.g., create tournament)
@@ -45,13 +36,7 @@ class ExpandListItem {
 
 class _EditTournamentInfoExpandableWidget
     extends State<EditTournamentInfoExpandableWidget> {
-  late IndividualScoringDetails _scoringDetails;
-
-  late CasualtyDetails _casualtyDetails;
-  // late SquadDetails _squadDetails;
-
   bool refreshFields = true;
-  bool editDates = false;
 
   late Tournament _tournament;
 
@@ -59,6 +44,7 @@ class _EditTournamentInfoExpandableWidget
   late TournyOrganizerInfoWidget _tournyOrganizerInfoWidget;
   late TournyIndividualSettingsWidget _tournyIndividualSettingsWidget;
   late TournySquadSettingsWidget _tournySquadSettingsWidget;
+  late TournyRankingSettingsWidget _tournyRankingSettingsWidget;
   late TournyHomePageInfoWidget _tournyHomePageInfoWidget;
 
   @override
@@ -91,6 +77,9 @@ class _EditTournamentInfoExpandableWidget
     _tournySquadSettingsWidget =
         TournySquadSettingsWidget(info: _tournament.info);
 
+    _tournyRankingSettingsWidget =
+        TournyRankingSettingsWidget(info: _tournament.info);
+
     _tournyHomePageInfoWidget =
         TournyHomePageInfoWidget(info: _tournament.info);
 
@@ -119,6 +108,8 @@ class _EditTournamentInfoExpandableWidget
       _createExpansionTile(
           ExpandListItem("Squad Settings", _tournySquadSettingsWidget)),
       _createExpansionTile(
+          ExpandListItem("Ranking Settings", _tournyRankingSettingsWidget)),
+      _createExpansionTile(
           ExpandListItem("Home Page Customization", _tournyHomePageInfoWidget)),
     ];
 
@@ -135,21 +126,6 @@ class _EditTournamentInfoExpandableWidget
       initiallyExpanded: false,
       children: <Widget>[item.widget],
     );
-  }
-
-  List<Widget> _viewInfos(BuildContext context) {
-    return [
-      _updateOrDiscard(),
-      Divider(),
-      // _createScoringDetails("Coach Scoring:", _scoringDetails,
-      //     _createIndividualTieBreakers(context, _scoringDetails)),
-      Divider(),
-      // _createCasulatyDetails(),
-      Divider(),
-      // _createSquadDetails(),
-      Divider(),
-      Divider(),
-    ];
   }
 
   Widget _updateOrDiscard() {
@@ -173,13 +149,9 @@ class _EditTournamentInfoExpandableWidget
               _tournyBasicInfoWidget.updateTournamentInfo(info);
               _tournyOrganizerInfoWidget.updateTournamentInfo(info);
               _tournyIndividualSettingsWidget.updateTournamentInfo(info);
+              _tournySquadSettingsWidget.updateTournamentInfo(info);
+              _tournyRankingSettingsWidget.updateTournamentInfo(info);
               _tournyHomePageInfoWidget.updateTournamentInfo(info);
-
-              // info.scoringDetails = _scoringDetails;
-              // info.casualtyDetails = _casualtyDetails;
-              // info.squadDetails = _squadDetails;
-
-              // _trySaveRichText();
 
               // Handle create vs update tournament
               if (widget.createTournament) {
@@ -199,69 +171,6 @@ class _EditTournamentInfoExpandableWidget
         )
       ],
     );
-  }
-
-// TODO: Need to add UI for adding CoachRankingFilters
-
-  List<Widget> _getCoachRankingFilterWidgets(IndividualScoringDetails details) {
-    List<Widget> rankingFilterWidgets = [
-      ElevatedButton(
-        onPressed: () {
-          setState(() {
-            String idx =
-                (_scoringDetails.coachRaceRankingFilters.length + 1).toString();
-
-            _scoringDetails.coachRaceRankingFilters
-                .add(CoachRaceFilter("RankingFilter_" + idx, []));
-          });
-        },
-        child: const Text('Add Race Ranking Filter'),
-      )
-    ];
-
-    for (int i = 0; i < details.coachRaceRankingFilters.length; i++) {
-      CoachRaceFilter filter = details.coachRaceRankingFilters[i];
-
-      String label = filter.name;
-      List<String> curRaces = EnumToString.toList(filter.races);
-
-      List<String> allRaces = EnumToString.toList(Race.values);
-
-      rankingFilterWidgets.add(Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            SizedBox(width: 10.0),
-            Expanded(
-                child: CustomTextFormField(
-                    initialValue: label.toString(),
-                    keyboardType: TextInputType.number,
-                    title: 'Race Filter Label',
-                    callback: (value) {
-                      setState(() {
-                        details.coachRaceRankingFilters[i].name = label;
-                      });
-                    })),
-            SizedBox(width: 10.0),
-            Expanded(
-                child: SetItemListWidget(
-                    title: 'Set Races',
-                    allItems: allRaces,
-                    curItems: curRaces,
-                    onComplete: (newItems) {
-                      List<Race> races =
-                          EnumToString.fromList(Race.values, newItems)
-                              .nonNulls
-                              .toList();
-
-                      details.coachRaceRankingFilters[i] =
-                          CoachRaceFilter(label, races);
-
-                      setState(() {});
-                    }))
-          ]));
-    }
-
-    return rankingFilterWidgets;
   }
 
   void _showDialogToConfirmOverwrite(
