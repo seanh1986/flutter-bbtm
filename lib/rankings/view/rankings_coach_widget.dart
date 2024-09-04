@@ -411,7 +411,8 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     TextStyle? squadRaceStyle = theme.textTheme.bodySmall;
 
     List<Widget> cellWidgets = [
-      Text(coach.nafName, overflow: TextOverflow.ellipsis, style: nafNameStyle),
+      Text(coach.displayName(_tournament.info),
+          overflow: TextOverflow.ellipsis, style: nafNameStyle),
     ];
 
     if (coachSquadName.isNotEmpty) {

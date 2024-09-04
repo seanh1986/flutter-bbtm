@@ -204,7 +204,8 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     TextStyle? coachStyle = theme.textTheme.bodySmall;
 
     List<Widget> cellWidgets = [
-      Text(squad.name(), overflow: TextOverflow.ellipsis, style: squadStyle),
+      Text(squad.displayName(_tournament.info),
+          overflow: TextOverflow.ellipsis, style: squadStyle),
     ];
 
     List<Coach> coaches = [];
@@ -226,7 +227,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     coaches.forEach((c) {
       cellWidgets.add(Text(
           "    " +
-              c.nafName +
+              c.displayName(_tournament.info) +
               " (" +
               c.wins().toString() +
               "/" +

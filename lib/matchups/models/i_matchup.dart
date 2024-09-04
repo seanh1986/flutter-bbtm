@@ -101,7 +101,7 @@ abstract class IMatchup {
 // This can be squad vs squad or coach vs coach
 abstract class IMatchupParticipant {
   OrgType type();
-  String name();
+  String name(); // Used for swiss pairings, etc.
   String parentName();
   double points();
   int wins();
@@ -110,6 +110,7 @@ abstract class IMatchupParticipant {
   List<double> tiebreakers();
   List<String> opponents();
   bool isActive(Tournament t);
+  String displayName(TournamentInfo info); // Used for matchups & rankings UI
 
   // Check if it matches the search word
   bool matchSearch(String search);

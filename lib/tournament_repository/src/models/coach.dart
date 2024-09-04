@@ -104,6 +104,22 @@ class Coach extends IMatchupParticipant {
     return active;
   }
 
+// Used for matchups & rankings UI
+  @override
+  String displayName(TournamentInfo info) {
+    switch (info.coachDisplayName) {
+      case CoachDisplayName.CoachName:
+        return coachName;
+      case CoachDisplayName.NafName_Then_CoachName:
+        return nafName + " (" + coachName + ")";
+      case CoachDisplayName.CoachName_Then_NafName:
+        return coachName + " (" + nafName + ")";
+      case CoachDisplayName.NafName:
+      default:
+        return nafName;
+    }
+  }
+
   // Search is lower case
   @override
   bool matchSearch(String search) {

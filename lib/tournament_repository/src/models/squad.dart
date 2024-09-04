@@ -86,6 +86,12 @@ class Squad extends IMatchupParticipant {
     return numActiveCoaches == requiredNumCoachesPerSquad;
   }
 
+  // Used for matchups & rankings UI
+  @override
+  String displayName(TournamentInfo info) {
+    return name();
+  }
+
 // Search is lower case
   @override
   bool matchSearch(String search) {
