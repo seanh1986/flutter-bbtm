@@ -100,7 +100,9 @@ class _EditTournamentInfoExpandableWidget
       _updateOrDiscard(),
       Divider(),
       _createExpansionTile(
-          ExpandListItem("Basic Information", _tournyBasicInfoWidget)),
+          ExpandListItem("Basic Information", _tournyBasicInfoWidget),
+          initialExpand:
+              widget.createTournament), // Expand automatically on creation
       _createExpansionTile(
           ExpandListItem("Organizers", _tournyOrganizerInfoWidget)),
       _createExpansionTile(ExpandListItem(
@@ -118,12 +120,13 @@ class _EditTournamentInfoExpandableWidget
     );
   }
 
-  ExpansionTile _createExpansionTile(ExpandListItem item) {
+  ExpansionTile _createExpansionTile(ExpandListItem item,
+      {bool initialExpand = false}) {
     return ExpansionTile(
       title: Text(item.title),
       // subtitle: Text('Leading expansion arrow icon'),
       controlAffinity: ListTileControlAffinity.leading,
-      initiallyExpanded: false,
+      initiallyExpanded: initialExpand,
       children: <Widget>[item.widget],
     );
   }

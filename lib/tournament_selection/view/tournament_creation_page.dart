@@ -65,7 +65,7 @@ class _TournamentCreationPage extends State<TournamentCreationPage> {
           onPressed: () {
             context.read<AppBloc>().add(AppRequestNavToTournamentList());
           }),
-      EditTournamentInfoWidget(
+      EditTournamentInfoExpandableWidget(
         tournament: _tournament,
         createTournament: true,
       )

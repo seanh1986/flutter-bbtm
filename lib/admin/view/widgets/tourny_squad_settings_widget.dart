@@ -1,6 +1,6 @@
 // ignore_for_file: must_be_immutable
 
-import 'package:bbnaf/admin/view/widgets/tourny_scoring_details.dart';
+import 'package:bbnaf/admin/view/widgets/tourny_scoring_details_widget.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
 import 'package:bbnaf/widgets/set_item_list_widget/set_item_list_widget.dart';
