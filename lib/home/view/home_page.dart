@@ -28,6 +28,8 @@ class _HomePageState extends State<HomePage>
     implements Serializable, Deserializable {
   late int _widgetIdx;
 
+  late int _rankingsIdx;
+
   late Tournament _tournament;
   late User _user;
 
@@ -134,8 +136,11 @@ class _HomePageState extends State<HomePage>
       BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
       BottomNavigationBarItem(
           icon: Icon(Icons.sports_football), label: 'Matches'),
-      BottomNavigationBarItem(icon: Icon(Icons.poll), label: 'Rankings'),
     ];
+
+    // Ensure we get the correct index for rankings
+    _rankingsIdx = items.length;
+    items.add(_generateRankingsItem());
 
     if (_tournament.isUserAdmin(_user)) {
       items.add(
@@ -143,6 +148,29 @@ class _HomePageState extends State<HomePage>
     }
 
     return items;
+  }
+
+  BottomNavigationBarItem _generateRankingsItem() {
+    return _tournament.info.showRankings
+        ? BottomNavigationBarItem(icon: Icon(Icons.poll), label: 'Rankings')
+        : BottomNavigationBarItem(
+            icon: Stack(
+              children: [
+                Icon(Icons.poll), // Base icon
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Icon(
+                    Icons.lock,
+                    size: 14, // Smaller lock icon
+                    color:
+                        Colors.red, // Optional: color to differentiate the lock
+                  ),
+                ),
+              ],
+            ),
+            label: 'Rankings',
+          );
   }
 
   void _handleBackButton() {
@@ -158,6 +186,14 @@ class _HomePageState extends State<HomePage>
   }
 
   void _onItemTapped(int index) {
+    // Skip showing rankings based on:
+    // Tournament Setting AND selected rankings AND not an admin
+    if (!_tournament.info.showRankings &&
+        index == _rankingsIdx &&
+        !_tournament.isUserAdmin(_user)) {
+      return;
+    }
+
     _widgetIdx = index;
 
     context.read<AppBloc>().add(ScreenChange(
