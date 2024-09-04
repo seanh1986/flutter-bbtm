@@ -225,7 +225,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
       // Ensure screen isn't too narrow
       result = ListTile(
         leading: raceLogo,
-        title: Text(_participant.name(),
+        title: Text(_participant.displayName(widget.tounamentInfo),
             style: TextStyle(fontSize: titleFontSize)),
         subtitle: Text(_participant.showRecord(),
             style: TextStyle(fontSize: subTitleFontSize)),
@@ -254,7 +254,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(_participant.name(),
+              Text(_participant.displayName(widget.tounamentInfo),
                   style: TextStyle(fontSize: titleFontSize)),
               Text(_participant.showRecord(),
                   style: TextStyle(fontSize: subTitleFontSize)),
@@ -277,7 +277,8 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
       SizedBox(height: 10)
     ];
 
-    Widget? bonusPtsWidget = _getBonusPtsWidget(participant.name());
+    Widget? bonusPtsWidget =
+        _getBonusPtsWidget(participant.name()); // nafName, etc.
     if (bonusPtsWidget != null) {
       widgets.add(bonusPtsWidget);
       widgets.add(SizedBox(height: 10));
