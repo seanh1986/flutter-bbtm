@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/admin/view/widgets/tourny_basic_info_widget.dart';
 import 'package:bbnaf/admin/view/widgets/tourny_home_page_info_widget.dart';
+import 'package:bbnaf/admin/view/widgets/tourny_individual_settings_widget.dart';
 import 'package:bbnaf/admin/view/widgets/tourny_orga_info_widget.dart';
+import 'package:bbnaf/admin/view/widgets/tourny_scoring_details.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/rankings/models/ranking_filter.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
@@ -45,12 +47,11 @@ class _EditTournamentInfoExpandableWidget
   late IndividualScoringDetails _scoringDetails;
 
   late CasualtyDetails _casualtyDetails;
-  late SquadDetails _squadDetails;
+  // late SquadDetails _squadDetails;
 
   bool refreshFields = true;
   bool editDates = false;
 
-  bool editIndividualTieBreakers = false;
   bool editSquadTieBreakers = false;
 
   late Tournament _tournament;
@@ -58,6 +59,7 @@ class _EditTournamentInfoExpandableWidget
   late TournyBasicInfoWidget _tournyBasicInfoWidget;
   late TournyOrganizerInfoWidget _tournyOrganizerInfoWidget;
   late TournyHomePageInfoWidget _tournyHomePageInfoWidget;
+  late TournyIndividualSettingsWidget _tournyIndividualSettingsWidget;
 
   @override
   void initState() {
@@ -86,6 +88,9 @@ class _EditTournamentInfoExpandableWidget
     _tournyHomePageInfoWidget =
         TournyHomePageInfoWidget(info: _tournament.info);
 
+    _tournyIndividualSettingsWidget =
+        TournyIndividualSettingsWidget(info: _tournament.info);
+
     List<Widget> widgets = [
       TitleBar(
         title: "Edit Tournament Info (Id: " + _tournament.info.id + ")",
@@ -106,6 +111,8 @@ class _EditTournamentInfoExpandableWidget
           ExpandListItem("Basic Information", _tournyBasicInfoWidget)),
       _createExpansionTile(
           ExpandListItem("Organizers", _tournyOrganizerInfoWidget)),
+      _createExpansionTile(ExpandListItem(
+          "Individual Scoring", _tournyIndividualSettingsWidget)),
       _createExpansionTile(
           ExpandListItem("Home Page Customization", _tournyHomePageInfoWidget)),
     ];
@@ -129,12 +136,12 @@ class _EditTournamentInfoExpandableWidget
     return [
       _updateOrDiscard(),
       Divider(),
-      _createScoringDetails("Coach Scoring:", _scoringDetails,
-          _createIndividualTieBreakers(context, _scoringDetails)),
+      // _createScoringDetails("Coach Scoring:", _scoringDetails,
+      //     _createIndividualTieBreakers(context, _scoringDetails)),
       Divider(),
       _createCasulatyDetails(),
       Divider(),
-      _createSquadDetails(),
+      // _createSquadDetails(),
       Divider(),
       Divider(),
     ];
@@ -160,6 +167,7 @@ class _EditTournamentInfoExpandableWidget
 
               _tournyBasicInfoWidget.updateTournamentInfo(info);
               _tournyOrganizerInfoWidget.updateTournamentInfo(info);
+              _tournyIndividualSettingsWidget.updateTournamentInfo(info);
               _tournyHomePageInfoWidget.updateTournamentInfo(info);
 
               // info.scoringDetails = _scoringDetails;
@@ -186,171 +194,6 @@ class _EditTournamentInfoExpandableWidget
         )
       ],
     );
-  }
-
-  Widget _createIndividualTieBreakers(
-      BuildContext context, IndividualScoringDetails details) {
-    final theme = Theme.of(context);
-
-    List<String> curTiebreakers = EnumToString.toList(details.tieBreakers);
-
-    String title = "Individual Tie Breakers";
-
-    if (editIndividualTieBreakers) {
-      List<String> allTiebreakers = EnumToString.toList(TieBreaker.values);
-
-      return SetItemListWidget(
-          title: title,
-          allItems: allTiebreakers,
-          curItems: curTiebreakers,
-          onComplete: (newItems) {
-            List<TieBreaker?> tieBreakers =
-                EnumToString.fromList(TieBreaker.values, newItems);
-
-            setState(() {
-              details.tieBreakers = tieBreakers.nonNulls.toList();
-              editIndividualTieBreakers = false;
-            });
-          });
-    } else {
-      StringBuffer sb = StringBuffer();
-      sb.writeln(title);
-      for (int i = 0; i < curTiebreakers.length; i++) {
-        int rank = i + 1;
-        String tieBreakerName = curTiebreakers[i];
-        sb.write(rank.toString() + ". " + tieBreakerName);
-        if (i + 1 < curTiebreakers.length) {
-          sb.write("\n");
-        }
-      }
-
-      return Row(
-        children: [
-          IconButton(
-              onPressed: () {
-                setState(() {
-                  editIndividualTieBreakers = true;
-                });
-              },
-              icon: Icon(Icons.edit)),
-          Text(sb.toString(), style: theme.textTheme.bodyMedium),
-        ],
-      );
-    }
-  }
-
-  Widget _createScoringDetails(
-      String title, ScoringDetails details, Widget? tiebreakerWidget) {
-    Row winTieLossPts =
-        Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-      SizedBox(width: 10.0),
-      Text(title),
-      SizedBox(width: 10.0),
-      Expanded(
-          child: CustomTextFormField(
-        initialValue: details.winPts.toString(),
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        keyboardType: TextInputType.number,
-        title: 'Wins',
-        callback: (value) => details.winPts = double.parse(value),
-      )),
-      SizedBox(width: 10.0),
-      Expanded(
-          child: CustomTextFormField(
-        initialValue: details.tiePts.toString(),
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        keyboardType: TextInputType.number,
-        title: 'Ties',
-        callback: (value) => details.tiePts = double.parse(value),
-      )),
-      SizedBox(width: 10.0),
-      Expanded(
-          child: CustomTextFormField(
-        initialValue: details.lossPts.toString(),
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        keyboardType: TextInputType.number,
-        title: 'Losses',
-        callback: (value) => details.lossPts = double.parse(value),
-      ))
-    ]);
-
-    List<Widget> children = [
-      winTieLossPts,
-      SizedBox(height: 10),
-    ];
-
-    if (tiebreakerWidget != null) {
-      children.addAll([tiebreakerWidget, SizedBox(height: 10)]);
-    }
-
-    children.addAll(_getBonusPtsWidgets(details));
-
-    if (details is IndividualScoringDetails) {
-      children.addAll(_getCoachRankingFilterWidgets(details));
-    }
-
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center, children: children);
-  }
-
-  List<Widget> _getBonusPtsWidgets(ScoringDetails details) {
-    List<Widget> bonusPtsWidgets = [
-      ElevatedButton(
-        onPressed: () {
-          setState(() {
-            String bonusPtsIdx = (details.bonusPts.length + 1).toString();
-            details.bonusPts.add(BonusDetails("Bonus_" + bonusPtsIdx, 1));
-          });
-        },
-        child: const Text('Add Bonus'),
-      )
-    ];
-
-    for (int i = 0; i < details.bonusPts.length; i++) {
-      String bonusKey = details.bonusPts[i].name;
-      double bonusVal = details.bonusPts[i].weight;
-
-      ValueChanged<String> bonusNameCallback = ((value) {
-        details.bonusPts[i] = BonusDetails(value, bonusVal);
-      });
-
-      ValueChanged<String> bonusPtsCallback = ((value) {
-        details.bonusPts[i] = BonusDetails(bonusKey, double.parse(value));
-      });
-
-      bonusPtsWidgets.add(Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            SizedBox(width: 10.0),
-            IconButton(
-                onPressed: () {
-                  setState(() {
-                    details.bonusPts.removeAt(i);
-                  });
-                },
-                icon: Icon(Icons.delete)),
-            SizedBox(width: 10.0),
-            Expanded(
-                child: CustomTextFormField(
-                    initialValue: bonusKey.toString(),
-                    // inputFormatters: [
-                    //   FilteringTextInputFormatter.singleLineFormatter
-                    // ],
-                    keyboardType: TextInputType.number,
-                    title: 'Bonus Name',
-                    callback: (value) => bonusNameCallback(value))),
-            SizedBox(width: 10.0),
-            Expanded(
-                child: CustomTextFormField(
-                    initialValue: bonusVal.toString(),
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    keyboardType: TextInputType.number,
-                    title: 'Bonus Value',
-                    callback: (value) => bonusPtsCallback(value)))
-          ]));
-    }
-
-    return bonusPtsWidgets;
   }
 
 // TODO: Need to add UI for adding CoachRankingFilters
@@ -482,169 +325,169 @@ class _EditTournamentInfoExpandableWidget
     );
   }
 
-  Widget _createSquadDetails() {
-    final theme = Theme.of(context);
+  // Widget _createSquadDetails() {
+  //   final theme = Theme.of(context);
 
-    List<String> squadUsageTypes = EnumToString.toList(SquadUsage.values);
+  //   List<String> squadUsageTypes = EnumToString.toList(SquadUsage.values);
 
-    List<DropdownMenuItem<String>> squadUsageTypesDropDown = squadUsageTypes
-        .map((String r) => DropdownMenuItem<String>(value: r, child: Text(r)))
-        .toList();
+  //   List<DropdownMenuItem<String>> squadUsageTypesDropDown = squadUsageTypes
+  //       .map((String r) => DropdownMenuItem<String>(value: r, child: Text(r)))
+  //       .toList();
 
-    List<Widget> mainSquadDetailsRow = [
-      SizedBox(width: 10.0),
-      Text("Squad Details:"),
-      SizedBox(width: 10.0),
-      Expanded(
-          child: DropdownButtonFormField<String>(
-        style: theme.textTheme.labelMedium,
-        value: EnumToString.convertToString(_squadDetails.type),
-        items: squadUsageTypesDropDown,
-        onChanged: (value) {
-          SquadUsage? usage = value is String
-              ? EnumToString.fromString(SquadUsage.values, value)
-              : null;
-          _squadDetails.type = usage != null ? usage : SquadUsage.NO_SQUADS;
+  //   List<Widget> mainSquadDetailsRow = [
+  //     SizedBox(width: 10.0),
+  //     Text("Squad Details:"),
+  //     SizedBox(width: 10.0),
+  //     Expanded(
+  //         child: DropdownButtonFormField<String>(
+  //       style: theme.textTheme.labelMedium,
+  //       value: EnumToString.convertToString(_squadDetails.type),
+  //       items: squadUsageTypesDropDown,
+  //       onChanged: (value) {
+  //         SquadUsage? usage = value is String
+  //             ? EnumToString.fromString(SquadUsage.values, value)
+  //             : null;
+  //         _squadDetails.type = usage != null ? usage : SquadUsage.NO_SQUADS;
 
-          // Update UI based on toggle
-          setState(() {});
-        },
-      ))
-    ];
+  //         // Update UI based on toggle
+  //         setState(() {});
+  //       },
+  //     ))
+  //   ];
 
-    if (_squadDetails.type == SquadUsage.SQUADS) {
-      mainSquadDetailsRow.addAll([
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CustomTextFormField(
-          initialValue: _squadDetails.requiredNumCoachesPerSquad.toString(),
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          keyboardType: TextInputType.number,
-          title: '# Active Coaches / Squad',
-          callback: (value) =>
-              _squadDetails.requiredNumCoachesPerSquad = int.parse(value),
-        )),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CustomTextFormField(
-          initialValue: _squadDetails.requiredNumCoachesPerSquad.toString(),
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          keyboardType: TextInputType.number,
-          title: '# Max Coaches / Squad',
-          callback: (value) =>
-              _squadDetails.maxNumCoachesPerSquad = int.parse(value),
-        ))
-      ]);
-    }
+  //   if (_squadDetails.type == SquadUsage.SQUADS) {
+  //     mainSquadDetailsRow.addAll([
+  //       SizedBox(width: 10.0),
+  //       Expanded(
+  //           child: CustomTextFormField(
+  //         initialValue: _squadDetails.requiredNumCoachesPerSquad.toString(),
+  //         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+  //         keyboardType: TextInputType.number,
+  //         title: '# Active Coaches / Squad',
+  //         callback: (value) =>
+  //             _squadDetails.requiredNumCoachesPerSquad = int.parse(value),
+  //       )),
+  //       SizedBox(width: 10.0),
+  //       Expanded(
+  //           child: CustomTextFormField(
+  //         initialValue: _squadDetails.requiredNumCoachesPerSquad.toString(),
+  //         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+  //         keyboardType: TextInputType.number,
+  //         title: '# Max Coaches / Squad',
+  //         callback: (value) =>
+  //             _squadDetails.maxNumCoachesPerSquad = int.parse(value),
+  //       ))
+  //     ]);
+  //   }
 
-    List<Widget> mainContent = [
-      Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: mainSquadDetailsRow)
-    ];
+  //   List<Widget> mainContent = [
+  //     Row(
+  //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //         children: mainSquadDetailsRow)
+  //   ];
 
-    if (_squadDetails.type == SquadUsage.SQUADS) {
-      // Update Main Content w/ squad scoring type
-      mainContent.addAll([
-        SizedBox(height: 10),
-        _getSquadScoringSelection(),
-        SizedBox(height: 10),
-      ]);
+  //   if (_squadDetails.type == SquadUsage.SQUADS) {
+  //     // Update Main Content w/ squad scoring type
+  //     mainContent.addAll([
+  //       SizedBox(height: 10),
+  //       _getSquadScoringSelection(),
+  //       SizedBox(height: 10),
+  //     ]);
 
-      if (_squadDetails.scoringType == SquadScoring.SQUAD_RESULT_W_T_L) {
-        // Update Main Content w/ squad scoring parameters
-        mainContent.addAll([
-          SizedBox(height: 10),
-          _createScoringDetails("Squad Scoring:", _squadDetails.scoringDetails,
-              _createSquadTieBreakers(context, _squadDetails)),
-        ]);
-      }
+  //     if (_squadDetails.scoringType == SquadScoring.SQUAD_RESULT_W_T_L) {
+  //       // Update Main Content w/ squad scoring parameters
+  //       mainContent.addAll([
+  //         SizedBox(height: 10),
+  //         _createScoringDetails("Squad Scoring:", _squadDetails.scoringDetails,
+  //             _createSquadTieBreakers(context, _squadDetails)),
+  //       ]);
+  //     }
 
-      // Update Main Content w/ squad matching
-      mainContent.addAll([
-        SizedBox(height: 10),
-        _getSquadMatchingSelection(),
-      ]);
-    }
+  //     // Update Main Content w/ squad matching
+  //     mainContent.addAll([
+  //       SizedBox(height: 10),
+  //       _getSquadMatchingSelection(),
+  //     ]);
+  //   }
 
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center, children: mainContent);
-  }
+  //   return Column(
+  //       mainAxisAlignment: MainAxisAlignment.center, children: mainContent);
+  // }
 
-  Row _getSquadScoringSelection() {
-    final theme = Theme.of(context);
+  // Row _getSquadScoringSelection() {
+  //   final theme = Theme.of(context);
 
-    // Create Row for Squad Scoring
-    List<String> squadScoringTypes = EnumToString.toList(SquadScoring.values);
+  //   // Create Row for Squad Scoring
+  //   List<String> squadScoringTypes = EnumToString.toList(SquadScoring.values);
 
-    List<DropdownMenuItem<String>> squadScoringTypesDropDown = squadScoringTypes
-        .map((String r) => DropdownMenuItem<String>(value: r, child: Text(r)))
-        .toList();
+  //   List<DropdownMenuItem<String>> squadScoringTypesDropDown = squadScoringTypes
+  //       .map((String r) => DropdownMenuItem<String>(value: r, child: Text(r)))
+  //       .toList();
 
-    List<Widget> squadScoringRow = [
-      SizedBox(width: 10.0),
-      Text("Squad Scoring Type:"),
-      SizedBox(width: 10.0),
-      Expanded(
-          child: DropdownButtonFormField<String>(
-        style: theme.textTheme.labelMedium,
-        value: EnumToString.convertToString(_squadDetails.scoringType),
-        items: squadScoringTypesDropDown,
-        onChanged: (value) {
-          SquadScoring? scoringTypes = value is String
-              ? EnumToString.fromString(SquadScoring.values, value)
-              : null;
-          _squadDetails.scoringType = scoringTypes != null
-              ? scoringTypes
-              : SquadScoring.CUMULATIVE_PLAYER_SCORES;
+  //   List<Widget> squadScoringRow = [
+  //     SizedBox(width: 10.0),
+  //     Text("Squad Scoring Type:"),
+  //     SizedBox(width: 10.0),
+  //     Expanded(
+  //         child: DropdownButtonFormField<String>(
+  //       style: theme.textTheme.labelMedium,
+  //       value: EnumToString.convertToString(_squadDetails.scoringType),
+  //       items: squadScoringTypesDropDown,
+  //       onChanged: (value) {
+  //         SquadScoring? scoringTypes = value is String
+  //             ? EnumToString.fromString(SquadScoring.values, value)
+  //             : null;
+  //         _squadDetails.scoringType = scoringTypes != null
+  //             ? scoringTypes
+  //             : SquadScoring.CUMULATIVE_PLAYER_SCORES;
 
-          setState(() {});
-        },
-      )),
-    ];
+  //         setState(() {});
+  //       },
+  //     )),
+  //   ];
 
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: squadScoringRow);
-  }
+  //   return Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //       children: squadScoringRow);
+  // }
 
-  Row _getSquadMatchingSelection() {
-    final theme = Theme.of(context);
+  // Row _getSquadMatchingSelection() {
+  //   final theme = Theme.of(context);
 
-    // Create Row for Squad Scoring
-    List<String> squadMatchMakingTypes =
-        EnumToString.toList(SquadMatchMaking.values);
+  //   // Create Row for Squad Scoring
+  //   List<String> squadMatchMakingTypes =
+  //       EnumToString.toList(SquadMatchMaking.values);
 
-    List<DropdownMenuItem<String>> squadMatchMakingTypesDropDown =
-        squadMatchMakingTypes
-            .map((String r) =>
-                DropdownMenuItem<String>(value: r, child: Text(r)))
-            .toList();
+  //   List<DropdownMenuItem<String>> squadMatchMakingTypesDropDown =
+  //       squadMatchMakingTypes
+  //           .map((String r) =>
+  //               DropdownMenuItem<String>(value: r, child: Text(r)))
+  //           .toList();
 
-    List<Widget> squadMatchMakingRow = [
-      SizedBox(width: 10.0),
-      Text("Squad Match Making:"),
-      SizedBox(width: 10.0),
-      Expanded(
-          child: DropdownButtonFormField<String>(
-        value: EnumToString.convertToString(_squadDetails.matchMaking),
-        style: theme.textTheme.labelMedium,
-        items: squadMatchMakingTypesDropDown,
-        onChanged: (value) {
-          SquadMatchMaking? matchMakingType = value is String
-              ? EnumToString.fromString(SquadMatchMaking.values, value)
-              : null;
-          _squadDetails.matchMaking = matchMakingType != null
-              ? matchMakingType
-              : SquadMatchMaking.ATTEMPT_SQUAD_VS_SQUAD_AVOID_BYES;
-        },
-      ))
-    ];
+  //   List<Widget> squadMatchMakingRow = [
+  //     SizedBox(width: 10.0),
+  //     Text("Squad Match Making:"),
+  //     SizedBox(width: 10.0),
+  //     Expanded(
+  //         child: DropdownButtonFormField<String>(
+  //       value: EnumToString.convertToString(_squadDetails.matchMaking),
+  //       style: theme.textTheme.labelMedium,
+  //       items: squadMatchMakingTypesDropDown,
+  //       onChanged: (value) {
+  //         SquadMatchMaking? matchMakingType = value is String
+  //             ? EnumToString.fromString(SquadMatchMaking.values, value)
+  //             : null;
+  //         _squadDetails.matchMaking = matchMakingType != null
+  //             ? matchMakingType
+  //             : SquadMatchMaking.ATTEMPT_SQUAD_VS_SQUAD_AVOID_BYES;
+  //       },
+  //     ))
+  //   ];
 
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: squadMatchMakingRow);
-  }
+  //   return Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //       children: squadMatchMakingRow);
+  // }
 
   Widget _createSquadTieBreakers(BuildContext context, SquadDetails details) {
     final theme = Theme.of(context);
