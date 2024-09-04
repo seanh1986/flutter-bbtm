@@ -5,6 +5,7 @@ import 'package:bbnaf/admin/view/widgets/tourny_home_page_info_widget.dart';
 import 'package:bbnaf/admin/view/widgets/tourny_individual_settings_widget.dart';
 import 'package:bbnaf/admin/view/widgets/tourny_orga_info_widget.dart';
 import 'package:bbnaf/admin/view/widgets/tourny_scoring_details.dart';
+import 'package:bbnaf/admin/view/widgets/tourny_squad_settings_widget.dart';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/rankings/models/ranking_filter.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
@@ -52,14 +53,13 @@ class _EditTournamentInfoExpandableWidget
   bool refreshFields = true;
   bool editDates = false;
 
-  bool editSquadTieBreakers = false;
-
   late Tournament _tournament;
 
   late TournyBasicInfoWidget _tournyBasicInfoWidget;
   late TournyOrganizerInfoWidget _tournyOrganizerInfoWidget;
-  late TournyHomePageInfoWidget _tournyHomePageInfoWidget;
   late TournyIndividualSettingsWidget _tournyIndividualSettingsWidget;
+  late TournySquadSettingsWidget _tournySquadSettingsWidget;
+  late TournyHomePageInfoWidget _tournyHomePageInfoWidget;
 
   @override
   void initState() {
@@ -85,11 +85,14 @@ class _EditTournamentInfoExpandableWidget
     _tournyOrganizerInfoWidget =
         TournyOrganizerInfoWidget(info: _tournament.info);
 
-    _tournyHomePageInfoWidget =
-        TournyHomePageInfoWidget(info: _tournament.info);
-
     _tournyIndividualSettingsWidget =
         TournyIndividualSettingsWidget(info: _tournament.info);
+
+    _tournySquadSettingsWidget =
+        TournySquadSettingsWidget(info: _tournament.info);
+
+    _tournyHomePageInfoWidget =
+        TournyHomePageInfoWidget(info: _tournament.info);
 
     List<Widget> widgets = [
       TitleBar(
@@ -113,6 +116,8 @@ class _EditTournamentInfoExpandableWidget
           ExpandListItem("Organizers", _tournyOrganizerInfoWidget)),
       _createExpansionTile(ExpandListItem(
           "Individual Scoring", _tournyIndividualSettingsWidget)),
+      _createExpansionTile(
+          ExpandListItem("Squad Settings", _tournySquadSettingsWidget)),
       _createExpansionTile(
           ExpandListItem("Home Page Customization", _tournyHomePageInfoWidget)),
     ];
@@ -323,221 +328,6 @@ class _EditTournamentInfoExpandableWidget
         )),
       ],
     );
-  }
-
-  // Widget _createSquadDetails() {
-  //   final theme = Theme.of(context);
-
-  //   List<String> squadUsageTypes = EnumToString.toList(SquadUsage.values);
-
-  //   List<DropdownMenuItem<String>> squadUsageTypesDropDown = squadUsageTypes
-  //       .map((String r) => DropdownMenuItem<String>(value: r, child: Text(r)))
-  //       .toList();
-
-  //   List<Widget> mainSquadDetailsRow = [
-  //     SizedBox(width: 10.0),
-  //     Text("Squad Details:"),
-  //     SizedBox(width: 10.0),
-  //     Expanded(
-  //         child: DropdownButtonFormField<String>(
-  //       style: theme.textTheme.labelMedium,
-  //       value: EnumToString.convertToString(_squadDetails.type),
-  //       items: squadUsageTypesDropDown,
-  //       onChanged: (value) {
-  //         SquadUsage? usage = value is String
-  //             ? EnumToString.fromString(SquadUsage.values, value)
-  //             : null;
-  //         _squadDetails.type = usage != null ? usage : SquadUsage.NO_SQUADS;
-
-  //         // Update UI based on toggle
-  //         setState(() {});
-  //       },
-  //     ))
-  //   ];
-
-  //   if (_squadDetails.type == SquadUsage.SQUADS) {
-  //     mainSquadDetailsRow.addAll([
-  //       SizedBox(width: 10.0),
-  //       Expanded(
-  //           child: CustomTextFormField(
-  //         initialValue: _squadDetails.requiredNumCoachesPerSquad.toString(),
-  //         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-  //         keyboardType: TextInputType.number,
-  //         title: '# Active Coaches / Squad',
-  //         callback: (value) =>
-  //             _squadDetails.requiredNumCoachesPerSquad = int.parse(value),
-  //       )),
-  //       SizedBox(width: 10.0),
-  //       Expanded(
-  //           child: CustomTextFormField(
-  //         initialValue: _squadDetails.requiredNumCoachesPerSquad.toString(),
-  //         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-  //         keyboardType: TextInputType.number,
-  //         title: '# Max Coaches / Squad',
-  //         callback: (value) =>
-  //             _squadDetails.maxNumCoachesPerSquad = int.parse(value),
-  //       ))
-  //     ]);
-  //   }
-
-  //   List<Widget> mainContent = [
-  //     Row(
-  //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //         children: mainSquadDetailsRow)
-  //   ];
-
-  //   if (_squadDetails.type == SquadUsage.SQUADS) {
-  //     // Update Main Content w/ squad scoring type
-  //     mainContent.addAll([
-  //       SizedBox(height: 10),
-  //       _getSquadScoringSelection(),
-  //       SizedBox(height: 10),
-  //     ]);
-
-  //     if (_squadDetails.scoringType == SquadScoring.SQUAD_RESULT_W_T_L) {
-  //       // Update Main Content w/ squad scoring parameters
-  //       mainContent.addAll([
-  //         SizedBox(height: 10),
-  //         _createScoringDetails("Squad Scoring:", _squadDetails.scoringDetails,
-  //             _createSquadTieBreakers(context, _squadDetails)),
-  //       ]);
-  //     }
-
-  //     // Update Main Content w/ squad matching
-  //     mainContent.addAll([
-  //       SizedBox(height: 10),
-  //       _getSquadMatchingSelection(),
-  //     ]);
-  //   }
-
-  //   return Column(
-  //       mainAxisAlignment: MainAxisAlignment.center, children: mainContent);
-  // }
-
-  // Row _getSquadScoringSelection() {
-  //   final theme = Theme.of(context);
-
-  //   // Create Row for Squad Scoring
-  //   List<String> squadScoringTypes = EnumToString.toList(SquadScoring.values);
-
-  //   List<DropdownMenuItem<String>> squadScoringTypesDropDown = squadScoringTypes
-  //       .map((String r) => DropdownMenuItem<String>(value: r, child: Text(r)))
-  //       .toList();
-
-  //   List<Widget> squadScoringRow = [
-  //     SizedBox(width: 10.0),
-  //     Text("Squad Scoring Type:"),
-  //     SizedBox(width: 10.0),
-  //     Expanded(
-  //         child: DropdownButtonFormField<String>(
-  //       style: theme.textTheme.labelMedium,
-  //       value: EnumToString.convertToString(_squadDetails.scoringType),
-  //       items: squadScoringTypesDropDown,
-  //       onChanged: (value) {
-  //         SquadScoring? scoringTypes = value is String
-  //             ? EnumToString.fromString(SquadScoring.values, value)
-  //             : null;
-  //         _squadDetails.scoringType = scoringTypes != null
-  //             ? scoringTypes
-  //             : SquadScoring.CUMULATIVE_PLAYER_SCORES;
-
-  //         setState(() {});
-  //       },
-  //     )),
-  //   ];
-
-  //   return Row(
-  //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //       children: squadScoringRow);
-  // }
-
-  // Row _getSquadMatchingSelection() {
-  //   final theme = Theme.of(context);
-
-  //   // Create Row for Squad Scoring
-  //   List<String> squadMatchMakingTypes =
-  //       EnumToString.toList(SquadMatchMaking.values);
-
-  //   List<DropdownMenuItem<String>> squadMatchMakingTypesDropDown =
-  //       squadMatchMakingTypes
-  //           .map((String r) =>
-  //               DropdownMenuItem<String>(value: r, child: Text(r)))
-  //           .toList();
-
-  //   List<Widget> squadMatchMakingRow = [
-  //     SizedBox(width: 10.0),
-  //     Text("Squad Match Making:"),
-  //     SizedBox(width: 10.0),
-  //     Expanded(
-  //         child: DropdownButtonFormField<String>(
-  //       value: EnumToString.convertToString(_squadDetails.matchMaking),
-  //       style: theme.textTheme.labelMedium,
-  //       items: squadMatchMakingTypesDropDown,
-  //       onChanged: (value) {
-  //         SquadMatchMaking? matchMakingType = value is String
-  //             ? EnumToString.fromString(SquadMatchMaking.values, value)
-  //             : null;
-  //         _squadDetails.matchMaking = matchMakingType != null
-  //             ? matchMakingType
-  //             : SquadMatchMaking.ATTEMPT_SQUAD_VS_SQUAD_AVOID_BYES;
-  //       },
-  //     ))
-  //   ];
-
-  //   return Row(
-  //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //       children: squadMatchMakingRow);
-  // }
-
-  Widget _createSquadTieBreakers(BuildContext context, SquadDetails details) {
-    final theme = Theme.of(context);
-
-    List<String> curTiebreakers = EnumToString.toList(details.squadTieBreakers);
-
-    String title = "Squad Tie Breakers";
-
-    if (editSquadTieBreakers) {
-      List<String> allTiebreakers =
-          EnumToString.toList(SquadTieBreakers.values);
-
-      return SetItemListWidget(
-          title: title,
-          allItems: allTiebreakers,
-          curItems: curTiebreakers,
-          onComplete: (newItems) {
-            List<SquadTieBreakers?> tieBreakers =
-                EnumToString.fromList(SquadTieBreakers.values, newItems);
-
-            setState(() {
-              details.squadTieBreakers = tieBreakers.nonNulls.toList();
-              editSquadTieBreakers = false;
-            });
-          });
-    } else {
-      StringBuffer sb = StringBuffer();
-      sb.writeln(title);
-      for (int i = 0; i < curTiebreakers.length; i++) {
-        int rank = i + 1;
-        String tieBreakerName = curTiebreakers[i];
-        sb.write(rank.toString() + ". " + tieBreakerName);
-        if (i + 1 < curTiebreakers.length) {
-          sb.write("\n");
-        }
-      }
-
-      return Row(
-        children: [
-          IconButton(
-              onPressed: () {
-                setState(() {
-                  editSquadTieBreakers = true;
-                });
-              },
-              icon: Icon(Icons.edit)),
-          Text(sb.toString(), style: theme.textTheme.bodyMedium),
-        ],
-      );
-    }
   }
 
   void _showDialogToConfirmOverwrite(

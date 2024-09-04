@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 
 class TournyIndividualSettingsWidget extends StatefulWidget {
   late IndividualScoringDetails scoringDetails;
-  late TournyScoringDetailsWidget detailsWidget;
 
   TournyIndividualSettingsWidget({Key? key, required TournamentInfo info})
       : super(key: key) {
@@ -41,11 +40,9 @@ class _TournyIndividualSettingsWidget
 
   @override
   Widget build(BuildContext context) {
-    widget.detailsWidget = TournyScoringDetailsWidget(
-        title: "Coach Scoring", details: widget.scoringDetails);
-
     return Column(children: [
-      widget.detailsWidget,
+      TournyScoringDetailsWidget(
+          title: "Coach Scoring", details: widget.scoringDetails),
       Divider(),
       _createIndividualTieBreakers(context)
     ]);
