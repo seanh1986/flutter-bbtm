@@ -399,6 +399,7 @@ class OrganizerInfo {
 enum SquadUsage {
   NO_SQUADS,
   INDIVIDUAL_USE_SQUADS_FOR_INIT,
+  INDIVIDUAL_USE_SQUADS_FOR_LABELS,
   SQUADS,
 }
 

@@ -152,13 +152,18 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       bool primaryHighlight = allowHighlights &&
           coach.nafName.toLowerCase() == nafname.toLowerCase();
 
-      // Check if coach is on squad of the logged-in user
-      Squad? userSquad = _tournament.getCoachSquad(nafname);
+      // Find squad (could be just for labeling)
+      Squad? userSquad = _tournament.showSquadLabel()
+          ? _tournament.getCoachSquad(nafname)
+          : null;
 
       String coachSquadName =
-          _tournament.useSquadVsSquad() ? coach.squadName : "";
+          _tournament.showSquadLabel() ? coach.squadName : "";
 
+      // Only highlight by squad if relevant for rankings
+      // i.e., if coach is on squad of the logged-in user & squad rankings are relevant
       bool secondaryHighlight = allowHighlights &&
+          _tournament.useSquadRankings() &&
           userSquad != null &&
           userSquad.hasCoach(coach.nafName);
 
@@ -453,7 +458,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     int totalLinesPerPage = 36;
 
     // Total lines per coach row
-    int numLinesPerRow = _tournament.useSquadVsSquad() ? 3 : 2;
+    int numLinesPerRow = _tournament.showSquadLabel() ? 3 : 2;
 
     // Total number of coaches per page
     int rowsPerPage = ((totalLinesPerPage as double) / numLinesPerRow).floor();

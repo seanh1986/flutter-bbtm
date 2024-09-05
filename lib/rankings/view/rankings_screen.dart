@@ -39,7 +39,7 @@ class _RankingsPage extends State<RankingsPage> {
     _tournament.reProcessAllRounds();
 
     Widget widget;
-    if (_tournament.useSquads()) {
+    if (_tournament.useSquadRankings()) {
       widget = _squadAndCoachTabs();
     } else {
       widget = _coachRankingsWithToggles();

@@ -25,17 +25,19 @@ class SwissPairings {
 
   /// Return true if pairing successful, false if
   RoundPairingError pairNextRound() {
-    bool useSquads = tournament.useSquads();
-
-    if (useSquads) {
-      bool useSquadVsSquad = tournament.useSquadVsSquad();
-
-      if (useSquadVsSquad) {
+    // Use Squad Rankings => Can be squad vs squad or individuals, etc.
+    if (tournament.useSquadRankings()) {
+      if (tournament.useSquadVsSquadPairings()) {
         // True squad pairings
         return _pairNextRoundAsSquads();
       } else {
         // Squad tournament based on individual pairings
-        return _pairNextRoundAsIndividuals(true, true);
+        bool avoidSquadsForInit = tournament.info.squadDetails.type ==
+            SquadUsage.INDIVIDUAL_USE_SQUADS_FOR_INIT;
+        bool avoidSquadsForAfter = tournament.info.squadDetails.matchMaking ==
+            SquadMatchMaking.INDIVIDUAL_SWISS_AVOIDING_SQUAD;
+        return _pairNextRoundAsIndividuals(
+            avoidSquadsForInit, avoidSquadsForAfter);
       }
     } else {
       // Individual pairings (may or may not use groups for init)

@@ -53,48 +53,51 @@ class _TournySquadSettingsWidget extends State<TournySquadSettingsWidget> {
       SizedBox(width: 10.0),
       Text("Squad Details:"),
       SizedBox(width: 10.0),
-      Expanded(
+      SizedBox(
+          width: 300,
           child: DropdownButtonFormField<String>(
-        style: theme.textTheme.labelMedium,
-        value: EnumToString.convertToString(widget.squadDetails.type),
-        items: squadUsageTypesDropDown,
-        onChanged: (value) {
-          SquadUsage? usage = value is String
-              ? EnumToString.fromString(SquadUsage.values, value)
-              : null;
-          widget.squadDetails.type =
-              usage != null ? usage : SquadUsage.NO_SQUADS;
+            style: theme.textTheme.labelMedium,
+            value: EnumToString.convertToString(widget.squadDetails.type),
+            items: squadUsageTypesDropDown,
+            onChanged: (value) {
+              SquadUsage? usage = value is String
+                  ? EnumToString.fromString(SquadUsage.values, value)
+                  : null;
+              widget.squadDetails.type =
+                  usage != null ? usage : SquadUsage.NO_SQUADS;
 
-          // Update UI based on toggle
-          setState(() {});
-        },
-      ))
+              // Update UI based on toggle
+              setState(() {});
+            },
+          ))
     ];
 
     if (widget.squadDetails.type == SquadUsage.SQUADS) {
       mainSquadDetailsRow.addAll([
         SizedBox(width: 10.0),
-        Expanded(
+        SizedBox(
+            width: 200,
             child: CustomTextFormField(
-          initialValue:
-              widget.squadDetails.requiredNumCoachesPerSquad.toString(),
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          keyboardType: TextInputType.number,
-          title: '# Active Coaches / Squad',
-          callback: (value) =>
-              widget.squadDetails.requiredNumCoachesPerSquad = int.parse(value),
-        )),
+              initialValue:
+                  widget.squadDetails.requiredNumCoachesPerSquad.toString(),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              keyboardType: TextInputType.number,
+              title: '# Active Coaches / Squad',
+              callback: (value) => widget
+                  .squadDetails.requiredNumCoachesPerSquad = int.parse(value),
+            )),
         SizedBox(width: 10.0),
-        Expanded(
+        SizedBox(
+            width: 200,
             child: CustomTextFormField(
-          initialValue:
-              widget.squadDetails.requiredNumCoachesPerSquad.toString(),
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          keyboardType: TextInputType.number,
-          title: '# Max Coaches / Squad',
-          callback: (value) =>
-              widget.squadDetails.maxNumCoachesPerSquad = int.parse(value),
-        ))
+              initialValue:
+                  widget.squadDetails.requiredNumCoachesPerSquad.toString(),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              keyboardType: TextInputType.number,
+              title: '# Max Coaches / Squad',
+              callback: (value) =>
+                  widget.squadDetails.maxNumCoachesPerSquad = int.parse(value),
+            ))
       ]);
     }
 

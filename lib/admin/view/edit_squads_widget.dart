@@ -19,7 +19,7 @@ class _EditSquadsWidget extends State<EditSquadsWidget> {
 
   Map<String, SquadItem> _assignedSquads = Map();
 
-  final _unselectedListKey = GlobalKey<AnimatedListState>();
+  // final _unselectedListKey = GlobalKey<AnimatedListState>();
 
   late Tournament _originalTournament;
   late Tournament _tournament;

@@ -4,11 +4,11 @@ import 'package:bbnaf/tournament_repository/src/models/models.dart';
 class Coach extends IMatchupParticipant {
   late String nafName; // Key
 
-  late String squadName;
+  late String squadName = "";
 
-  late String coachName;
+  late String coachName = "";
 
-  late String teamName;
+  late String teamName = "";
 
   late int nafNumber;
 
@@ -267,7 +267,7 @@ class Coach extends IMatchupParticipant {
           _tieBreakers.add((deltaTd() + deltaCas()).toDouble());
           break;
         case TieBreaker.SquadScore:
-          Squad? squad = t.getCoachSquad(nafName);
+          Squad? squad = t.useSquadRankings() ? t.getCoachSquad(nafName) : null;
           _tieBreakers.add(squad != null ? squad.points() : 0.0);
           break;
         case TieBreaker.NumWins:
