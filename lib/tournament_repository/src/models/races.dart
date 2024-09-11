@@ -157,4 +157,11 @@ class RaceUtils {
         race == Race.Gnomes ||
         race == Race.Snotling;
   }
+
+  static bool canBeCustomStunty(Race race) {
+    return race == Race.Lizardmen ||
+        race == Race.UnderworldDenizens ||
+        race == Race.BlackOrc ||
+        race == Race.Unknown;
+  }
 }

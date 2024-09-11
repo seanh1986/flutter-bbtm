@@ -45,14 +45,16 @@ class Coach extends IMatchupParticipant {
   bool isCustomStunty = false;
 
   Coach(String nafName, String squadName, this.coachName, this.race,
-      this.teamName, this.nafNumber, this.active) {
+      this.teamName, this.nafNumber, this.active,
+      {this.isCustomStunty = false}) {
     this.nafName = nafName.trim();
     this.squadName = squadName.trim();
   }
 
   Coach.from(Coach c)
       : this(c.nafName, c.squadName, c.coachName, c.race, c.teamName,
-            c.nafNumber, c.active);
+            c.nafNumber, c.active,
+            isCustomStunty: c.isCustomStunty);
 
   @override
   OrgType type() {
@@ -310,6 +312,9 @@ class Coach extends IMatchupParticipant {
     final tActive = json['active'] as bool?;
     this.active = tActive != null && tActive;
 
+    final tCustomStunty = json['is_custom_stunty'] as bool?;
+    this.isCustomStunty = tCustomStunty != null && tCustomStunty;
+
     final tRoster = json['roster'] as String?;
     this.rosterFileName = tRoster != null ? tRoster.trim() : "";
   }
@@ -322,6 +327,7 @@ class Coach extends IMatchupParticipant {
         'race': RaceUtils.getName(race),
         'naf_number': nafNumber,
         'active': active,
+        'is_custom_stunty': isCustomStunty,
         'roster': rosterFileName,
       };
 }
