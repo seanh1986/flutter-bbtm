@@ -566,14 +566,42 @@ class CoachesDataSource extends DataTableSource {
       decoration: InputDecoration(labelText: "Race"),
     );
 
+    List<Widget> widgets = [teamNameField, raceField];
+
+    if (RaceUtils.canBeCustomStunty(c.race)) {
+      widgets.add(_getCustomStuntyOnOffToggle(c));
+    }
+
     return Column(
       children: [
         Expanded(
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [teamNameField, raceField],
+          children: widgets,
         ))
+      ],
+    );
+  }
+
+  Widget _getCustomStuntyOnOffToggle(Coach c) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Custom Stunty"),
+        Checkbox(
+          value: c.isCustomStunty,
+          onChanged: (value) {
+            if (value != null) {
+              c.isCustomStunty = value;
+
+              // Force reload the UI to register the checkbox action
+              if (editIdx != null) {
+                editCallback(editIdx!, false, newCoaches, coachIdxNafRenames);
+              }
+            }
+          },
+        ),
       ],
     );
   }
