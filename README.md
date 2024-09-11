@@ -157,7 +157,7 @@ add-zsh-hook chpwd fvm_auto_use
 fvm_auto_use
 ```
 
-### Development vs. Prodcution
+### Development vs. Production
 
 Two Google Firebase projects are setup for `production` and `development` respesctively.
 
