@@ -1,5 +1,6 @@
 // ignore_for_file: must_be_immutable
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/rankings/models/ranking_filter.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
@@ -98,6 +99,13 @@ class _TournyRankingSettingsWidget extends State<TournyRankingSettingsWidget> {
       rankingFilterWidgets.add(Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
+            SizedBox(width: 10.0),
+            IconButton(
+                onPressed: () {
+                  widget.coachRaceRankingFilters.removeAt(i);
+                  setState(() {});
+                },
+                icon: Icon(Icons.delete)),
             SizedBox(width: 10.0),
             Expanded(
                 child: CustomTextFormField(
