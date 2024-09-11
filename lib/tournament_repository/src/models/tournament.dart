@@ -95,7 +95,7 @@ class Tournament {
   }
 
   Squad? getCoachSquad(String nafName) {
-    if (!useSquads() && !useSquadsForInitOnly()) {
+    if (noSquads()) {
       return null;
     }
 
@@ -115,6 +115,10 @@ class Tournament {
   }
 
   bool isSquadCaptainFor(String captain, String memberNafName) {
+    if (!useSquadRankings()) {
+      return false;
+    }
+
     Squad? squad1 = getCoachSquad(captain);
     Squad? squad2 = getCoachSquad(memberNafName);
 
@@ -141,16 +145,27 @@ class Tournament {
     return info.locked;
   }
 
-  bool useSquads() {
+  bool noSquads() {
+    return info.squadDetails.type == SquadUsage.NO_SQUADS;
+  }
+
+  bool showSquadLabel() {
+    return info.squadDetails.type == SquadUsage.SQUADS ||
+        info.squadDetails.type == SquadUsage.INDIVIDUAL_USE_SQUADS_FOR_LABELS;
+  }
+
+  bool useSquadsForInitOrLabel() {
+    return info.squadDetails.type ==
+            SquadUsage.INDIVIDUAL_USE_SQUADS_FOR_INIT ||
+        info.squadDetails.type == SquadUsage.INDIVIDUAL_USE_SQUADS_FOR_LABELS;
+  }
+
+  bool useSquadRankings() {
     return info.squadDetails.type == SquadUsage.SQUADS;
   }
 
-  bool useSquadsForInitOnly() {
-    return info.squadDetails.type == SquadUsage.INDIVIDUAL_USE_SQUADS_FOR_INIT;
-  }
-
-  bool useSquadVsSquad() {
-    if (!useSquads()) {
+  bool useSquadVsSquadPairings() {
+    if (!useSquadRankings()) {
       return false;
     }
 
@@ -196,12 +211,12 @@ class Tournament {
       awayCoach?.overwriteRecord(info);
     });
 
-    if (useSquads()) {
+    if (!noSquads()) {
       _squads.forEach((squad) {
         squad.overwriteRecord(this);
       });
 
-      if (useSquadVsSquad()) {
+      if (useSquadRankings()) {
         squadRounds.add(SquadRound.fromCoachRound(this, round));
       }
     }
@@ -248,7 +263,7 @@ class Tournament {
       c.updateOppScoreAndTieBreakers(this);
     });
 
-    if (useSquads()) {
+    if (useSquadRankings()) {
       // Overwrite records
       _squads.forEach((squad) {
         squad.overwriteRecord(this);
@@ -259,11 +274,9 @@ class Tournament {
         squad.updateOppScoreAndTieBreakers(this);
       });
 
-      if (useSquadVsSquad()) {
-        coachRounds.forEach((r) {
-          squadRounds.add(SquadRound.fromCoachRound(this, r));
-        });
-      }
+      coachRounds.forEach((r) {
+        squadRounds.add(SquadRound.fromCoachRound(this, r));
+      });
     }
   }
 
@@ -276,7 +289,7 @@ class Tournament {
       return false;
     }
 
-    if (useSquads() &&
+    if (useSquadRankings() &&
         matchups.getMatches().isNotEmpty &&
         matchups.getMatches().first is SquadMatchup) {
       SquadRound squadRound = SquadRound.fromRoundMatching(matchups);
@@ -318,7 +331,7 @@ class Tournament {
       return Authorization.HomeCoach;
     }
 
-    if (useSquads()) {
+    if (useSquadRankings()) {
       if (isSquadCaptainFor(nafName, matchup.awayNafName)) {
         return Authorization.AwayCaptain;
       } else if (isSquadCaptainFor(nafName, matchup.homeNafName)) {

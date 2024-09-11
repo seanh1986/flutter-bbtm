@@ -272,8 +272,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
     _items = List.from(_tournament.getSquads().where((a) =>
         (widget.filter == null || widget.filter!.isActive(a)) && // Check filter
-        a.isActive(_tournament) &&
-        a.gamesPlayed() > 0)); // "active"
+        (a.isActive(_tournament) || a.gamesPlayed() > 0))); // "active"
 
     _items.sort((Squad a, Squad b) {
       final double aValue = _getSortingValue(a, _sortField!);

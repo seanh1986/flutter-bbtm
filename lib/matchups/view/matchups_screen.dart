@@ -51,9 +51,11 @@ class _MatchupsPage extends State<MatchupsPage> {
       allowMyMatchup = true;
     }
 
-    Squad? squad = _tournament.getCoachSquad(nafName);
-    if (squad != null && squad.isActive(_tournament)) {
-      allowMySquad = true;
+    if (_tournament.useSquadRankings()) {
+      Squad? squad = _tournament.getCoachSquad(nafName);
+      if (squad != null && squad.isActive(_tournament)) {
+        allowMySquad = true;
+      }
     }
 
     if (allowMyMatchup) {
@@ -64,7 +66,7 @@ class _MatchupsPage extends State<MatchupsPage> {
       subScreensAllowed.add(MatchupSubScreens.MY_SQUAD);
     }
 
-    if (_tournament.useSquadVsSquad()) {
+    if (_tournament.useSquadVsSquadPairings()) {
       subScreensAllowed.add(MatchupSubScreens.SQUAD_MATCHUPS);
     }
 
@@ -94,7 +96,7 @@ class _MatchupsPage extends State<MatchupsPage> {
   WidgetBuilder _getSubScreenBuilder(MatchupSubScreens subScreen) {
     switch (subScreen) {
       case MatchupSubScreens.MY_SQUAD:
-        if (_tournament.useSquadVsSquad()) {
+        if (_tournament.useSquadRankings()) {
           return (context) {
             String nafName = _user.getNafName();
             Squad? squad = _tournament.getCoachSquad(nafName);

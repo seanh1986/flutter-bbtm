@@ -4,7 +4,7 @@ import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 
 abstract class RankingFilter {
-  late final String name;
+  late String name;
 
   RankingFilter(this.name);
 
@@ -21,7 +21,7 @@ abstract class RankingFilter {
 }
 
 abstract class CoachRankingFilter extends RankingFilter {
-  late final List<CoachRankingFields> fields;
+  late List<CoachRankingFields> fields;
 
   CoachRankingFilter(
       {required String name,

@@ -61,7 +61,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
       DataColumn2(label: Text("Team")),
     ];
 
-    if (_tournament.useSquads() || _tournament.useSquadsForInitOnly()) {
+    if (!_tournament.noSquads()) {
       _coachCols.add(DataColumn2(label: Text("Squad")));
     }
   }
@@ -248,7 +248,7 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
 
     _coachSource = CoachesDataSource(
         theme: theme,
-        useSquad: _tournament.useSquads() || _tournament.useSquadsForInitOnly(),
+        useSquad: !_tournament.noSquads(),
         originalCoaches: _coaches,
         editIdx: _editIdx,
         coachIdxNafRenames: _coachIdxNafRenames,

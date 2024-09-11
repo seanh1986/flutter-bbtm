@@ -272,7 +272,7 @@ class Squad extends IMatchupParticipant {
       }
     });
 
-    if (t.useSquadVsSquad()) {
+    if (t.useSquadVsSquadPairings()) {
       _opponents.forEach((s) {
         String oppSquadName = s.name();
         Squad? oppSquad = t.getSquad(oppSquadName);
