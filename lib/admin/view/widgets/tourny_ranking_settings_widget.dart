@@ -11,12 +11,14 @@ import 'package:flutter/material.dart';
 class TournyRankingSettingsWidget extends StatefulWidget {
   late List<CoachRaceFilter> coachRaceRankingFilters;
   late bool showRankings;
+  late bool showBonusPtsInRankings;
 
   TournyRankingSettingsWidget({Key? key, required TournamentInfo info})
       : super(key: key) {
     this.coachRaceRankingFilters =
         List.from(info.scoringDetails.coachRaceRankingFilters);
     this.showRankings = info.showRankings;
+    this.showBonusPtsInRankings = info.showBonusPtsInRankings;
   }
 
   @override
@@ -27,6 +29,7 @@ class TournyRankingSettingsWidget extends StatefulWidget {
   void updateTournamentInfo(TournamentInfo info) {
     info.scoringDetails.coachRaceRankingFilters = coachRaceRankingFilters;
     info.showRankings = showRankings;
+    info.showBonusPtsInRankings = showBonusPtsInRankings;
   }
 }
 
@@ -52,6 +55,13 @@ class _TournyRankingSettingsWidget extends State<TournyRankingSettingsWidget> {
     ];
 
     widgets.addAll(_getCoachRankingFilterWidgets());
+
+    widgets.addAll([
+      SizedBox(height: 5),
+      Divider(),
+      _getDisplayBonusPointRankingsToggle(),
+      SizedBox(height: 5),
+    ]);
 
     return Column(children: widgets);
   }
@@ -134,5 +144,24 @@ class _TournyRankingSettingsWidget extends State<TournyRankingSettingsWidget> {
     }
 
     return rankingFilterWidgets;
+  }
+
+  Widget _getDisplayBonusPointRankingsToggle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Show Bonus Points in Rankings"),
+        Checkbox(
+          value: widget.showRankings,
+          onChanged: (value) {
+            if (value != null) {
+              setState(() {
+                widget.showRankings = value;
+              });
+            }
+          },
+        ),
+      ],
+    );
   }
 }
