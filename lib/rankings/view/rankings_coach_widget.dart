@@ -101,10 +101,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   double? _getColumnWidth(CoachRankingField f) {
     switch (f.type) {
       case CoachRankingFieldType.OppScore:
+      case CoachRankingFieldType.Bonus: // Perhaps based on length of label?
         return 110;
       case CoachRankingFieldType.W_T_L:
       case CoachRankingFieldType.BestSport:
-      case CoachRankingFieldType.Bonus: // Perhaps based on length of label?
         return 90;
       case CoachRankingFieldType.Pts:
       case CoachRankingFieldType.Td:
@@ -360,13 +360,11 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         return c.bestSportPoints.toDouble();
       case CoachRankingFieldType.Bonus:
         {
-          ScoringDetails scoringDetails = _tournament.info.scoringDetails;
-
-          if (f.bonusIdx < 0 || f.bonusIdx >= scoringDetails.bonusPts.length) {
+          if (f.bonusIdx < 0 || f.bonusIdx >= c.bonusPts.length) {
             return 0.0;
           }
 
-          return scoringDetails.bonusPts[f.bonusIdx!].weight;
+          return c.bonusPts[f.bonusIdx];
         }
       default:
         return 0.0;

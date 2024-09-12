@@ -95,12 +95,12 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   double? _getColumnWidth(SquadRankingField f) {
     switch (f.type) {
       case SquadRankingFieldType.OppScore:
+      case SquadRankingFieldType.Bonus: // Perhaps based on length of label?
         return 100;
       case SquadRankingFieldType.SumIndividualScore:
       case SquadRankingFieldType.W_T_L:
       case SquadRankingFieldType.SumBestSport:
       case SquadRankingFieldType.W_Percent:
-      case SquadRankingFieldType.Bonus: // Perhaps based on length of label?
         return 90;
       case SquadRankingFieldType.Pts:
       case SquadRankingFieldType.SumTd:
@@ -393,16 +393,11 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         return s.sumBestSport(_tournament).toDouble();
       case SquadRankingFieldType.Bonus:
         {
-          ScoringDetails scoringDetails =
-              _tournament.info.squadDetails.scoringDetails;
-
-          if (f.bonusIdx == null ||
-              f.bonusIdx! < 0 ||
-              f.bonusIdx! >= scoringDetails.bonusPts.length) {
+          if (f.bonusIdx < 0 || f.bonusIdx >= s.bonusPts.length) {
             return 0.0;
           }
 
-          return scoringDetails.bonusPts[f.bonusIdx!].weight;
+          return s.bonusPts[f.bonusIdx];
         }
       default:
         return 0.0;

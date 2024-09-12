@@ -43,10 +43,10 @@ abstract class CoachRankingFilter extends RankingFilter {
 
   CoachRankingFilter.fromJson(Map<String, dynamic> json)
       : super.fromJson(json) {
+    List<CoachRankingField> tParsedFields = [];
+
     // Backwards compatibility
     final tOldFields = json['fields'] as List<dynamic>?;
-
-    List<CoachRankingField> tParsedFields = [];
 
     if (tOldFields != null) {
       tOldFields.forEach((f) {
@@ -63,7 +63,7 @@ abstract class CoachRankingFilter extends RankingFilter {
     if (tFieldList != null) {
       tFieldList.forEach((tField) {
         var fJson = tField as Map<String, dynamic>;
-        fields.add(CoachRankingField.fromJson(fJson));
+        tParsedFields.add(CoachRankingField.fromJson(fJson));
       });
     }
 
@@ -153,17 +153,6 @@ abstract class SquadRankingFilter extends RankingFilter {
 
     if (tOldFields != null) {
       tOldFields.forEach((f) {
-        SquadRankingFieldType? tParsed =
-            EnumToString.fromString(SquadRankingFieldType.values, f);
-        if (tParsed != null) {
-          tParsedFields.add(SquadRankingField(tParsed));
-        }
-      });
-    }
-
-    final tFields = json['fields'] as List<dynamic>?;
-    if (tFields != null) {
-      tFields.forEach((f) {
         SquadRankingFieldType? tParsed =
             EnumToString.fromString(SquadRankingFieldType.values, f);
         if (tParsed != null) {

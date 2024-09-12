@@ -34,7 +34,7 @@ class Coach extends IMatchupParticipant {
 
   int bestSportPoints = 0;
 
-  List<double> _bonusPts = <double>[];
+  List<double> bonusPts = <double>[];
 
   List<double> _tieBreakers = <double>[];
 
@@ -153,9 +153,9 @@ class Coach extends IMatchupParticipant {
     bestSportPoints = 0;
     _opponents.clear();
 
-    _bonusPts.clear();
+    bonusPts.clear();
     t.scoringDetails.bonusPts.forEach((element) {
-      _bonusPts.add(0);
+      bonusPts.add(0);
     });
 
     matches.forEach((m) {
@@ -183,7 +183,7 @@ class Coach extends IMatchupParticipant {
         oppCas += matchStats.awayCas;
 
         for (int i = 0; i < matchStats.homeBonusPts.length; i++) {
-          _bonusPts[i] += matchStats.homeBonusPts[i];
+          bonusPts[i] += matchStats.homeBonusPts[i];
         }
 
         // Based on opponent's vote
@@ -211,7 +211,7 @@ class Coach extends IMatchupParticipant {
         oppCas += matchStats.homeCas;
 
         for (int i = 0; i < matchStats.awayBonusPts.length; i++) {
-          _bonusPts[i] += matchStats.awayBonusPts[i];
+          bonusPts[i] += matchStats.awayBonusPts[i];
         }
 
         // Based on opponent's vote
@@ -228,9 +228,9 @@ class Coach extends IMatchupParticipant {
     // Add bonus points to total points
     List<BonusDetails> bonusDetails = t.scoringDetails.bonusPts;
 
-    for (int i = 0; i < _bonusPts.length; i++) {
+    for (int i = 0; i < bonusPts.length; i++) {
       double weight = i < bonusDetails.length ? bonusDetails[i].weight : 0.0;
-      _points += _bonusPts[i] * weight;
+      _points += bonusPts[i] * weight;
     }
   }
 

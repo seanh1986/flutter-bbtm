@@ -122,7 +122,7 @@ class CoachRankingField extends RankingField {
             return "";
           }
 
-          ScoringDetails scoringDetails = info.squadDetails.scoringDetails;
+          ScoringDetails scoringDetails = info.scoringDetails;
 
           if (bonusIdx < 0 || bonusIdx >= scoringDetails.bonusPts.length) {
             return "";

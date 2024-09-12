@@ -138,6 +138,22 @@ class _RankingsPage extends State<RankingsPage> {
       }));
     });
 
+    // If we should use bonus points
+    ScoringDetails coachScoringDetails = _tournament.info.scoringDetails;
+    if (coachScoringDetails.bonusPts.isNotEmpty &&
+        _tournament.info.showBonusPtsInRankings) {
+      List<CoachRankingField> fields = [];
+
+      for (int i = 0; i < coachScoringDetails.bonusPts.length; i++) {
+        fields.add(CoachRankingField(CoachRankingFieldType.Bonus,
+            info: _tournament.info, bonusIdx: i));
+      }
+
+      items.add(ToggleWidgetItem("Bonuses", (context) {
+        return RankingCoachPage(title: "Bonuses", fields: fields);
+      }));
+    }
+
 // TODO: BestSport
     // if (showAdminDetails) {
     //   items.add(ToggleWidgetItem("Sport", (context) {
@@ -191,6 +207,23 @@ class _RankingsPage extends State<RankingsPage> {
             title: "Squad " + f.name, filter: f, fields: f.fields);
       }));
     });
+
+    // If we should use bonus points
+    ScoringDetails squadScoringDetails =
+        _tournament.info.squadDetails.scoringDetails;
+    if (squadScoringDetails.bonusPts.isNotEmpty &&
+        _tournament.info.showBonusPtsInRankings) {
+      List<CoachRankingField> fields = [];
+
+      for (int i = 0; i < squadScoringDetails.bonusPts.length; i++) {
+        fields.add(CoachRankingField(CoachRankingFieldType.Bonus,
+            info: _tournament.info, bonusIdx: i));
+      }
+
+      items.add(ToggleWidgetItem("Bonuses", (context) {
+        return RankingCoachPage(title: "Bonuses", fields: fields);
+      }));
+    }
 
     return ToggleWidget(items: items);
   }
