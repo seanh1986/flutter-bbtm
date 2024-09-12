@@ -152,11 +152,11 @@ class _TournyRankingSettingsWidget extends State<TournyRankingSettingsWidget> {
       children: [
         Text("Show Bonus Points in Rankings"),
         Checkbox(
-          value: widget.showRankings,
+          value: widget.showBonusPtsInRankings,
           onChanged: (value) {
             if (value != null) {
               setState(() {
-                widget.showRankings = value;
+                widget.showBonusPtsInRankings = value;
               });
             }
           },
