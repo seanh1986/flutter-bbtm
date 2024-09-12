@@ -26,6 +26,8 @@ class TournamentInfo {
 
   bool showRankings = true;
 
+  bool showBonusPtsInRankings = true;
+
   // Prevents users from submitting updates
   bool locked = false;
 
@@ -124,6 +126,11 @@ class TournamentInfo {
     final tShowRankings = json['show_rankings'] as bool?;
     this.showRankings = tShowRankings == null || tShowRankings;
 
+    // Default is showRankings for legacy purposes
+    final tShowBonusPtsInRankings = json['show_bonus_pts_in_rankings'] as bool?;
+    this.showBonusPtsInRankings =
+        tShowBonusPtsInRankings == null || tShowBonusPtsInRankings;
+
     // Default is locked for legacy purposes
     final tLocked = json['locked'] as bool?;
     this.locked = tLocked == null || tLocked;
@@ -145,6 +152,7 @@ class TournamentInfo {
         'logo_file_name': logoFileName,
         'coach_display_name': EnumToString.convertToString(coachDisplayName),
         'show_rankings': showRankings,
+        'show_bonus_pts_in_rankings': showBonusPtsInRankings,
         'locked': locked,
       };
 }

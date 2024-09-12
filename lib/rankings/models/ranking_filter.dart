@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/rankings/rankings.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 
+/**
+ * These are filters which apply to the rankings, reducing how many participants are shown
+ */
 abstract class RankingFilter {
   late String name;
 
@@ -21,32 +26,44 @@ abstract class RankingFilter {
 }
 
 abstract class CoachRankingFilter extends RankingFilter {
-  late List<CoachRankingFields> fields;
+  late List<CoachRankingField> fields;
 
-  CoachRankingFilter(
-      {required String name,
-      this.fields = const [
-        CoachRankingFields.Pts,
-        CoachRankingFields.W_T_L,
-        CoachRankingFields.OppScore,
-        CoachRankingFields.Td,
-        CoachRankingFields.Cas,
-      ]})
-      : super(name);
+  CoachRankingFilter({required String name, this.fields = const []})
+      : super(name) {
+    if (fields.isEmpty) {
+      fields = [
+        CoachRankingField(CoachRankingFieldType.Pts),
+        CoachRankingField(CoachRankingFieldType.W_T_L),
+        CoachRankingField(CoachRankingFieldType.OppScore),
+        CoachRankingField(CoachRankingFieldType.Td),
+        CoachRankingField(CoachRankingFieldType.Cas),
+      ];
+    }
+  }
 
   CoachRankingFilter.fromJson(Map<String, dynamic> json)
       : super.fromJson(json) {
-    final tFields = json['fields'] as List<dynamic>?;
+    List<CoachRankingField> tParsedFields = [];
 
-    List<CoachRankingFields> tParsedFields = [];
+    // Backwards compatibility
+    final tOldFields = json['fields'] as List<dynamic>?;
 
-    if (tFields != null) {
-      tFields.forEach((f) {
-        CoachRankingFields? tParsed =
-            EnumToString.fromString(CoachRankingFields.values, f);
+    if (tOldFields != null) {
+      tOldFields.forEach((f) {
+        CoachRankingFieldType? tParsed =
+            EnumToString.fromString(CoachRankingFieldType.values, f);
         if (tParsed != null) {
-          tParsedFields.add(tParsed);
+          tParsedFields.add(CoachRankingField(tParsed));
         }
+      });
+    }
+
+    // New Parsing
+    final tFieldList = json['field_list'] as List<dynamic>?;
+    if (tFieldList != null) {
+      tFieldList.forEach((tField) {
+        var fJson = tField as Map<String, dynamic>;
+        tParsedFields.add(CoachRankingField.fromJson(fJson));
       });
     }
 
@@ -58,8 +75,7 @@ abstract class CoachRankingFilter extends RankingFilter {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = super.toJson();
 
-    data['fields'] =
-        fields.map((e) => EnumToString.convertToString(e)).toList();
+    data['field_list'] = fields.map((e) => e.toJson()).toList();
     return data;
   }
 }
@@ -67,9 +83,9 @@ abstract class CoachRankingFilter extends RankingFilter {
 class StuntyFilter extends CoachRankingFilter {
   StuntyFilter()
       : super(name: "Stunty", fields: [
-          CoachRankingFields.Pts,
-          CoachRankingFields.Td,
-          CoachRankingFields.Cas
+          CoachRankingField(CoachRankingFieldType.Pts),
+          CoachRankingField(CoachRankingFieldType.Td),
+          CoachRankingField(CoachRankingFieldType.Cas),
         ]);
 
   @override
@@ -122,7 +138,7 @@ class CoachRaceFilter extends CoachRankingFilter {
 }
 
 abstract class SquadRankingFilter extends RankingFilter {
-  late final List<SquadRankingFields> fields;
+  late final List<SquadRankingField> fields;
 
   SquadRankingFilter(String name, this.fields) : super(name);
 
@@ -130,16 +146,27 @@ abstract class SquadRankingFilter extends RankingFilter {
 
   SquadRankingFilter.fromJson(Map<String, dynamic> json)
       : super.fromJson(json) {
-    List<SquadRankingFields> tParsedFields = [];
+    List<SquadRankingField> tParsedFields = [];
 
-    final tFields = json['fields'] as List<dynamic>?;
-    if (tFields != null) {
-      tFields.forEach((f) {
-        SquadRankingFields? tParsed =
-            EnumToString.fromString(SquadRankingFields.values, f);
+    // Backwards compatibility
+    final tOldFields = json['fields'] as List<dynamic>?;
+
+    if (tOldFields != null) {
+      tOldFields.forEach((f) {
+        SquadRankingFieldType? tParsed =
+            EnumToString.fromString(SquadRankingFieldType.values, f);
         if (tParsed != null) {
-          tParsedFields.add(tParsed);
+          tParsedFields.add(SquadRankingField(tParsed));
         }
+      });
+    }
+
+    // New Parsing
+    final tFieldList = json['field_list'] as List<dynamic>?;
+    if (tFieldList != null) {
+      tFieldList.forEach((tField) {
+        var fJson = tField as Map<String, dynamic>;
+        tParsedFields.add(SquadRankingField.fromJson(fJson));
       });
     }
 
@@ -149,8 +176,7 @@ abstract class SquadRankingFilter extends RankingFilter {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = super.toJson();
 
-    data['fields'] =
-        fields.map((e) => EnumToString.convertToString(e)).toList();
+    data['field_list'] = fields.map((e) => e.toJson()).toList();
     return data;
   }
 }
@@ -159,13 +185,13 @@ class SquadNameFilter extends SquadRankingFilter {
   late final List<String> squadNames;
 
   SquadNameFilter(String name, this.squadNames)
-      : super(name, const [
-          SquadRankingFields.Pts,
-          SquadRankingFields.W_T_L,
-          SquadRankingFields.SumIndividualScore,
-          SquadRankingFields.OppScore,
-          SquadRankingFields.SumTd,
-          SquadRankingFields.SumCas,
+      : super(name, [
+          SquadRankingField(SquadRankingFieldType.Pts),
+          SquadRankingField(SquadRankingFieldType.W_T_L),
+          SquadRankingField(SquadRankingFieldType.SumIndividualScore),
+          SquadRankingField(SquadRankingFieldType.OppScore),
+          SquadRankingField(SquadRankingFieldType.SumTd),
+          SquadRankingField(SquadRankingFieldType.SumCas),
         ]);
 
   SquadNameFilter.fromJson(Map<String, dynamic> json) : super.fromJson(json) {

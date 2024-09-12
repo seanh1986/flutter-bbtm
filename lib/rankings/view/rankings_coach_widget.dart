@@ -9,30 +9,18 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-enum CoachRankingFields {
-  Pts,
-  W,
-  T,
-  L,
-  W_T_L,
-  W_Percent,
-  Td,
-  Cas,
-  OppTd,
-  OppCas,
-  OppScore,
-  DeltaTd,
-  DeltaCas,
-  BestSport,
-}
-
 class RankingCoachPage extends StatefulWidget {
   final String title;
   final CoachRankingFilter? filter;
-  final List<CoachRankingFields> fields;
+  final List<CoachRankingField> fields;
+  final bool showBonuses;
 
   RankingCoachPage(
-      {Key? key, required this.title, this.filter, required this.fields})
+      {Key? key,
+      required this.title,
+      this.filter,
+      required this.fields,
+      this.showBonuses = false})
       : super(key: key);
 
   @override
@@ -47,7 +35,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
 
   late String _title;
 
-  CoachRankingFields? _sortField;
+  CoachRankingField? _sortField;
 
   bool _sortAscending = false;
 
@@ -66,7 +54,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     _sortAscending = false;
   }
 
-  void _sort<T>(CoachRankingFields field, bool ascending) {
+  void _sort<T>(CoachRankingField field, bool ascending) {
     setState(() {
       _reset = false;
       _sortField = field;
@@ -83,12 +71,12 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         .add(DataColumn2(label: Center(child: Text('Coach')), fixedWidth: 200));
 
     widget.fields.forEach((f) {
-      String name = _getColumnName(f);
+      String name = f.label;
 
       if (name.isNotEmpty) {
         DataColumnSortCallback? sorter;
-        switch (f) {
-          case CoachRankingFields.W_T_L:
+        switch (f.type) {
+          case CoachRankingFieldType.W_T_L:
             sorter = null;
             break;
           default:
@@ -110,20 +98,21 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     return columns;
   }
 
-  double? _getColumnWidth(CoachRankingFields f) {
-    switch (f) {
-      case CoachRankingFields.OppScore:
+  double? _getColumnWidth(CoachRankingField f) {
+    switch (f.type) {
+      case CoachRankingFieldType.OppScore:
+      case CoachRankingFieldType.Bonus: // Perhaps based on length of label?
         return 110;
-      case CoachRankingFields.W_T_L:
-      case CoachRankingFields.BestSport:
+      case CoachRankingFieldType.W_T_L:
+      case CoachRankingFieldType.BestSport:
         return 90;
-      case CoachRankingFields.Pts:
-      case CoachRankingFields.Td:
-      case CoachRankingFields.Cas:
-      case CoachRankingFields.OppTd:
-      case CoachRankingFields.OppCas:
-      case CoachRankingFields.DeltaTd:
-      case CoachRankingFields.DeltaCas:
+      case CoachRankingFieldType.Pts:
+      case CoachRankingFieldType.Td:
+      case CoachRankingFieldType.Cas:
+      case CoachRankingFieldType.OppTd:
+      case CoachRankingFieldType.OppCas:
+      case CoachRankingFieldType.DeltaTd:
+      case CoachRankingFieldType.DeltaCas:
         return 70;
       default:
         return null;
@@ -184,7 +173,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
       cells.add(_createCoachDataCell(coach, coachSquadName));
 
       widget.fields.forEach((f) {
-        String name = _getColumnName(f);
+        String name = f.label;
 
         if (name.isNotEmpty) {
           cells.add(_createDataCell(_getCellValue(coach, f)));
@@ -315,44 +304,9 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     return skipIndices + idx;
   }
 
-  String _getColumnName(CoachRankingFields f) {
-    switch (f) {
-      case CoachRankingFields.Pts:
-        return "Pts";
-      case CoachRankingFields.W:
-        return "W";
-      case CoachRankingFields.T:
-        return "T";
-      case CoachRankingFields.L:
-        return "L";
-      case CoachRankingFields.W_T_L:
-        return "W/T/L";
-      case CoachRankingFields.W_Percent:
-        return "%";
-      case CoachRankingFields.Td:
-        return "Td+";
-      case CoachRankingFields.Cas:
-        return "Cas+";
-      case CoachRankingFields.OppTd:
-        return "Td-";
-      case CoachRankingFields.OppCas:
-        return "Cas-";
-      case CoachRankingFields.DeltaTd:
-        return "Td\u0394";
-      case CoachRankingFields.DeltaCas:
-        return "Cas\u0394";
-      case CoachRankingFields.OppScore:
-        return "OppScore";
-      case CoachRankingFields.BestSport:
-        return "Sport";
-      default:
-        return "";
-    }
-  }
-
-  String _getCellValue(Coach c, CoachRankingFields f) {
-    switch (f) {
-      case CoachRankingFields.W_T_L:
+  String _getCellValue(Coach c, CoachRankingField f) {
+    switch (f.type) {
+      case CoachRankingFieldType.W_T_L:
         return c.wins().toString() +
             "/" +
             c.ties().toString() +
@@ -363,47 +317,55 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     }
   }
 
-  double _getSortingValue(Coach c, CoachRankingFields f) {
-    switch (f) {
-      case CoachRankingFields.Pts:
+  double _getSortingValue(Coach c, CoachRankingField f) {
+    switch (f.type) {
+      case CoachRankingFieldType.Pts:
         return c.pointsWithTieBreakersBuiltIn();
-      case CoachRankingFields.Td:
+      case CoachRankingFieldType.Td:
         return 1000.0 * c.tds + c.deltaTd();
-      case CoachRankingFields.Cas:
+      case CoachRankingFieldType.Cas:
         return 1000.0 * c.cas + c.deltaCas();
       default:
         return _getViewValue(c, f);
     }
   }
 
-  double _getViewValue(Coach c, CoachRankingFields f) {
-    switch (f) {
-      case CoachRankingFields.Pts:
+  double _getViewValue(Coach c, CoachRankingField f) {
+    switch (f.type) {
+      case CoachRankingFieldType.Pts:
         return c.points();
-      case CoachRankingFields.W:
+      case CoachRankingFieldType.W:
         return c.wins().toDouble();
-      case CoachRankingFields.T:
+      case CoachRankingFieldType.T:
         return c.ties().toDouble();
-      case CoachRankingFields.L:
+      case CoachRankingFieldType.L:
         return c.losses().toDouble();
-      case CoachRankingFields.W_Percent:
+      case CoachRankingFieldType.W_Percent:
         return c.winPercent();
-      case CoachRankingFields.Td:
+      case CoachRankingFieldType.Td:
         return c.tds.toDouble();
-      case CoachRankingFields.Cas:
+      case CoachRankingFieldType.Cas:
         return c.cas.toDouble();
-      case CoachRankingFields.OppTd:
+      case CoachRankingFieldType.OppTd:
         return c.oppTds.toDouble();
-      case CoachRankingFields.OppCas:
+      case CoachRankingFieldType.OppCas:
         return c.oppCas.toDouble();
-      case CoachRankingFields.DeltaTd:
+      case CoachRankingFieldType.DeltaTd:
         return c.deltaTd().toDouble();
-      case CoachRankingFields.DeltaCas:
+      case CoachRankingFieldType.DeltaCas:
         return c.deltaCas().toDouble();
-      case CoachRankingFields.OppScore:
+      case CoachRankingFieldType.OppScore:
         return c.oppPoints.toDouble();
-      case CoachRankingFields.BestSport:
+      case CoachRankingFieldType.BestSport:
         return c.bestSportPoints.toDouble();
+      case CoachRankingFieldType.Bonus:
+        {
+          if (f.bonusIdx < 0 || f.bonusIdx >= c.bonusPts.length) {
+            return 0.0;
+          }
+
+          return c.bonusPts[f.bonusIdx];
+        }
       default:
         return 0.0;
     }

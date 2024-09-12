@@ -8,28 +8,10 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-enum SquadRankingFields {
-  Pts,
-  W,
-  T,
-  L,
-  W_T_L,
-  W_Percent,
-  SumIndividualScore,
-  SumTd,
-  SumCas,
-  SumOppTd,
-  SumOppCas,
-  SumDeltaTd,
-  SumDeltaCas,
-  OppScore,
-  SumBestSport,
-}
-
 class RankingSquadsPage extends StatefulWidget {
   final String title;
   final SquadRankingFilter? filter;
-  final List<SquadRankingFields> fields;
+  final List<SquadRankingField> fields;
 
   RankingSquadsPage(
       {Key? key, required this.title, this.filter, required this.fields})
@@ -47,7 +29,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
 
   late String _title;
 
-  SquadRankingFields? _sortField;
+  SquadRankingField? _sortField;
   bool _sortAscending = false;
 
   bool _reset = true;
@@ -66,7 +48,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     _sortAscending = false;
   }
 
-  void _sort<T>(SquadRankingFields field, bool ascending) {
+  void _sort<T>(SquadRankingField field, bool ascending) {
     setState(() {
       _reset = false;
       _sortField = field;
@@ -83,12 +65,12 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         label: Center(child: Text('Squad  |  Coaches')), fixedWidth: 200));
 
     widget.fields.forEach((f) {
-      String name = _getColumnName(f);
+      String name = f.label;
 
       if (name.isNotEmpty) {
         DataColumnSortCallback? sorter;
-        switch (f) {
-          case SquadRankingFields.W_T_L:
+        switch (f.type) {
+          case SquadRankingFieldType.W_T_L:
             sorter = null;
             break;
           default:
@@ -110,25 +92,26 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     return columns;
   }
 
-  double? _getColumnWidth(SquadRankingFields f) {
-    switch (f) {
-      case SquadRankingFields.OppScore:
+  double? _getColumnWidth(SquadRankingField f) {
+    switch (f.type) {
+      case SquadRankingFieldType.OppScore:
+      case SquadRankingFieldType.Bonus: // Perhaps based on length of label?
         return 100;
-      case SquadRankingFields.SumIndividualScore:
-      case SquadRankingFields.W_T_L:
-      case SquadRankingFields.SumBestSport:
-      case SquadRankingFields.W_Percent:
+      case SquadRankingFieldType.SumIndividualScore:
+      case SquadRankingFieldType.W_T_L:
+      case SquadRankingFieldType.SumBestSport:
+      case SquadRankingFieldType.W_Percent:
         return 90;
-      case SquadRankingFields.Pts:
-      case SquadRankingFields.SumTd:
-      case SquadRankingFields.SumCas:
-      case SquadRankingFields.SumOppTd:
-      case SquadRankingFields.SumOppCas:
-      case SquadRankingFields.SumDeltaTd:
-      case SquadRankingFields.SumDeltaCas:
-      case SquadRankingFields.W:
-      case SquadRankingFields.T:
-      case SquadRankingFields.L:
+      case SquadRankingFieldType.Pts:
+      case SquadRankingFieldType.SumTd:
+      case SquadRankingFieldType.SumCas:
+      case SquadRankingFieldType.SumOppTd:
+      case SquadRankingFieldType.SumOppCas:
+      case SquadRankingFieldType.SumDeltaTd:
+      case SquadRankingFieldType.SumDeltaCas:
+      case SquadRankingFieldType.W:
+      case SquadRankingFieldType.T:
+      case SquadRankingFieldType.L:
         return 70;
       default:
         return null;
@@ -171,7 +154,7 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
       cells.add(_createSquadCoachesDataCell(squad));
 
       widget.fields.forEach((f) {
-        String name = _getColumnName(f);
+        String name = f.label;
 
         if (name.isNotEmpty) {
           cells.add(_createDataCell(_getCellValue(squad, f)));
@@ -356,46 +339,9 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     return skipIndices + idx;
   }
 
-  String _getColumnName(SquadRankingFields f) {
-    switch (f) {
-      case SquadRankingFields.Pts:
-        return "Pts";
-      case SquadRankingFields.W:
-        return "W";
-      case SquadRankingFields.T:
-        return "T";
-      case SquadRankingFields.L:
-        return "L";
-      case SquadRankingFields.W_T_L:
-        return "W/T/L";
-      case SquadRankingFields.W_Percent:
-        return "%";
-      case SquadRankingFields.SumIndividualScore:
-        return "CoachPts";
-      case SquadRankingFields.SumTd:
-        return "Td+";
-      case SquadRankingFields.SumCas:
-        return "Cas+";
-      case SquadRankingFields.SumOppTd:
-        return "Td-";
-      case SquadRankingFields.SumOppCas:
-        return "Cas-";
-      case SquadRankingFields.SumDeltaTd:
-        return "Td\u0394";
-      case SquadRankingFields.SumDeltaCas:
-        return "Cas\u0394";
-      case SquadRankingFields.OppScore:
-        return "OppScore";
-      case SquadRankingFields.SumBestSport:
-        return "Sport";
-      default:
-        return "";
-    }
-  }
-
-  String _getCellValue(Squad s, SquadRankingFields f) {
-    switch (f) {
-      case SquadRankingFields.W_T_L:
+  String _getCellValue(Squad s, SquadRankingField f) {
+    switch (f.type) {
+      case SquadRankingFieldType.W_T_L:
         return s.wins().toString() +
             "/" +
             s.ties().toString() +
@@ -406,45 +352,53 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     }
   }
 
-  double _getSortingValue(Squad s, SquadRankingFields f) {
-    switch (f) {
-      case SquadRankingFields.Pts:
+  double _getSortingValue(Squad s, SquadRankingField f) {
+    switch (f.type) {
+      case SquadRankingFieldType.Pts:
         return s.pointsWithTieBreakersBuiltIn();
       default:
         return _getViewValue(s, f);
     }
   }
 
-  double _getViewValue(Squad s, SquadRankingFields f) {
-    switch (f) {
-      case SquadRankingFields.Pts:
+  double _getViewValue(Squad s, SquadRankingField f) {
+    switch (f.type) {
+      case SquadRankingFieldType.Pts:
         return s.points();
-      case SquadRankingFields.W:
+      case SquadRankingFieldType.W:
         return s.wins().toDouble();
-      case SquadRankingFields.T:
+      case SquadRankingFieldType.T:
         return s.ties().toDouble();
-      case SquadRankingFields.L:
+      case SquadRankingFieldType.L:
         return s.losses().toDouble();
-      case SquadRankingFields.SumIndividualScore:
+      case SquadRankingFieldType.SumIndividualScore:
         return s.sumIndividualScores(_tournament);
-      case SquadRankingFields.W_Percent:
+      case SquadRankingFieldType.W_Percent:
         return s.winPercent();
-      case SquadRankingFields.SumTd:
+      case SquadRankingFieldType.SumTd:
         return s.sumTds(_tournament).toDouble();
-      case SquadRankingFields.SumCas:
+      case SquadRankingFieldType.SumCas:
         return s.sumCas(_tournament).toDouble();
-      case SquadRankingFields.SumOppTd:
+      case SquadRankingFieldType.SumOppTd:
         return s.sumOppTds(_tournament).toDouble();
-      case SquadRankingFields.SumOppCas:
+      case SquadRankingFieldType.SumOppCas:
         return s.sumOppCas(_tournament).toDouble();
-      case SquadRankingFields.SumDeltaTd:
+      case SquadRankingFieldType.SumDeltaTd:
         return s.sumDeltaTds(_tournament).toDouble();
-      case SquadRankingFields.SumDeltaCas:
+      case SquadRankingFieldType.SumDeltaCas:
         return s.sumDeltaCas(_tournament).toDouble();
-      case SquadRankingFields.OppScore:
+      case SquadRankingFieldType.OppScore:
         return s.oppPoints.toDouble();
-      case SquadRankingFields.SumBestSport:
+      case SquadRankingFieldType.SumBestSport:
         return s.sumBestSport(_tournament).toDouble();
+      case SquadRankingFieldType.Bonus:
+        {
+          if (f.bonusIdx < 0 || f.bonusIdx >= s.bonusPts.length) {
+            return 0.0;
+          }
+
+          return s.bonusPts[f.bonusIdx];
+        }
       default:
         return 0.0;
     }
