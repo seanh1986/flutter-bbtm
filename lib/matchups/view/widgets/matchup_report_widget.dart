@@ -3,6 +3,7 @@ import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/utils/toast.dart';
+import 'package:bbnaf/widgets/add_minus_widget/add_minus_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,13 +16,12 @@ class MatchupReportWidget extends StatefulWidget {
   final bool showHome;
 
   late final UploadState state;
-  late ReportedMatchResult? reportedMatch;
+  ReportedMatchResult? reportedMatch;
 
-  // Allows passing primitives by reference
-  Map<String, int> counts = LinkedHashMap();
+  late AddMinusWidget TdsWidget;
+  late AddMinusWidget CasWidget;
 
-  final String _tdName = "Tds";
-  final String _casName = "Cas";
+  List<AddMinusWidget> bonusWidgets = [];
 
   final bool refreshState;
 
@@ -37,24 +37,54 @@ class MatchupReportWidget extends StatefulWidget {
       required this.refreshState,
       this.titleColor})
       : super(key: key) {
-    if (reportedMatch != null) {
-      counts.putIfAbsent(_tdName,
-          () => showHome ? reportedMatch!.homeTds : reportedMatch!.awayTds);
-      counts.putIfAbsent(_casName,
-          () => showHome ? reportedMatch!.homeCas : reportedMatch!.awayCas);
+    bool editable = _editableState();
+    bool showFab = !_hideFabs();
+    Color? fillColor = _getFillColor();
 
-      int numBonus = tounamentInfo.scoringDetails.bonusPts.length;
-      for (int i = 0; i < numBonus; i++) {
-        BonusDetails infoBonusPts = tounamentInfo.scoringDetails.bonusPts[i];
+    int tdInitVal = reportedMatch != null
+        ? (showHome ? reportedMatch!.homeTds : reportedMatch!.awayTds)
+        : 0;
 
-        List<int> matchBonusPts = showHome
-            ? reportedMatch!.homeBonusPts
-            : reportedMatch!.awayBonusPts;
+    int casInitVal = reportedMatch != null
+        ? (showHome ? reportedMatch!.homeCas : reportedMatch!.awayCas)
+        : 0;
 
-        int cnt = matchBonusPts.length == numBonus ? matchBonusPts[i] : 0;
+    TdsWidget = AddMinusWidget(
+        item: AddMinusItem(
+            name: "Tds",
+            minValue: 0,
+            value: tdInitVal,
+            color: fillColor,
+            editable: editable,
+            showFab: showFab));
 
-        counts.putIfAbsent(infoBonusPts.name, () => cnt);
-      }
+    CasWidget = AddMinusWidget(
+        item: AddMinusItem(
+            name: "Cas",
+            minValue: 0,
+            value: casInitVal,
+            color: fillColor,
+            editable: editable,
+            showFab: showFab));
+
+    int numBonus = tounamentInfo.scoringDetails.bonusPts.length;
+    for (int i = 0; i < numBonus; i++) {
+      BonusDetails infoBonusPts = tounamentInfo.scoringDetails.bonusPts[i];
+
+      List<int> matchBonusPts =
+          showHome ? reportedMatch!.homeBonusPts : reportedMatch!.awayBonusPts;
+
+      int bonusInitVal =
+          matchBonusPts.length == numBonus ? matchBonusPts[i] : 0;
+
+      bonusWidgets.add(AddMinusWidget(
+          item: AddMinusItem(
+              name: infoBonusPts.name,
+              minValue: 0,
+              value: bonusInitVal,
+              color: fillColor,
+              editable: editable,
+              showFab: showFab)));
     }
   }
 
@@ -64,31 +94,47 @@ class MatchupReportWidget extends StatefulWidget {
   }
 
   int getTds() {
-    int? tds = counts[_tdName];
-    return tds != null ? tds : 0;
+    return TdsWidget.item.value;
   }
 
   int getCas() {
-    int? cas = counts[_casName];
-    return cas != null ? cas : 0;
+    return CasWidget.item.value;
   }
 
   // Ensure correct order
   List<int> getBonusPts() {
-    List<int> bonusPts = [];
+    return bonusWidgets.map((b) => b.item.value).toList();
+  }
 
-    tounamentInfo.scoringDetails.bonusPts.forEach((bonusDetails) {
-      int? bonus = counts[bonusDetails.name];
-      bonusPts.add(bonus != null ? bonus : 0);
-    });
+  bool _editableState() {
+    // return _state == UploadState.Editing || _state == UploadState.Error;
+    return state != UploadState.NotAuthorized && state != UploadState.NotYetSet;
+  }
 
-    return bonusPts;
+  bool _hideFabs() {
+    return state == UploadState.NotAuthorized || state == UploadState.NotYetSet;
+  }
+
+  Color? _getFillColor() {
+    switch (state) {
+      case UploadState.Error:
+        return Colors.redAccent;
+      case UploadState.UploadedConfirmed:
+        return Colors.greenAccent;
+      case UploadState.CanEdit:
+        return Colors.orangeAccent;
+      case UploadState.NotAuthorized:
+      case UploadState.NotYetSet:
+      case UploadState.Editing:
+      case UploadState.CanConfirm:
+      default:
+        return Colors.white;
+    }
   }
 }
 
 class _MatchupReportWidget extends State<MatchupReportWidget> {
   late IMatchupParticipant _participant;
-  late UploadState _state;
 
   final double titleFontSize = kIsWeb ? 16.0 : 10.0;
   final double subTitleFontSize = kIsWeb ? 11.0 : 9.0;
@@ -115,7 +161,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   void _refreshState() {
     _participant = widget.participant;
-    _state = widget.state;
     _titleColor = widget.titleColor;
 
     if (_participant is Coach) {
@@ -271,17 +316,17 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
       BuildContext context, IMatchupParticipant participant) {
     List<Widget> widgets = [
       SizedBox(height: 10),
-      _itemCounter(context, widget._tdName),
+      widget.TdsWidget,
       SizedBox(height: 10),
-      _itemCounter(context, widget._casName),
+      widget.CasWidget,
       SizedBox(height: 10)
     ];
 
-    Widget? bonusPtsWidget =
-        _getBonusPtsWidget(participant.name()); // nafName, etc.
-    if (bonusPtsWidget != null) {
-      widgets.add(bonusPtsWidget);
-      widgets.add(SizedBox(height: 10));
+    if (widget.bonusWidgets.isNotEmpty) {
+      widget.bonusWidgets.forEach((bonusWidget) {
+        widgets.add(bonusWidget);
+        widgets.add(SizedBox(height: 10));
+      });
     }
 
     return Card(
@@ -291,190 +336,5 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
           alignment: WrapAlignment.center,
           children: widgets,
         ));
-  }
-
-  Widget? _getBonusPtsWidget(String nafName) {
-    if (widget.tounamentInfo.scoringDetails.bonusPts.isEmpty) {
-      return null;
-    }
-
-    VoidCallback callback = () {
-      _showBonusDialog(nafName);
-    };
-
-    return ElevatedButton(
-        onPressed: () {
-          callback();
-        },
-        child: Text('Bonus Pts'));
-  }
-
-  Future<void> _showBonusDialog(String nafName) async {
-    String title = "Bonus Points: " + nafName;
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return StatefulBuilder(builder: (context, setState) {
-          List<Widget> widgets = [];
-
-          VoidCallback callback = (() {
-            setState(() {});
-          });
-
-          widget.tounamentInfo.scoringDetails.bonusPts.forEach((element) {
-            widgets.add(_itemCounterCallback(context, element.name, () {
-              callback();
-            }));
-            widgets.add(SizedBox(height: 10));
-          });
-
-          return AlertDialog(
-            title: Text(
-              title,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: widgets,
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('Ok'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        });
-      },
-    );
-  }
-
-  Widget _itemCounter(BuildContext context, String name) {
-    return _itemCounterCallback(context, name, null);
-  }
-
-  Widget _itemCounterCallback(
-      BuildContext context, String name, VoidCallback? callback) {
-    final theme = Theme.of(context);
-
-    int? num = widget.counts[name];
-    String numStr = num != null ? num.toString() : "?";
-
-    bool showFabs = !_hideFabs();
-
-    List<Widget> widgets = [
-      Text(numStr,
-          style:
-              theme.textTheme.bodyLarge) // TextStyle(fontSize: titleFontSize))
-    ];
-
-    if (showFabs) {
-      widgets.add(Wrap(
-        children: [
-          RawMaterialButton(
-            constraints: BoxConstraints.tight(Size(fabSize, fabSize)),
-            shape: CircleBorder(),
-            fillColor: _getFillColor(),
-            elevation: 0.0,
-            child: Icon(Icons.add, color: Colors.black, size: fabSize / 2.0),
-            onPressed: _editableState() // only click-able in editing mode
-                ? () {
-                    if (widget.counts.containsKey(name)) {
-                      if (mounted) {
-                        setState(() {
-                          widget.counts.update(name, (value) => value + 1);
-                        });
-                      }
-                    }
-
-                    if (callback != null) {
-                      callback();
-                    }
-                  }
-                : null,
-          )
-        ],
-      ));
-    }
-
-    widgets.add(Text(name,
-        style: theme
-            .textTheme.bodyLarge)); // TextStyle(fontSize: titleFontSize)));
-
-    if (showFabs) {
-      widgets.add(Container(
-          child: Wrap(
-        children: [
-          RawMaterialButton(
-            constraints: BoxConstraints.tight(Size(fabSize, fabSize)),
-            shape: CircleBorder(),
-            fillColor: _getFillColor(),
-            elevation: 0.0,
-            child: Icon(Icons.remove, color: Colors.black, size: fabSize / 2.0),
-            onPressed: _editableState() // only click-able in editing mode
-                ? () {
-                    if (widget.counts.containsKey(name) &&
-                        widget.counts[name]! > 0) {
-                      if (mounted) {
-                        setState(() {
-                          widget.counts.update(name, (value) => value - 1);
-                        });
-                      }
-                    }
-
-                    if (callback != null) {
-                      callback();
-                    }
-                  }
-                : null,
-          )
-        ],
-      )));
-    }
-
-    // Wrap width, Match height ?
-    return Container(
-        margin: EdgeInsets.symmetric(horizontal: 0.5, vertical: 5.0),
-        child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: widgets)
-        // Column(mainAxisSize: MainAxisSize.max, children: [
-        //   Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: widgets)
-        // ]),
-        );
-  }
-
-  bool _editableState() {
-    // return _state == UploadState.Editing || _state == UploadState.Error;
-    return _state != UploadState.NotAuthorized &&
-        _state != UploadState.NotYetSet;
-  }
-
-  bool _hideFabs() {
-    // return _state == UploadState.NotAuthorized ||
-    //     _state == UploadState.UploadedConfirmed;
-    return _state == UploadState.NotAuthorized ||
-        _state == UploadState.NotYetSet;
-  }
-
-  Color? _getFillColor() {
-    switch (_state) {
-      case UploadState.Error:
-        return Colors.redAccent;
-      case UploadState.UploadedConfirmed:
-        return Colors.greenAccent;
-      case UploadState.CanEdit:
-        return Colors.orangeAccent;
-      case UploadState.NotAuthorized:
-      case UploadState.NotYetSet:
-      case UploadState.Editing:
-      case UploadState.CanConfirm:
-      default:
-        return Colors.white;
-    }
   }
 }

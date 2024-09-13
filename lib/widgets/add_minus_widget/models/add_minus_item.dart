@@ -6,11 +6,15 @@ class AddMinusItem {
   Color? color;
   bool showFab;
   bool editable;
+  int? minValue;
+  int? maxValue;
 
   AddMinusItem(
       {required this.name,
       required this.value,
       this.color,
+      this.minValue,
+      this.maxValue,
       this.showFab = true,
       this.editable = true});
 }
