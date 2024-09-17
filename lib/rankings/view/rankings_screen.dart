@@ -39,7 +39,7 @@ class _RankingsPage extends State<RankingsPage> {
     _tournament.reProcessAllRounds();
 
     Widget widget;
-    if (_tournament.useSquads()) {
+    if (_tournament.useSquadRankings()) {
       widget = _squadAndCoachTabs();
     } else {
       widget = _coachRankingsWithToggles();
@@ -48,47 +48,47 @@ class _RankingsPage extends State<RankingsPage> {
     return widget;
   }
 
-  List<SquadRankingFields> _getSquadRankingFieldsCombined() {
+  List<SquadRankingField> _getSquadRankingFieldsCombined() {
     return [
-      SquadRankingFields.Pts,
-      SquadRankingFields.W_T_L,
-      SquadRankingFields.SumIndividualScore,
-      SquadRankingFields.OppScore,
-      SquadRankingFields.SumTd,
-      SquadRankingFields.SumCas,
+      SquadRankingField(SquadRankingFieldType.Pts),
+      SquadRankingField(SquadRankingFieldType.W_T_L),
+      SquadRankingField(SquadRankingFieldType.SumIndividualScore),
+      SquadRankingField(SquadRankingFieldType.OppScore),
+      SquadRankingField(SquadRankingFieldType.SumTd),
+      SquadRankingField(SquadRankingFieldType.SumCas),
     ];
   }
 
-  List<SquadRankingFields> _getSquadRankingFieldsCombinedAdmin() {
+  List<SquadRankingField> _getSquadRankingFieldsCombinedAdmin() {
     return [
-      SquadRankingFields.Pts,
-      SquadRankingFields.W_T_L,
-      SquadRankingFields.SumIndividualScore,
-      SquadRankingFields.OppScore,
-      SquadRankingFields.SumTd,
-      SquadRankingFields.SumCas,
-      // SquadRankingFields.SumBestSport,
+      SquadRankingField(SquadRankingFieldType.Pts),
+      SquadRankingField(SquadRankingFieldType.W_T_L),
+      SquadRankingField(SquadRankingFieldType.SumIndividualScore),
+      SquadRankingField(SquadRankingFieldType.OppScore),
+      SquadRankingField(SquadRankingFieldType.SumTd),
+      SquadRankingField(SquadRankingFieldType.SumCas),
+      // SquadRankingField(SquadRankingFieldType.SumBestSport),
     ];
   }
 
-  List<CoachRankingFields> _getCoachRankingFieldsCombined() {
+  List<CoachRankingField> _getCoachRankingFieldsCombined() {
     return [
-      CoachRankingFields.Pts,
-      CoachRankingFields.W_T_L,
-      CoachRankingFields.OppScore,
-      CoachRankingFields.Td,
-      CoachRankingFields.Cas,
+      CoachRankingField(CoachRankingFieldType.Pts),
+      CoachRankingField(CoachRankingFieldType.W_T_L),
+      CoachRankingField(CoachRankingFieldType.OppScore),
+      CoachRankingField(CoachRankingFieldType.Td),
+      CoachRankingField(CoachRankingFieldType.Cas),
     ];
   }
 
-  List<CoachRankingFields> _getCoachRankingFieldsCombinedAdmin() {
+  List<CoachRankingField> _getCoachRankingFieldsCombinedAdmin() {
     return [
-      CoachRankingFields.Pts,
-      CoachRankingFields.W_T_L,
-      CoachRankingFields.OppScore,
-      CoachRankingFields.Td,
-      CoachRankingFields.Cas,
-      // CoachRankingFields.BestSport,
+      CoachRankingField(CoachRankingFieldType.Pts),
+      CoachRankingField(CoachRankingFieldType.W_T_L),
+      CoachRankingField(CoachRankingFieldType.OppScore),
+      CoachRankingField(CoachRankingFieldType.Td),
+      CoachRankingField(CoachRankingFieldType.Cas),
+      // CoachRankingField(CoachRankingFields.BestSport),
     ];
   }
 
@@ -107,16 +107,16 @@ class _RankingsPage extends State<RankingsPage> {
       }),
       ToggleWidgetItem("Td", (context) {
         return RankingCoachPage(title: "Coach Touchdowns", fields: [
-          CoachRankingFields.Td,
-          CoachRankingFields.OppTd,
-          CoachRankingFields.DeltaTd,
+          CoachRankingField(CoachRankingFieldType.Td),
+          CoachRankingField(CoachRankingFieldType.OppTd),
+          CoachRankingField(CoachRankingFieldType.DeltaTd),
         ]);
       }),
       ToggleWidgetItem("Cas", (context) {
         return RankingCoachPage(title: "Coach Casualties", fields: [
-          CoachRankingFields.Cas,
-          CoachRankingFields.OppCas,
-          CoachRankingFields.DeltaCas,
+          CoachRankingField(CoachRankingFieldType.Cas),
+          CoachRankingField(CoachRankingFieldType.OppCas),
+          CoachRankingField(CoachRankingFieldType.DeltaCas),
         ]);
       }),
       ToggleWidgetItem(stuntyFilter.name, (context) {
@@ -137,6 +137,22 @@ class _RankingsPage extends State<RankingsPage> {
                 : _getCoachRankingFieldsCombined());
       }));
     });
+
+    // If we should use bonus points
+    ScoringDetails coachScoringDetails = _tournament.info.scoringDetails;
+    if (coachScoringDetails.bonusPts.isNotEmpty &&
+        _tournament.info.showBonusPtsInRankings) {
+      List<CoachRankingField> fields = [];
+
+      for (int i = 0; i < coachScoringDetails.bonusPts.length; i++) {
+        fields.add(CoachRankingField(CoachRankingFieldType.Bonus,
+            info: _tournament.info, bonusIdx: i));
+      }
+
+      items.add(ToggleWidgetItem("Bonuses", (context) {
+        return RankingCoachPage(title: "Bonuses", fields: fields);
+      }));
+    }
 
 // TODO: BestSport
     // if (showAdminDetails) {
@@ -162,16 +178,16 @@ class _RankingsPage extends State<RankingsPage> {
       }),
       ToggleWidgetItem("Td", (context) {
         return RankingSquadsPage(title: "Squad Touchdowns", fields: [
-          SquadRankingFields.SumTd,
-          SquadRankingFields.SumOppTd,
-          SquadRankingFields.SumDeltaTd,
+          SquadRankingField(SquadRankingFieldType.SumTd),
+          SquadRankingField(SquadRankingFieldType.SumOppTd),
+          SquadRankingField(SquadRankingFieldType.SumDeltaTd),
         ]);
       }),
       ToggleWidgetItem("Cas", (context) {
         return RankingSquadsPage(title: "Squad Casualties", fields: [
-          SquadRankingFields.SumCas,
-          SquadRankingFields.SumOppCas,
-          SquadRankingFields.SumDeltaCas,
+          SquadRankingField(SquadRankingFieldType.SumCas),
+          SquadRankingField(SquadRankingFieldType.SumOppCas),
+          SquadRankingField(SquadRankingFieldType.SumDeltaCas),
         ]);
       }),
     ];
@@ -191,6 +207,23 @@ class _RankingsPage extends State<RankingsPage> {
             title: "Squad " + f.name, filter: f, fields: f.fields);
       }));
     });
+
+    // If we should use bonus points
+    ScoringDetails squadScoringDetails =
+        _tournament.info.squadDetails.scoringDetails;
+    if (squadScoringDetails.bonusPts.isNotEmpty &&
+        _tournament.info.showBonusPtsInRankings) {
+      List<CoachRankingField> fields = [];
+
+      for (int i = 0; i < squadScoringDetails.bonusPts.length; i++) {
+        fields.add(CoachRankingField(CoachRankingFieldType.Bonus,
+            info: _tournament.info, bonusIdx: i));
+      }
+
+      items.add(ToggleWidgetItem("Bonuses", (context) {
+        return RankingCoachPage(title: "Bonuses", fields: fields);
+      }));
+    }
 
     return ToggleWidget(items: items);
   }

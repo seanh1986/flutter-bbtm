@@ -58,6 +58,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   MatchupReportWidget? homeReportWidget;
   MatchupReportWidget? awayReportWidget;
 
+  bool _isBonusPtsExpanded = false;
+
   @override
   void initState() {
     super.initState();
@@ -66,10 +68,6 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   @override
   void dispose() {
     super.dispose();
-  }
-
-  void _refreshState() {
-    _matchup = widget.matchup;
   }
 
   @override
@@ -116,7 +114,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     bool refreshState = widget.refreshState && allowRefresh;
 
     if (refreshState) {
-      _refreshState();
+      _isBonusPtsExpanded = canEditHome || canEditAway;
+      _matchup = widget.matchup;
 
       _reportWithStatus =
           _matchup!.getReportedMatchStatus(t: _tournament!, nafName: nafName);
@@ -142,6 +141,12 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
       Color? homeColor = _getColor(true);
       Color? awayColor = _getColor(false);
 
+      ValueChanged<bool> onBonusPtsToggle = (value) {
+        setState(() {
+          _isBonusPtsExpanded = !_isBonusPtsExpanded;
+        });
+      };
+
       homeReportWidget = MatchupReportWidget(
           tounamentInfo: _tournament!.info,
           reportedMatch: _reportWithStatus,
@@ -149,6 +154,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           showHome: true,
           state: _state,
           refreshState: refreshState,
+          onBonusPtsToggle: onBonusPtsToggle,
+          isBonusPtsExpanded: _isBonusPtsExpanded,
           titleColor: homeColor);
 
       awayReportWidget = MatchupReportWidget(
@@ -158,6 +165,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           showHome: false,
           state: _state,
           refreshState: refreshState,
+          onBonusPtsToggle: onBonusPtsToggle,
+          isBonusPtsExpanded: _isBonusPtsExpanded,
           titleColor: awayColor);
     }
 
@@ -390,13 +399,9 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           .add(SizedBox(width: uploadIconSize, height: uploadIconSize));
     }
 
-    tableVsDetails.add(Text(' vs. ',
-        style: theme
-            .textTheme.labelSmall)); //TextStyle(fontSize: subTitleFontSize)));
+    tableVsDetails.add(Text(' vs. ', style: theme.textTheme.labelSmall));
     tableVsDetails.add(Text('T#' + _matchup!.tableNum.toString(),
-        style: theme
-            .textTheme.labelSmall)); // TextStyle(fontSize: subTitleFontSize)));
-
+        style: theme.textTheme.bodyLarge));
     return SizedBox(
         width: vsTableNumWidth,
         child: Card(

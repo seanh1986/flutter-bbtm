@@ -1,9 +1,11 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:bbnaf/widgets/add_minus_widget/models/add_minus_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AddMinusWidget extends StatefulWidget {
-  final AddMinusItem item;
+  AddMinusItem item;
 
   AddMinusWidget({Key? key, required this.item}) : super(key: key);
 
@@ -14,14 +16,11 @@ class AddMinusWidget extends StatefulWidget {
 }
 
 class _AddMinusWidget extends State<AddMinusWidget> {
-  late AddMinusItem _item;
-
   final double fabSize = kIsWeb ? 32.0 : 20.0;
 
   @override
   void initState() {
     super.initState();
-    _item = widget.item;
   }
 
   @override
@@ -33,17 +32,17 @@ class _AddMinusWidget extends State<AddMinusWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    String numStr = _item.value.toString();
+    String numStr = widget.item.value.toString();
 
     List<Widget> widgets = [Text(numStr, style: theme.textTheme.bodyLarge)];
 
-    if (_item.showFab) {
+    if (widget.item.showFab) {
       widgets.add(_getButton(true));
     }
 
-    widgets.add(Text(_item.name, style: theme.textTheme.bodyLarge));
+    widgets.add(Text(widget.item.name, style: theme.textTheme.bodyLarge));
 
-    if (_item.showFab) {
+    if (widget.item.showFab) {
       widgets.add(_getButton(false));
     }
 
@@ -61,18 +60,24 @@ class _AddMinusWidget extends State<AddMinusWidget> {
         RawMaterialButton(
           constraints: BoxConstraints.tight(Size(fabSize, fabSize)),
           shape: CircleBorder(),
-          fillColor: _item.color,
+          fillColor: widget.item.color,
           elevation: 0.0,
           child: Icon(add ? Icons.add : Icons.remove,
               color: Colors.black, size: fabSize / 2.0),
-          onPressed: _item.editable // only click-able in editing mode
+          onPressed: widget.item.editable // only click-able in editing mode
               ? () {
                   if (mounted) {
                     setState(() {
                       if (add) {
-                        _item.value++;
+                        if (widget.item.maxValue == null ||
+                            widget.item.value + 1 <= widget.item.maxValue!) {
+                          widget.item.value++;
+                        }
                       } else {
-                        _item.value--;
+                        if (widget.item.minValue == null ||
+                            widget.item.value - 1 >= widget.item.minValue!) {
+                          widget.item.value--;
+                        }
                       }
                     });
                   }

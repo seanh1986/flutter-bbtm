@@ -4,11 +4,11 @@ import 'package:bbnaf/tournament_repository/src/models/models.dart';
 class Coach extends IMatchupParticipant {
   late String nafName; // Key
 
-  late String squadName;
+  late String squadName = "";
 
-  late String coachName;
+  late String coachName = "";
 
-  late String teamName;
+  late String teamName = "";
 
   late int nafNumber;
 
@@ -34,7 +34,7 @@ class Coach extends IMatchupParticipant {
 
   int bestSportPoints = 0;
 
-  List<double> _bonusPts = <double>[];
+  List<double> bonusPts = <double>[];
 
   List<double> _tieBreakers = <double>[];
 
@@ -45,14 +45,16 @@ class Coach extends IMatchupParticipant {
   bool isCustomStunty = false;
 
   Coach(String nafName, String squadName, this.coachName, this.race,
-      this.teamName, this.nafNumber, this.active) {
+      this.teamName, this.nafNumber, this.active,
+      {this.isCustomStunty = false}) {
     this.nafName = nafName.trim();
     this.squadName = squadName.trim();
   }
 
   Coach.from(Coach c)
       : this(c.nafName, c.squadName, c.coachName, c.race, c.teamName,
-            c.nafNumber, c.active);
+            c.nafNumber, c.active,
+            isCustomStunty: c.isCustomStunty);
 
   @override
   OrgType type() {
@@ -104,6 +106,22 @@ class Coach extends IMatchupParticipant {
     return active;
   }
 
+// Used for matchups & rankings UI
+  @override
+  String displayName(TournamentInfo info) {
+    switch (info.coachDisplayName) {
+      case CoachDisplayName.CoachName:
+        return coachName;
+      case CoachDisplayName.NafName_Then_CoachName:
+        return nafName + " (" + coachName + ")";
+      case CoachDisplayName.CoachName_Then_NafName:
+        return coachName + " (" + nafName + ")";
+      case CoachDisplayName.NafName:
+      default:
+        return nafName;
+    }
+  }
+
   // Search is lower case
   @override
   bool matchSearch(String search) {
@@ -135,9 +153,9 @@ class Coach extends IMatchupParticipant {
     bestSportPoints = 0;
     _opponents.clear();
 
-    _bonusPts.clear();
+    bonusPts.clear();
     t.scoringDetails.bonusPts.forEach((element) {
-      _bonusPts.add(0);
+      bonusPts.add(0);
     });
 
     matches.forEach((m) {
@@ -165,7 +183,7 @@ class Coach extends IMatchupParticipant {
         oppCas += matchStats.awayCas;
 
         for (int i = 0; i < matchStats.homeBonusPts.length; i++) {
-          _bonusPts[i] += matchStats.homeBonusPts[i];
+          bonusPts[i] += matchStats.homeBonusPts[i];
         }
 
         // Based on opponent's vote
@@ -193,7 +211,7 @@ class Coach extends IMatchupParticipant {
         oppCas += matchStats.homeCas;
 
         for (int i = 0; i < matchStats.awayBonusPts.length; i++) {
-          _bonusPts[i] += matchStats.awayBonusPts[i];
+          bonusPts[i] += matchStats.awayBonusPts[i];
         }
 
         // Based on opponent's vote
@@ -210,9 +228,9 @@ class Coach extends IMatchupParticipant {
     // Add bonus points to total points
     List<BonusDetails> bonusDetails = t.scoringDetails.bonusPts;
 
-    for (int i = 0; i < _bonusPts.length; i++) {
+    for (int i = 0; i < bonusPts.length; i++) {
       double weight = i < bonusDetails.length ? bonusDetails[i].weight : 0.0;
-      _points += _bonusPts[i] * weight;
+      _points += bonusPts[i] * weight;
     }
   }
 
@@ -251,7 +269,7 @@ class Coach extends IMatchupParticipant {
           _tieBreakers.add((deltaTd() + deltaCas()).toDouble());
           break;
         case TieBreaker.SquadScore:
-          Squad? squad = t.getCoachSquad(nafName);
+          Squad? squad = t.useSquadRankings() ? t.getCoachSquad(nafName) : null;
           _tieBreakers.add(squad != null ? squad.points() : 0.0);
           break;
         case TieBreaker.NumWins:
@@ -294,6 +312,9 @@ class Coach extends IMatchupParticipant {
     final tActive = json['active'] as bool?;
     this.active = tActive != null && tActive;
 
+    final tCustomStunty = json['is_custom_stunty'] as bool?;
+    this.isCustomStunty = tCustomStunty != null && tCustomStunty;
+
     final tRoster = json['roster'] as String?;
     this.rosterFileName = tRoster != null ? tRoster.trim() : "";
   }
@@ -306,6 +327,7 @@ class Coach extends IMatchupParticipant {
         'race': RaceUtils.getName(race),
         'naf_number': nafNumber,
         'active': active,
+        'is_custom_stunty': isCustomStunty,
         'roster': rosterFileName,
       };
 }

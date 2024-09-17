@@ -1,5 +1,6 @@
 // ignore_for_file: must_be_immutable
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/rankings/models/ranking_filter.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
@@ -8,13 +9,16 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 
 class TournyRankingSettingsWidget extends StatefulWidget {
-  late IndividualScoringDetails individualScoringDetails;
+  late List<CoachRaceFilter> coachRaceRankingFilters;
   late bool showRankings;
+  late bool showBonusPtsInRankings;
 
   TournyRankingSettingsWidget({Key? key, required TournamentInfo info})
       : super(key: key) {
-    this.individualScoringDetails = info.scoringDetails;
+    this.coachRaceRankingFilters =
+        List.from(info.scoringDetails.coachRaceRankingFilters);
     this.showRankings = info.showRankings;
+    this.showBonusPtsInRankings = info.showBonusPtsInRankings;
   }
 
   @override
@@ -23,8 +27,9 @@ class TournyRankingSettingsWidget extends StatefulWidget {
   }
 
   void updateTournamentInfo(TournamentInfo info) {
-    info.scoringDetails = individualScoringDetails;
+    info.scoringDetails.coachRaceRankingFilters = coachRaceRankingFilters;
     info.showRankings = showRankings;
+    info.showBonusPtsInRankings = showBonusPtsInRankings;
   }
 }
 
@@ -50,6 +55,13 @@ class _TournyRankingSettingsWidget extends State<TournyRankingSettingsWidget> {
     ];
 
     widgets.addAll(_getCoachRankingFilterWidgets());
+
+    widgets.addAll([
+      SizedBox(height: 5),
+      Divider(),
+      _getDisplayBonusPointRankingsToggle(),
+      SizedBox(height: 5),
+    ]);
 
     return Column(children: widgets);
   }
@@ -77,25 +89,17 @@ class _TournyRankingSettingsWidget extends State<TournyRankingSettingsWidget> {
     List<Widget> rankingFilterWidgets = [
       ElevatedButton(
         onPressed: () {
-          setState(() {
-            String idx = (widget.individualScoringDetails
-                        .coachRaceRankingFilters.length +
-                    1)
-                .toString();
-
-            widget.individualScoringDetails.coachRaceRankingFilters
-                .add(CoachRaceFilter("RankingFilter_" + idx, []));
-          });
+          String idx = (widget.coachRaceRankingFilters.length + 1).toString();
+          widget.coachRaceRankingFilters
+              .add(CoachRaceFilter("RankingFilter_" + idx, []));
+          setState(() {});
         },
         child: const Text('Add Race Ranking Filter'),
       )
     ];
 
-    for (int i = 0;
-        i < widget.individualScoringDetails.coachRaceRankingFilters.length;
-        i++) {
-      CoachRaceFilter filter =
-          widget.individualScoringDetails.coachRaceRankingFilters[i];
+    for (int i = 0; i < widget.coachRaceRankingFilters.length; i++) {
+      CoachRaceFilter filter = widget.coachRaceRankingFilters[i];
 
       String label = filter.name;
       List<String> curRaces = EnumToString.toList(filter.races);
@@ -106,16 +110,20 @@ class _TournyRankingSettingsWidget extends State<TournyRankingSettingsWidget> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             SizedBox(width: 10.0),
+            IconButton(
+                onPressed: () {
+                  widget.coachRaceRankingFilters.removeAt(i);
+                  setState(() {});
+                },
+                icon: Icon(Icons.delete)),
+            SizedBox(width: 10.0),
             Expanded(
                 child: CustomTextFormField(
                     initialValue: label.toString(),
                     keyboardType: TextInputType.number,
                     title: 'Race Filter Label',
                     callback: (value) {
-                      setState(() {
-                        widget.individualScoringDetails
-                            .coachRaceRankingFilters[i].name = label;
-                      });
+                      widget.coachRaceRankingFilters[i].name = value;
                     })),
             SizedBox(width: 10.0),
             Expanded(
@@ -129,15 +137,31 @@ class _TournyRankingSettingsWidget extends State<TournyRankingSettingsWidget> {
                               .nonNulls
                               .toList();
 
-                      widget.individualScoringDetails
-                              .coachRaceRankingFilters[i] =
+                      widget.coachRaceRankingFilters[i] =
                           CoachRaceFilter(label, races);
-
-                      setState(() {});
                     }))
           ]));
     }
 
     return rankingFilterWidgets;
+  }
+
+  Widget _getDisplayBonusPointRankingsToggle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Show Bonus Points in Rankings"),
+        Checkbox(
+          value: widget.showBonusPtsInRankings,
+          onChanged: (value) {
+            if (value != null) {
+              setState(() {
+                widget.showBonusPtsInRankings = value;
+              });
+            }
+          },
+        ),
+      ],
+    );
   }
 }

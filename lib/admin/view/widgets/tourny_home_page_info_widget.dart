@@ -1,9 +1,7 @@
 // ignore_for_file: must_be_immutable
 
 import 'dart:convert';
-
 import 'package:bbnaf/tournament_repository/src/models/tournament_info.dart';
-import 'package:bbnaf/widgets/checkbox_formfield/checkbox_list_tile_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
@@ -62,6 +60,9 @@ class _TournyHomePageInfoWidget extends State<TournyHomePageInfoWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
+      SizedBox(height: 10),
+      _createCasualtyDetails(),
+      Divider(),
       _getRichTextEditor(
           "Special Rules", widget._richTextSpecialRulesController),
       Divider(),
@@ -71,69 +72,73 @@ class _TournyHomePageInfoWidget extends State<TournyHomePageInfoWidget> {
     ]);
   }
 
-  Widget _createCasulatyDetails() {
+  Widget _createCasualtyDetails() {
     final theme = Theme.of(context);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        SizedBox(width: 10.0),
-        Text("Casualty Details:"),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CheckboxListTileFormField(
-                title: Text('Spp', style: theme.textTheme.labelMedium),
-                initialValue: widget.casualtyDetails.spp,
-                onChanged: (value) {
-                  widget.casualtyDetails.spp = value;
-                },
-                autovalidateMode: AutovalidateMode.always,
-                contentPadding: EdgeInsets.all(1))),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CheckboxListTileFormField(
-          title: Text('Foul', style: theme.textTheme.labelMedium),
-          initialValue: widget.casualtyDetails.foul,
-          onChanged: (value) {
-            widget.casualtyDetails.foul = value;
-          },
-          autovalidateMode: AutovalidateMode.always,
-          contentPadding: EdgeInsets.all(1),
-        )),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CheckboxListTileFormField(
-          title: Text('Surf', style: theme.textTheme.labelMedium),
-          initialValue: widget.casualtyDetails.surf,
-          onChanged: (value) {
-            widget.casualtyDetails.surf = value;
-          },
-          autovalidateMode: AutovalidateMode.always,
-          contentPadding: EdgeInsets.all(1),
-        )),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CheckboxListTileFormField(
-          title: Text('Weapon', style: theme.textTheme.labelMedium),
-          initialValue: widget.casualtyDetails.weapon,
-          onChanged: (value) {
-            widget.casualtyDetails.weapon = value;
-          },
-          autovalidateMode: AutovalidateMode.always,
-          contentPadding: EdgeInsets.all(1),
-        )),
-        SizedBox(width: 10.0),
-        Expanded(
-            child: CheckboxListTileFormField(
-          title: Text('Dodge', style: theme.textTheme.labelMedium),
-          initialValue: widget.casualtyDetails.dodge,
-          onChanged: (value) {
-            widget.casualtyDetails.dodge = value;
-          },
-          autovalidateMode: AutovalidateMode.always,
-          contentPadding: EdgeInsets.all(1),
-        )),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        bool isMobile = constraints.maxWidth < 600;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text("Casualty Details:"),
+            ),
+            isMobile
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _buildCasualtyDetailsCheckboxList(theme),
+                  )
+                : Wrap(
+                    spacing: 10.0,
+                    runSpacing: 10.0,
+                    children: _buildCasualtyDetailsCheckboxList(theme),
+                  ),
+          ],
+        );
+      },
+    );
+  }
+
+  List<Widget> _buildCasualtyDetailsCheckboxList(ThemeData theme) {
+    return <Widget>[
+      _buildCasualtyDetailsCheckboxField(
+          theme, 'Spp', widget.casualtyDetails.spp, (value) {
+        widget.casualtyDetails.spp = value!;
+      }),
+      _buildCasualtyDetailsCheckboxField(
+          theme, 'Foul', widget.casualtyDetails.foul, (value) {
+        widget.casualtyDetails.foul = value!;
+      }),
+      _buildCasualtyDetailsCheckboxField(
+          theme, 'Surf', widget.casualtyDetails.surf, (value) {
+        widget.casualtyDetails.surf = value!;
+      }),
+      _buildCasualtyDetailsCheckboxField(
+          theme, 'Weapon', widget.casualtyDetails.weapon, (value) {
+        widget.casualtyDetails.weapon = value!;
+      }),
+      _buildCasualtyDetailsCheckboxField(
+          theme, 'Dodge', widget.casualtyDetails.dodge, (value) {
+        widget.casualtyDetails.dodge = value!;
+      }),
+    ];
+  }
+
+  Widget _buildCasualtyDetailsCheckboxField(ThemeData theme, String title,
+      bool initialValue, Function(bool?) onChanged) {
+    return SizedBox(
+      width: 140,
+      child: CheckboxListTile(
+        title: Text(title, style: theme.textTheme.labelMedium),
+        value: initialValue,
+        onChanged: onChanged,
+        contentPadding: EdgeInsets.zero,
+        dense: true,
+        controlAffinity: ListTileControlAffinity.leading,
+      ),
     );
   }
 
@@ -144,16 +149,16 @@ class _TournyHomePageInfoWidget extends State<TournyHomePageInfoWidget> {
       children: [
         Text(title, style: theme.textTheme.bodyLarge),
         QuillToolbar.simple(
+          controller: controller,
           configurations: QuillSimpleToolbarConfigurations(
-            controller: controller,
             sharedConfigurations: const QuillSharedConfigurations(
               locale: Locale('en'),
             ),
           ),
         ),
         QuillEditor.basic(
+          controller: controller,
           configurations: QuillEditorConfigurations(
-            controller: controller,
             sharedConfigurations: const QuillSharedConfigurations(
               locale: Locale('en'),
             ),

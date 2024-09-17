@@ -26,8 +26,12 @@ class TournamentInfo {
 
   bool showRankings = true;
 
+  bool showBonusPtsInRankings = true;
+
   // Prevents users from submitting updates
   bool locked = false;
+
+  CoachDisplayName coachDisplayName = CoachDisplayName.NafName;
 
   TournamentInfo(
       {required this.id,
@@ -109,9 +113,23 @@ class TournamentInfo {
       this.logoFileName = tLogo;
     }
 
+    final tCoachDisplayName = json['coach_display_name'] as String?;
+    if (tCoachDisplayName != null) {
+      CoachDisplayName? pCoachDisplayName =
+          EnumToString.fromString(CoachDisplayName.values, tCoachDisplayName);
+      if (pCoachDisplayName != null) {
+        this.coachDisplayName = pCoachDisplayName;
+      }
+    }
+
     // Default is showRankings for legacy purposes
-    final tShowRankings = json['showRankings'] as bool?;
+    final tShowRankings = json['show_rankings'] as bool?;
     this.showRankings = tShowRankings == null || tShowRankings;
+
+    // Default is showRankings for legacy purposes
+    final tShowBonusPtsInRankings = json['show_bonus_pts_in_rankings'] as bool?;
+    this.showBonusPtsInRankings =
+        tShowBonusPtsInRankings == null || tShowBonusPtsInRankings;
 
     // Default is locked for legacy purposes
     final tLocked = json['locked'] as bool?;
@@ -132,7 +150,9 @@ class TournamentInfo {
         'details_kickoff': detailsKickOff,
         'details_special_rules': detailsSpecialRules,
         'logo_file_name': logoFileName,
-        'showRankings': showRankings,
+        'coach_display_name': EnumToString.convertToString(coachDisplayName),
+        'show_rankings': showRankings,
+        'show_bonus_pts_in_rankings': showBonusPtsInRankings,
         'locked': locked,
       };
 }
@@ -180,6 +200,13 @@ class CasualtyDetails {
         'weapon': weapon,
         'dodge': dodge,
       };
+}
+
+enum CoachDisplayName {
+  NafName,
+  CoachName,
+  NafName_Then_CoachName,
+  CoachName_Then_NafName
 }
 
 enum TieBreaker {
@@ -380,6 +407,7 @@ class OrganizerInfo {
 enum SquadUsage {
   NO_SQUADS,
   INDIVIDUAL_USE_SQUADS_FOR_INIT,
+  INDIVIDUAL_USE_SQUADS_FOR_LABELS,
   SQUADS,
 }
 
