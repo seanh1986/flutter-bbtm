@@ -27,6 +27,11 @@ class MatchupReportWidget extends StatefulWidget {
 
   final Color? titleColor;
 
+  final bool isBonusPtsExpanded;
+
+  final ValueChanged<bool>
+      onBonusPtsToggle; // Callback function that will be called on toggle
+
   MatchupReportWidget(
       {Key? key,
       required this.tounamentInfo,
@@ -35,6 +40,8 @@ class MatchupReportWidget extends StatefulWidget {
       required this.showHome,
       required this.state,
       required this.refreshState,
+      required this.onBonusPtsToggle,
+      this.isBonusPtsExpanded = false,
       this.titleColor})
       : super(key: key) {
     bool editable = _editableState();
@@ -146,8 +153,6 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
 
   String _rosterFileName = "";
   bool isDownloaded = false;
-
-  bool isBonusPtsExpanded = false;
 
   @override
   void initState() {
@@ -340,7 +345,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
       return [];
     }
 
-    if (isBonusPtsExpanded) {
+    if (widget.isBonusPtsExpanded) {
       return _getBonusPtsWidgetsExpanded();
     } else {
       return _getBonusPtsWidgetsCompresssed();
@@ -367,15 +372,12 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   Widget _getBonusPtsWidgetHeader() {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          isBonusPtsExpanded =
-              !isBonusPtsExpanded; // Toggle the chevron direction
-        });
+        widget.onBonusPtsToggle.call(!widget.isBonusPtsExpanded);
       },
       child: Row(
         children: [
           Icon(
-            isBonusPtsExpanded
+            widget.isBonusPtsExpanded
                 ? Icons.expand_less
                 : Icons.expand_more, // Chevron up or down
             size: 24.0,
