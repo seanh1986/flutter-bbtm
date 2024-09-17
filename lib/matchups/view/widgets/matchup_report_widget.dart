@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'package:bbnaf/app/bloc/app_bloc.dart';
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';

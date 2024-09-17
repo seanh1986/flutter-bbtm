@@ -162,8 +162,8 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
   Future<bool> _downloadImportCoachesTemplateFromGoogleDrive(
       BuildContext context) async {
     String downloadFileName = 'bbtm-coach-import-template.xlsx';
-    String url =
-        'https://docs.google.com/spreadsheets/d/1jDNdmgVDnhC_UJgCEAt8WOF90i3d5yum/edit?usp=sharing&ouid=116212630434144180021&rtpof=true&sd=true';
+    // String url =
+    //     'https://docs.google.com/spreadsheets/d/1jDNdmgVDnhC_UJgCEAt8WOF90i3d5yum/edit?usp=sharing&ouid=116212630434144180021&rtpof=true&sd=true';
 
     // try {
     //   ToastUtils.show(context, "Downloading " + downloadFileName);
@@ -187,7 +187,7 @@ class _DownloadFilesWidget extends State<DownloadFilesWidget> {
 
         // Create a link element
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', downloadFileName)
           ..click();
 

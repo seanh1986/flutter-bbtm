@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:bbnaf/matchups/matchups.dart';
 import 'package:bbnaf/rankings/rankings.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
