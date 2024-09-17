@@ -58,7 +58,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   MatchupReportWidget? homeReportWidget;
   MatchupReportWidget? awayReportWidget;
 
-  bool isBonusPtsExpanded = false;
+  bool _isBonusPtsExpanded = false;
 
   @override
   void initState() {
@@ -68,10 +68,6 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   @override
   void dispose() {
     super.dispose();
-  }
-
-  void _refreshState() {
-    _matchup = widget.matchup;
   }
 
   @override
@@ -118,7 +114,8 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
     bool refreshState = widget.refreshState && allowRefresh;
 
     if (refreshState) {
-      _refreshState();
+      _isBonusPtsExpanded = canEditHome || canEditAway;
+      _matchup = widget.matchup;
 
       _reportWithStatus =
           _matchup!.getReportedMatchStatus(t: _tournament!, nafName: nafName);
@@ -146,7 +143,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
       ValueChanged<bool> onBonusPtsToggle = (value) {
         setState(() {
-          isBonusPtsExpanded = !isBonusPtsExpanded;
+          _isBonusPtsExpanded = !_isBonusPtsExpanded;
         });
       };
 
@@ -158,7 +155,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           state: _state,
           refreshState: refreshState,
           onBonusPtsToggle: onBonusPtsToggle,
-          isBonusPtsExpanded: isBonusPtsExpanded,
+          isBonusPtsExpanded: _isBonusPtsExpanded,
           titleColor: homeColor);
 
       awayReportWidget = MatchupReportWidget(
@@ -169,7 +166,7 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           state: _state,
           refreshState: refreshState,
           onBonusPtsToggle: onBonusPtsToggle,
-          isBonusPtsExpanded: isBonusPtsExpanded,
+          isBonusPtsExpanded: _isBonusPtsExpanded,
           titleColor: awayColor);
     }
 

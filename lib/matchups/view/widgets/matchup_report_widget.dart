@@ -41,7 +41,7 @@ class MatchupReportWidget extends StatefulWidget {
       required this.state,
       required this.refreshState,
       required this.onBonusPtsToggle,
-      this.isBonusPtsExpanded = false,
+      required this.isBonusPtsExpanded,
       this.titleColor})
       : super(key: key) {
     bool editable = _editableState();
