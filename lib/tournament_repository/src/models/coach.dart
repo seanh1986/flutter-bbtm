@@ -42,6 +42,8 @@ class Coach extends IMatchupParticipant {
 
   List<CoachMatchup> matches = [];
 
+  List<int> ranksPerRound = [];
+
   bool isCustomStunty = false;
 
   Coach(String nafName, String squadName, this.coachName, this.race,
