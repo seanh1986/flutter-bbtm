@@ -442,6 +442,23 @@ class Tournament {
     });
   }
 
+  /**
+   * Returns true if duplicate naf names are found, false if none are found.
+   */
+  bool containsDuplicateNafNames() {
+    Set<String> nafNamesSet = {};
+
+    for (var coach in getCoaches()) {
+      if (!nafNamesSet.add(coach.nafName)) {
+        // If add() returns false, it means the nafName is already in the set
+        // ==> duplicate found
+        return true;
+      }
+    }
+
+    return false; // No duplicates found
+  }
+
   XmlDocument generateNafUploadFile() {
     OrganizerInfo mainOrganizer = info.organizers.firstWhere((o) => o.primary);
     DateTime roundTime = info.dateTimeStart;

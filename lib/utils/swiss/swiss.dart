@@ -12,6 +12,7 @@ import 'package:collection/collection.dart';
 
 enum RoundPairingError {
   NoError,
+  DuplicateNafNames,
   MissingPreviousResults,
   UnableToFindValidMatches,
 }
@@ -25,6 +26,10 @@ class SwissPairings {
 
   /// Return true if pairing successful, false if
   RoundPairingError pairNextRound() {
+    if (tournament.containsDuplicateNafNames()) {
+      return RoundPairingError.DuplicateNafNames;
+    }
+
     // Use Squad Rankings => Can be squad vs squad or individuals, etc.
     if (tournament.useSquadRankings()) {
       if (tournament.useSquadVsSquadPairings()) {
