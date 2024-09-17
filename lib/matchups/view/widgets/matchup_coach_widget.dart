@@ -58,7 +58,9 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
   MatchupReportWidget? homeReportWidget;
   MatchupReportWidget? awayReportWidget;
 
-  bool _isBonusPtsExpanded = false;
+  bool? _isBonusPtsExpanded;
+
+  late ValueChanged<bool> _onBonusPtsToggle;
 
   @override
   void initState() {
@@ -113,8 +115,15 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
 
     bool refreshState = widget.refreshState && allowRefresh;
 
+    if (_isBonusPtsExpanded == null && _matchup != null) {
+      _refreshBonusPtsToggle(canEdit);
+    }
+
+    _onBonusPtsToggle = (value) {
+      _refreshBonusPtsToggle(value);
+    };
+
     if (refreshState) {
-      _isBonusPtsExpanded = canEditHome || canEditAway;
       _matchup = widget.matchup;
 
       _reportWithStatus =
@@ -138,41 +147,43 @@ class _MatchupHeadlineWidget extends State<MatchupCoachWidget> {
           " -> " +
           _state.toString());
 
-      Color? homeColor = _getColor(true);
-      Color? awayColor = _getColor(false);
-
-      ValueChanged<bool> onBonusPtsToggle = (value) {
-        setState(() {
-          _isBonusPtsExpanded = !_isBonusPtsExpanded;
-        });
-      };
-
-      homeReportWidget = MatchupReportWidget(
-          tounamentInfo: _tournament!.info,
-          reportedMatch: _reportWithStatus,
-          participant: _matchup!.home(_tournament!),
-          showHome: true,
-          state: _state,
-          refreshState: refreshState,
-          onBonusPtsToggle: onBonusPtsToggle,
-          isBonusPtsExpanded: _isBonusPtsExpanded,
-          titleColor: homeColor);
-
-      awayReportWidget = MatchupReportWidget(
-          tounamentInfo: _tournament!.info,
-          reportedMatch: _reportWithStatus,
-          participant: _matchup!.away(_tournament!),
-          showHome: false,
-          state: _state,
-          refreshState: refreshState,
-          onBonusPtsToggle: onBonusPtsToggle,
-          isBonusPtsExpanded: _isBonusPtsExpanded,
-          titleColor: awayColor);
+      homeReportWidget = _createMatchupReportWidget(true, refreshState);
+      awayReportWidget = _createMatchupReportWidget(false, refreshState);
     }
 
     return Container(
         alignment: FractionalOffset.center,
         child: _coachMatchupWidget(context));
+  }
+
+  void _refreshBonusPtsToggle(bool expand) {
+    if (_isBonusPtsExpanded != null && _isBonusPtsExpanded == expand) {
+      return;
+    }
+    setState(() {
+      _isBonusPtsExpanded = expand;
+      homeReportWidget = _createMatchupReportWidget(true, false);
+      awayReportWidget = _createMatchupReportWidget(false, false);
+    });
+  }
+
+  MatchupReportWidget _createMatchupReportWidget(
+      bool isHome, bool refreshState) {
+    Color? homeColor = _getColor(isHome);
+    IMatchupParticipant participant =
+        isHome ? _matchup!.home(_tournament!) : _matchup!.away(_tournament!);
+    bool showExpandedBonusPts = _isBonusPtsExpanded != null &&
+        _isBonusPtsExpanded!; // if null, set false
+    return MatchupReportWidget(
+        tounamentInfo: _tournament!.info,
+        reportedMatch: _reportWithStatus,
+        participant: participant,
+        showHome: isHome,
+        state: _state,
+        refreshState: refreshState,
+        onBonusPtsToggle: _onBonusPtsToggle,
+        isBonusPtsExpanded: showExpandedBonusPts,
+        titleColor: homeColor);
   }
 
   Widget _coachMatchupWidget(BuildContext context) {

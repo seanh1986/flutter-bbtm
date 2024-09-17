@@ -1,6 +1,5 @@
 // ignore_for_file: must_be_immutable
 
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bbnaf/rankings/models/ranking_filter.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
