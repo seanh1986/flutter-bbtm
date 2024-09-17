@@ -147,6 +147,8 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
   String _rosterFileName = "";
   bool isDownloaded = false;
 
+  bool isBonusPtsExpanded = false;
+
   @override
   void initState() {
     super.initState();
@@ -322,12 +324,7 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
       SizedBox(height: 10)
     ];
 
-    if (widget.bonusWidgets.isNotEmpty) {
-      widget.bonusWidgets.forEach((bonusWidget) {
-        widgets.add(bonusWidget);
-        widgets.add(SizedBox(height: 10));
-      });
-    }
+    widgets.addAll(_getBonusPtsWidgets());
 
     return Card(
         elevation: 8.0,
@@ -336,5 +333,58 @@ class _MatchupReportWidget extends State<MatchupReportWidget> {
           alignment: WrapAlignment.center,
           children: widgets,
         ));
+  }
+
+  List<Widget> _getBonusPtsWidgets() {
+    if (widget.bonusWidgets.isEmpty) {
+      return [];
+    }
+
+    if (isBonusPtsExpanded) {
+      return _getBonusPtsWidgetsExpanded();
+    } else {
+      return _getBonusPtsWidgetsCompresssed();
+    }
+  }
+
+  List<Widget> _getBonusPtsWidgetsCompresssed() {
+    return [_getBonusPtsWidgetHeader()];
+  }
+
+  List<Widget> _getBonusPtsWidgetsExpanded() {
+    List<Widget> bonusWidgets = [_getBonusPtsWidgetHeader()];
+
+    if (widget.bonusWidgets.isNotEmpty) {
+      widget.bonusWidgets.forEach((bonusWidget) {
+        bonusWidgets.add(bonusWidget);
+        bonusWidgets.add(SizedBox(height: 10));
+      });
+    }
+
+    return bonusWidgets;
+  }
+
+  Widget _getBonusPtsWidgetHeader() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isBonusPtsExpanded =
+              !isBonusPtsExpanded; // Toggle the chevron direction
+        });
+      },
+      child: Row(
+        children: [
+          Icon(
+            isBonusPtsExpanded
+                ? Icons.expand_less
+                : Icons.expand_more, // Chevron up or down
+            size: 24.0,
+          ),
+          const SizedBox(
+              width: 8.0), // Add some spacing between the chevron and the text
+          Center(child: Text('Bonus Points', style: TextStyle(fontSize: 12.0))),
+        ],
+      ),
+    );
   }
 }
