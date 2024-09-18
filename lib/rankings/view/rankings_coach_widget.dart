@@ -102,9 +102,12 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     switch (f.type) {
       case CoachRankingFieldType.OppScore:
       case CoachRankingFieldType.Bonus: // Perhaps based on length of label?
+      case CoachRankingFieldType.RankFromRound:
+      case CoachRankingFieldType.CurRank:
         return 110;
       case CoachRankingFieldType.W_T_L:
       case CoachRankingFieldType.BestSport:
+      case CoachRankingFieldType.DeltaRankFromRound:
         return 90;
       case CoachRankingFieldType.Pts:
       case CoachRankingFieldType.Td:
@@ -358,6 +361,15 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         return c.oppPoints.toDouble();
       case CoachRankingFieldType.BestSport:
         return c.bestSportPoints.toDouble();
+      case CoachRankingFieldType.DeltaRankFromRound:
+        int? rank = c.getDeltaRankSinceRound(f.rankFromRound);
+        return rank != null ? rank.toDouble() : 0.0;
+      case CoachRankingFieldType.RankFromRound:
+        int? rank = c.getRankFrom(f.rankFromRound);
+        return rank != null ? rank.toDouble() : 0.0;
+      case CoachRankingFieldType.CurRank:
+        int? rank = c.getCurrentRank();
+        return rank != null ? rank.toDouble() : 0.0;
       case CoachRankingFieldType.Bonus:
         {
           if (f.bonusIdx < 0 || f.bonusIdx >= c.bonusPts.length) {

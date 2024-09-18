@@ -270,6 +270,15 @@ class Tournament {
 
       // Calculate & update rank for each coach
       List<Coach> sortedCoaches = List.from(_coaches);
+
+      sortedCoaches.forEach((sortedCoach) {
+        sortedCoach.overwriteRecord(info);
+      });
+
+      sortedCoaches.forEach((sortedCoach) {
+        sortedCoach.updateOppScoreAndTieBreakers(this);
+      });
+
       // Sorting in descending order
       sortedCoaches.sort((a, b) => b
           .pointsWithTieBreakersBuiltIn()

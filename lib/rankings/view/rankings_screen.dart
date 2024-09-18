@@ -145,12 +145,27 @@ class _RankingsPage extends State<RankingsPage> {
       List<CoachRankingField> fields = [];
 
       for (int i = 0; i < coachScoringDetails.bonusPts.length; i++) {
-        fields.add(CoachRankingField(CoachRankingFieldType.Bonus,
-            info: _tournament.info, bonusIdx: i));
+        fields.add(CoachRankingField.fromBonus(_tournament.info, i));
       }
 
       items.add(ToggleWidgetItem("Bonuses", (context) {
         return RankingCoachPage(title: "Bonuses", fields: fields);
+      }));
+    }
+
+    int comebackRound = _tournament.info.showBiggestComebackFromRoundNum;
+    if (comebackRound > 0 && comebackRound < _tournament.curRoundNumber()) {
+      List<CoachRankingField> fields = [
+        CoachRankingField.fromRankFromRound(
+            CoachRankingFieldType.DeltaRankFromRound, comebackRound),
+        CoachRankingField.fromRankFromRound(
+            CoachRankingFieldType.RankFromRound, comebackRound),
+        CoachRankingField(CoachRankingFieldType.CurRank),
+      ];
+
+      items.add(ToggleWidgetItem(
+          "Comeback (Rnd " + comebackRound.toString() + ")", (context) {
+        return RankingCoachPage(title: "Comeback", fields: fields);
       }));
     }
 
@@ -216,8 +231,7 @@ class _RankingsPage extends State<RankingsPage> {
       List<CoachRankingField> fields = [];
 
       for (int i = 0; i < squadScoringDetails.bonusPts.length; i++) {
-        fields.add(CoachRankingField(CoachRankingFieldType.Bonus,
-            info: _tournament.info, bonusIdx: i));
+        fields.add(CoachRankingField.fromBonus(_tournament.info, i));
       }
 
       items.add(ToggleWidgetItem("Bonuses", (context) {

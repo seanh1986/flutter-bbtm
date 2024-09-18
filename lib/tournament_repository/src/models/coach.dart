@@ -292,6 +292,25 @@ class Coach extends IMatchupParticipant {
     return cas - oppCas;
   }
 
+  // It is fromRank - curRank because a positive delta means moving "up" the rankings (smaller numbers)
+  int? getDeltaRankSinceRound(int roundNumber) {
+    int? curRank = getCurrentRank();
+    int? fromRank = getRankFrom(roundNumber);
+
+    return curRank != null && fromRank != null ? fromRank - curRank : null;
+  }
+
+  int? getRankFrom(int roundNumber) {
+    int roundIdx = roundNumber - 1;
+    return (roundIdx > 0 && roundIdx < ranksPerRound.length)
+        ? ranksPerRound[roundIdx]
+        : null;
+  }
+
+  int? getCurrentRank() {
+    return ranksPerRound.isNotEmpty ? ranksPerRound.last : null;
+  }
+
   Coach.fromJson(int id, Map<String, Object?> json) {
     final tNafName = json['naf_name'] as String?;
     this.nafName = tNafName != null ? tNafName.trim() : "";

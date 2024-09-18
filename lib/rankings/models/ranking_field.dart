@@ -18,6 +18,9 @@ enum CoachRankingFieldType {
   DeltaCas,
   BestSport,
   Bonus, // Requires specifying the bonus
+  CurRank,
+  RankFromRound, // Requires specifying the round (since when)
+  DeltaRankFromRound, // Requires specifying the round (since when)
 }
 
 enum SquadRankingFieldType {
@@ -60,11 +63,22 @@ abstract class RankingField {
 
 class CoachRankingField extends RankingField {
   late CoachRankingFieldType type;
-  late int bonusIdx;
+  int bonusIdx = -1;
+  int rankFromRound = -1;
 
-  CoachRankingField(this.type,
-      {TournamentInfo? info = null, this.bonusIdx = -1})
-      : super(_getLabel(type, info, bonusIdx));
+  CoachRankingField(this.type) : super(_getLabel(type));
+
+  CoachRankingField.fromBonus(TournamentInfo info, this.bonusIdx)
+      : super(_getLabel(CoachRankingFieldType.Bonus,
+            info: info, bonusIdx: bonusIdx)) {
+    this.type = CoachRankingFieldType.Bonus;
+  }
+
+  CoachRankingField.fromRankFromRound(
+      CoachRankingFieldType type, this.rankFromRound)
+      : super(_getLabel(type, rankFromRound: rankFromRound)) {
+    this.type = type;
+  }
 
   CoachRankingField.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
     final tType = json['type'] as String?;
@@ -75,6 +89,9 @@ class CoachRankingField extends RankingField {
 
     final tBonusIdx = json['bonusIdx'] as int?;
     bonusIdx = tBonusIdx != null ? tBonusIdx : -1;
+
+    final tRankFromRound = json['rank_from_round'] as int?;
+    rankFromRound = tRankFromRound != null ? tRankFromRound : -1;
   }
 
   Map<String, dynamic> toJson() {
@@ -82,11 +99,12 @@ class CoachRankingField extends RankingField {
 
     data['type'] = EnumToString.convertToString(type);
     data['bonusIdx'] = bonusIdx;
+    data['rank_from_round'] = rankFromRound;
     return data;
   }
 
-  static String _getLabel(
-      CoachRankingFieldType type, TournamentInfo? info, int bonusIdx) {
+  static String _getLabel(CoachRankingFieldType type,
+      {TournamentInfo? info, int bonusIdx = -1, int rankFromRound = -1}) {
     switch (type) {
       case CoachRankingFieldType.Pts:
         return "Pts";
@@ -116,6 +134,12 @@ class CoachRankingField extends RankingField {
         return "OppScore";
       case CoachRankingFieldType.BestSport:
         return "Sport";
+      case CoachRankingFieldType.DeltaRankFromRound:
+        return "Rank\u0394";
+      case CoachRankingFieldType.RankFromRound:
+        return "Rank (Rd " + rankFromRound.toString() + ")";
+      case CoachRankingFieldType.CurRank:
+        return "Rank (Current)";
       case CoachRankingFieldType.Bonus:
         {
           if (info == null) {
