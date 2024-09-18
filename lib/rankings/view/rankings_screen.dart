@@ -154,14 +154,18 @@ class _RankingsPage extends State<RankingsPage> {
     }
 
     int comebackRound = _tournament.info.showBiggestComebackFromRoundNum;
-    if (comebackRound > 0 && comebackRound < _tournament.curRoundNumber()) {
-      List<CoachRankingField> fields = [
-        CoachRankingField.fromRankFromRound(
-            CoachRankingFieldType.DeltaRankFromRound, comebackRound),
-        CoachRankingField.fromRankFromRound(
-            CoachRankingFieldType.RankFromRound, comebackRound),
-        CoachRankingField(CoachRankingFieldType.CurRank),
-      ];
+    if (comebackRound > 0) {
+      List<CoachRankingField> fields = [];
+
+      if (comebackRound < _tournament.curRoundNumber()) {
+        fields.addAll([
+          CoachRankingField.fromRankFromRound(
+              CoachRankingFieldType.DeltaRankFromRound, comebackRound),
+          CoachRankingField.fromRankFromRound(
+              CoachRankingFieldType.RankFromRound, comebackRound),
+          CoachRankingField(CoachRankingFieldType.CurRank),
+        ]);
+      }
 
       items.add(ToggleWidgetItem(
           "Comeback (Rnd " + comebackRound.toString() + ")", (context) {
