@@ -65,6 +65,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
   List<DataColumn2> _getColumns() {
     List<DataColumn2> columns = [];
 
+    if (widget.fields.isEmpty) {
+      return columns;
+    }
+
     columns.add(DataColumn2(label: Center(child: Text('#')), fixedWidth: 35));
 
     columns
@@ -102,9 +106,12 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     switch (f.type) {
       case CoachRankingFieldType.OppScore:
       case CoachRankingFieldType.Bonus: // Perhaps based on length of label?
+      case CoachRankingFieldType.RankFromRound:
+      case CoachRankingFieldType.CurRank:
         return 110;
       case CoachRankingFieldType.W_T_L:
       case CoachRankingFieldType.BestSport:
+      case CoachRankingFieldType.DeltaRankFromRound:
         return 90;
       case CoachRankingFieldType.Pts:
       case CoachRankingFieldType.Td:
@@ -123,6 +130,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     final theme = Theme.of(context);
 
     List<DataRow2> rows = [];
+
+    if (widget.fields.isEmpty) {
+      return rows;
+    }
 
     Color? even = theme.listTileTheme.tileColor;
     Color? odd = theme.listTileTheme.selectedTileColor;
@@ -209,7 +220,7 @@ class _RankingCoachPage extends State<RankingCoachPage> {
     _searchValue = appState.screenState.searchValue;
 
     if (_reset || _sortField == null) {
-      _sortField = widget.fields.first;
+      _sortField = widget.fields.isNotEmpty ? widget.fields.first : null;
       _sortAscending = false;
     }
 
@@ -228,8 +239,10 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         (a.isActive(_tournament) || a.gamesPlayed() > 0))); // "active"
 
     _items.sort((Coach a, Coach b) {
-      final double aValue = _getSortingValue(a, _sortField!);
-      final double bValue = _getSortingValue(b, _sortField!);
+      final double aValue =
+          _sortField != null ? _getSortingValue(a, _sortField!) : 0.0;
+      final double bValue =
+          _sortField != null ? _getSortingValue(b, _sortField!) : 0.0;
 
       int multiplier = _sortAscending ? 1 : -1;
 
@@ -257,9 +270,18 @@ class _RankingCoachPage extends State<RankingCoachPage> {
           }));
     }
 
+    widgets.add(SizedBox(height: 5));
+
     widgets.add(Container(
         height: MediaQuery.of(context).size.height * 0.75,
-        child: getDataTable(context, rows, columns)));
+        child: widget.fields.isNotEmpty
+            ? getDataTable(context, rows, columns)
+            : Column(
+                children: [
+                  SizedBox(height: 30),
+                  Text("No results available at this time."),
+                ],
+              )));
 
     return Column(
       children: widgets,
@@ -358,6 +380,15 @@ class _RankingCoachPage extends State<RankingCoachPage> {
         return c.oppPoints.toDouble();
       case CoachRankingFieldType.BestSport:
         return c.bestSportPoints.toDouble();
+      case CoachRankingFieldType.DeltaRankFromRound:
+        int? rank = c.getDeltaRankSinceRound(f.rankFromRound);
+        return rank != null ? rank.toDouble() : 0.0;
+      case CoachRankingFieldType.RankFromRound:
+        int? rank = c.getRankFrom(f.rankFromRound);
+        return rank != null ? rank.toDouble() : 0.0;
+      case CoachRankingFieldType.CurRank:
+        int? rank = c.getCurrentRank();
+        return rank != null ? rank.toDouble() : 0.0;
       case CoachRankingFieldType.Bonus:
         {
           if (f.bonusIdx < 0 || f.bonusIdx >= c.bonusPts.length) {

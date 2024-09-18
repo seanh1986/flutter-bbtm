@@ -211,6 +211,21 @@ class Tournament {
       awayCoach?.overwriteRecord(info);
     });
 
+    // Update Ranks per round
+    List<Coach> sortedCoaches = List.from(_coaches);
+    // Sorting in descending order
+    sortedCoaches.sort((a, b) => b
+        .pointsWithTieBreakersBuiltIn()
+        .compareTo(a.pointsWithTieBreakersBuiltIn()));
+
+    // Update ranks per round for all coaches
+    sortedCoaches.forEachIndexed((i, c) {
+      Coach? coach = getCoach(c.nafName);
+      if (coach != null) {
+        coach.ranksPerRound.add(i + 1); // Start counting from 1 instead of 0
+      }
+    });
+
     if (!noSquads()) {
       _squads.forEach((squad) {
         squad.overwriteRecord(this);
@@ -228,6 +243,7 @@ class Tournament {
     // Clear all coach matchups
     _coaches.forEach((c) {
       c.matches.clear();
+      c.ranksPerRound.clear();
     });
 
     // Update matches for each coach
@@ -249,6 +265,30 @@ class Tournament {
       _coaches.forEach((c) {
         if (!r.hasMatchForPlayer(c)) {
           c.matches.add(CoachMatchup(c.nafName, CoachMatchup.Bye));
+        }
+      });
+
+      // Calculate & update rank for each coach
+      List<Coach> sortedCoaches = List.from(_coaches);
+
+      sortedCoaches.forEach((sortedCoach) {
+        sortedCoach.overwriteRecord(info);
+      });
+
+      sortedCoaches.forEach((sortedCoach) {
+        sortedCoach.updateOppScoreAndTieBreakers(this);
+      });
+
+      // Sorting in descending order
+      sortedCoaches.sort((a, b) => b
+          .pointsWithTieBreakersBuiltIn()
+          .compareTo(a.pointsWithTieBreakersBuiltIn()));
+
+      // Update ranks per round for all coaches
+      sortedCoaches.forEachIndexed((i, c) {
+        Coach? coach = getCoach(c.nafName);
+        if (coach != null) {
+          coach.ranksPerRound.add(i + 1); // Start counting from 1 instead of 0
         }
       });
     });
