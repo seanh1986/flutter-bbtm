@@ -1,5 +1,6 @@
 // ignore_for_file: must_be_immutable
 
+import 'package:bbnaf/admin/view/widgets/biggest_comeback_settings_widget.dart';
 import 'package:bbnaf/rankings/models/ranking_filter.dart';
 import 'package:bbnaf/tournament_repository/src/models/models.dart';
 import 'package:bbnaf/widgets/custom_form_field.dart';
@@ -12,12 +13,17 @@ class TournyRankingSettingsWidget extends StatefulWidget {
   late bool showRankings;
   late bool showBonusPtsInRankings;
 
+  late BiggestComebackSettingWidget biggestComebackSettingWidget;
+
   TournyRankingSettingsWidget({Key? key, required TournamentInfo info})
       : super(key: key) {
     this.coachRaceRankingFilters =
         List.from(info.scoringDetails.coachRaceRankingFilters);
     this.showRankings = info.showRankings;
     this.showBonusPtsInRankings = info.showBonusPtsInRankings;
+
+    this.biggestComebackSettingWidget =
+        BiggestComebackSettingWidget(info.showBiggestComebackFromRoundNum);
   }
 
   @override
@@ -29,6 +35,8 @@ class TournyRankingSettingsWidget extends StatefulWidget {
     info.scoringDetails.coachRaceRankingFilters = coachRaceRankingFilters;
     info.showRankings = showRankings;
     info.showBonusPtsInRankings = showBonusPtsInRankings;
+    info.showBiggestComebackFromRoundNum =
+        biggestComebackSettingWidget.showBiggestComebackFromRoundNum;
   }
 }
 
@@ -60,6 +68,10 @@ class _TournyRankingSettingsWidget extends State<TournyRankingSettingsWidget> {
       Divider(),
       _getDisplayBonusPointRankingsToggle(),
       SizedBox(height: 5),
+      Divider(),
+      widget.biggestComebackSettingWidget,
+      SizedBox(height: 5),
+      Divider(),
     ]);
 
     return Column(children: widgets);

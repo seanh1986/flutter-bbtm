@@ -156,8 +156,23 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
                   List<RenameNafName> renames =
                       _coachSource.coachIdxNafRenames.values.toList();
 
-                  context.read<AppBloc>().add(UpdateCoaches(
-                      context, _tournament.info, _coaches, renames));
+                  UpdateCoaches updateCoaches = UpdateCoaches(
+                      context, _tournament.info, _coaches, renames);
+
+                  List<String> duplicateNafNames =
+                      findDuplicateNafNames(updateCoaches);
+
+                  if (duplicateNafNames.isNotEmpty) {
+                    String appendedNafNames = duplicateNafNames
+                        .join('\n'); // Join all names with a newline character
+
+                    showOkAlertDialog(
+                        context: context,
+                        title: "Failed to Update Coaches",
+                        message: "Duplicate Naf Names:\n" + appendedNafNames);
+                  } else {
+                    context.read<AppBloc>().add(updateCoaches);
+                  }
                 };
 
                 _showDialogToConfirmOverwrite(context, callback);
@@ -335,6 +350,25 @@ class _EditParticipantsWidget extends State<EditParticipantsWidget> {
     });
 
     return rows;
+  }
+
+  List<String> findDuplicateNafNames(UpdateCoaches updateCoaches) {
+    // Step 1: Extract all nafNames into a list
+    List<String> nafNames =
+        updateCoaches.newCoaches.map((coach) => coach.nafName).toList();
+
+    // Step 2: Group nafNames and only keep the ones that occur more than once
+    var nafNamesCount = Map<String, int>();
+
+    nafNames.forEach((nafName) {
+      nafNamesCount[nafName] = (nafNamesCount[nafName] ?? 0) + 1;
+    });
+
+    // Step 3: Return only the duplicate nafNames
+    return nafNamesCount.entries
+        .where((entry) => entry.value > 1)
+        .map((entry) => entry.key)
+        .toList();
   }
 }
 

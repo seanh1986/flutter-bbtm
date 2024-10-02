@@ -28,6 +28,9 @@ class TournamentInfo {
 
   bool showBonusPtsInRankings = true;
 
+  // show & calculate the biggest comeback from the specified round
+  int showBiggestComebackFromRoundNum = -1;
+
   // Prevents users from submitting updates
   bool locked = false;
 
@@ -131,6 +134,12 @@ class TournamentInfo {
     this.showBonusPtsInRankings =
         tShowBonusPtsInRankings == null || tShowBonusPtsInRankings;
 
+    final tShowBiggestComebackFromRoundNum =
+        json['show_biggest_comeback_from_round_num'] as int?;
+    if (tShowBiggestComebackFromRoundNum != null) {
+      showBiggestComebackFromRoundNum = tShowBiggestComebackFromRoundNum;
+    }
+
     // Default is locked for legacy purposes
     final tLocked = json['locked'] as bool?;
     this.locked = tLocked == null || tLocked;
@@ -153,6 +162,7 @@ class TournamentInfo {
         'coach_display_name': EnumToString.convertToString(coachDisplayName),
         'show_rankings': showRankings,
         'show_bonus_pts_in_rankings': showBonusPtsInRankings,
+        'show_biggest_comeback_from_round_num': showBiggestComebackFromRoundNum,
         'locked': locked,
       };
 }

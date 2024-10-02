@@ -59,6 +59,10 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
   List<DataColumn2> _getColumns() {
     List<DataColumn2> columns = [];
 
+    if (widget.fields.isEmpty) {
+      return columns;
+    }
+
     columns.add(DataColumn2(label: Text('#'), fixedWidth: 35));
 
     columns.add(DataColumn2(
@@ -122,6 +126,10 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
     final theme = Theme.of(context);
 
     List<DataRow2> rows = [];
+
+    if (widget.fields.isEmpty) {
+      return rows;
+    }
 
     Color? even = theme.listTileTheme.tileColor;
     Color? odd = theme.listTileTheme.selectedTileColor;
@@ -258,8 +266,10 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
         (a.isActive(_tournament) || a.gamesPlayed() > 0))); // "active"
 
     _items.sort((Squad a, Squad b) {
-      final double aValue = _getSortingValue(a, _sortField!);
-      final double bValue = _getSortingValue(b, _sortField!);
+      final double aValue =
+          _sortField != null ? _getSortingValue(a, _sortField!) : 0.0;
+      final double bValue =
+          _sortField != null ? _getSortingValue(b, _sortField!) : 0.0;
 
       int multiplier = _sortAscending ? 1 : -1;
 
@@ -287,9 +297,18 @@ class _RankingSquadsPage extends State<RankingSquadsPage> {
           }));
     }
 
+    widgets.add(SizedBox(height: 5));
+
     widgets.add(Container(
         height: MediaQuery.of(context).size.height * 0.75,
-        child: getDataTable(context, rows, columns)));
+        child: widget.fields.isNotEmpty
+            ? getDataTable(context, rows, columns)
+            : Column(
+                children: [
+                  SizedBox(height: 30),
+                  Text("No results available at this time."),
+                ],
+              )));
 
     return Column(
       children: widgets,

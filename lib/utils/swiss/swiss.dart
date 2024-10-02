@@ -12,6 +12,7 @@ import 'package:collection/collection.dart';
 
 enum RoundPairingError {
   NoError,
+  DuplicateNafNames,
   MissingPreviousResults,
   UnableToFindValidMatches,
 }
@@ -25,6 +26,10 @@ class SwissPairings {
 
   /// Return true if pairing successful, false if
   RoundPairingError pairNextRound() {
+    if (tournament.containsDuplicateNafNames()) {
+      return RoundPairingError.DuplicateNafNames;
+    }
+
     // Use Squad Rankings => Can be squad vs squad or individuals, etc.
     if (tournament.useSquadRankings()) {
       if (tournament.useSquadVsSquadPairings()) {
@@ -32,10 +37,17 @@ class SwissPairings {
         return _pairNextRoundAsSquads();
       } else {
         // Squad tournament based on individual pairings
+
+        // Check if should avoid within squads for initial round
         bool avoidSquadsForInit = tournament.info.squadDetails.type ==
-            SquadUsage.INDIVIDUAL_USE_SQUADS_FOR_INIT;
+                SquadUsage.INDIVIDUAL_USE_SQUADS_FOR_INIT ||
+            tournament.info.squadDetails.matchMaking ==
+                SquadMatchMaking.INDIVIDUAL_SWISS_AVOIDING_SQUAD;
+
+        // Check if should avoid within squads for subsequent round
         bool avoidSquadsForAfter = tournament.info.squadDetails.matchMaking ==
             SquadMatchMaking.INDIVIDUAL_SWISS_AVOIDING_SQUAD;
+
         return _pairNextRoundAsIndividuals(
             avoidSquadsForInit, avoidSquadsForAfter);
       }

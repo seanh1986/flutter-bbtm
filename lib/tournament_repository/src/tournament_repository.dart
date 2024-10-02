@@ -411,13 +411,14 @@ class TournamentRepository {
 
         if (dbTournament.coachRounds.length != t.coachRounds.length) {
           throw new Exception("Tournament coach round lengths do not align");
-        } else if (dbTournament.squadRounds.length != t.squadRounds.length) {
-          throw new Exception("Tournament squad round lengths do not align");
         }
+        // else if (dbTournament.squadRounds.length != t.squadRounds.length) {
+        //   throw new Exception("Tournament squad round lengths do not align");
+        // }
 
-        if (dbTournament.squadRounds.isNotEmpty) {
-          dbTournament.squadRounds.removeLast();
-        }
+        // if (dbTournament.squadRounds.isNotEmpty) {
+        //   dbTournament.squadRounds.removeLast();
+        // }
 
         if (dbTournament.coachRounds.isNotEmpty) {
           dbTournament.coachRounds.removeLast();

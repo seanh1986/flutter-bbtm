@@ -355,11 +355,14 @@ class _RoundManagementWidget extends State<RoundManagementWidget> {
             case RoundPairingError.NoError:
               msg = "Succesful";
               break;
+            case RoundPairingError.DuplicateNafNames:
+              msg = "Failed: Duplicate Naf Names";
+              break;
             case RoundPairingError.MissingPreviousResults:
-              msg = "Missing Previous Results";
+              msg = "Failed: Missing Previous Results";
               break;
             case RoundPairingError.UnableToFindValidMatches:
-              msg = "Unable To Find Valid Matches";
+              msg = "Failed: Unable To Find Valid Matches";
               break;
             default:
               msg = "Unknown Error";
